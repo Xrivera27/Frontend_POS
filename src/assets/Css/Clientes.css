@@ -1,0 +1,23 @@
+
+.clientes-wrapper {
+  padding: 16px;
+}
+
+.table-header {
+  font-weight: bold;
+  background-color: #f1f1f1;
+  text-align: center;
+}
+
+ion-col {
+  text-align: center;
+}
+
+ion-button {
+  margin: 0 4px;
+}
+
+ion-modal {
+  --width: 80vw;
+  --height: 80vh;
+}
