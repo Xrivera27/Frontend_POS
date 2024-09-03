@@ -8,9 +8,9 @@
   </section>
 
   <div class="clientes-wrapper">
-    <h1>Administrar Clientes</h1>
+    <h1> Clientes</h1>
 
-    <button id="btnAdd" class="btn btn-primary" @click="openModal">Agregar Cliente</button>
+    <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar Clientes</button>
 
     <div class="registros">
       <span>Mostrar  <select></select>  registros</span>

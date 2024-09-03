@@ -12,7 +12,7 @@
 
         <!-- Usuario -->
         <li class="nav-item">
-          <router-link to="#" class="nav-link">
+          <router-link to="/empleados" class="nav-link">
             <i class="bi bi-person-fill"></i>
             <span class="tooltip-text">Usuario</span>
           </router-link>
@@ -20,7 +20,7 @@
 
         <!-- Categorías -->
         <li class="nav-item">
-          <router-link to="#" class="nav-link">
+          <router-link to="/categorias" class="nav-link">
             <i class="bi bi-tags-fill"></i>
             <span class="tooltip-text">Categorías</span>
           </router-link>
@@ -28,7 +28,7 @@
 
         <!-- Productos -->
         <li class="nav-item">
-          <router-link to="#" class="nav-link">
+          <router-link to="/productos" class="nav-link">
             <i class="bi bi-box-seam"></i>
             <span class="tooltip-text">Productos</span>
           </router-link>
