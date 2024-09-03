@@ -190,17 +190,30 @@ export default {
 }
 
 #btnEditar{
-  font-size: 16px;
+  font-size: 18px;
   width: 50px;
   height: 40px;
   border-radius: 10px;
 }
 
+#btnEditar:hover{
+  background-color: #e8af06;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
 #btnEliminar{
-  font-size: 16px;
+  font-size: 18px;
   width: 50px;
   height: 40px;
   border-radius: 10px;
+  color: black;
+}
+
+#btnEliminar:hover{
+  background-color: #b72433;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
 }
 
 #campana{
@@ -329,7 +342,7 @@ select {
 #AddClienteModal{
   background: #a38655;
   border-radius: 15px;
-  font-size: 16px;
+  font-size: 16px
 }
 
 #BtnCerrar{
