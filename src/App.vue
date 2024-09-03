@@ -3,7 +3,7 @@
     <aside class="sidebar">
       <ul class="nav flex-column">
         <!-- Home -->
-        <li class="nav-item">
+        <li id="home" class="nav-item">
           <router-link to="/" class="nav-link">
             <i class="bi bi-house-door-fill"></i>
             <span class="tooltip-text">Home</span>
@@ -82,6 +82,11 @@ export default {
 </script>
 
 <style scoped>
+
+#home{
+  margin-top: 70%;
+}
+
 /* Estilos del sidebar y el layout */
 .app-wrapper {
   display: flex;
@@ -89,12 +94,14 @@ export default {
 }
 
 .sidebar {
-  width: 80px;
-  background-color: rgb(172, 167, 167);
+  width: 85px;
+  background-color: #ebebeb;
   color: white;
   padding-top: 20px;
   position: fixed;
   height: 100%;
+  overflow: hidden;
+  border-radius: 15px;
 }
 
 .sidebar .nav {
@@ -104,23 +111,31 @@ export default {
 
 .sidebar .nav-item {
   margin-bottom: 10px;
+  margin-top: 20px;
 }
 
 .sidebar .nav-link {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 15px;
+  padding: 10px;
   color: rgb(245, 196, 91);
   font-size: 24px;
+  width: 25px;
+  margin-left: 20px;
   text-align: center;
   position: relative;
   text-decoration: none;
+  transition: all 0.3s ease;
 }
 
 .sidebar .nav-link:hover {
-  background-color: rgb(238, 203, 157);
-  color: white;
+  background-color: #cecece;
+  color: #a38655;
+  transform: scale(1.2);
+  width: 25px;
+  margin-left: 20px;
+  border-radius: 25%;
 }
 
 .sidebar .nav-link i {

@@ -1,41 +1,55 @@
 <template>
+  <section>
+    <div class="container-top">
+      <i id="campana" class="bi bi-bell-fill"></i>Perdomo y Asociados<br>
+      <span class="rol">Gerente</span>
+      <hr>
+    </div>
+  </section>
+
   <div class="clientes-wrapper">
     <h1>Administrar Clientes</h1>
 
-    <button class="btn btn-primary" @click="openModal">Agregar cliente</button>
+    <button id="btnAdd" class="btn btn-primary" @click="openModal">Agregar Cliente</button>
+
+    <div class="registros">
+      <span>Mostrar  <select></select>  registros</span>
+    </div>
 
     <!-- Barra de búsqueda -->
     <div class="search-bar">
-      <input type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
+      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
     </div>
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Nombre</th>
-          <th>ID/RTN</th>
-          <th>Teléfono</th>
-          <th>Total Compras</th>
-          <th>Última Compra</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(cliente, index) in filteredClientes" :key="index">
-          <td>{{ index + 1 }}</td>
-          <td>{{ cliente.nombre }}</td>
-          <td>{{ cliente.documentoId }}</td>
-          <td>{{ cliente.telefono }}</td>
-          <td>{{ cliente.totalCompras }}</td>
-          <td>{{ cliente.ultimaCompra }}</td>
-          <td>
-            <button class="btn btn-warning" @click="editCliente(index)"><i class="bi bi-pencil-fill"></i></button>
-            <button class="btn btn-danger" @click="deleteCliente(index)"><b><i class="bi bi-x-lg"></i></b></button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>DNI / RTN</th>
+            <th>Teléfono</th>
+            <th>Total Compras</th>
+            <th>Última Compra</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(cliente, index) in filteredClientes" :key="index">
+            <td>{{ index + 1 }}</td>
+            <td>{{ cliente.nombre }}</td>
+            <td>{{ cliente.documentoId }}</td>
+            <td>{{ cliente.telefono }}</td>
+            <td>{{ cliente.totalCompras }}</td>
+            <td>{{ cliente.ultimaCompra }}</td>
+            <td>
+              <button id="btnEditar" class="btn btn-warning" @click="editCliente(index)"><i class="bi bi-pencil-fill"></i></button>
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(index)"><b><i class="bi bi-x-lg"></i></b></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Modal para agregar o editar clientes -->
     <div v-if="isModalOpen" class="modal">
@@ -48,7 +62,7 @@
         </div>
 
         <div class="form-group">
-          <label>Documento ID:</label>
+          <label>DNI / RTN:</label>
           <input v-model="clienteForm.documentoId" type="text" required>
         </div>
 
@@ -63,11 +77,10 @@
           <input v-model="clienteForm.direccion" type="text" required>
         </div>
 
-
-        <button class="btn btn-primary" @click="guardarCliente">
+        <button id="AddClienteModal" class="btn btn-primary" @click="guardarCliente">
           {{ isEditing ? 'Guardar Cambios' : 'Agregar Cliente' }}
         </button>
-        <button class="btn btn-secondary" @click="closeModal">Cerrar</button>
+        <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
       </div>
     </div>
   </div>
@@ -155,6 +168,77 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+*{
+  font-family: 'Montserrat', sans-serif;
+}
+#btnAdd {
+  background-color: #c09d62;
+  font-size: 16px;
+  width: 170px;
+  height: 40px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  color: black;
+  font-weight: bold;
+}
+
+#btnAdd:hover {
+  background-color: #a38655;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+#btnEditar{
+  font-size: 16px;
+  width: 50px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+#btnEliminar{
+  font-size: 16px;
+  width: 50px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+#campana{
+  margin-right: 10px;
+  font-size: 18px;
+  color: #a38655;
+}
+
+.container-top{
+  width: 100%;
+  text-align: right;
+}
+
+.rol{
+  color: #969696;
+  font-size: 14px;
+}
+
+select {
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
+  width: 60px;
+  height: 35px;
+  border-radius: 5px;
+}
+
+.busqueda {
+  float: right;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 10px;
+  border-width: 0.5px;
+  margin-top: -40px;
+  margin-bottom: 20px;
+}
+
 .clientes-wrapper {
   padding: 16px;
 }
@@ -163,24 +247,49 @@ export default {
   margin-bottom: 16px;
 }
 
-.table {
+.table-container {
   width: 100%;
-  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #ddd;
   margin-top: 16px;
 }
 
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
 .table th, .table td {
-  border: 1px solid #ddd;
   padding: 8px;
 }
 
-.table th {
-  background-color: #f4f4f4;
+.table thead th {
+  background-color: #e7e4e4;
   text-align: center;
+  border-bottom: 1px solid #ddd;
 }
 
-.table td {
+.table tbody td {
   text-align: center;
+  border-top: 1px solid #ddd;
+}
+
+.table thead th:first-child {
+  border-top-left-radius: 10px;
+}
+
+.table thead th:last-child {
+  border-top-right-radius: 10px;
+}
+
+.table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 10px;
+}
+
+.table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 10px;
 }
 
 .btn {
@@ -217,6 +326,18 @@ export default {
   align-items: center;
 }
 
+#AddClienteModal{
+  background: #a38655;
+  border-radius: 15px;
+  font-size: 16px;
+}
+
+#BtnCerrar{
+  border-radius: 15px;
+  background-color: #ebebeb;
+  font-size: 16px;
+}
+
 .modal-content {
   background-color: white;
   padding: 20px;
@@ -233,4 +354,12 @@ export default {
   display: block;
   margin-bottom: 8px;
 }
+
+.form-group input {
+  width: 50%;
+  height: 20px;
+  border-radius: 5px;
+  padding: 5px;
+}
+
 </style>
