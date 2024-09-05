@@ -100,7 +100,7 @@ export default {
   padding-top: 20px;
   position: fixed;
   height: 100%;
-  overflow: hidden;
+  /* overflow: hidden; */
   border-radius: 15px;
 }
 
@@ -142,7 +142,7 @@ export default {
   display: block;
 }
 
-.tooltip-text {
+/* .tooltip-text {
   display: none;
   position: absolute;
   left: 90px;
@@ -151,6 +151,22 @@ export default {
   color: white;
   padding: 5px 10px;
   border-radius: 4px;
+} */
+
+.tooltip-text {
+  display: none;
+  position: absolute;
+  left: 50px; /* Cambia para asegurar que el tooltip esté fuera del sidebar */
+  top: 50%;
+  font-size: 14px;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  background-color: #585757;
+  font-family: 'Montserrat', sans-serif;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  z-index: 1000; /* Asegúrate de que el tooltip aparezca por encima de otros elementos */
 }
 
 .sidebar .nav-link:hover .tooltip-text {
