@@ -6,6 +6,7 @@ import EmpleadoList from '@/components/EmpleadoList.vue';
 import CategoriasList from '@/components/CategoriasList.vue';
 import ProductosList from '@/components/ProductosList.vue';
 import LoginList from '@/components/LoginList.vue';
+import RegistroList from '@/components/RegistroList.vue';
 
 const routes = [
   {
@@ -51,7 +52,7 @@ const routes = [
   {
     path: '/registro',
     name: 'registroEmpresas',
-    component: LoginList
+    component: RegistroList
   },
 
 ];
