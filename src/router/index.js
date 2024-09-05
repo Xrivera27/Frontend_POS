@@ -48,6 +48,12 @@ const routes = [
     component: LoginList
   },
 
+  {
+    path: '/registro',
+    name: 'registroEmpresas',
+    component: LoginList
+  },
+
 ];
 
 const router = createRouter({

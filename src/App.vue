@@ -60,8 +60,16 @@
 
         <!-- Venta -->
         <li class="nav-item">
-          <router-link to="login" class="nav-link">
+          <router-link to="/login" class="nav-link">
             <i class="bi bi-cash-stack"></i>
+            <span class="tooltip-text">Venta</span>
+          </router-link>
+        </li>
+
+        <!-- TEST REGISTRO | BORRAR AL FINALIZAR EL TEST -->
+        <li class="nav-item">
+          <router-link to="/registro" class="nav-link">
+            <i class="bi bi-file-earmark-medical-fill"></i>
             <span class="tooltip-text">Venta</span>
           </router-link>
         </li>
@@ -82,8 +90,7 @@ export default {
 </script>
 
 <style scoped>
-
-#home{
+#home {
   margin-top: 70%;
 }
 
