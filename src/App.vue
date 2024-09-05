@@ -12,7 +12,7 @@
 
         <!-- Usuario -->
         <li class="nav-item">
-          <router-link to="#" class="nav-link">
+          <router-link to="/empleados" class="nav-link">
             <i class="bi bi-person-fill"></i>
             <span class="tooltip-text">Usuario</span>
           </router-link>
@@ -20,7 +20,7 @@
 
         <!-- Categorías -->
         <li class="nav-item">
-          <router-link to="#" class="nav-link">
+          <router-link to="/categorias" class="nav-link">
             <i class="bi bi-tags-fill"></i>
             <span class="tooltip-text">Categorías</span>
           </router-link>
@@ -28,7 +28,7 @@
 
         <!-- Productos -->
         <li class="nav-item">
-          <router-link to="#" class="nav-link">
+          <router-link to="/productos" class="nav-link">
             <i class="bi bi-box-seam"></i>
             <span class="tooltip-text">Productos</span>
           </router-link>
@@ -142,21 +142,10 @@ export default {
   display: block;
 }
 
-/* .tooltip-text {
-  display: none;
-  position: absolute;
-  left: 90px;
-  white-space: nowrap;
-  background-color: #333;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-} */
-
 .tooltip-text {
   display: none;
   position: absolute;
-  left: 50px; /* Cambia para asegurar que el tooltip esté fuera del sidebar */
+  left: 50px;
   top: 50%;
   font-size: 14px;
   transform: translateY(-50%);
@@ -166,7 +155,7 @@ export default {
   color: white;
   padding: 5px 10px;
   border-radius: 4px;
-  z-index: 1000; /* Asegúrate de que el tooltip aparezca por encima de otros elementos */
+  z-index: 1000;
 }
 
 .sidebar .nav-link:hover .tooltip-text {
