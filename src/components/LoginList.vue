@@ -1,115 +1,153 @@
 <template>
-    <div class="login-container">
-      <form @submit.prevent="handleSubmit">
-        <h2>Login</h2>
-        
+  <div class="login-container">
+    <div class="login-card">
+      <h2>Login</h2>
+      <p class="welcome-message">¡Bienvenido de nuevo!</p>
+      <p class="or-text">Ingrese con su usuario</p>
+      <form @submit.prevent="login">
         <div class="form-group">
-          <label for="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            v-model="username"
-            placeholder="Enter your username"
-            required
-          />
+          <input type="email" v-model="email" placeholder="Correo eléctronico" required />
         </div>
-        
         <div class="form-group">
-          <label for="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            v-model="password"
-            placeholder="Enter your password"
-            required
-          />
+          <input type="password" v-model="password" placeholder="Contraseña" required />
         </div>
-        
-        <button type="submit" class="btn">Login</button>
-        
-        <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+        <div class="form-options">
+          <label class="checkbox-container">
+            <input type="checkbox" v-model="rememberMe" />Recordar contraseña
+          </label>
+          <a href="#" class="forgot-password">¿Olvidaste la contraseña?</a>
+        </div>
+        <div class="form-group button-container">
+          <button type="submit" class="submit-btn">
+            <i id="btnLogin" class="bi bi-arrow-right-circle-fill"></i>
+          </button>
+        </div>
       </form>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        username: '',
-        password: '',
-        errorMessage: '',
-      };
-    },
-    methods: {
-      handleSubmit() {
-        // Reset error message
-        this.errorMessage = '';
-  
-        // Simple validation
-        if (this.username.trim() === '' || this.password.trim() === '') {
-          this.errorMessage = 'Both fields are required.';
-          return;
-        }
-  
-        // Simulate an API call
-        setTimeout(() => {
-          if (this.username === 'admin' && this.password === 'password') {
-            this.$router.push('/dashboard'); // Navigate to dashboard on success
-          } else {
-            this.errorMessage = 'Invalid username or password.';
-          }
-        }, 1000);
-      },
-    },
-  };
-  </script>
-  
-  <style scoped>
-  .login-container {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      email: '',
+      password: '',
+      rememberMe: false,
+    };
+  },
+  methods: {
+    login() {
+      // Aquí puedes añadir la lógica para manejar el login
+      console.log('Email:', this.email);
+      console.log('Password:', this.password);
+    }
   }
-  
-  h2 {
-    text-align: center;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-  }
-  
-  button {
-    width: 100%;
-    padding: 10px;
-    background-color: #28a745;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #218838;
-  }
-  
-  .error {
-    color: #dc3545;
-    text-align: center;
-  }
-  </style>
-  
+};
+</script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+* {
+  font-family: 'Montserrat', sans-serif;
+}
+
+#btnLogin{
+  color: white;
+  font-size: 2rem;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background-color: transparent;
+}
+
+.login-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+h2 {
+  color: #39b378;
+}
+
+.welcome-message {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.social-login {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.or-text {
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+input[type="email"], input[type="password"] {
+  width: 95%;
+  padding: .8rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+input[type="checkbox"] {
+  margin-right: 0.5rem;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.submit-btn {
+  background-color: #39b378;
+  border: none;
+  border-radius: 50%;
+  padding: 1rem;
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.forgot-password {
+  color: #39b378;
+}
+</style>
