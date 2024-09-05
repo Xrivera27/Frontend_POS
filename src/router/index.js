@@ -5,6 +5,7 @@ import Home from '../components/HomeList.vue'; // El componente de tu dashboard 
 import EmpleadoList from '@/components/EmpleadoList.vue';
 import CategoriasList from '@/components/CategoriasList.vue';
 import ProductosList from '@/components/ProductosList.vue';
+import LoginList from '@/components/LoginList.vue';
 
 const routes = [
   {
@@ -39,7 +40,13 @@ const routes = [
     path: '/productos',
     name: 'Productos',
     component: ProductosList
-  }
+  },
+
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginList
+  },
 
 ];
 
