@@ -54,10 +54,16 @@
                             <input id="numeroActualSar" v-model="form.numeroActualSar" type="number"
                                 placeholder="Número actual SAR" required />
                         </div>
+
+                        <!-- Fecha de Autorización -->
                         <div class="form-group">
+                            <label for="fechaAutorizacion" class="date-label">Fecha de Autorización</label>
                             <input id="fechaAutorizacion" v-model="form.fechaAutorizacion" type="date" required />
                         </div>
+
+                        <!-- Fecha de Vencimiento -->
                         <div class="form-group">
+                            <label for="fechaVencimiento" class="date-label">Fecha de Vencimiento</label>
                             <input id="fechaVencimiento" v-model="form.fechaVencimiento" type="date" required />
                         </div>
                     </div>
@@ -71,11 +77,19 @@
                 </div>
             </form>
         </div>
+
+        <!-- Popup personalizado -->
+        <div v-if="showPopup" class="custom-popup">
+            <div class="popup-content">
+                <p>Formulario enviado correctamente</p>
+                <button @click="closePopup">Cerrar</button>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 
 const form = reactive({
     nombre: '',
@@ -92,8 +106,21 @@ const form = reactive({
     estado: ''
 })
 
+// Estado para controlar la visibilidad del popup
+const showPopup = ref(false)
+
 const handleSubmit = () => {
     console.log('Formulario enviado:', form)
+
+    // Mostrar el popup personalizado
+    showPopup.value = true
+
+    // Limpiar el formulario
+    Object.keys(form).forEach((key) => (form[key] = ''))
+}
+
+const closePopup = () => {
+    showPopup.value = false
 }
 </script>
 
@@ -194,13 +221,45 @@ input[type="checkbox"] {
     margin-top: 1rem;
 }
 
-.register-container {
+.date-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #333;
+}
+
+/* Estilos para el popup personalizado */
+.custom-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background-color: transparent;
-    padding-top: 4rem;
-    /* Ajusta el margen superior según sea necesario */
+    z-index: 1000;
+}
+
+.popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.popup-content p {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.popup-content button {
+    background-color: #39b378;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
 }
 </style>
