@@ -1,6 +1,7 @@
 <template>
   <div class="app-wrapper">
-    <aside class="sidebar">
+    <!-- Condicional para mostrar el sidebar solo si la ruta actual no es /login -->
+    <aside v-if="!isLoginRoute" class="sidebar">
       <ul class="nav flex-column">
         <!-- Home -->
         <li id="home" class="nav-item">
@@ -74,15 +75,7 @@
           </router-link>
         </li>
 
-
-        <li class="nav-item">
-          <router-link to="/login" class="nav-link">
-            <i class="bi bi-box-arrow-in-right"></i>
-            <span class="tooltip-text">Login</span>
-          </router-link>
-        </li>
-
-
+       
       </ul>
     </aside>
 
@@ -95,7 +88,12 @@
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+  computed: {
+    isLoginRoute() {
+      return this.$route.path === '/login';
+    }
+  }
 };
 </script>
 

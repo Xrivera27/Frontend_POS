@@ -34,13 +34,19 @@ export default {
       email: '',
       password: '',
       rememberMe: false,
+      predefinedEmail: 'usuario@ejemplo.com',  // Correo predefinido
+      predefinedPassword: 'contraseña123'  // Contraseña predefinida
     };
   },
   methods: {
     login() {
-      // Aquí puedes añadir la lógica para manejar el login
-      console.log('Email:', this.email);
-      console.log('Password:', this.password);
+      // Verifica si el correo electrónico y la contraseña coinciden con los valores predefinidos
+      if (this.email === this.predefinedEmail && this.password === this.predefinedPassword) {
+        localStorage.setItem('auth', 'true');
+        this.$router.push('/home'); // Redirige al Home después del login
+      } else {
+        alert('Credenciales incorrectas'); // Muestra un mensaje de error si las credenciales son incorrectas
+      }
     }
   }
 };
@@ -52,7 +58,7 @@ export default {
   font-family: 'Montserrat', sans-serif;
 }
 
-#btnLogin{
+#btnLogin {
   color: white;
   font-size: 2rem;
 }
@@ -82,13 +88,6 @@ h2 {
 .welcome-message {
   font-size: 1.1rem;
   margin-bottom: 1rem;
-}
-
-.social-login {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
 }
 
 .or-text {
