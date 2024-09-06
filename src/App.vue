@@ -60,7 +60,7 @@
 
         <!-- Venta -->
         <li class="nav-item">
-          <router-link to="/login" class="nav-link">
+          <router-link to="/" class="nav-link">
             <i class="bi bi-cash-stack"></i>
             <span class="tooltip-text">Venta</span>
           </router-link>
@@ -69,10 +69,20 @@
         <!-- TEST REGISTRO | BORRAR AL FINALIZAR EL TEST -->
         <li class="nav-item">
           <router-link to="/registro" class="nav-link">
-            <i class="bi bi-file-earmark-medical-fill"></i>
-            <span class="tooltip-text">Venta</span>
+            <i class="bi bi-pencil-square"></i>
+            <span class="tooltip-text">Registro</span>
           </router-link>
         </li>
+
+
+        <li class="nav-item">
+          <router-link to="/login" class="nav-link">
+            <i class="bi bi-box-arrow-in-right"></i>
+            <span class="tooltip-text">Login</span>
+          </router-link>
+        </li>
+
+
       </ul>
     </aside>
 
