@@ -4,7 +4,7 @@
     <aside v-if="!isLoginRoute" class="sidebar">
       <ul class="nav flex-column">
         <!-- Home -->
-        <li id="home" class="nav-item">
+        <li v-if="hasPermission('Home')" class="nav-item">
           <router-link to="/home" class="nav-link">
             <i class="bi bi-house-door-fill"></i>
             <span class="tooltip-text">Home</span>
@@ -12,7 +12,7 @@
         </li>
 
         <!-- Usuario -->
-        <li class="nav-item">
+        <li v-if="hasPermission('Usuario')" class="nav-item">
           <router-link to="/empleados" class="nav-link">
             <i class="bi bi-person-fill"></i>
             <span class="tooltip-text">Usuario</span>
@@ -20,7 +20,7 @@
         </li>
 
         <!-- Categorías -->
-        <li class="nav-item">
+        <li v-if="hasPermission('Categorias')" class="nav-item">
           <router-link to="/categorias" class="nav-link">
             <i class="bi bi-tags-fill"></i>
             <span class="tooltip-text">Categorías</span>
@@ -28,7 +28,7 @@
         </li>
 
         <!-- Productos -->
-        <li class="nav-item">
+        <li v-if="hasPermission('Productos')" class="nav-item">
           <router-link to="/productos" class="nav-link">
             <i class="bi bi-box-seam"></i>
             <span class="tooltip-text">Productos</span>
@@ -36,7 +36,7 @@
         </li>
 
         <!-- Clientes -->
-        <li class="nav-item">
+        <li v-if="hasPermission('Clientes')" class="nav-item">
           <router-link to="/clientes" class="nav-link">
             <i class="bi bi-people-fill"></i>
             <span class="tooltip-text">Clientes</span>
@@ -44,7 +44,7 @@
         </li>
 
         <!-- Proveedores -->
-        <li class="nav-item">
+        <li v-if="hasPermission('Proveedores')" class="nav-item">
           <router-link to="/proveedores" class="nav-link">
             <i class="bi bi-truck"></i>
             <span class="tooltip-text">Proveedores</span>
@@ -52,7 +52,7 @@
         </li>
 
         <!-- Compra -->
-        <li class="nav-item">
+        <li v-if="hasPermission('Compra')" class="nav-item">
           <router-link to="#" class="nav-link">
             <i class="bi bi-cart-plus-fill"></i>
             <span class="tooltip-text">Compra</span>
@@ -60,7 +60,7 @@
         </li>
 
         <!-- Venta -->
-        <li class="nav-item">
+        <li v-if="hasPermission('Venta')" class="nav-item">
           <router-link to="#" class="nav-link">
             <i class="bi bi-cash-stack"></i>
             <span class="tooltip-text">Venta</span>
@@ -68,14 +68,12 @@
         </li>
 
         <!-- TEST REGISTRO | BORRAR AL FINALIZAR EL TEST -->
-        <li class="nav-item">
+        <li v-if="hasPermission('Registro')" class="nav-item">
           <router-link to="/registro" class="nav-link">
             <i class="bi bi-pencil-square"></i>
             <span class="tooltip-text">Registro</span>
           </router-link>
         </li>
-
-       
       </ul>
     </aside>
 
@@ -92,6 +90,21 @@ export default {
   computed: {
     isLoginRoute() {
       return this.$route.path === '/login';
+    },
+    userRole() {
+      return localStorage.getItem('role');
+    }
+  },
+  methods: {
+    hasPermission(section) {
+      const permissions = {
+        Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro'],
+        Gerente: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
+        Cajero: ['Home', 'Productos', 'Venta']
+      };
+
+      // Validar si el rol del usuario está en el objeto de permisos y si la sección es accesible para ese rol
+      return this.userRole && permissions[this.userRole]?.includes(section);
     }
   }
 };
@@ -115,7 +128,6 @@ export default {
   padding-top: 20px;
   position: fixed;
   height: 100%;
-  /* overflow: hidden; */
   border-radius: 15px;
 }
 

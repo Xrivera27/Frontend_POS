@@ -6,7 +6,11 @@ import CategoriasList from '@/components/CategoriasList.vue';
 import ProductosList from '@/components/ProductosList.vue';
 import LoginList from '@/components/LoginList.vue';
 import RegistroList from '@/components/RegistroList.vue';
-import HomeList from '@/components/HomeList.vue'; // Importa tu componente de Home
+import HomeList from '@/components/HomeList.vue';
+
+function getRole() {
+  return localStorage.getItem('role'); // Obtiene el rol del usuario desde localStorage
+}
 
 const routes = [
   {
@@ -28,31 +32,31 @@ const routes = [
     path: '/clientes',
     name: 'Clientes',
     component: ClientesList,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, roles: ['Administrador', 'Gerente'] }
   },
   {
     path: '/proveedores',
     name: 'Proveedores',
     component: ProveedoresList,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, roles: ['Administrador', 'Gerente'] }
   },
   {
     path: '/empleados',
     name: 'Empleados',
     component: EmpleadoList,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, roles: ['Administrador'] }
   },
   {
     path: '/categorias',
     name: 'Categorias',
     component: CategoriasList,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, roles: ['Administrador'] }
   },
   {
     path: '/productos',
     name: 'Productos',
     component: ProductosList,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, roles: ['Administrador', 'Gerente', 'Cajero'] }
   },
   {
     path: '/registro',
@@ -70,13 +74,17 @@ const router = createRouter({
   routes
 });
 
-// Verificación de autenticación global
+// Verificación de autenticación y control de acceso por roles
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('auth');
+  const role = getRole();
 
   // Si la ruta requiere autenticación y el usuario no está autenticado, redirige al login
   if (to.matched.some(record => record.meta.requiresAuth) && !isAuthenticated) {
     next('/login');
+  } else if (to.matched.some(record => record.meta.roles) && !to.meta.roles.includes(role)) {
+    // Redirige a Home si el rol no tiene acceso a la ruta
+    next('/home');
   } else {
     next();
   }

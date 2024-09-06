@@ -6,7 +6,7 @@
       <p class="or-text">Ingrese con su usuario</p>
       <form @submit.prevent="login">
         <div class="form-group">
-          <input type="email" v-model="email" placeholder="Correo eléctronico" required />
+          <input type="text" v-model="username" placeholder="Usuario" required />
         </div>
         <div class="form-group">
           <input type="password" v-model="password" placeholder="Contraseña" required />
@@ -31,21 +31,39 @@
 export default {
   data() {
     return {
-      email: '',
+      username: '', // Cambiado a username en vez de email
       password: '',
       rememberMe: false,
-      predefinedEmail: 'admin@ejemplo.com',  // Correo predefinido
-      predefinedPassword: 'contraseña123'  // Contraseña predefinida
+      users: [
+        {
+          username: 'admin',
+          password: 'admin123',
+          role: 'Administrador'
+        },
+        {
+          username: 'gerente',
+          password: 'gerente123',
+          role: 'Gerente'
+        },
+        {
+          username: 'cajero',
+          password: 'cajero123',
+          role: 'Cajero'
+        }
+      ]
     };
   },
   methods: {
     login() {
-      // Verifica si el correo electrónico y la contraseña coinciden con los valores predefinidos
-      if (this.email === this.predefinedEmail && this.password === this.predefinedPassword) {
+      const user = this.users.find(
+        u => u.username === this.username && u.password === this.password
+      );
+      if (user) {
         localStorage.setItem('auth', 'true');
-        this.$router.push('/home'); // Redirige al Home después del login
+        localStorage.setItem('role', user.role); // Guardamos el rol del usuario
+        this.$router.push('/home'); // Redirige a la vista Home
       } else {
-        alert('Credenciales incorrectas'); // Muestra un mensaje de error si las credenciales son incorrectas
+        alert('Credenciales incorrectas');
       }
     }
   }
@@ -99,7 +117,7 @@ h2 {
   margin-bottom: 1rem;
 }
 
-input[type="email"], input[type="password"] {
+input[type="text"], input[type="password"] {
   width: 95%;
   padding: .8rem;
   border-radius: 8px;
