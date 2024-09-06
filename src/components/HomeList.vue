@@ -1,9 +1,24 @@
 <template>
+
+  <section>
+    <div class="container-top">
+      <i id="campana" class="bi bi-bell-fill"></i>Perdomo y Asociados<br>
+      <span class="rol">Gerente</span>
+      <hr>
+    </div>
+  </section>
+
+  <!-- Resto del contenido -->
+  <div class="dashboard-container">
+    <!-- Texto o contenido adicional debajo de la barra superior -->
+    <div class="section-below-bar">
+      <h2>Bienvenido al panel</h2>
+    </div>
+  </div>
+
   <div class="dashboard">
-    <h2>Dashboard</h2>
     <div v-if="role === 'Administrador'">
       <!-- Secciones visibles solo para Administrador -->
-      <h3>Panel de Administrador</h3>
       <BarChart />
       <div class="box">
         <div class="box-header">
@@ -72,6 +87,13 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  font-family: 'Montserrat', sans-serif;
+}
+
+
 .dashboard {
   padding: 20px;
 }
@@ -92,5 +114,21 @@ h2 {
 
 h3 {
   color: #333;
+}
+
+.container-top {
+  width: 100%;
+  text-align: right;
+}
+
+#campana {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #a38655;
+}
+
+.rol {
+  color: #969696;
+  font-size: 14px;
 }
 </style>
