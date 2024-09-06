@@ -61,7 +61,7 @@
 
         <!-- Venta -->
         <li class="nav-item">
-          <router-link to="/" class="nav-link">
+          <router-link to="#" class="nav-link">
             <i class="bi bi-cash-stack"></i>
             <span class="tooltip-text">Venta</span>
           </router-link>

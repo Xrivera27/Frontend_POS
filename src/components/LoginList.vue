@@ -34,7 +34,7 @@ export default {
       email: '',
       password: '',
       rememberMe: false,
-      predefinedEmail: 'usuario@ejemplo.com',  // Correo predefinido
+      predefinedEmail: 'admin@ejemplo.com',  // Correo predefinido
       predefinedPassword: 'contraseña123'  // Contraseña predefinida
     };
   },
