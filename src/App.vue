@@ -5,7 +5,7 @@
       <ul class="nav flex-column">
         <!-- Home -->
         <li id="home" class="nav-item">
-          <router-link to="/" class="nav-link">
+          <router-link to="/home" class="nav-link">
             <i class="bi bi-house-door-fill"></i>
             <span class="tooltip-text">Home</span>
           </router-link>
