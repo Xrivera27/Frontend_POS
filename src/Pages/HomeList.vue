@@ -1,12 +1,8 @@
 <template>
-
-  <section>
-    <div class="container-top">
-      <i id="campana" class="bi bi-bell-fill"></i>Perdomo y Asociados<br>
-      <span class="rol">Gerente</span>
-      <hr>
-    </div>
-  </section>
+  <div>
+    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
+  </div>
+  <hr>
 
   <!-- Resto del contenido -->
   <div class="dashboard-container">
@@ -72,10 +68,12 @@
 </template>
 
 <script>
-import BarChart from './BarChartList.vue';
+import BarChart from '../components/BarChartList.vue';
+import ProfileButton from '../components/ProfileButton.vue';
 
 export default {
   components: {
+    ProfileButton,
     BarChart,
   },
   data() {

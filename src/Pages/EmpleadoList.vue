@@ -1,21 +1,17 @@
 <template>
-  <section>
-    <div class="container-top">
-      <i id="campana" class="bi bi-bell-fill"></i>Perdomo y Asociados<br>
-      <span class="rol">Gerente</span>
-      <hr>
-    </div>
-  </section>
-
-  <h1> Proveedores</h1>
+  <div>
+    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
+  </div>
+  <hr>
 
   <div class="clientes-wrapper">
-   
+    <h1> Usuarios</h1>
 
-    <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar Proveedores</button>
+    <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+      Usuario</button>
 
     <div class="registros">
-      <span>Mostrar  <select></select>  registros</span>
+      <span>Mostrar <select></select> registros</span>
     </div>
 
     <!-- Barra de búsqueda -->
@@ -29,9 +25,13 @@
           <tr>
             <th>#</th>
             <th>Nombre</th>
-            <th>Teléfono</th>
+            <th>Apellido</th>
+            <th>Nombre Usuario</th>
+            <th>Contraseña</th>
             <th>Email</th>
-            <th>Direccion</th>
+            <th>Rol</th>
+            <th>Telefono</th>
+            <th>Estado</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -39,12 +39,18 @@
           <tr v-for="(cliente, index) in filteredClientes" :key="index">
             <td>{{ index + 1 }}</td>
             <td>{{ cliente.nombre }}</td>
-            <td>{{ cliente.telefono }}</td>
+            <td>{{ cliente.apellido }}</td>
+            <td>{{ cliente.nombreusuario }}</td>
+            <td>{{ cliente.contraseña }}</td>
             <td>{{ cliente.email }}</td>
-            <td>{{ cliente.direccion }}</td>
+            <td>{{ cliente.rol }}</td>
+            <td>{{ cliente.telefono }}</td>
+            <td>{{ cliente.estado }}</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editCliente(index)"><i class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(index)"><b><i class="bi bi-x-lg"></i></b></button>
+              <button id="btnEditar" class="btn btn-warning" @click="editCliente(index)"><i
+                  class="bi bi-pencil-fill"></i></button>
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(index)"><b><i
+                    class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
         </tbody>
@@ -61,11 +67,23 @@
           <input v-model="clienteForm.nombre" type="text" required>
         </div>
 
-     
+
         <div class="form-group">
-          <label>Teléfono:</label>
-          <input v-model="clienteForm.telefono" type="text" required>
+          <label>Apellido:</label>
+          <input v-model="clienteForm.apellido" type="text" required>
         </div>
+
+
+        <div class="form-group">
+          <label>Usuario:</label>
+          <input v-model="clienteForm.nombreusuario" type="text" required>
+        </div>
+
+        <div class="form-group">
+          <label>Contraseña:</label>
+          <input v-model="clienteForm.contraseña" type="password" required>
+        </div>
+
 
         <div class="form-group">
           <label>Email:</label>
@@ -73,8 +91,26 @@
         </div>
 
         <div class="form-group">
-          <label>Dirección:</label>
-          <input v-model="clienteForm.direccion" type="text" required>
+          <label>Rol:</label>
+          <select v-model="clienteForm.rol" required style="width: 30%; height: 35px; font-size: 16px; padding: 5px;">
+            <option value="Administrador">Administrador</option>
+            <option value="Cajero">Cajero</option>
+            <option value="Gerente">Gerente</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Telefono:</label>
+          <input v-model="clienteForm.telefono" type="text" required>
+        </div>
+
+        <div class="form-group">
+          <label>Estado:</label>
+          <select v-model="clienteForm.estado" required
+            style="width: 30%; height: 35px; font-size: 16px; padding: 5px;">
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
         </div>
 
         <button id="AddClienteModal" class="btn btn-primary" @click="guardarCliente">
@@ -87,7 +123,11 @@
 </template>
 
 <script>
+import ProfileButton from '../components/ProfileButton.vue';
 export default {
+  components: {
+    ProfileButton
+  },
   data() {
     return {
       searchQuery: '', // Almacena el texto de búsqueda
@@ -96,16 +136,24 @@ export default {
       editIndex: null,
       clienteForm: {
         nombre: '',
-        telefono: '',
+        apellido: '',
+        nombreusuario: '',
+        contraseña: '',
         email: '',
-        direccion: '',
+        rol: '',
+        telefono: '',
+        estado: '',
       },
       clientes: [
         {
-          nombre: 'Juan Villegas',
-          telefono: '555 57 67',
+          nombre: 'Juan',
+          apellido: 'Villegas',
+          nombreusuario: 'Juvil',
+          contraseña: '*****',
           email: 'Junavillega@gmail.com',
-          direccion: 'calle 27 # 40 - 36',
+          rol: 'Cajero',
+          telefono: '9875875875',
+          estado: 'Activo',
         }
         // Más clientes...
       ]
@@ -114,7 +162,7 @@ export default {
   computed: {
     filteredClientes() {
       // Filtra los clientes basados en el texto de búsqueda
-      return this.clientes.filter(cliente => 
+      return this.clientes.filter(cliente =>
         cliente.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         cliente.documentoId.includes(this.searchQuery)
       );
@@ -131,9 +179,13 @@ export default {
     clearForm() {
       this.clienteForm = {
         nombre: '',
-        telefono: '',
+        documentoId: '',
         email: '',
+        telefono: '',
         direccion: '',
+        fechaNacimiento: '',
+        totalCompras: 0,
+        ultimaCompra: new Date().toISOString().split('T')[0]
       };
       this.isEditing = false;
       this.editIndex = null;
@@ -161,9 +213,11 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-*{
+
+* {
   font-family: 'Montserrat', sans-serif;
 }
+
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
@@ -181,20 +235,23 @@ export default {
   transition: all 0.3s ease;
 }
 
-#btnEditar{
+
+
+
+#btnEditar {
   font-size: 18px;
   width: 50px;
   height: 40px;
   border-radius: 10px;
 }
 
-#btnEditar:hover{
+#btnEditar:hover {
   background-color: #e8af06;
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
 
-#btnEliminar{
+#btnEliminar {
   font-size: 18px;
   width: 50px;
   height: 40px;
@@ -202,24 +259,24 @@ export default {
   color: black;
 }
 
-#btnEliminar:hover{
+#btnEliminar:hover {
   background-color: #b72433;
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
 
-#campana{
+#campana {
   margin-right: 10px;
   font-size: 18px;
   color: #a38655;
 }
 
-.container-top{
+.container-top {
   width: 100%;
   text-align: right;
 }
 
-.rol{
+.rol {
   color: #969696;
   font-size: 14px;
 }
@@ -266,7 +323,8 @@ select {
   border-spacing: 0;
 }
 
-.table th, .table td {
+.table th,
+.table td {
   padding: 8px;
 }
 
@@ -331,13 +389,13 @@ select {
   align-items: center;
 }
 
-#AddClienteModal{
+#AddClienteModal {
   background: #a38655;
   border-radius: 15px;
   font-size: 16px
 }
 
-#BtnCerrar{
+#BtnCerrar {
   border-radius: 15px;
   background-color: #ebebeb;
   font-size: 16px;
@@ -366,5 +424,4 @@ select {
   border-radius: 5px;
   padding: 5px;
 }
-
 </style>

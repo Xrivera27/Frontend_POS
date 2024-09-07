@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import ClientesList from '../components/ClientesList.vue';
-import ProveedoresList from '../components/ProveedoresList.vue';
-import EmpleadoList from '@/components/EmpleadoList.vue';
-import CategoriasList from '@/components/CategoriasList.vue';
-import ProductosList from '@/components/ProductosList.vue';
-import LoginList from '@/components/LoginList.vue';
-import RegistroList from '@/components/RegistroList.vue';
-import HomeList from '@/components/HomeList.vue';
+import ClientesList from '../Pages/ClientesList.vue';
+import ProveedoresList from '../Pages/ProveedoresList.vue';
+import EmpleadoList from '@/Pages/EmpleadoList.vue';
+import CategoriasList from '@/Pages/CategoriasList.vue';
+import ProductosList from '@/Pages/ProductosList.vue';
+import LoginList from '@/Pages/LoginList.vue';
+import RegistroList from '@/Pages/RegistroList.vue';
+import HomeList from '@/Pages/HomeList.vue';
 
 function getRole() {
   return localStorage.getItem('role'); // Obtiene el rol del usuario desde localStorage

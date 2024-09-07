@@ -1,4 +1,5 @@
 <template>
+
   <div class="app-wrapper">
     <!-- Condicional para mostrar el sidebar solo si la ruta actual no es /login -->
     <aside v-if="!isLoginRoute" class="sidebar">

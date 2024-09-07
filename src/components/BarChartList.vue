@@ -1,8 +1,5 @@
 <template>
-  <div>
-    <!-- Sección de Perdomo y Asociados en la parte superior derecha -->
-
-
+  <div class="dashboard-container">
     <!-- Tarjetas informativas con iconos de Bootstrap y enlaces "Ver más" -->
     <div class="cards-container">
       <div class="card" v-for="(item, index) in cards" :key="index">
@@ -46,9 +43,7 @@
           <td>{{ sale.numero }}</td>
           <td>{{ sale.fecha }}</td>
           <td>{{ sale.total }}</td>
-          <td>
-            <a href="#">Ver más</a> <button>Descargar</button>
-          </td>
+          <td><a href="#">Ver más</a> <button>Descargar</button></td>
         </tr>
       </tbody>
     </table>
@@ -143,114 +138,10 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-
-* {
-  font-family: 'Montserrat', sans-serif;
-}
-
 /* Estilo para las tarjetas informativas */
 .cards-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-#campana {
-  margin-right: 10px;
-  font-size: 18px;
-  color: #a38655;
-}
-
-.card {
-  background-color: #f7f7f7;
-  padding: 1.5rem;
-  border-radius: 8px;
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.card-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.card-icon {
-  font-size: 1.75rem;
-  color: #333;
-}
-
-.card h3 {
-  font-size: 1.25rem;
-  color: #333;
-}
-
-.card p {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
-}
-
-.card-link {
-  display: block;
-  margin-top: 1rem;
-  color: #007bff;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-/* Estilo para los gráficos más pequeños */
-.charts-container {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-}
-
-.line-chart,
-.pie-chart {
-  width: 30%;
-}
-
-/* Estilo para la tabla de ventas */
-.sales-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 2rem;
-}
-
-.sales-table th,
-.sales-table td {
-  padding: 12px;
-  border: 1px solid #ddd;
-}
-
-.sales-table th {
-  background-color: #f4f4f4;
-  font-weight: bold;
-}
-
-.sales-table td {
-  text-align: center;
-}
-
-.sales-table a,
-.sales-table button {
-  margin-right: 10px;
-  text-decoration: none;
-  color: #007bff;
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-}
-
-/* Estilo para las tarjetas informativas */
-.cards-container {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  /* Número de columnas basado en el número de tarjetas */
   gap: 1rem;
   margin-bottom: 2rem;
 }
