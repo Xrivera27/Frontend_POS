@@ -212,7 +212,16 @@ input[type="checkbox"] {
     display: flex;
     justify-content: center;
     align-items: center;
+    color: white;
+    font-size: 2.5rem;
+    /* Ajusta el tamaño del ícono aquí */
 }
+
+.submit-btn i {
+    font-size: 2.5rem;
+    /* Asegúrate de que el tamaño sea consistente */
+}
+
 
 .sar-fields {
     background-color: #f4f4f4;

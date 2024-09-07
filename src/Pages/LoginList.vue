@@ -59,19 +59,19 @@ export default {
   methods: {
 
     login() {
-  const user = this.users.find(
-    u => u.username === this.username && u.password === this.password
-  );
-  if (user) {
-    localStorage.setItem('auth', 'true');
-    localStorage.setItem('role', user.role); // Almacena correctamente el rol
-    console.log('Rol guardado:', user.role); // Verificar en la consola si se guarda correctamente
-    this.$router.push('/home');
-  } else {
-    alert('Credenciales incorrectas');
-  }
+      const user = this.users.find(
+        u => u.username === this.username && u.password === this.password
+      );
+      if (user) {
+        localStorage.setItem('auth', 'true');
+        localStorage.setItem('role', user.role); // Almacena correctamente el rol
+        console.log('Rol guardado:', user.role); // Verificar en la consola si se guarda correctamente
+        this.$router.push('/home');
+      } else {
+        alert('Credenciales incorrectas');
+      }
 
-},
+    },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     }
@@ -80,12 +80,17 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos del Login */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  font-family: 'Montserrat', sans-serif;
+}
+
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
+  height: 100vh;
   background-color: transparent;
 }
 
@@ -102,6 +107,7 @@ export default {
 h2 {
   font-size: 24px;
   font-weight: 600;
+  color: #39b378;
   margin-bottom: 20px;
 }
 
@@ -114,18 +120,22 @@ h2 {
 .or-text {
   margin-bottom: 20px;
   font-size: 16px;
+  color: #333;
 }
 
 .form-group {
   margin-bottom: 1rem;
-  text-align: center;
 }
 
-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="tel"] {
+  width: 95%;
+  padding: 0.8rem;
   border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
 }
 
 .password-group {
@@ -142,27 +152,49 @@ input {
 }
 
 .submit-btn {
-  background-color: transparent;
+  background-color: #39b378;
   border: none;
+  border-radius: 50%;
+  padding: 1rem;
   cursor: pointer;
-  font-size: 2rem;
-  color: rgb(245, 196, 91);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 2.5rem;
+  /* Ajusta el tamaño del ícono aquí */
 }
+
+.submit-btn i {
+  font-size: 2.5rem;
+  /* Asegúrate de que el tamaño sea consistente */
+}
+
 
 .form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .checkbox-container {
-  font-size: 12px;
-  color: #888;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #333;
 }
 
 .forgot-password {
   font-size: 12px;
-  color: rgb(245, 196, 91);
+  color: #39b378;
+}
+
+/* Centrar el botón de submit */
+.button-container {
+  display: flex;
+  justify-content: center;
 }
 </style>
