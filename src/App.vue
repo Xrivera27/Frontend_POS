@@ -1,5 +1,4 @@
 <template>
-
   <div class="app-wrapper">
     <!-- Condicional para mostrar el sidebar solo si la ruta actual no es /login -->
     <aside v-if="!isLoginRoute" class="sidebar">
@@ -75,6 +74,14 @@
             <span class="tooltip-text">Registro</span>
           </router-link>
         </li>
+
+        <!-- Cerrar sesión -->
+        <li class="nav-item">
+          <a @click="logout" class="nav-link" style="cursor: pointer;">
+            <i class="bi bi-box-arrow-right"></i>
+            <span class="tooltip-text">Cerrar sesión</span>
+          </a>
+        </li>
       </ul>
     </aside>
 
@@ -92,20 +99,22 @@ export default {
     isLoginRoute() {
       return this.$route.path === '/login';
     },
-    userRole() {
-      return localStorage.getItem('role');
-    }
   },
   methods: {
     hasPermission(section) {
+      const role = localStorage.getItem('role');
       const permissions = {
         Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro'],
         Gerente: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
         Cajero: ['Home', 'Productos', 'Venta']
       };
 
-      // Validar si el rol del usuario está en el objeto de permisos y si la sección es accesible para ese rol
-      return this.userRole && permissions[this.userRole]?.includes(section);
+      return role && permissions[role]?.includes(section);
+    },
+
+    logout() {
+      localStorage.clear(); // Limpiar el localStorage
+      this.$router.push('/login'); // Redirigir a la página de login
     }
   }
 };

@@ -57,18 +57,21 @@ export default {
     };
   },
   methods: {
+
     login() {
-      const user = this.users.find(
-        u => u.username === this.username && u.password === this.password
-      );
-      if (user) {
-        localStorage.setItem('auth', 'true');
-        localStorage.setItem('role', user.role);
-        this.$router.push('/home');
-      } else {
-        alert('Credenciales incorrectas');
-      }
-    },
+  const user = this.users.find(
+    u => u.username === this.username && u.password === this.password
+  );
+  if (user) {
+    localStorage.setItem('auth', 'true');
+    localStorage.setItem('role', user.role); // Almacena correctamente el rol
+    console.log('Rol guardado:', user.role); // Verificar en la consola si se guarda correctamente
+    this.$router.push('/home');
+  } else {
+    alert('Credenciales incorrectas');
+  }
+
+},
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     }
@@ -77,17 +80,7 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-
-* {
-  font-family: 'Montserrat', sans-serif;
-}
-
-#btnLogin {
-  color: white;
-  font-size: 2rem;
-}
-
+/* Estilos del Login */
 .login-container {
   display: flex;
   justify-content: center;
@@ -107,30 +100,32 @@ export default {
 }
 
 h2 {
-  color: #39b378;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
 }
 
 .welcome-message {
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #888;
 }
 
 .or-text {
-  font-size: 0.9rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
+  font-size: 16px;
 }
 
 .form-group {
   margin-bottom: 1rem;
+  text-align: center;
 }
 
-input[type="text"],
-input[type="password"] {
-  width: 95%;
-  padding: .8rem;
-  border-radius: 8px;
+input {
+  width: 100%;
+  padding: 0.75rem;
   border: 1px solid #ddd;
-  font-size: 1rem;
+  border-radius: 8px;
 }
 
 .password-group {
@@ -139,53 +134,35 @@ input[type="password"] {
 
 .toggle-password {
   position: absolute;
-  right: 10px;
   top: 50%;
+  right: 10px;
   transform: translateY(-50%);
   cursor: pointer;
   color: #888;
+}
+
+.submit-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 2rem;
+  color: rgb(245, 196, 91);
 }
 
 .form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .checkbox-container {
-  display: flex;
-  align-items: center;
-  font-size: 0.9rem;
-}
-
-input[type="checkbox"] {
-  margin-right: 0.5rem;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-}
-
-.submit-btn {
-  background-color: #39b378;
-  border: none;
-  border-radius: 50%;
-  padding: 1rem;
-  cursor: pointer;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  font-size: 12px;
+  color: #888;
 }
 
 .forgot-password {
-  color: #39b378;
+  font-size: 12px;
+  color: rgb(245, 196, 91);
 }
 </style>
