@@ -8,8 +8,10 @@
         <div class="form-group">
           <input type="text" v-model="username" placeholder="Usuario" required />
         </div>
-        <div class="form-group">
-          <input type="password" v-model="password" placeholder="Contraseña" required />
+        <div class="form-group password-group">
+          <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="Contraseña" required />
+          <i :class="showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'" class="toggle-password"
+            @click="togglePasswordVisibility"></i>
         </div>
         <div class="form-options">
           <label class="checkbox-container">
@@ -31,9 +33,10 @@
 export default {
   data() {
     return {
-      username: '', // Cambiado a username en vez de email
+      username: '',
       password: '',
       rememberMe: false,
+      showPassword: false, // Controla la visibilidad de la contraseña
       users: [
         {
           username: 'admin',
@@ -60,11 +63,14 @@ export default {
       );
       if (user) {
         localStorage.setItem('auth', 'true');
-        localStorage.setItem('role', user.role); // Guardamos el rol del usuario
-        this.$router.push('/home'); // Redirige a la vista Home
+        localStorage.setItem('role', user.role);
+        this.$router.push('/home');
       } else {
         alert('Credenciales incorrectas');
       }
+    },
+    togglePasswordVisibility() {
+      this.showPassword = !this.showPassword;
     }
   }
 };
@@ -72,6 +78,7 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 * {
   font-family: 'Montserrat', sans-serif;
 }
@@ -117,12 +124,26 @@ h2 {
   margin-bottom: 1rem;
 }
 
-input[type="text"], input[type="password"] {
+input[type="text"],
+input[type="password"] {
   width: 95%;
   padding: .8rem;
   border-radius: 8px;
   border: 1px solid #ddd;
   font-size: 1rem;
+}
+
+.password-group {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
 }
 
 .form-options {
