@@ -18,18 +18,12 @@
       <BarChart />
       <div class="box">
         <div class="box-header">
-          <h3>Gestión de Usuarios</h3>
+         
         </div>
         <!-- Contenido de gestión de usuarios -->
-        <p>Aquí puedes gestionar usuarios, asignar roles y configurar el sistema.</p>
+       
       </div>
-      <div class="box">
-        <div class="box-header">
-          <h3>Gestión de Proveedores</h3>
-        </div>
-        <!-- Contenido de gestión de proveedores -->
-        <p>Aquí puedes registrar y gestionar proveedores.</p>
-      </div>
+      
     </div>
 
     <div v-if="role === 'Gerente'">
