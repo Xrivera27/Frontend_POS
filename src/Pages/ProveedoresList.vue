@@ -6,19 +6,27 @@
 
   <h1> Proveedores</h1>
 
-  <div class="clientes-wrapper">
-
+  <div class="proveedores-wrapper">
 
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-      Proveedores</button>
+      Proveedor</button>
 
     <div class="registros">
-      <span>Mostrar <select></select> registros</span>
+      <span>Mostrar
+        <select v-model="itemsPerPage" class="custom-select">
+          <option value="">Todos</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+        </select> registros
+      </span>
     </div>
 
     <!-- Barra de búsqueda -->
     <div class="search-bar">
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
+      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar proveedor..." />
     </div>
 
     <div class="table-container">
@@ -34,16 +42,16 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(cliente, index) in filteredClientes" :key="index">
+          <tr v-for="(proveedor, index) in paginatedProveedores" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ cliente.nombre }}</td>
-            <td>{{ cliente.telefono }}</td>
-            <td>{{ cliente.email }}</td>
-            <td>{{ cliente.direccion }}</td>
+            <td>{{ proveedor.nombre }}</td>
+            <td>{{ proveedor.telefono }}</td>
+            <td>{{ proveedor.email }}</td>
+            <td>{{ proveedor.direccion }}</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editCliente(index)"><i
+              <button id="btnEditar" class="btn btn-warning" @click="editProveedor(index)"><i
                   class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(index)"><b><i
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteProveedor(index)"><b><i
                     class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
@@ -51,34 +59,33 @@
       </table>
     </div>
 
-    <!-- Modal para agregar o editar clientes -->
+    <!-- Modal para agregar o editar proveedores -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
         <h2>{{ isEditing ? 'Editar Proveedor' : 'Agregar Proveedor' }}</h2>
 
         <div class="form-group">
           <label>Nombre:</label>
-          <input v-model="clienteForm.nombre" type="text" required>
+          <input v-model="proveedorForm.nombre" type="text" required>
         </div>
-
 
         <div class="form-group">
           <label>Teléfono:</label>
-          <input v-model="clienteForm.telefono" type="text" required>
+          <input v-model="proveedorForm.telefono" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Email:</label>
-          <input v-model="clienteForm.email" type="text" required>
+          <input v-model="proveedorForm.email" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Dirección:</label>
-          <input v-model="clienteForm.direccion" type="text" required>
+          <input v-model="proveedorForm.direccion" type="text" required>
         </div>
 
-        <button id="AddClienteModal" class="btn btn-primary" @click="guardarCliente">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Cliente' }}
+        <button id="AddProveedorModal" class="btn btn-primary" @click="guardarProveedor">
+          {{ isEditing ? 'Guardar Cambios' : 'Agregar Proveedor' }}
         </button>
         <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
       </div>
@@ -98,30 +105,52 @@ export default {
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
-      clienteForm: {
+      itemsPerPage: "",
+      proveedorForm: {
         nombre: '',
         telefono: '',
         email: '',
         direccion: '',
       },
-      clientes: [
-        {
-          nombre: 'Juan Villegas',
-          telefono: '555 57 67',
-          email: 'Junavillega@gmail.com',
-          direccion: 'calle 27 # 40 - 36',
-        }
-        // Más clientes...
+      proveedores: [
+        { nombre: 'Juan Villegas', telefono: '555 57 67', email: 'Juanavillega@gmail.com', direccion: 'calle 27 # 40 - 36' },
+        { nombre: 'Marta Pérez', telefono: '123 45 67', email: 'martaperez@gmail.com', direccion: 'avenida 15 # 20 - 40' },
+        { nombre: 'Carlos Ramírez', telefono: '987 65 43', email: 'carlosramirez@gmail.com', direccion: 'calle 10 # 12 - 50' },
+        { nombre: 'Ana Gómez', telefono: '654 32 10', email: 'anagomez@gmail.com', direccion: 'carrera 7 # 8 - 60' },
+        { nombre: 'Luis Fernández', telefono: '432 10 98', email: 'luisfernandez@gmail.com', direccion: 'calle 8 # 9 - 70' },
+        { nombre: 'Pedro Sánchez', telefono: '789 01 23', email: 'pedrosanchez@gmail.com', direccion: 'calle 5 # 6 - 80' },
+        { nombre: 'Claudia Rodríguez', telefono: '567 89 01', email: 'claudiarodriguez@gmail.com', direccion: 'avenida 9 # 10 - 90' },
+        { nombre: 'Gabriel López', telefono: '345 67 89', email: 'gabriellopez@gmail.com', direccion: 'calle 3 # 4 - 100' },
+        { nombre: 'Julia Castillo', telefono: '234 56 78', email: 'juliacastillo@gmail.com', direccion: 'carrera 5 # 6 - 110' },
+        { nombre: 'Andrés Ríos', telefono: '890 12 34', email: 'andresrios@gmail.com', direccion: 'calle 4 # 5 - 120' },
+        { nombre: 'Sofía Torres', telefono: '567 89 12', email: 'sofiatorres@gmail.com', direccion: 'carrera 6 # 7 - 130' },
+        { nombre: 'Ricardo Morales', telefono: '234 78 90', email: 'ricardomorales@gmail.com', direccion: 'avenida 3 # 4 - 140' },
+        { nombre: 'Carolina Vargas', telefono: '890 34 56', email: 'carolinavargas@gmail.com', direccion: 'calle 2 # 3 - 150' },
+        { nombre: 'Eduardo Herrera', telefono: '123 56 78', email: 'eduardoherrera@gmail.com', direccion: 'carrera 2 # 3 - 160' },
+        { nombre: 'Patricia Medina', telefono: '456 78 90', email: 'patriciamedina@gmail.com', direccion: 'avenida 7 # 8 - 170' },
+        { nombre: 'Miguel Ortiz', telefono: '789 23 45', email: 'miguelortiz@gmail.com', direccion: 'calle 1 # 2 - 180' },
+        { nombre: 'Diana Ruiz', telefono: '234 90 12', email: 'dianaruiz@gmail.com', direccion: 'carrera 4 # 5 - 190' },
+        { nombre: 'Javier Mendoza', telefono: '567 12 34', email: 'javiermendoza@gmail.com', direccion: 'avenida 6 # 7 - 200' },
+        { nombre: 'Gloria Peña', telefono: '890 45 67', email: 'gloriapena@gmail.com', direccion: 'calle 7 # 8 - 210' },
+        { nombre: 'Fernando Castro', telefono: '123 67 89', email: 'fernandocastro@gmail.com', direccion: 'carrera 3 # 4 - 220' }
       ]
     };
   },
   computed: {
-    filteredClientes() {
-      // Filtra los clientes basados en el texto de búsqueda
-      return this.clientes.filter(cliente =>
-        cliente.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        cliente.documentoId.includes(this.searchQuery)
+    filteredProveedores() {
+      // Filtra los proveedores basados en el texto de búsqueda
+      return this.proveedores.filter(proveedor =>
+        proveedor.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        proveedor.telefono.includes(this.searchQuery)
       );
+    },
+    paginatedProveedores() {
+
+      if (this.itemsPerPage === "" || this.itemsPerPage === null) {
+        return this.filteredProveedores;
+      } else {
+        return this.filteredProveedores.slice(0, parseInt(this.itemsPerPage));
+      }
     }
   },
   methods: {
@@ -133,7 +162,7 @@ export default {
       this.clearForm();
     },
     clearForm() {
-      this.clienteForm = {
+      this.proveedorForm = {
         nombre: '',
         telefono: '',
         email: '',
@@ -142,22 +171,22 @@ export default {
       this.isEditing = false;
       this.editIndex = null;
     },
-    guardarCliente() {
+    guardarProveedor() {
       if (this.isEditing) {
-        this.clientes[this.editIndex] = { ...this.clienteForm };
+        this.proveedores[this.editIndex] = { ...this.proveedorForm };
       } else {
-        this.clientes.push({ ...this.clienteForm });
+        this.proveedores.push({ ...this.proveedorForm });
       }
       this.closeModal();
     },
-    editCliente(index) {
-      this.clienteForm = { ...this.clientes[index] };
+    editProveedor(index) {
+      this.proveedorForm = { ...this.proveedores[index] };
       this.isEditing = true;
       this.editIndex = index;
       this.openModal();
     },
-    deleteCliente(index) {
-      this.clientes.splice(index, 1);
+    deleteProveedor(index) {
+      this.proveedores.splice(index, 1);
     }
   }
 };
@@ -250,7 +279,7 @@ select {
   margin-bottom: 20px;
 }
 
-.clientes-wrapper {
+.proveedores-wrapper {
   padding: 16px;
 }
 
@@ -338,7 +367,7 @@ select {
   align-items: center;
 }
 
-#AddClienteModal {
+#AddProveedorModal {
   background: #a38655;
   border-radius: 15px;
   font-size: 16px
@@ -372,5 +401,25 @@ select {
   height: 20px;
   border-radius: 5px;
   padding: 5px;
+}
+
+.custom-select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 35px;
+  font-size: 16px;
+  padding: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 80px;
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: #a38655;
+}
+
+.custom-select option {
+  font-size: 16px;
 }
 </style>

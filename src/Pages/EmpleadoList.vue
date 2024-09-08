@@ -4,19 +4,28 @@
   </div>
   <hr>
 
-  <div class="clientes-wrapper">
+  <div class="empleados-wrapper">
     <h1> Usuarios</h1>
 
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
       Usuario</button>
 
     <div class="registros">
-      <span>Mostrar <select></select> registros</span>
+      <span>Mostrar
+        <select v-model="itemsPerPage" class="custom-select">
+          <option value="">Todos</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+        </select> registros
+      </span>
     </div>
 
     <!-- Barra de búsqueda -->
     <div class="search-bar">
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
+      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar empleado..." />
     </div>
 
     <div class="table-container">
@@ -36,20 +45,20 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(cliente, index) in filteredClientes" :key="index">
+          <tr v-for="(empleado, index) in paginatedEmpleados" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ cliente.nombre }}</td>
-            <td>{{ cliente.apellido }}</td>
-            <td>{{ cliente.nombreusuario }}</td>
-            <td>{{ cliente.contraseña }}</td>
-            <td>{{ cliente.email }}</td>
-            <td>{{ cliente.rol }}</td>
-            <td>{{ cliente.telefono }}</td>
-            <td>{{ cliente.estado }}</td>
+            <td>{{ empleado.nombre }}</td>
+            <td>{{ empleado.apellido }}</td>
+            <td>{{ empleado.nombreusuario }}</td>
+            <td>{{ empleado.contraseña }}</td>
+            <td>{{ empleado.email }}</td>
+            <td>{{ empleado.rol }}</td>
+            <td>{{ empleado.telefono }}</td>
+            <td>{{ empleado.estado }}</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editCliente(index)"><i
+              <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(index)"><i
                   class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(index)"><b><i
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteEmpleado(index)"><b><i
                     class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
@@ -57,42 +66,39 @@
       </table>
     </div>
 
-    <!-- Modal para agregar o editar clientes -->
+    <!-- Modal para agregar o editar empleados -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
-        <h2>{{ isEditing ? 'Editar Proveedor' : 'Agregar Proveedor' }}</h2>
+        <h2>{{ isEditing ? 'Editar Empleado' : 'Agregar Empleado' }}</h2>
 
         <div class="form-group">
           <label>Nombre:</label>
-          <input v-model="clienteForm.nombre" type="text" required>
+          <input v-model="empleadoForm.nombre" type="text" required>
         </div>
-
 
         <div class="form-group">
           <label>Apellido:</label>
-          <input v-model="clienteForm.apellido" type="text" required>
+          <input v-model="empleadoForm.apellido" type="text" required>
         </div>
-
 
         <div class="form-group">
           <label>Usuario:</label>
-          <input v-model="clienteForm.nombreusuario" type="text" required>
+          <input v-model="empleadoForm.nombreusuario" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Contraseña:</label>
-          <input v-model="clienteForm.contraseña" type="password" required>
+          <input v-model="empleadoForm.contraseña" type="password" required>
         </div>
-
 
         <div class="form-group">
           <label>Email:</label>
-          <input v-model="clienteForm.email" type="text" required>
+          <input v-model="empleadoForm.email" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Rol:</label>
-          <select v-model="clienteForm.rol" required style="width: 30%; height: 35px; font-size: 16px; padding: 5px;">
+          <select v-model="empleadoForm.rol" required style="width: 30%; height: 35px; font-size: 16px; padding: 5px;">
             <option value="Administrador">Administrador</option>
             <option value="Cajero">Cajero</option>
             <option value="Gerente">Gerente</option>
@@ -101,20 +107,20 @@
 
         <div class="form-group">
           <label>Telefono:</label>
-          <input v-model="clienteForm.telefono" type="text" required>
+          <input v-model="empleadoForm.telefono" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Estado:</label>
-          <select v-model="clienteForm.estado" required
+          <select v-model="empleadoForm.estado" required
             style="width: 30%; height: 35px; font-size: 16px; padding: 5px;">
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
           </select>
         </div>
 
-        <button id="AddClienteModal" class="btn btn-primary" @click="guardarCliente">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Cliente' }}
+        <button id="AddEmpleadoModal" class="btn btn-primary" @click="guardarEmpleado">
+          {{ isEditing ? 'Guardar Cambios' : 'Agregar Empleado' }}
         </button>
         <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
       </div>
@@ -134,7 +140,8 @@ export default {
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
-      clienteForm: {
+      itemsPerPage: "",
+      empleadoForm: {
         nombre: '',
         apellido: '',
         nombreusuario: '',
@@ -144,28 +151,65 @@ export default {
         telefono: '',
         estado: '',
       },
-      clientes: [
-        {
-          nombre: 'Juan',
-          apellido: 'Villegas',
-          nombreusuario: 'Juvil',
-          contraseña: '*****',
-          email: 'Junavillega@gmail.com',
-          rol: 'Cajero',
-          telefono: '9875875875',
-          estado: 'Activo',
-        }
-        // Más clientes...
+      empleados: [
+        { nombre: 'Juan', apellido: 'Villegas', nombreusuario: 'Juvil', contraseña: '*****', email: 'junavillega@gmail.com', rol: 'Cajero', telefono: '9875875875', estado: 'Activo' },
+        { nombre: 'María', apellido: 'Pérez', nombreusuario: 'Maper', contraseña: '*****', email: 'mariaperez@gmail.com', rol: 'Cajero', telefono: '9876543210', estado: 'Activo' },
+        { nombre: 'Carlos', apellido: 'Ramírez', nombreusuario: 'Cram', contraseña: '*****', email: 'carlosramirez@gmail.com', rol: 'Cajero', telefono: '9876543211', estado: 'Activo' },
+        { nombre: 'Ana', apellido: 'Gómez', nombreusuario: 'Anago', contraseña: '*****', email: 'anagomez@gmail.com', rol: 'Cajero', telefono: '9876543212', estado: 'Activo' },
+        { nombre: 'Luis', apellido: 'Fernández', nombreusuario: 'Lufe', contraseña: '*****', email: 'luisfernandez@gmail.com', rol: 'Cajero', telefono: '9876543213', estado: 'Activo' },
+        { nombre: 'Pedro', apellido: 'Sánchez', nombreusuario: 'Pesan', contraseña: '*****', email: 'pedrosanchez@gmail.com', rol: 'Cajero', telefono: '9876543214', estado: 'Activo' },
+        { nombre: 'Claudia', apellido: 'Rodríguez', nombreusuario: 'Clrod', contraseña: '*****', email: 'claudiarodriguez@gmail.com', rol: 'Cajero', telefono: '9876543215', estado: 'Activo' },
+        { nombre: 'Gabriel', apellido: 'López', nombreusuario: 'Galo', contraseña: '*****', email: 'gabriellopez@gmail.com', rol: 'Cajero', telefono: '9876543216', estado: 'Activo' },
+        { nombre: 'Julia', apellido: 'Castillo', nombreusuario: 'Jucas', contraseña: '*****', email: 'juliacastillo@gmail.com', rol: 'Cajero', telefono: '9876543217', estado: 'Activo' },
+        { nombre: 'Andrés', apellido: 'Ríos', nombreusuario: 'Andri', contraseña: '*****', email: 'andresrios@gmail.com', rol: 'Cajero', telefono: '9876543218', estado: 'Activo' },
+        { nombre: 'Sofía', apellido: 'Torres', nombreusuario: 'Sotor', contraseña: '*****', email: 'sofiatorres@gmail.com', rol: 'Cajero', telefono: '9876543219', estado: 'Activo' },
+        { nombre: 'Ricardo', apellido: 'Morales', nombreusuario: 'Rimo', contraseña: '*****', email: 'ricardomorales@gmail.com', rol: 'Cajero', telefono: '9876543220', estado: 'Activo' },
+        { nombre: 'Carolina', apellido: 'Vargas', nombreusuario: 'Cav', contraseña: '*****', email: 'carolinavargas@gmail.com', rol: 'Cajero', telefono: '9876543221', estado: 'Activo' },
+        { nombre: 'Eduardo', apellido: 'Herrera', nombreusuario: 'Edher', contraseña: '*****', email: 'eduardoherrera@gmail.com', rol: 'Cajero', telefono: '9876543222', estado: 'Activo' },
+        { nombre: 'Patricia', apellido: 'Medina', nombreusuario: 'Pamed', contraseña: '*****', email: 'patriciamedina@gmail.com', rol: 'Cajero', telefono: '9876543223', estado: 'Activo' },
+        { nombre: 'Miguel', apellido: 'Ortiz', nombreusuario: 'Miort', contraseña: '*****', email: 'miguelortiz@gmail.com', rol: 'Cajero', telefono: '9876543224', estado: 'Activo' },
+        { nombre: 'Diana', apellido: 'Ruiz', nombreusuario: 'Dirui', contraseña: '*****', email: 'dianaruiz@gmail.com', rol: 'Cajero', telefono: '9876543225', estado: 'Activo' },
+        { nombre: 'Javier', apellido: 'Mendoza', nombreusuario: 'Jame', contraseña: '*****', email: 'javiermendoza@gmail.com', rol: 'Cajero', telefono: '9876543226', estado: 'Activo' },
+        { nombre: 'Gloria', apellido: 'Peña', nombreusuario: 'Glpea', contraseña: '*****', email: 'gloriapena@gmail.com', rol: 'Cajero', telefono: '9876543227', estado: 'Activo' },
+        { nombre: 'Fernando', apellido: 'Castro', nombreusuario: 'Fecas', contraseña: '*****', email: 'fernandocastro@gmail.com', rol: 'Cajero', telefono: '9876543228', estado: 'Activo' },
+
+        { nombre: 'Lucía', apellido: 'Hernández', nombreusuario: 'Luher', contraseña: '*****', email: 'luciahernandez@gmail.com', rol: 'Gerente', telefono: '9876543229', estado: 'Activo' },
+        { nombre: 'Ricardo', apellido: 'Castillo', nombreusuario: 'Ricas', contraseña: '*****', email: 'ricardocastillo@gmail.com', rol: 'Gerente', telefono: '9876543230', estado: 'Activo' },
+        { nombre: 'Gabriela', apellido: 'Fuentes', nombreusuario: 'Gafu', contraseña: '*****', email: 'gabriela@gmail.com', rol: 'Gerente', telefono: '9876543231', estado: 'Activo' },
+        { nombre: 'José', apellido: 'Maldonado', nombreusuario: 'Jomal', contraseña: '*****', email: 'josemaldonado@gmail.com', rol: 'Gerente', telefono: '9876543232', estado: 'Activo' },
+        { nombre: 'Elena', apellido: 'Rivas', nombreusuario: 'Elriv', contraseña: '*****', email: 'elenarivas@gmail.com', rol: 'Gerente', telefono: '9876543233', estado: 'Activo' },
+
+        { nombre: 'Luis', apellido: 'Ortega', nombreusuario: 'Luort', contraseña: '*****', email: 'luisortega@gmail.com', rol: 'Administrador', telefono: '9876543234', estado: 'Activo' },
+        { nombre: 'Patricia', apellido: 'Reyes', nombreusuario: 'Parey', contraseña: '*****', email: 'patriciareyes@gmail.com', rol: 'Administrador', telefono: '9876543235', estado: 'Activo' },
+        { nombre: 'Sofía', apellido: 'Morales', nombreusuario: 'Somor', contraseña: '*****', email: 'sofimorales@gmail.com', rol: 'Administrador', telefono: '9876543236', estado: 'Activo' },
+        { nombre: 'Andrés', apellido: 'Vargas', nombreusuario: 'Andva', contraseña: '*****', email: 'andresvargas@gmail.com', rol: 'Administrador', telefono: '9876543237', estado: 'Activo' },
+        { nombre: 'Lorena', apellido: 'Padilla', nombreusuario: 'Lopa', contraseña: '*****', email: 'lorenapadilla@gmail.com', rol: 'Administrador', telefono: '9876543238', estado: 'Activo' },
+
+        { nombre: 'Felipe', apellido: 'Mena', nombreusuario: 'Feme', contraseña: '*****', email: 'felipemena@gmail.com', rol: 'Gerente', telefono: '9876543239', estado: 'Activo' },
+        { nombre: 'Marcela', apellido: 'Valdez', nombreusuario: 'Mava', contraseña: '*****', email: 'marcelavaldez@gmail.com', rol: 'Gerente', telefono: '9876543240', estado: 'Activo' },
+        { nombre: 'Alberto', apellido: 'López', nombreusuario: 'Alol', contraseña: '*****', email: 'albertolopez@gmail.com', rol: 'Administrador', telefono: '9876543241', estado: 'Activo' },
+        { nombre: 'Raquel', apellido: 'Pineda', nombreusuario: 'Rapi', contraseña: '*****', email: 'raquelpineda@gmail.com', rol: 'Administrador', telefono: '9876543242', estado: 'Activo' },
+        { nombre: 'Mauricio', apellido: 'Cardona', nombreusuario: 'Maca', contraseña: '*****', email: 'mauriciocardona@gmail.com', rol: 'Cajero', telefono: '9876543243', estado: 'Activo' }
       ]
+
     };
   },
   computed: {
-    filteredClientes() {
-      // Filtra los clientes basados en el texto de búsqueda
-      return this.clientes.filter(cliente =>
-        cliente.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        cliente.documentoId.includes(this.searchQuery)
+    filteredEmpleados() {
+      // Filtra los empleados basados en el texto de búsqueda
+      return this.empleados.filter(empleado =>
+        empleado.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        empleado.apellido.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        empleado.nombreusuario.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
+    },
+    paginatedEmpleados() {
+      // Si itemsPerPage es vacío, mostramos todos los registros, de lo contrario aplicamos la paginación
+      if (this.itemsPerPage === "" || this.itemsPerPage === null) {
+        return this.filteredEmpleados;
+      } else {
+        return this.filteredEmpleados.slice(0, parseInt(this.itemsPerPage));
+      }
     }
   },
   methods: {
@@ -177,35 +221,35 @@ export default {
       this.clearForm();
     },
     clearForm() {
-      this.clienteForm = {
+      this.empleadoForm = {
         nombre: '',
-        documentoId: '',
+        apellido: '',
+        nombreusuario: '',
+        contraseña: '',
         email: '',
+        rol: '',
         telefono: '',
-        direccion: '',
-        fechaNacimiento: '',
-        totalCompras: 0,
-        ultimaCompra: new Date().toISOString().split('T')[0]
+        estado: '',
       };
       this.isEditing = false;
       this.editIndex = null;
     },
-    guardarCliente() {
+    guardarEmpleado() {
       if (this.isEditing) {
-        this.clientes[this.editIndex] = { ...this.clienteForm };
+        this.empleados[this.editIndex] = { ...this.empleadoForm };
       } else {
-        this.clientes.push({ ...this.clienteForm });
+        this.empleados.push({ ...this.empleadoForm });
       }
       this.closeModal();
     },
-    editCliente(index) {
-      this.clienteForm = { ...this.clientes[index] };
+    editEmpleado(index) {
+      this.empleadoForm = { ...this.empleados[index] };
       this.isEditing = true;
       this.editIndex = index;
       this.openModal();
     },
-    deleteCliente(index) {
-      this.clientes.splice(index, 1);
+    deleteEmpleado(index) {
+      this.empleados.splice(index, 1);
     }
   }
 };
@@ -234,9 +278,6 @@ export default {
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
-
-
-
 
 #btnEditar {
   font-size: 18px;
@@ -301,7 +342,7 @@ select {
   margin-bottom: 20px;
 }
 
-.clientes-wrapper {
+.empleados-wrapper {
   padding: 16px;
 }
 
@@ -389,7 +430,7 @@ select {
   align-items: center;
 }
 
-#AddClienteModal {
+#AddEmpleadoModal {
   background: #a38655;
   border-radius: 15px;
   font-size: 16px
@@ -423,5 +464,31 @@ select {
   height: 20px;
   border-radius: 5px;
   padding: 5px;
+}
+
+button {
+  cursor: pointer;
+}
+
+.custom-select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 35px;
+  font-size: 16px;
+  padding: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 80px;
+  /* Ajusta el ancho a 120px o el valor que prefieras */
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: #a38655;
+  /* Ajusta el color del borde al de tu diseño */
+}
+
+.custom-select option {
+  font-size: 16px;
 }
 </style>

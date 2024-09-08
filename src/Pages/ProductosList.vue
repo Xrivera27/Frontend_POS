@@ -4,19 +4,27 @@
   </div>
   <hr>
 
-  <div class="clientes-wrapper">
+  <div class="productos-wrapper">
     <h1> Productos </h1>
 
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-      Productos</button>
+      Producto</button>
 
     <div class="registros">
-      <span>Mostrar <select></select> registros</span>
+      <span>Mostrar
+        <select v-model="itemsPerPage" class="custom-select">
+          <option value="">Todos</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+        </select> registros
+      </span>
     </div>
-
     <!-- Barra de búsqueda -->
     <div class="search-bar">
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
+      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar producto..." />
     </div>
 
     <div class="table-container">
@@ -28,87 +36,84 @@
             <th>Descripcion</th>
             <th>Categoria</th>
             <th>Stock</th>
-            <th>Precio Unitarios</th>
-            <th>Precio Mayoristas</th>
+            <th>Precio Unitario</th>
+            <th>Precio Mayorista</th>
             <th>Precio Descuento</th>
             <th>Fecha</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(cliente, index) in filteredClientes" :key="index">
+          <tr v-for="(producto, index) in paginatedProductos" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ cliente.codigo }}</td>
-            <td>{{ cliente.descripcion }}</td>
-            <td>{{ cliente.categoria }}</td>
-            <td>{{ cliente.stock }}</td>
-            <td>{{ cliente.preciounitario }}</td>
-            <td>{{ cliente.preciomayorista }}</td>
-            <td>{{ cliente.preciodescuento }}</td>
-            <td>{{ cliente.fecha }}</td>
-
-
+            <td>{{ producto.codigo }}</td>
+            <td>{{ producto.descripcion }}</td>
+            <td>{{ producto.categoria }}</td>
+            <td>{{ producto.stock }}</td>
+            <td>{{ producto.preciounitario }}</td>
+            <td>{{ producto.preciomayorista }}</td>
+            <td>{{ producto.preciodescuento }}</td>
+            <td>{{ producto.fecha }}</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editCliente(index)"><i
-                  class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(index)"><b><i
-                    class="bi bi-x-lg"></i></b></button>
+              <button id="btnEditar" class="btn btn-warning" @click="editProducto(index)">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteProducto(index)">
+                <b><i class="bi bi-x-lg"></i></b>
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Modal para agregar o editar clientes -->
+    <!-- Modal para agregar o editar productos -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
-        <h2>{{ isEditing ? 'Editar Cliente' : 'Agregar Cliente' }}</h2>
+        <h2>{{ isEditing ? 'Editar Producto' : 'Agregar Producto' }}</h2>
 
         <div class="form-group">
           <label>Codigo:</label>
-          <input v-model="clienteForm.codigo" type="text" required>
+          <input v-model="productoForm.codigo" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Descripcion:</label>
-          <input v-model="clienteForm.descripcion" type="text" required>
+          <input v-model="productoForm.descripcion" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Categoria:</label>
-          <input v-model="clienteForm.categoria" type="text" required>
+          <input v-model="productoForm.categoria" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Stock:</label>
-          <input v-model="clienteForm.stock" type="text" required>
+          <input v-model="productoForm.stock" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Precio Unitario:</label>
-          <input v-model="clienteForm.preciounitario" type="text" required>
+          <input v-model="productoForm.preciounitario" type="text" required>
         </div>
 
-
         <div class="form-group">
-          <label>Precio Mayorista :</label>
-          <input v-model="clienteForm.preciomayorista" type="text" required>
+          <label>Precio Mayorista:</label>
+          <input v-model="productoForm.preciomayorista" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Precio Descuento:</label>
-          <input v-model="clienteForm.preciodescuento" type="text" required>
+          <input v-model="productoForm.preciodescuento" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Fecha:</label>
-          <input v-model="clienteForm.fecha" type="date" required>
+          <input v-model="productoForm.fecha" type="date" required>
         </div>
 
-
-
-        <button id="AddClienteModal" class="btn btn-primary" @click="guardarCliente">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Cliente' }}
+        <button id="AddProductoModal" class="btn btn-primary" @click="guardarProducto">
+          {{ isEditing ? 'Guardar Cambios' : 'Agregar Producto' }}
         </button>
         <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
       </div>
@@ -128,7 +133,8 @@ export default {
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
-      clienteForm: {
+      itemsPerPage: "",
+      productoForm: {
         codigo: '',
         descripcion: '',
         categoria: '',
@@ -136,36 +142,52 @@ export default {
         preciounitario: '',
         preciomayorista: '',
         preciodescuento: '',
-        fecha: '',
-
-
+        fecha: ''
       },
-      clientes: [
-        {
-          codigo: '1504',
-          descripcion: 'Mortal Kombat X',
-          categoria: 'Videojuegos',
-          stock: '45',
-          preciounitario: 'L. 450.00',
-          preciomayorista: 'L. 350.00',
-          preciodescuento: 'L. 400.00',
-          fecha: '2017-12-11'
-        }
-        // Más clientes...
+      productos: [
+        { codigo: '1504', descripcion: 'Mortal Kombat X', categoria: 'Videojuegos', stock: '45', preciounitario: 'L. 450.00', preciomayorista: 'L. 350.00', preciodescuento: 'L. 400.00', fecha: '2017-12-11' },
+        { codigo: '1505', descripcion: 'Call of Duty: Modern Warfare', categoria: 'Videojuegos', stock: '30', preciounitario: 'L. 600.00', preciomayorista: 'L. 500.00', preciodescuento: 'L. 550.00', fecha: '2020-05-21' },
+        { codigo: '1506', descripcion: 'God of War', categoria: 'Videojuegos', stock: '25', preciounitario: 'L. 700.00', preciomayorista: 'L. 600.00', preciodescuento: 'L. 650.00', fecha: '2018-04-15' },
+        { codigo: '1507', descripcion: 'The Last of Us Part II', categoria: 'Videojuegos', stock: '35', preciounitario: 'L. 800.00', preciomayorista: 'L. 700.00', preciodescuento: 'L. 750.00', fecha: '2020-06-19' },
+        { codigo: '1508', descripcion: 'FIFA 21', categoria: 'Videojuegos', stock: '50', preciounitario: 'L. 550.00', preciomayorista: 'L. 450.00', preciodescuento: 'L. 500.00', fecha: '2020-10-09' },
+        { codigo: '1509', descripcion: 'Red Dead Redemption 2', categoria: 'Videojuegos', stock: '20', preciounitario: 'L. 900.00', preciomayorista: 'L. 800.00', preciodescuento: 'L. 850.00', fecha: '2018-10-26' },
+        { codigo: '1510', descripcion: 'Spider-Man', categoria: 'Videojuegos', stock: '40', preciounitario: 'L. 500.00', preciomayorista: 'L. 400.00', preciodescuento: 'L. 450.00', fecha: '2018-09-07' },
+        { codigo: '1511', descripcion: 'Minecraft', categoria: 'Videojuegos', stock: '60', preciounitario: 'L. 350.00', preciomayorista: 'L. 300.00', preciodescuento: 'L. 320.00', fecha: '2019-12-20' },
+        { codigo: '1512', descripcion: 'Fortnite (Paquete Deluxe)', categoria: 'Videojuegos', stock: '70', preciounitario: 'L. 200.00', preciomayorista: 'L. 150.00', preciodescuento: 'L. 180.00', fecha: '2021-03-10' },
+        { codigo: '1513', descripcion: 'NBA 2K21', categoria: 'Videojuegos', stock: '30', preciounitario: 'L. 600.00', preciomayorista: 'L. 500.00', preciodescuento: 'L. 550.00', fecha: '2020-09-04' },
+        { codigo: '1514', descripcion: 'Assassin’s Creed Valhalla', categoria: 'Videojuegos', stock: '28', preciounitario: 'L. 750.00', preciomayorista: 'L. 650.00', preciodescuento: 'L. 700.00', fecha: '2020-11-10' },
+        { codigo: '1515', descripcion: 'Cyberpunk 2077', categoria: 'Videojuegos', stock: '22', preciounitario: 'L. 900.00', preciomayorista: 'L. 800.00', preciodescuento: 'L. 850.00', fecha: '2020-12-10' },
+        { codigo: '1516', descripcion: 'Gears 5', categoria: 'Videojuegos', stock: '40', preciounitario: 'L. 550.00', preciomayorista: 'L. 450.00', preciodescuento: 'L. 500.00', fecha: '2019-09-06' },
+        { codigo: '1517', descripcion: 'Resident Evil Village', categoria: 'Videojuegos', stock: '15', preciounitario: 'L. 800.00', preciomayorista: 'L. 700.00', preciodescuento: 'L. 750.00', fecha: '2021-05-07' },
+        { codigo: '1518', descripcion: 'Grand Theft Auto V', categoria: 'Videojuegos', stock: '50', preciounitario: 'L. 650.00', preciomayorista: 'L. 550.00', preciodescuento: 'L. 600.00', fecha: '2013-09-17' },
+        { codigo: '1519', descripcion: 'Horizon Zero Dawn', categoria: 'Videojuegos', stock: '25', preciounitario: 'L. 700.00', preciomayorista: 'L. 600.00', preciodescuento: 'L. 650.00', fecha: '2017-02-28' },
+        { codigo: '1520', descripcion: 'Dark Souls III', categoria: 'Videojuegos', stock: '20', preciounitario: 'L. 750.00', preciomayorista: 'L. 650.00', preciodescuento: 'L. 700.00', fecha: '2016-04-12' },
+        { codigo: '1521', descripcion: 'Sekiro: Shadows Die Twice', categoria: 'Videojuegos', stock: '30', preciounitario: 'L. 850.00', preciomayorista: 'L. 750.00', preciodescuento: 'L. 800.00', fecha: '2019-03-22' },
+        { codigo: '1522', descripcion: 'The Witcher 3: Wild Hunt', categoria: 'Videojuegos', stock: '35', preciounitario: 'L. 600.00', preciomayorista: 'L. 500.00', preciodescuento: 'L. 550.00', fecha: '2015-05-19' },
+        { codigo: '1523', descripcion: 'Far Cry 5', categoria: 'Videojuegos', stock: '40', preciounitario: 'L. 500.00', preciomayorista: 'L. 400.00', preciodescuento: 'L. 450.00', fecha: '2018-03-27' },
+        { codigo: '1524', descripcion: 'Battlefield V', categoria: 'Videojuegos', stock: '18', preciounitario: 'L. 650.00', preciomayorista: 'L. 550.00', preciodescuento: 'L. 600.00', fecha: '2018-11-20' }
       ]
+
     };
   },
   computed: {
-    filteredClientes() {
-      // Filtra los clientes basados en el texto de búsqueda
-      return this.clientes.filter(cliente =>
-        cliente.codigo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        cliente.descripcion.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        cliente.categoria.toLowerCase().includes(this.searchQuery.toLowerCase())
+    filteredProductos() {
+      // Filtra los productos basados en el texto de búsqueda
+      return this.productos.filter(producto =>
+        producto.codigo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        producto.descripcion.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        producto.categoria.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
+    },
+    paginatedProductos() {
+      // Si itemsPerPage es vacío, mostramos todos los registros, de lo contrario aplicamos la paginación
+      if (this.itemsPerPage === "" || this.itemsPerPage === null) {
+        return this.filteredProductos;
+      } else {
+        return this.filteredProductos.slice(0, parseInt(this.itemsPerPage));
+      }
     }
   },
-
   methods: {
     openModal() {
       this.isModalOpen = true;
@@ -175,7 +197,7 @@ export default {
       this.clearForm();
     },
     clearForm() {
-      this.clienteForm = {
+      this.productoForm = {
         codigo: '',
         descripcion: '',
         categoria: '',
@@ -188,22 +210,22 @@ export default {
       this.isEditing = false;
       this.editIndex = null;
     },
-    guardarCliente() {
+    guardarProducto() {
       if (this.isEditing) {
-        this.clientes[this.editIndex] = { ...this.clienteForm };
+        this.productos[this.editIndex] = { ...this.productoForm };
       } else {
-        this.clientes.push({ ...this.clienteForm });
+        this.productos.push({ ...this.productoForm });
       }
       this.closeModal();
     },
-    editCliente(index) {
-      this.clienteForm = { ...this.clientes[index] };
+    editProducto(index) {
+      this.productoForm = { ...this.productos[index] };
       this.isEditing = true;
       this.editIndex = index;
       this.openModal();
     },
-    deleteCliente(index) {
-      this.clientes.splice(index, 1);
+    deleteProducto(index) {
+      this.productos.splice(index, 1);
     }
   }
 };
@@ -219,12 +241,12 @@ export default {
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
-  width: 170px;
+  width: 200px;
   height: 40px;
   border-radius: 10px;
-  margin-bottom: 15px;
   color: black;
   font-weight: bold;
+  margin-bottom: 15px;
 }
 
 #btnAdd:hover {
@@ -260,32 +282,6 @@ export default {
   transition: all 0.3s ease;
 }
 
-#campana {
-  margin-right: 10px;
-  font-size: 18px;
-  color: #a38655;
-}
-
-.container-top {
-  width: 100%;
-  text-align: right;
-}
-
-.rol {
-  color: #969696;
-  font-size: 14px;
-}
-
-select {
-  border: 1px solid #ccc;
-  margin-top: 10px;
-  margin-left: 5px;
-  margin-right: 5px;
-  width: 60px;
-  height: 35px;
-  border-radius: 5px;
-}
-
 .busqueda {
   float: right;
   padding: 10px;
@@ -296,7 +292,7 @@ select {
   margin-bottom: 20px;
 }
 
-.clientes-wrapper {
+.productos-wrapper {
   padding: 16px;
 }
 
@@ -384,18 +380,6 @@ select {
   align-items: center;
 }
 
-#AddClienteModal {
-  background: #a38655;
-  border-radius: 15px;
-  font-size: 16px
-}
-
-#BtnCerrar {
-  border-radius: 15px;
-  background-color: #ebebeb;
-  font-size: 16px;
-}
-
 .modal-content {
   background-color: white;
   padding: 20px;
@@ -414,9 +398,36 @@ select {
 }
 
 .form-group input {
-  width: 50%;
-  height: 20px;
+  width: 100%;
+  height: 35px;
   border-radius: 5px;
   padding: 5px;
+  border: 1px solid #ccc;
+}
+
+button {
+  cursor: pointer;
+}
+
+.custom-select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 35px;
+  font-size: 16px;
+  padding: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 80px;
+  /* Ajusta el ancho a 120px o el valor que prefieras */
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: #a38655;
+  /* Ajusta el color del borde al de tu diseño */
+}
+
+.custom-select option {
+  font-size: 16px;
 }
 </style>

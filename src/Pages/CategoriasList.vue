@@ -1,22 +1,31 @@
 <template>
-  <div class="button-container">
+  <div>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   </div>
   <hr>
 
-  <div class="clientes-wrapper">
+  <div class="categorias-wrapper">
     <h1> Categorías </h1>
 
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-      Categorías</button>
+      Categoría</button>
 
     <div class="registros">
-      <span>Mostrar <select></select> registros</span>
+      <span>Mostrar
+        <select v-model="itemsPerPage" class="custom-select">
+          <option value="">Todos</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+        </select> registros
+      </span>
     </div>
 
     <!-- Barra de búsqueda -->
     <div class="search-bar">
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
+      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar categoría..." />
     </div>
 
     <div class="table-container">
@@ -30,14 +39,14 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(cliente, index) in filteredClientes" :key="index">
+          <tr v-for="(categoria, index) in paginatedCategorias" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ cliente.nombre }}</td>
-            <td>{{ cliente.descripcion }}</td>
+            <td>{{ categoria.nombre }}</td>
+            <td>{{ categoria.descripcion }}</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editCliente(index)"><i
+              <button id="btnEditar" class="btn btn-warning" @click="editCategoria(index)"><i
                   class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(index)"><b><i
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteCategoria(index)"><b><i
                     class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
@@ -45,23 +54,23 @@
       </table>
     </div>
 
-    <!-- Modal para agregar o editar clientes -->
+    <!-- Modal para agregar o editar categorías -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
         <h2>{{ isEditing ? 'Editar Categoría' : 'Agregar Categoría' }}</h2>
 
         <div class="form-group">
           <label>Nombre:</label>
-          <input v-model="clienteForm.nombre" type="text" required>
+          <input v-model="categoriaForm.nombre" type="text" required>
         </div>
 
         <!-- Campo de descripción estilizado como textarea -->
         <div class="form-group">
           <label>Descripción:</label>
-          <textarea v-model="clienteForm.descripcion" required rows="4"></textarea>
+          <textarea v-model="categoriaForm.descripcion" required rows="4"></textarea>
         </div>
 
-        <button id="AddClienteModal" class="btn btn-primary" @click="guardarCategoria">
+        <button id="AddCategoriaModal" class="btn btn-primary" @click="guardarCategoria">
           {{ isEditing ? 'Guardar Cambios' : 'Agregar Categoría' }}
         </button>
         <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
@@ -73,68 +82,146 @@
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
 export default {
-  components: {
-    ProfileButton,
-  },
+  components: { ProfileButton },
   data() {
     return {
       searchQuery: '', // Almacena el texto de búsqueda
-      isModalOpen: false,
-      isEditing: false,
-      editIndex: null,
-      clienteForm: {
-        nombre: '',
-        descripcion: '',
-      },
-      clientes: [
+      itemsPerPage: "", // Valor por defecto para mostrar todos los registros
+      categorias: [
         {
           nombre: 'Videojuegos',
           descripcion: 'Todo tipo de videojuegos tanto de consola como de pc',
+        },
+        {
+          nombre: 'Ropa Deportiva',
+          descripcion: 'Artículos deportivos de marcas reconocidas',
+        },
+        {
+          nombre: 'Electrodomésticos',
+          descripcion: 'Electrodomésticos para el hogar de última tecnología',
+        },
+        {
+          nombre: 'Joyería',
+          descripcion: 'Anillos, collares y pulseras de alta gama',
+        },
+        {
+          nombre: 'Muebles',
+          descripcion: 'Mobiliario moderno y elegante para el hogar',
+        },
+        {
+          nombre: 'Libros',
+          descripcion: 'Libros de diferentes géneros literarios y educativos',
+        },
+        {
+          nombre: 'Juguetes',
+          descripcion: 'Juguetes educativos y recreativos para todas las edades',
+        },
+        {
+          nombre: 'Calzado',
+          descripcion: 'Zapatillas y zapatos para hombres, mujeres y niños',
+        },
+        {
+          nombre: 'Relojes',
+          descripcion: 'Relojes de pulsera clásicos y digitales',
+        },
+        {
+          nombre: 'Equipos de Sonido',
+          descripcion: 'Altavoces y auriculares de alta fidelidad',
+        },
+        {
+          nombre: 'Ropa Casual',
+          descripcion: 'Prendas de vestir para el día a día',
+        },
+        {
+          nombre: 'Computadoras',
+          descripcion: 'Laptops, PCs de escritorio y accesorios',
+        },
+        {
+          nombre: 'Teléfonos Móviles',
+          descripcion: 'Smartphones y teléfonos básicos de diversas marcas',
+        },
+        {
+          nombre: 'Cámaras Fotográficas',
+          descripcion: 'Cámaras digitales y accesorios para fotografía',
+        },
+        {
+          nombre: 'Accesorios para Autos',
+          descripcion: 'Accesorios y repuestos para vehículos',
+        },
+        {
+          nombre: 'Herramientas',
+          descripcion: 'Herramientas manuales y eléctricas para proyectos',
+        },
+        {
+          nombre: 'Papelería',
+          descripcion: 'Artículos de oficina y útiles escolares',
+        },
+        {
+          nombre: 'Decoración',
+          descripcion: 'Artículos de decoración para el hogar y la oficina',
+        },
+        {
+          nombre: 'Jardinería',
+          descripcion: 'Productos para el cuidado del jardín y paisajismo',
+        },
+        {
+          nombre: 'Ropa de Invierno',
+          descripcion: 'Abrigos, guantes y bufandas para el frío',
+        },
+        {
+          nombre: 'Bebidas',
+          descripcion: 'Bebidas alcohólicas y no alcohólicas de todo tipo',
         }
-        // Más clientes...
-      ]
+      ],
     };
   },
   computed: {
-    filteredClientes() {
-      // Filtra los clientes basados en el texto de búsqueda
-      return this.clientes.filter(cliente =>
-        cliente.nombre.toLowerCase().includes(this.searchQuery.toLowerCase())
+    filteredCategorias() {
+      // Filtra las categorías basados en el texto de búsqueda
+      return this.categorias.filter(categoria =>
+        categoria.nombre.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
+    },
+    paginatedCategorias() {
+      // Si itemsPerPage es 0, mostramos todos los registros, de lo contrario aplicamos la paginación
+      return this.itemsPerPage === "" || this.itemsPerPage === null
+        ? this.filteredCategorias
+        : this.filteredCategorias.slice(0, this.itemsPerPage);
     }
   },
   methods: {
     openModal() {
+      // Implementa la lógica para abrir el modal
       this.isModalOpen = true;
+      this.isEditing = false;
+      this.categoriaForm = { nombre: '', descripcion: '' };
     },
     closeModal() {
+      // Implementa la lógica para cerrar el modal
       this.isModalOpen = false;
-      this.clearForm();
     },
-    clearForm() {
-      this.clienteForm = {
-        nombre: '',
-        descripcion: '',
-      };
-      this.isEditing = false;
-      this.editIndex = null;
+    editCategoria(index) {
+      // Implementa la lógica para editar una categoría
+      this.isModalOpen = true;
+      this.isEditing = true;
+      this.categoriaForm = { ...this.categorias[index] };
+    },
+    deleteCategoria(index) {
+      // Implementa la lógica para eliminar una categoría
+      this.categorias.splice(index, 1);
     },
     guardarCategoria() {
       if (this.isEditing) {
-        this.clientes[this.editIndex] = { ...this.clienteForm };
+        // Actualiza una categoría existente
+        const index = this.categorias.findIndex(c => c.nombre === this.categoriaForm.nombre);
+        if (index !== -1) {
+          this.$set(this.categorias, index, this.categoriaForm);
+        }
       } else {
-        this.clientes.push({ ...this.clienteForm });
+        // Agrega una nueva categoría
+        this.categorias.push(this.categoriaForm);
       }
       this.closeModal();
-    },
-    editCliente(index) {
-      this.clienteForm = { ...this.clientes[index] };
-      this.isEditing = true;
-      this.editIndex = index;
-      this.openModal();
-    },
-    deleteCliente(index) {
-      this.clientes.splice(index, 1);
     }
   }
 };
@@ -227,7 +314,7 @@ select {
   margin-bottom: 20px;
 }
 
-.clientes-wrapper {
+.categorias-wrapper {
   padding: 16px;
 }
 
@@ -315,7 +402,7 @@ select {
   align-items: center;
 }
 
-#AddClienteModal {
+#AddCategoriaModal {
   background: #a38655;
   border-radius: 15px;
   font-size: 16px;
@@ -370,5 +457,27 @@ textarea:focus {
 
 button {
   cursor: pointer;
+}
+
+.custom-select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 35px;
+  font-size: 16px;
+  padding: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 80px;
+  /* Ajusta el ancho a 120px o el valor que prefieras */
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: #a38655;
+  /* Ajusta el color del borde al de tu diseño */
+}
+
+.custom-select option {
+  font-size: 16px;
 }
 </style>
