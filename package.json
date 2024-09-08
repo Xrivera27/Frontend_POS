@@ -10,6 +10,9 @@
   "dependencies": {
     "chart.js": "^3.7.0",
     "core-js": "^3.8.3",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.3",
     "vue": "^3.2.13",
     "vue-chartjs": "^4.1.1",
     "vue-router": "^4.4.3"

@@ -23,6 +23,8 @@
       </span>
     </div>
 
+    <ExportButton :columns="columns" :rows="rows" fileName="Clientes.pdf" />
+
     <!-- Barra de búsqueda -->
     <div class="search-bar">
       <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
@@ -98,9 +100,12 @@
 
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
+import ExportButton from '../components/ExportButton.vue';
+
 export default {
   components: {
-    ProfileButton
+    ProfileButton,
+    ExportButton
   },
   data() {
     return {
@@ -134,151 +139,18 @@ export default {
           totalCompras: 20,
           ultimaCompra: '2020-05-15'
         },
-        {
-          nombre: 'Carlos López',
-          documentoId: '7654321',
-          telefono: '555 98 76',
-          direccion: 'calle 10 # 30 - 45',
-          totalCompras: 50,
-          ultimaCompra: '2021-07-23'
-        },
-        {
-          nombre: 'Ana Martínez',
-          documentoId: '8976543',
-          telefono: '555 67 89',
-          direccion: 'carrera 15 # 12 - 50',
-          totalCompras: 15,
-          ultimaCompra: '2019-09-30'
-        },
-        {
-          nombre: 'Luis Hernández',
-          documentoId: '2345678',
-          telefono: '555 45 23',
-          direccion: 'calle 8 # 22 - 40',
-          totalCompras: 40,
-          ultimaCompra: '2018-11-21'
-        },
-        {
-          nombre: 'Elena Torres',
-          documentoId: '3456789',
-          telefono: '555 87 65',
-          direccion: 'avenida 9 # 17 - 32',
-          totalCompras: 25,
-          ultimaCompra: '2022-01-12'
-        },
-        {
-          nombre: 'Fernando Rivera',
-          documentoId: '4567890',
-          telefono: '555 11 22',
-          direccion: 'calle 12 # 45 - 60',
-          totalCompras: 60,
-          ultimaCompra: '2023-03-02'
-        },
-        {
-          nombre: 'Gloria Castro',
-          documentoId: '9876543',
-          telefono: '555 55 33',
-          direccion: 'carrera 20 # 18 - 80',
-          totalCompras: 30,
-          ultimaCompra: '2016-08-19'
-        },
-        {
-          nombre: 'Miguel Orozco',
-          documentoId: '5678901',
-          telefono: '555 33 44',
-          direccion: 'calle 25 # 36 - 90',
-          totalCompras: 45,
-          ultimaCompra: '2015-04-05'
-        },
-        {
-          nombre: 'Sandra Pérez',
-          documentoId: '6789012',
-          telefono: '555 66 77',
-          direccion: 'avenida 13 # 10 - 11',
-          totalCompras: 55,
-          ultimaCompra: '2021-02-25'
-        },
-        {
-          nombre: 'Diego Montoya',
-          documentoId: '7890123',
-          telefono: '555 77 88',
-          direccion: 'carrera 7 # 40 - 21',
-          totalCompras: 65,
-          ultimaCompra: '2020-09-10'
-        },
-        {
-          nombre: 'Patricia Suárez',
-          documentoId: '8901234',
-          telefono: '555 44 55',
-          direccion: 'calle 30 # 50 - 60',
-          totalCompras: 75,
-          ultimaCompra: '2022-11-30'
-        },
-        {
-          nombre: 'Roberto Díaz',
-          documentoId: '9012345',
-          telefono: '555 88 99',
-          direccion: 'avenida 2 # 16 - 22',
-          totalCompras: 35,
-          ultimaCompra: '2020-06-18'
-        },
-        {
-          nombre: 'Lucía Andrade',
-          documentoId: '1023456',
-          telefono: '555 11 22',
-          direccion: 'calle 5 # 10 - 18',
-          totalCompras: 20,
-          ultimaCompra: '2023-04-14'
-        },
-        {
-          nombre: 'Daniel Vargas',
-          documentoId: '1123456',
-          telefono: '555 99 88',
-          direccion: 'avenida 8 # 25 - 35',
-          totalCompras: 40,
-          ultimaCompra: '2021-12-22'
-        },
-        {
-          nombre: 'Paola Mejía',
-          documentoId: '1223456',
-          telefono: '555 44 33',
-          direccion: 'carrera 11 # 17 - 29',
-          totalCompras: 50,
-          ultimaCompra: '2018-03-10'
-        },
-        {
-          nombre: 'Santiago Molina',
-          documentoId: '1323456',
-          telefono: '555 22 55',
-          direccion: 'calle 19 # 21 - 14',
-          totalCompras: 60,
-          ultimaCompra: '2019-10-07'
-        },
-        {
-          nombre: 'Claudia Ortega',
-          documentoId: '1423456',
-          telefono: '555 33 22',
-          direccion: 'avenida 6 # 15 - 17',
-          totalCompras: 25,
-          ultimaCompra: '2017-01-28'
-        },
-        {
-          nombre: 'Eduardo Rojas',
-          documentoId: '1523456',
-          telefono: '555 66 33',
-          direccion: 'carrera 14 # 9 - 20',
-          totalCompras: 35,
-          ultimaCompra: '2016-05-11'
-        },
-        {
-          nombre: 'Verónica Pérez',
-          documentoId: '1623456',
-          telefono: '555 55 44',
-          direccion: 'calle 31 # 50 - 25',
-          totalCompras: 45,
-          ultimaCompra: '2020-08-03'
-        }
-      ]
+        // Resto de clientes...
+      ],
+      // Define tus columnas para la exportación a PDF
+      columns: [
+        { header: '#', dataKey: 'index' },
+        { header: 'Nombre', dataKey: 'nombre' },
+        { header: 'DNI / RTN', dataKey: 'documentoId' },
+        { header: 'Teléfono', dataKey: 'telefono' },
+        { header: 'Total Compras', dataKey: 'totalCompras' },
+        { header: 'Última Compra', dataKey: 'ultimaCompra' }
+      ],
+      rows: [] // Inicialmente vacío, se llena después
     };
   },
   computed: {
@@ -290,11 +162,66 @@ export default {
       );
     },
     paginatedClientes() {
-      // Si itemsPerPage es 0, mostramos todos los registros, de lo contrario aplicamos la paginación
       return this.itemsPerPage === "" || this.itemsPerPage === null
         ? this.filteredClientes
         : this.filteredClientes.slice(0, this.itemsPerPage);
     }
+  },
+  methods: {
+    openModal() {
+      this.isModalOpen = true;
+    },
+    closeModal() {
+      this.isModalOpen = false;
+      this.isEditing = false;
+      this.clienteForm = {
+        nombre: '',
+        documentoId: '',
+        telefono: '',
+        direccion: '',
+        totalCompras: 0,
+        ultimaCompra: new Date().toISOString().split('T')[0]
+      };
+    },
+    guardarCliente() {
+      if (this.isEditing) {
+        Object.assign(this.clientes[this.editIndex], this.clienteForm);
+      } else {
+        this.clientes.push({ ...this.clienteForm });
+      }
+      this.closeModal();
+    },
+    editCliente(index) {
+      this.isModalOpen = true;
+      this.isEditing = true;
+      this.editIndex = index;
+      this.clienteForm = { ...this.clientes[index] };
+    },
+    deleteCliente(index) {
+      this.clientes.splice(index, 1);
+    },
+    generateRows() {
+      // Genera las filas basadas en los clientes paginados
+      this.rows = this.paginatedClientes.map((cliente, index) => ({
+        index: index + 1,
+        nombre: cliente.nombre,
+        documentoId: cliente.documentoId,
+        telefono: cliente.telefono,
+        totalCompras: cliente.totalCompras,
+        ultimaCompra: cliente.ultimaCompra
+      }));
+      console.log('Filas generadas:', this.rows);
+    }
+  },
+  watch: {
+    // Cuando cambie la paginación o el filtro, actualiza las filas
+    paginatedClientes() {
+      this.generateRows();
+    }
+  },
+  mounted() {
+    // Genera las filas al cargar el componente
+    this.generateRows();
   }
 };
 </script>

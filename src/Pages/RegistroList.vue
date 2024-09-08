@@ -131,10 +131,10 @@ const closePopup = () => {
     font-family: 'Montserrat', sans-serif;
 }
 
-#categoria{
+#categoria {
 
     width: 100%;
-    
+
 }
 
 #btnSubmit {

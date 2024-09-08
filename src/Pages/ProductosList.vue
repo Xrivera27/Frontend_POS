@@ -5,10 +5,13 @@
   <hr>
 
   <div class="productos-wrapper">
-    <h1> Productos </h1>
+    <h1>Productos</h1>
 
-    <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-      Producto</button>
+    <div class="action-bar">
+      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">
+        Agregar Producto
+      </button>
+    </div>
 
     <div class="registros">
       <span>Mostrar
@@ -22,12 +25,17 @@
         </select> registros
       </span>
     </div>
+
+    <!-- Botón de exportación PDF -->
+    <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" />
+
     <!-- Barra de búsqueda -->
     <div class="search-bar">
       <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar producto..." />
     </div>
 
-    <div class="table-container">
+    <!-- Tabla exportable -->
+    <div class="table-container" v-pdf-export ref="table">
       <table class="table">
         <thead>
           <tr>
@@ -123,13 +131,16 @@
 
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
+import ExportButton from '../components/ExportButton.vue';
+
 export default {
   components: {
-    ProfileButton
+    ProfileButton,
+    ExportButton
   },
   data() {
     return {
-      searchQuery: '', // Almacena el texto de búsqueda
+      searchQuery: '',
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
@@ -166,13 +177,23 @@ export default {
         { codigo: '1522', descripcion: 'The Witcher 3: Wild Hunt', categoria: 'Videojuegos', stock: '35', preciounitario: 'L. 600.00', preciomayorista: 'L. 500.00', preciodescuento: 'L. 550.00', fecha: '2015-05-19' },
         { codigo: '1523', descripcion: 'Far Cry 5', categoria: 'Videojuegos', stock: '40', preciounitario: 'L. 500.00', preciomayorista: 'L. 400.00', preciodescuento: 'L. 450.00', fecha: '2018-03-27' },
         { codigo: '1524', descripcion: 'Battlefield V', categoria: 'Videojuegos', stock: '18', preciounitario: 'L. 650.00', preciomayorista: 'L. 550.00', preciodescuento: 'L. 600.00', fecha: '2018-11-20' }
-      ]
-
+      ],
+      columns: [
+        { header: '#', dataKey: 'index' },
+        { header: 'Código', dataKey: 'codigo' },
+        { header: 'Descripción', dataKey: 'descripcion' },
+        { header: 'Categoría', dataKey: 'categoria' },
+        { header: 'Stock', dataKey: 'stock' },
+        { header: 'Precio Unitario', dataKey: 'preciounitario' },
+        { header: 'Precio Mayorista', dataKey: 'preciomayorista' },
+        { header: 'Precio Descuento', dataKey: 'preciodescuento' },
+        { header: 'Fecha', dataKey: 'fecha' }
+      ],
+      rows: []
     };
   },
   computed: {
     filteredProductos() {
-      // Filtra los productos basados en el texto de búsqueda
       return this.productos.filter(producto =>
         producto.codigo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         producto.descripcion.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
@@ -180,7 +201,6 @@ export default {
       );
     },
     paginatedProductos() {
-      // Si itemsPerPage es vacío, mostramos todos los registros, de lo contrario aplicamos la paginación
       if (this.itemsPerPage === "" || this.itemsPerPage === null) {
         return this.filteredProductos;
       } else {
@@ -226,7 +246,32 @@ export default {
     },
     deleteProducto(index) {
       this.productos.splice(index, 1);
+    },
+    generateRows() {
+      // Genera las filas basadas en los productos paginados
+      this.rows = this.paginatedProductos.map((producto, index) => ({
+        index: index + 1,
+        codigo: producto.codigo,
+        descripcion: producto.descripcion,
+        categoria: producto.categoria,
+        stock: producto.stock,
+        preciounitario: producto.preciounitario,
+        preciomayorista: producto.preciomayorista,
+        preciodescuento: producto.preciodescuento,
+        fecha: producto.fecha
+      }));
+      console.log('Filas generadas:', this.rows);
     }
+  },
+  watch: {
+    // Cuando cambie la paginación o el filtro, actualiza las filas
+    paginatedProductos() {
+      this.generateRows();
+    }
+  },
+  mounted() {
+    // Genera las filas al cargar el componente
+    this.generateRows();
   }
 };
 </script>
@@ -291,6 +336,7 @@ export default {
   margin-top: -40px;
   margin-bottom: 20px;
 }
+
 
 .productos-wrapper {
   padding: 16px;
@@ -429,5 +475,24 @@ button {
 
 .custom-select option {
   font-size: 16px;
+}
+
+.action-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.btn-export {
+  background-color: #4CAF50;
+  color: white;
+  font-size: 16px;
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin-right: 10px;
+}
+
+.btn-export:hover {
+  background-color: #45a049;
 }
 </style>
