@@ -6,6 +6,7 @@ import CategoriasList from '@/Pages/CategoriasList.vue';
 import ProductosList from '@/Pages/ProductosList.vue';
 import LoginList from '@/Pages/LoginList.vue';
 import RegistroList from '@/Pages/RegistroList.vue';
+import VentasList from '@/Pages/VentasList.vue';
 import HomeList from '@/Pages/HomeList.vue';
 
 function getRole() {
@@ -63,6 +64,13 @@ const routes = [
     name: 'Registro',
     component: RegistroList
   },
+
+  {
+    path: '/ventas',
+    name: 'Ventas',
+    component: VentasList,
+  },
+
   {
     path: '/:pathMatch(.*)*', // Ruta para manejar rutas no encontradas
     redirect: '/'

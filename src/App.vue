@@ -89,7 +89,7 @@
         <!-- Venta -->
         <li v-if="hasPermission('Venta')" class="nav-item">
           <router-link
-            to="#"
+            to="/ventas"
             class="nav-link"
             :class="{ active: isActive('/venta') }"
           >
