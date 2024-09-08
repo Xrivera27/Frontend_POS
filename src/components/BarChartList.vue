@@ -43,7 +43,7 @@
           <td>{{ sale.numero }}</td>
           <td>{{ sale.fecha }}</td>
           <td>{{ sale.total }}</td>
-          <td><a href="#">Ver más</a> <button>Descargar</button></td>
+          <td><a href="#">Ver más</a><span>|</span><button style="font-size: 1rem;">Descargar</button></td>
         </tr>
       </tbody>
     </table>
@@ -138,6 +138,13 @@ export default {
 </script>
 
 <style scoped>
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+    font-family: 'Montserrat', sans-serif;
+}
+
 /* Estilo para las tarjetas informativas */
 .cards-container {
   display: grid;
@@ -162,6 +169,7 @@ export default {
 }
 
 .card-icon {
+  margin-top: 3rem;
   font-size: 1.75rem;
   color: #333;
 }

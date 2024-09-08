@@ -4,9 +4,11 @@
   </div>
   <hr>
 
-  <h1> Proveedores</h1>
+
 
   <div class="proveedores-wrapper">
+
+    <h1> Proveedores</h1>
 
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
       Proveedor</button>
