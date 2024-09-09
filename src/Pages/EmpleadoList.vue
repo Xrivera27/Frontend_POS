@@ -86,10 +86,15 @@
           <input v-model="empleadoForm.nombreusuario" type="text" required>
         </div>
 
-        <div class="form-group">
+        <div class="form-group password-group">
           <label>Contraseña:</label>
-          <input v-model="empleadoForm.contraseña" type="password" required>
+          <div class="password-wrapper">
+            <input :type="showPassword ? 'text' : 'password'" v-model="password" required />
+            <i :class="showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'" class="toggle-password"
+              @click="togglePasswordVisibility"></i>
+          </div>
         </div>
+
 
         <div class="form-group">
           <label>Email:</label>
@@ -139,6 +144,7 @@ export default {
       searchQuery: '', // Almacena el texto de búsqueda
       isModalOpen: false,
       isEditing: false,
+      showPassword: false,
       editIndex: null,
       itemsPerPage: "",
       empleadoForm: {
@@ -510,5 +516,31 @@ button {
 
 .custom-select option {
   font-size: 16px;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  width: 95%;
+  height: 25%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  justify-content: center;
+}
+
+.password-wrapper .toggle-password {
+  position: absolute;
+  right: 1.3rem;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #aaa;
+}
+
+.password-wrapper .toggle-password:hover {
+  color: #000;
 }
 </style>
