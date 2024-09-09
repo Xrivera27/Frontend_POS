@@ -79,7 +79,7 @@
           <router-link
             to="/compras"
             class="nav-link"
-            :class="{ active: isActive('/compra') }"
+            :class="{ active: isActive('/compras') }"
           >
             <i class="bi bi-cart-plus-fill"></i>
             <span class="tooltip-text">Compra</span>
@@ -91,7 +91,7 @@
           <router-link
             to="/ventas"
             class="nav-link"
-            :class="{ active: isActive('/venta') }"
+            :class="{ active: isActive('/ventas') }"
           >
             <i class="bi bi-cash-stack"></i>
             <span class="tooltip-text">Venta</span>
