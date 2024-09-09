@@ -193,7 +193,9 @@ export default {
 }
 
 .sidebar .nav-item {
-  margin-bottom: 5px; /* Espacio reducido entre los botones */
+  margin-bottom: 5px; 
+  transform: scale(1.05);
+  transition: all 0.3s ease;
 }
 
 .sidebar .nav-link {
@@ -201,7 +203,8 @@ export default {
   justify-content: center;
   align-items: center;
   padding: 0; /* Elimina el padding interno */
-  color: rgb(245, 196, 91);
+  color: rgb(255, 179, 0);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   text-align: center;
   position: relative;
   text-decoration: none;
