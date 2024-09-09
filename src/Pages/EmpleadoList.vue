@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <div class="encabezado">
+    <h1>Usuarios</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   </div>
   <hr>
 
   <div class="empleados-wrapper">
-    <h1> Usuarios</h1>
 
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
       Usuario</button>
@@ -262,6 +262,11 @@ export default {
   font-family: 'Montserrat', sans-serif;
 }
 
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+}
+
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
@@ -403,11 +408,6 @@ select {
   cursor: pointer;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
 .btn-warning {
   background-color: #ffc107;
   color: black;
@@ -431,15 +431,25 @@ select {
 }
 
 #AddEmpleadoModal {
-  background: #a38655;
-  border-radius: 15px;
-  font-size: 16px
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #007bff;
+  cursor: pointer;
+  margin-right: 1rem;
 }
 
 #BtnCerrar {
-  border-radius: 15px;
-  background-color: #ebebeb;
-  font-size: 16px;
+  background-color: rgb(93, 100, 104);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 1rem;
 }
 
 .modal-content {
@@ -452,18 +462,21 @@ select {
 
 .form-group {
   margin-bottom: 16px;
+
 }
 
 .form-group label {
-  display: block;
+  display: flexbox;
   margin-bottom: 8px;
 }
 
 .form-group input {
-  width: 50%;
-  height: 20px;
-  border-radius: 5px;
-  padding: 5px;
+  width: 95%;
+  height: 25%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  justify-content: center;
 }
 
 button {

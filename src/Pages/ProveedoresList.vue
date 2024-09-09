@@ -1,14 +1,11 @@
 <template>
-  <div>
+  <div class="encabezado">
+    <h1>Proveedores</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   </div>
   <hr>
 
-
-
   <div class="proveedores-wrapper">
-
-    <h1> Proveedores</h1>
 
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
       Proveedor</button>
@@ -199,6 +196,11 @@ export default {
 
 * {
   font-family: 'Montserrat', sans-serif;
+}
+
+.encabezado {
+  display: flex;
+  justify-content: space-between;
 }
 
 #btnAdd {

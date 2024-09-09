@@ -2,7 +2,6 @@
   <div class="encabezado" >
     <h1>Registro Compra</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-    
   </div>
   <hr>
 

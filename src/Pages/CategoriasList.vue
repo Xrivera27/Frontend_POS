@@ -1,11 +1,12 @@
 <template>
-  <div>
+  <div class="encabezado">
+    <h1>Categorias</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   </div>
   <hr>
 
   <div class="categorias-wrapper">
-    <h1> Categorías </h1>
+
 
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
       Categoría</button>
@@ -232,6 +233,11 @@ export default {
 
 * {
   font-family: 'Montserrat', sans-serif;
+}
+
+.encabezado {
+  display: flex;
+  justify-content: space-between;
 }
 
 #btnAdd {

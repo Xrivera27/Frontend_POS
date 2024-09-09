@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <div class="encabezado">
+    <h1>Productos</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   </div>
   <hr>
 
   <div class="productos-wrapper">
-    <h1>Productos</h1>
 
     <div class="action-bar">
       <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">
@@ -283,6 +283,11 @@ export default {
   font-family: 'Montserrat', sans-serif;
 }
 
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+}
+
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
@@ -444,8 +449,8 @@ export default {
 }
 
 .form-group input {
-  width: 100%;
-  height: 35px;
+  width: 90%;
+  height: 20%;
   border-radius: 5px;
   padding: 5px;
   border: 1px solid #ccc;
