@@ -1,6 +1,6 @@
 <template>
     <div class="encabezado" >
-      <h1> Ventas</h1>
+      <h1>Registro Ventas</h1>
       <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
       
     </div>
@@ -61,9 +61,11 @@
     </div>
 
     <div class="end-container" >
-      <button class="btn" id="cancelar-venta" @click="cancelarVenta" ><span>Esc</span><br>Cancelar Venta</button>
+      <p class="texto-tecla-boton texto-esc">Esc</p>
+      <button class="btn" id="cancelar-venta" @click="cancelarVenta" >Cancelar Venta</button>
       <div class="end-container-cobro">
-        <button class="btn" id="boton-cobrar" @click="payModalOpen" >F12-Cobrar</button>
+        <p class="texto-tecla-boton texto-f12">F12</p>
+        <button class="btn" id="boton-cobrar" @click="payModalOpen" >Cobrar</button>
         <div class="end-container-cobro-p" >
         <p id="total" >{{ calcularTotal }}</p>
         <p id="moneda">Lempiras</p>
@@ -453,16 +455,16 @@ pushF12(event) {
 }
 
   #delete-last-producto {
-    background-color: rgb(207, 57, 57);
+    background-color: rgb(241, 222, 50);
     border-radius: 10px;
-    color: white;
+    color: black;
     font-weight: bold;
   }
-  
-  #btnAdd:hover {
-    background-color: #a38655;
+
+  #delete-last-producto:hover {
+    background-color: rgb(224, 206, 45);
     transform: scale(1.05);
-    transition: all 0.3s ease;
+  transition: all 0.3s ease;
   }
   
   #btnEditar {
@@ -533,6 +535,12 @@ pushF12(event) {
     font-size: 24px;
     cursor: pointer;
   }
+
+  .agregar-producto:hover{
+  color: rgb(11, 173, 11);
+  transition: all 0.3s ease;
+}
+
   .codigo-input, .boton-input, .input-cantidad{
     display: flex;
     align-items: center;
@@ -589,8 +597,6 @@ pushF12(event) {
     padding: 8px 16px;
     margin: 4px;
     border: none;
-    border-bottom: solid gray 2px;
-    border-right: solid gray 2px;
     cursor: pointer;
     border-radius: 10px;
   }
@@ -608,15 +614,29 @@ pushF12(event) {
   }
   
   #cancelar-venta {
-    background-color: #dc3545;
+    background-color: #d30015;
     color: black;
   }
+
+  .texto-esc{
+    color: #d30015;
+  }
+
+  #cancelar-venta:hover{
+  background-color: #ad0314;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
   
   .close-btn {
     background-color: #dc3545;
     color: white;
   }
   
+  .texto-tecla-boton{
+    display: inline-block;
+    transform: rotate(-90deg);
+  }
   .modal {
     position: fixed;
     top: 0;
@@ -703,23 +723,27 @@ pushF12(event) {
   }
 
   #boton-cobrar{
-    height: 60%;
-    width: 10%;
-    margin-right: 15px;
-    background-color: #094688;
-    font-weight: bold;
-    color: white;
+    height: 70px;
+  margin-right: 15px;
+  background-color: #094688;
+  font-weight: bold;
+  color: white;
   }
+
+  #boton-cobrar:hover{
+  background-color: #093c72;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
 
   #cancelar-venta{
     height: 60%;
-    width: 14%;
-    margin-right: 15px;
-    background-color: rgb(185, 10, 10);
-    font-weight: bold;
-    font-size: 12px;
-    color: white;
-  }
+  margin-right: 15px;
+  background-color: rgb(185, 10, 10);
+  font-weight: bold;
+  font-size: 12px;
+  color: white;
+}
 
   #cancelar-venta span{
     font-size: 15px;

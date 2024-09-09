@@ -1,6 +1,6 @@
 <template>
   <div class="encabezado" >
-    <h1> Compras</h1>
+    <h1>Registro Compra</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
     
   </div>
@@ -17,15 +17,15 @@
       <button id="registrar-producto" class="btn btn-success" >Producto Nuevo</button>
     </div>
 
+    <div class="input-total-compra">
+      <label for="total-compra" class="label-input">Total Compra:</label>
+      <input name="total-compra" class="campo" type="text" v-model="addtotalPrice" />
+    </div>
+
     <!-- Barra de búsqueda -->
     <div class="input-cantidad">
       <label for="cantidad" class="label-input">Cantidad:</label>
       <input name="cantidad" class="campo" type="text" v-model="addQuantity" />
-    </div>
-
-    <div class="input-total-compra">
-      <label for="total-compra" class="label-input">Total Compra:</label>
-      <input name="total-compra" class="campo" type="text" v-model="addtotalPrice" />
     </div>
 
     
@@ -63,9 +63,11 @@
   </div>
 
   <div class="end-container" >
-    <button class="btn" id="cancelar-compra" @click="cancelarcompra" ><span>Esc</span><br>Cancelar compra</button>
+    <p class="texto-tecla-boton texto-esc">Esc</p>
+    <button class="btn" id="cancelar-compra" @click="cancelarcompra" >Cancelar compra</button>
     <div class="end-container-cobro">
-      <button class="btn" id="boton-cobrar" @click="payModalOpen" >F12-Pagar</button>
+      <p class="texto-tecla-boton texto-f12">F12</p>
+      <button class="btn" id="boton-cobrar" @click="payModalOpen" >Pagar</button>
       <div class="end-container-cobro-p" >
       <p id="total" >{{ calcularTotal }}</p>
       <p id="moneda">Lempiras</p>
@@ -282,27 +284,18 @@ pushF12(event) {
   },
 
     agregarProducto(){
-      if (!this.addQuery) {
-         this.addQuery = 'Ingresa codigo';
+      if (!this.addQuery || !this.addtotalPrice) {
+        alert("Campo vacio");
           return;   
         }
 
-      if(isNaN(this.addQuantity)){
-        this.addQuantity = 'Ingresa cantidad';
-        return;
-      }
-
-      if(!this.addQuantity){
+        if(!this.addQuantity){
         this.addQuantity = '1';
       }
 
-      if(isNaN(this.addtotalPrice)){
-        this.addQuantity = 'Ingresa cantidad';
+      if(isNaN(Number(this.addQuantity) || isNaN(Number(this.addtotalPrice)))){
+       alert("Ingresa un dato valido");
         return;
-      }
-
-      if(!this.addtotalPrice){
-        this.addQuantity = '1';
       }
 
       const newProduct = this.productos.find(p => p.codigo === this.addQuery);
@@ -457,9 +450,8 @@ justify-content: space-between;
   background-color: #46ce10;
   margin-left: 30px;
 }
-
-#btnAdd:hover {
-  background-color: #a38655;
+#registrar-producto:hover{
+  background-color: #38a50d;
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
@@ -514,6 +506,11 @@ justify-content: space-between;
   color: rgb(1, 181, 252);
   font-size: 24px;
   cursor: pointer;
+}
+
+.agregar-producto:hover{
+  color: rgb(4, 146, 202);
+  transition: all 0.3s ease;
 }
 .codigo-input, .boton-input, .input-cantidad, .input-total-compra {
   display: flex; 
@@ -576,8 +573,6 @@ justify-content: space-between;
   padding: 8px 16px;
   margin: 4px;
   border: none;
-  border-bottom: solid gray 2px;
-  border-right: solid gray 2px;
   cursor: pointer;
   border-radius: 10px;
 }
@@ -590,12 +585,17 @@ font-size: 22px;
 }
 
 #cancelar-compra {
-  background-color: #dc3545;
+  background-color: #d30015;
   color: black;
 }
 
+#cancelar-compra:hover{
+  background-color: #ad0314;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
 .close-btn {
-  background-color: #dc3545;
   color: white;
 }
 
@@ -669,17 +669,21 @@ font-size: 22px;
 }
 
 #boton-cobrar{
-  height: 60%;
-  width: 10%;
+  height: 70px;
   margin-right: 15px;
   background-color: #094688;
   font-weight: bold;
   color: white;
 }
 
+#boton-cobrar:hover{
+  background-color: #093c72;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
 #cancelar-compra{
   height: 60%;
-  width: 14%;
   margin-right: 15px;
   background-color: rgb(185, 10, 10);
   font-weight: bold;
@@ -690,6 +694,10 @@ font-size: 22px;
 #cancelar-compra span{
   font-size: 15px;
 }
+
+.texto-esc{
+    color: #d30015;
+  }
 
 .modal-overlay {
 position: fixed;
@@ -709,6 +717,12 @@ padding: 20px;
 border-radius: 8px;
 width: 400px;
 }
+
+.texto-tecla-boton{
+    display: inline-block;
+    transform: rotate(-90deg);
+  }
+
 
 .product-list {
 list-style-type: none;
@@ -751,10 +765,18 @@ flex: 1; /* El input ocupará el resto del espacio disponible */
 .div-modal-resumen-rtn{
 margin-left: 30px;
 }
-.modalShowConfirm-Si, .cancelar{
+.modalShowConfirm-Si, .cancelar, .close-btn{
 background-color: #dc3545;
 }
 .modalShowConfirm-no, .confirmar-pago{
-background-color: #46ce10;
+  background-color: #4CAF50;
+}
+
+.modalShowConfirm-no:hover, .confirmar-pago:hover{
+  background-color: #45a049;
+}
+
+.modalShowConfirm-Si:hover, .cancelar:hover, .close-btn:hover{
+background-color: #bd0d1f;
 }
 </style>
