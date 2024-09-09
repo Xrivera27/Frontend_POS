@@ -2,10 +2,11 @@
   <div class="login-container">
     <LoadingSpinner :isLoading="isLoading" />
     <div class="login-card">
-      <h2>Login</h2>
-      <p class="welcome-message">¡Bienvenido de nuevo!</p>
-      <p class="or-text">Ingrese con su usuario</p>
-      <form @submit.prevent="login">
+      <h2 v-if="!isRecoveringPassword">Login</h2>
+      <h2 v-else>Recuperar Contraseña</h2>
+
+      <!-- Formulario de Login -->
+      <form v-if="!isRecoveringPassword" @submit.prevent="login">
         <div class="form-group">
           <input type="text" v-model="username" placeholder="Usuario" required />
         </div>
@@ -18,13 +19,26 @@
           <label class="checkbox-container">
             <input type="checkbox" v-model="rememberMe" />Recordar contraseña
           </label>
-          <a href="#" class="forgot-password">¿Olvidaste la contraseña?</a>
+          <a href="#" class="forgot-password" @click.prevent="togglePasswordRecovery">¿Olvidaste la contraseña?</a>
         </div>
         <div class="form-group button-container">
           <button type="submit" class="submit-btn">
             <i id="btnLogin" class="bi bi-arrow-right-circle-fill"></i>
           </button>
         </div>
+      </form>
+
+      <!-- Formulario de Recuperación de Contraseña -->
+      <form v-else @submit.prevent="recoverPassword">
+        <div class="form-group">
+          <input type="email" v-model="recoveryEmail" placeholder="Ingresa tu correo electrónico" required />
+        </div>
+        <div class="form-group button-container">
+          <button type="submit" class="submit-btn">
+            <i class="bi bi-envelope-fill"></i>
+          </button>
+        </div>
+        <p><a href="#" @click.prevent="togglePasswordRecovery">Volver al login</a></p>
       </form>
     </div>
   </div>
@@ -44,6 +58,8 @@ export default {
       password: '',
       rememberMe: false,
       showPassword: false, // Controla la visibilidad de la contraseña
+      isRecoveringPassword: false, // Nuevo estado para controlar la vista de recuperación de contraseña
+      recoveryEmail: '',
       users: [
         {
           username: 'admin',
@@ -85,6 +101,15 @@ export default {
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
+    },
+    togglePasswordRecovery() {
+      // Verifica si el estado se cambia correctamente
+      console.log('Antes de cambiar:', this.isRecoveringPassword);
+      this.isRecoveringPassword = !this.isRecoveringPassword;
+      console.log('Después de cambiar:', this.isRecoveringPassword);
+    },
+    recoverPassword() {
+      // Lógica de recuperación de contraseña
     }
   }
 };

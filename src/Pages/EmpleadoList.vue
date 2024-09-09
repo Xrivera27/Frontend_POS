@@ -250,7 +250,10 @@ export default {
     },
     deleteEmpleado(index) {
       this.empleados.splice(index, 1);
-    }
+    },
+    togglePasswordVisibility() {
+      this.showPassword = !this.showPassword;
+    },
   }
 };
 </script>
