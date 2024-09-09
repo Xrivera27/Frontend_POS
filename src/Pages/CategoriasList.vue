@@ -7,7 +7,6 @@
 
   <div class="categorias-wrapper">
 
-
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
       Categoría</button>
 
@@ -58,7 +57,7 @@
     <!-- Modal para agregar o editar categorías -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
-        <h2>{{ isEditing ? 'Editar Categoría' : 'Agregar Categoría' }}</h2>
+        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Categoría' : 'Agregar Categoría' }}</h2>
 
         <div class="form-group">
           <label>Nombre:</label>
@@ -68,7 +67,7 @@
         <!-- Campo de descripción estilizado como textarea -->
         <div class="form-group">
           <label>Descripción:</label>
-          <textarea v-model="categoriaForm.descripcion" required rows="4"></textarea>
+          <textarea v-model="categoriaForm.descripcion" class="descriptionForm" required rows="4"></textarea>
         </div>
 
         <button id="AddCategoriaModal" class="btn btn-primary" @click="guardarCategoria">
@@ -82,8 +81,12 @@
 
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
+
 export default {
-  components: { ProfileButton },
+  components:
+  {
+    ProfileButton,
+  },
   data() {
     return {
       searchQuery: '', // Almacena el texto de búsqueda
@@ -93,87 +96,11 @@ export default {
           nombre: 'Videojuegos',
           descripcion: 'Todo tipo de videojuegos tanto de consola como de pc',
         },
-        {
-          nombre: 'Ropa Deportiva',
-          descripcion: 'Artículos deportivos de marcas reconocidas',
-        },
-        {
-          nombre: 'Electrodomésticos',
-          descripcion: 'Electrodomésticos para el hogar de última tecnología',
-        },
-        {
-          nombre: 'Joyería',
-          descripcion: 'Anillos, collares y pulseras de alta gama',
-        },
-        {
-          nombre: 'Muebles',
-          descripcion: 'Mobiliario moderno y elegante para el hogar',
-        },
-        {
-          nombre: 'Libros',
-          descripcion: 'Libros de diferentes géneros literarios y educativos',
-        },
-        {
-          nombre: 'Juguetes',
-          descripcion: 'Juguetes educativos y recreativos para todas las edades',
-        },
-        {
-          nombre: 'Calzado',
-          descripcion: 'Zapatillas y zapatos para hombres, mujeres y niños',
-        },
-        {
-          nombre: 'Relojes',
-          descripcion: 'Relojes de pulsera clásicos y digitales',
-        },
-        {
-          nombre: 'Equipos de Sonido',
-          descripcion: 'Altavoces y auriculares de alta fidelidad',
-        },
-        {
-          nombre: 'Ropa Casual',
-          descripcion: 'Prendas de vestir para el día a día',
-        },
-        {
-          nombre: 'Computadoras',
-          descripcion: 'Laptops, PCs de escritorio y accesorios',
-        },
-        {
-          nombre: 'Teléfonos Móviles',
-          descripcion: 'Smartphones y teléfonos básicos de diversas marcas',
-        },
-        {
-          nombre: 'Cámaras Fotográficas',
-          descripcion: 'Cámaras digitales y accesorios para fotografía',
-        },
-        {
-          nombre: 'Accesorios para Autos',
-          descripcion: 'Accesorios y repuestos para vehículos',
-        },
-        {
-          nombre: 'Herramientas',
-          descripcion: 'Herramientas manuales y eléctricas para proyectos',
-        },
-        {
-          nombre: 'Papelería',
-          descripcion: 'Artículos de oficina y útiles escolares',
-        },
-        {
-          nombre: 'Decoración',
-          descripcion: 'Artículos de decoración para el hogar y la oficina',
-        },
-        {
-          nombre: 'Jardinería',
-          descripcion: 'Productos para el cuidado del jardín y paisajismo',
-        },
-        {
-          nombre: 'Ropa de Invierno',
-          descripcion: 'Abrigos, guantes y bufandas para el frío',
-        },
-        {
-          nombre: 'Bebidas',
-          descripcion: 'Bebidas alcohólicas y no alcohólicas de todo tipo',
-        }
+        // ... otras categorías
       ],
+      isModalOpen: false, // Estado para controlar si el modal está abierto o cerrado
+      isEditing: false, // Estado para verificar si estamos editando una categoría
+      categoriaForm: { nombre: '', descripcion: '' }, // Objeto para el formulario de categorías
     };
   },
   computed: {
@@ -192,13 +119,13 @@ export default {
   },
   methods: {
     openModal() {
-      // Implementa la lógica para abrir el modal
+      // Resetea el formulario y abre el modal
       this.isModalOpen = true;
       this.isEditing = false;
-      this.categoriaForm = { nombre: '', descripcion: '' };
+      this.categoriaForm = { nombre: '', descripcion: '' }; // Resetea el formulario
     },
     closeModal() {
-      // Implementa la lógica para cerrar el modal
+      // Cierra el modal
       this.isModalOpen = false;
     },
     editCategoria(index) {
@@ -228,6 +155,7 @@ export default {
 };
 </script>
 
+
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
@@ -238,6 +166,10 @@ export default {
 .encabezado {
   display: flex;
   justify-content: space-between;
+}
+
+.h2-modal-content {
+  margin-top: 0px;
 }
 
 #btnAdd {
@@ -386,6 +318,15 @@ select {
   color: white;
 }
 
+.descriptionForm {
+  width: 95%;
+  height: 25%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  justify-content: center;
+}
+
 .btn-warning {
   background-color: #ffc107;
   color: black;
@@ -394,6 +335,28 @@ select {
 .btn-danger {
   background-color: #dc3545;
   color: white;
+}
+
+#AddCategoriaModal {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #007bff;
+  cursor: pointer;
+  margin-right: 1rem;
+}
+
+#BtnCerrar {
+  background-color: rgb(93, 100, 104);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 1rem;
 }
 
 .modal {
@@ -408,18 +371,6 @@ select {
   align-items: center;
 }
 
-#AddCategoriaModal {
-  background: #a38655;
-  border-radius: 15px;
-  font-size: 16px;
-}
-
-#BtnCerrar {
-  border-radius: 15px;
-  background-color: #ebebeb;
-  font-size: 16px;
-}
-
 .modal-content {
   background-color: white;
   padding: 20px;
@@ -430,19 +381,23 @@ select {
 
 .form-group {
   margin-bottom: 16px;
+
 }
 
 .form-group label {
-  display: block;
+  display: flexbox;
   margin-bottom: 8px;
 }
 
 .form-group input {
-  width: 50%;
-  height: 20px;
-  border-radius: 5px;
-  padding: 5px;
+  width: 95%;
+  height: 25%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  justify-content: center;
 }
+
 
 /* Estilos para el textarea */
 textarea {

@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div class="encabezado">
+    <h1>Bienvenido al Panel</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   </div>
   <hr>
@@ -7,9 +8,7 @@
   <!-- Resto del contenido -->
   <div class="dashboard-container">
     <!-- Texto o contenido adicional debajo de la barra superior -->
-    <div class="section-below-bar">
-      <h2>Bienvenido al panel</h2>
-    </div>
+
   </div>
 
   <div class="dashboard">
@@ -18,12 +17,12 @@
       <BarChart />
       <div class="box">
         <div class="box-header">
-         
+
         </div>
         <!-- Contenido de gestión de usuarios -->
-       
+
       </div>
-      
+
     </div>
 
     <div v-if="role === 'Gerente'">
@@ -85,6 +84,11 @@ export default {
   font-family: 'Montserrat', sans-serif;
 }
 
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
 .dashboard {
   padding: 20px;
@@ -100,7 +104,7 @@ export default {
   margin: 0;
 }
 
-h2 {
+h1 {
   color: #39b378;
 }
 

@@ -78,7 +78,7 @@
     <!-- Modal para agregar o editar productos -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
-        <h2>{{ isEditing ? 'Editar Producto' : 'Agregar Producto' }}</h2>
+        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Producto' : 'Agregar Producto' }}</h2>
 
         <div class="form-group">
           <label>Codigo:</label>
@@ -419,6 +419,10 @@ export default {
   color: white;
 }
 
+.h2-modal-content {
+  margin-top: 0px;
+}
+
 .modal {
   position: fixed;
   top: 0;
@@ -441,20 +445,23 @@ export default {
 
 .form-group {
   margin-bottom: 16px;
+
 }
 
 .form-group label {
-  display: block;
+  display: flexbox;
   margin-bottom: 8px;
 }
 
 .form-group input {
-  width: 90%;
-  height: 20%;
-  border-radius: 5px;
-  padding: 5px;
-  border: 1px solid #ccc;
+  width: 95%;
+  height: 25%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  justify-content: center;
 }
+
 
 button {
   cursor: pointer;

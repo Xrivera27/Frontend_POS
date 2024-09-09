@@ -1,5 +1,6 @@
 <template>
   <div class="login-container">
+    <LoadingSpinner :isLoading="isLoading" />
     <div class="login-card">
       <h2>Login</h2>
       <p class="welcome-message">¡Bienvenido de nuevo!</p>
@@ -30,9 +31,15 @@
 </template>
 
 <script>
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
+
 export default {
+  components: {
+    LoadingSpinner
+  },
   data() {
     return {
+      isLoading: false,
       username: '',
       password: '',
       rememberMe: false,
@@ -57,20 +64,24 @@ export default {
     };
   },
   methods: {
-
     login() {
       const user = this.users.find(
         u => u.username === this.username && u.password === this.password
       );
       if (user) {
+        this.isLoading = true;
+        console.log('Loading state before timeout:', this.isLoading); // Verificar si el valor cambia
+        setTimeout(() => {
+          this.isLoading = false;
+          console.log('Loading state after timeout:', this.isLoading); // Verificar si se desactiva
+          this.$router.push('/home');
+        }, 300); // Spinner aparece durante 1.5 segundos
         localStorage.setItem('auth', 'true');
         localStorage.setItem('role', user.role); // Almacena correctamente el rol
         console.log('Rol guardado:', user.role); // Verificar en la consola si se guarda correctamente
-        this.$router.push('/home');
       } else {
         alert('Credenciales incorrectas');
       }
-
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;

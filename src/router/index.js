@@ -9,6 +9,7 @@ import RegistroList from '@/Pages/RegistroList.vue';
 import VentasList from '@/Pages/VentasList.vue';
 import ComprasList from '@/Pages/ComprasList.vue';
 import HomeList from '@/Pages/HomeList.vue';
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
 function getRole() {
   return localStorage.getItem('role'); // Obtiene el rol del usuario desde localStorage
@@ -22,7 +23,7 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: LoginList
+    component: LoginList, LoadingSpinner
   },
   {
     path: '/home',

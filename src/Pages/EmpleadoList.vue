@@ -69,7 +69,7 @@
     <!-- Modal para agregar o editar empleados -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
-        <h2>{{ isEditing ? 'Editar Empleado' : 'Agregar Empleado' }}</h2>
+        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Empleado' : 'Agregar Empleado' }}</h2>
 
         <div class="form-group">
           <label>Nombre:</label>
@@ -265,6 +265,10 @@ export default {
 .encabezado {
   display: flex;
   justify-content: space-between;
+}
+
+.h2-modal-content {
+  margin-top: 0px
 }
 
 #btnAdd {

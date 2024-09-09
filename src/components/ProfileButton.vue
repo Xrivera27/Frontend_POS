@@ -100,8 +100,6 @@ export default {
 .btn-config-container {
     display: flex;
     justify-content: flex-end;
-    /* Alinea el botón a la derecha */
-    margin: 10px 0;
 }
 
 /* Estilos para el botón de configuración */
@@ -117,6 +115,7 @@ export default {
     color: #a38655;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: block;
+
 }
 
 /* Efecto al pasar el mouse por encima */

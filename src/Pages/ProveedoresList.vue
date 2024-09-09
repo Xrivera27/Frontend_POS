@@ -61,7 +61,7 @@
     <!-- Modal para agregar o editar proveedores -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
-        <h2>{{ isEditing ? 'Editar Proveedor' : 'Agregar Proveedor' }}</h2>
+        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Proveedor' : 'Agregar Proveedor' }}</h2>
 
         <div class="form-group">
           <label>Nombre:</label>
@@ -344,11 +344,6 @@ select {
   cursor: pointer;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
 .btn-warning {
   background-color: #ffc107;
   color: black;
@@ -357,6 +352,10 @@ select {
 .btn-danger {
   background-color: #dc3545;
   color: white;
+}
+
+.h2-modal-content {
+  margin-top: 0px;
 }
 
 .modal {
@@ -371,18 +370,6 @@ select {
   align-items: center;
 }
 
-#AddProveedorModal {
-  background: #a38655;
-  border-radius: 15px;
-  font-size: 16px
-}
-
-#BtnCerrar {
-  border-radius: 15px;
-  background-color: #ebebeb;
-  font-size: 16px;
-}
-
 .modal-content {
   background-color: white;
   padding: 20px;
@@ -393,29 +380,43 @@ select {
 
 .form-group {
   margin-bottom: 16px;
+
 }
 
 .form-group label {
-  display: block;
+  display: flexbox;
   margin-bottom: 8px;
 }
 
 .form-group input {
-  width: 50%;
-  height: 20px;
-  border-radius: 5px;
-  padding: 5px;
+  width: 95%;
+  height: 25%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  justify-content: center;
 }
 
-.custom-select {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  height: 35px;
-  font-size: 16px;
-  padding: 5px;
-  background-color: #fff;
+#AddProveedorModal {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #007bff;
   cursor: pointer;
-  width: 80px;
+  margin-right: 1rem;
+}
+
+#BtnCerrar {
+  background-color: rgb(93, 100, 104);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 1rem;
 }
 
 .custom-select:focus {
