@@ -10,20 +10,20 @@
   <div class="main-container">
 
 
-  <div class="inputs-container">
-    <div class=" input-container codigo-input">
+    <div class="inputs-container">
+    <div class="codigo-input">
       <label for="codigo-busqueda" class="label-input" >Codigo del producto:</label>
         <input name="codigo-busqueda" ref="codigo" type="text" class="campo codigo-busqueda" v-model="addQuery">
         <button class="agregar-producto bi bi-plus-circle-fill" @click="agregarProducto()" ></button>
       </div>
-  
+
       <!-- Barra de búsqueda -->
-      <div class="input-container input-cantidad">
+      <div class="input-cantidad">
         <label for="cantidad" class="label-input">Cantidad:</label>
         <input name="cantidad" class="campo" type="text" v-model="addQuantity" />
       </div>
 
-      <div>
+      <div class="boton-input" >
         <button id="delete-last-producto" class="btn" @click="deleteUltimo" >Cancelar ultimo</button>
       </div>
   </div>
@@ -148,8 +148,8 @@
     <h2>Confirmación</h2>
     <p>¿Estás seguro de que quieres cancelar la venta?</p>
     <div class="modal-actions">
-      <button class="btn" @click="confirmCancel">Sí, cancelar</button>
-      <button class="btn" @click="cancelCancel">No, volver</button>
+      <button class="btn modalShowConfirm-Si" @click="confirmCancel">Sí, cancelar</button>
+      <button class="btn modalShowConfirm-no" @click="cancelCancel">No, volver</button>
     </div>
   </div>
 </div>
@@ -180,14 +180,7 @@
         paymentMethod: '',
         confirmModal: '',
         showConfirmModal: false,
-        productoForm: {
-          codigo: '',
-          nombre: '',
-          cantidad: '',
-          precioUnitario: '',
-          descuento: '',
-        
-        },
+
         productos: [
         {
           
@@ -461,11 +454,7 @@ pushF12(event) {
 
   #delete-last-producto {
     background-color: rgb(207, 57, 57);
-    font-size: 16px;
-    width: 170px;
-    height: 40px;
     border-radius: 10px;
-    margin-bottom: 15px;
     color: white;
     font-weight: bold;
   }
@@ -495,8 +484,6 @@ pushF12(event) {
     transition: all 0.3s ease;
   }
 
-  
-  
   #btnAumentar:hover {
     color: #46ce10;
     transform: scale(1.05);
@@ -511,30 +498,9 @@ pushF12(event) {
     transition: all 0.3s ease;
   }
   
-  #campana {
-    margin-right: 10px;
-    font-size: 18px;
-    color: #a38655;
-  }
-  
-  .container-top {
-    width: 100%;
-    text-align: right;
-  }
-  
   .rol {
     color: #969696;
     font-size: 14px;
-  }
-  
-  select {
-    border: 1px solid #ccc;
-    margin-top: 10px;
-    margin-left: 5px;
-    margin-right: 5px;
-    width: 60px;
-    height: 35px;
-    border-radius: 5px;
   }
   
  .inputs-container{
@@ -554,31 +520,22 @@ pushF12(event) {
     margin-right: 10px;
   }
   .input-container{
-   
     margin-bottom: 20px;
     margin-right: 20px;
   }
 
-  .agregar-producto, .agregar-cliente{
+  .agregar-producto{
     padding: 0;
     margin-left: 10px;
     background: transparent;
     border: none;
     color: rgb(18, 228, 18);
     font-size: 24px;
-    font-size: 24px;
     cursor: pointer;
   }
-  .codigo-input{
+  .codigo-input, .boton-input, .input-cantidad{
     display: flex;
-    
     align-items: center;
-  }
-  
-  
-  
-  .input-cantidad {
-    margin-bottom: 16px;
   }
   
   .table-container {
@@ -827,5 +784,11 @@ pushF12(event) {
 }
 .div-modal-resumen-rtn{
   margin-left: 30px;
+}
+.modalShowConfirm-Si{
+  background-color: #dc3545;
+}
+.modalShowConfirm-no{
+  background-color: #46ce10;
 }
   </style>

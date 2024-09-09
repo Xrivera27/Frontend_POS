@@ -7,6 +7,7 @@ import ProductosList from '@/Pages/ProductosList.vue';
 import LoginList from '@/Pages/LoginList.vue';
 import RegistroList from '@/Pages/RegistroList.vue';
 import VentasList from '@/Pages/VentasList.vue';
+import ComprasList from '@/Pages/ComprasList.vue';
 import HomeList from '@/Pages/HomeList.vue';
 
 function getRole() {
@@ -64,7 +65,11 @@ const routes = [
     name: 'Registro',
     component: RegistroList
   },
-
+  {
+    path: '/compras',
+    name: 'Compras',
+    component: ComprasList,
+  },
   {
     path: '/ventas',
     name: 'Ventas',

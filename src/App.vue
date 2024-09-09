@@ -77,7 +77,7 @@
         <!-- Compra -->
         <li v-if="hasPermission('Compra')" class="nav-item">
           <router-link
-            to="#"
+            to="/compras"
             class="nav-link"
             :class="{ active: isActive('/compra') }"
           >
