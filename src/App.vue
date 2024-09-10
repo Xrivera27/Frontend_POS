@@ -4,24 +4,16 @@
       <ul class="nav flex-column">
         <!-- Home -->
         <li v-if="hasPermission('Home')" class="nav-item">
-          <router-link
-            to="/home"
-            class="nav-link"
-            :class="{ active: isActive('/home') }"
-          >
+          <router-link to="/home" class="nav-link" :class="{ active: isActive('/home') }">
             <i class="bi bi-house-door-fill"></i>
             <span class="tooltip-text">Home</span>
           </router-link>
         </li>
 
-       
+
         <!-- Sucursales -->
         <li v-if="hasPermission('Sucursal')" class="nav-item">
-          <router-link
-            to="/sucursales"
-            class="nav-link"
-            :class="{ active: isActive('/sucursales') }"
-          >
+          <router-link to="/sucursales" class="nav-link" :class="{ active: isActive('/sucursales') }">
             <i class="bi bi-shop-window"></i>
             <span class="tooltip-text">Sucursal</span>
           </router-link>
@@ -29,11 +21,7 @@
 
         <!-- Usuario -->
         <li v-if="hasPermission('Usuario')" class="nav-item">
-          <router-link
-            to="/empleados"
-            class="nav-link"
-            :class="{ active: isActive('/empleados') }"
-          >
+          <router-link to="/empleados" class="nav-link" :class="{ active: isActive('/empleados') }">
             <i class="bi bi-person-fill"></i>
             <span class="tooltip-text">Usuario</span>
           </router-link>
@@ -41,11 +29,7 @@
 
         <!-- Categorías -->
         <li v-if="hasPermission('Categorias')" class="nav-item">
-          <router-link
-            to="/categorias"
-            class="nav-link"
-            :class="{ active: isActive('/categorias') }"
-          >
+          <router-link to="/categorias" class="nav-link" :class="{ active: isActive('/categorias') }">
             <i class="bi bi-tags-fill"></i>
             <span class="tooltip-text">Categorías</span>
           </router-link>
@@ -53,11 +37,7 @@
 
         <!-- Productos -->
         <li v-if="hasPermission('Productos')" class="nav-item">
-          <router-link
-            to="/productos"
-            class="nav-link"
-            :class="{ active: isActive('/productos') }"
-          >
+          <router-link to="/productos" class="nav-link" :class="{ active: isActive('/productos') }">
             <i class="bi bi-box-seam"></i>
             <span class="tooltip-text">Productos</span>
           </router-link>
@@ -65,11 +45,7 @@
 
         <!-- Clientes -->
         <li v-if="hasPermission('Clientes')" class="nav-item">
-          <router-link
-            to="/clientes"
-            class="nav-link"
-            :class="{ active: isActive('/clientes') }"
-          >
+          <router-link to="/clientes" class="nav-link" :class="{ active: isActive('/clientes') }">
             <i class="bi bi-people-fill"></i>
             <span class="tooltip-text">Clientes</span>
           </router-link>
@@ -77,18 +53,14 @@
 
         <!-- Proveedores -->
         <li v-if="hasPermission('Proveedores')" class="nav-item">
-          <router-link
-            to="/proveedores"
-            class="nav-link"
-            :class="{ active: isActive('/proveedores') }"
-          >
+          <router-link to="/proveedores" class="nav-link" :class="{ active: isActive('/proveedores') }">
             <i class="bi bi-truck"></i>
             <span class="tooltip-text">Proveedores</span>
           </router-link>
         </li>
 
-         <!-- Ventas con menú desplegable -->
-         <li v-if="hasPermission('Venta')" class="nav-item dropdown" @click="toggleDropdown('ventas')">
+        <!-- Ventas con menú desplegable -->
+        <li v-if="hasPermission('Venta')" class="nav-item dropdown" @click="toggleDropdown('ventas')">
           <a href="#" class="nav-link">
             <i class="bi bi-cash-stack"></i>
             <span class="tooltip-text">Ventas</span>
@@ -102,7 +74,7 @@
               <router-link to="/ventas" class="nav-link">Crear venta</router-link>
             </li>
             <li>
-              <router-link to="/reporte-ventas" class="nav-link">Reporte de ventas</router-link>
+              <router-link to="/administrar-ventas" class="nav-link">Reporte de ventas</router-link>
             </li>
           </ul>
         </li>
@@ -122,17 +94,13 @@
               <router-link to="/compras" class="nav-link">Crear compra</router-link>
             </li>
             <li>
-              <router-link to="/reporte-compras" class="nav-link">Reporte de compras</router-link>
+              <router-link to="/administrar-compras" class="nav-link">Reporte de compras</router-link>
             </li>
           </ul>
         </li>
         <!-- TEST REGISTRO | BORRAR AL FINALIZAR EL TEST -->
         <li v-if="hasPermission('Registro')" class="nav-item">
-          <router-link
-            to="/registro"
-            class="nav-link"
-            :class="{ active: isActive('/registro') }"
-          >
+          <router-link to="/registro" class="nav-link" :class="{ active: isActive('/registro') }">
             <i class="bi bi-pencil-square"></i>
             <span class="tooltip-text">Registro</span>
           </router-link>
@@ -181,7 +149,7 @@ export default {
 
       return role && permissions[role]?.includes(section);
     },
-    
+
     toggleDropdown(dropdown) {
       this.dropdowns[dropdown] = !this.dropdowns[dropdown];
     },
@@ -199,6 +167,12 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  font-family: 'Montserrat', sans-serif;
+}
+
 /* Estilos del layout */
 .app-wrapper {
   display: flex;
@@ -206,7 +180,8 @@ export default {
 }
 
 .sidebar {
-  width: 80px; /* Ancho del sidebar */
+  width: 80px;
+  /* Ancho del sidebar */
   background-color: #ebebeb;
   color: white;
   padding-top: 20px;
@@ -231,7 +206,7 @@ export default {
 }
 
 .sidebar .nav-item {
-  margin-bottom: 5px; 
+  margin-bottom: 5px;
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
@@ -240,22 +215,28 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0; /* Elimina el padding interno */
+  padding: 0;
   color: rgb(255, 179, 0);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   text-align: center;
   position: relative;
   text-decoration: none;
   transition: all 0.3s ease;
-  width: 50px; /* Ancho fijo del botón */
-  height: 50px; /* Alto fijo del botón */
-  border-radius: 12px; /* Bordes redondeados */
-  margin: 5px 0; /* Espacio reducido entre los botones */
+  width: 70px;
+  /* Asegúrate de que el ancho sea consistente */
+  height: 50px;
+  border-radius: 12px;
+  margin: 5px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar .nav-link.active {
-  background-color: #d4d4d4; /* Color de fondo del botón activo */
-  color: #a38655; /* Color del icono en el botón activo */
+  background-color: #d4d4d4;
+  /* Color de fondo del botón activo */
+  color: #a38655;
+  /* Color del icono en el botón activo */
 }
 
 .sidebar .nav-link:hover {
@@ -266,13 +247,19 @@ export default {
 
 .sidebar .nav-link i {
   display: block;
-  font-size: 24px; /* Tamaño del icono */
+  font-size: 24px;
+  /* Tamaño del icono */
+}
+
+.sidebar .nav-item.dropdown {
+  position: relative;
 }
 
 .tooltip-text {
   display: none;
   position: absolute;
-  left: 60px; /* Ajusta la posición del texto emergente */
+  left: 80px;
+  /* Ajusta la posición si es necesario */
   top: 50%;
   font-size: 14px;
   transform: translateY(-50%);
@@ -297,7 +284,6 @@ export default {
   min-height: 100vh;
 }
 
-/* Estilos adicionales para los dropdowns */
 .nav-item.dropdown {
   position: relative;
 }
@@ -305,13 +291,13 @@ export default {
 .dropdown-menu {
   display: block;
   background-color: #ebebeb;
-  margin-top: 0; /* Ajusta para eliminar espacio superior */
+  margin-top: 0;
   padding: 0;
   position: absolute;
-  top: 0; /* Mantiene el menú alineado verticalmente con el botón */
-  left: 100%; /* Desplaza el menú hacia la derecha del botón */
-  min-width: 150px; /* Ancho mínimo del menú desplegable */
-  z-index: 1; /* Asegura que esté sobre otros elementos */
+  top: 0;
+  left: 100%;
+  width: 220px;
+  z-index: 1;
 }
 
 .dropdown-menu li {
@@ -322,7 +308,11 @@ export default {
 .dropdown-menu .nav-link {
   color: rgb(255, 179, 0);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-  padding-left: 10px; /* Ajusta para que no se solapen los textos */
+  width: 180px;
+  height: 35px;
+  margin-left: 20px;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 
 .dropdown-menu .nav-link:hover {

@@ -2,12 +2,12 @@
   <div class="dashboard-container">
     <!-- Tarjetas informativas con iconos de Bootstrap y enlaces "Ver más" -->
     <div class="cards-container">
-      
+
       <div class="card" v-for="(item, index) in cards" :key="index">
         <div class="card-content">
-          
+
           <div class="value-content">
-            
+
             <h3>{{ item.title }}</h3>
             <i :class="item.icon" class="card-icon"></i>
             <p class="item-value">{{ item.value }}</p>
@@ -178,7 +178,7 @@ export default {
   color: #333;
 }
 
-.item-value{
+.item-value {
   display: inline;
   padding: 10px;
 }
@@ -212,6 +212,8 @@ export default {
 .line-chart,
 .pie-chart {
   width: 30%;
+  margin-left: 150px;
+  margin-right: 150px;
 }
 
 /* Estilo para la tabla de ventas */
