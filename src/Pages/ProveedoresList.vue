@@ -6,28 +6,28 @@
   <hr>
 
   <div class="proveedores-wrapper">
-<div class="opciones">
-    <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-      Proveedor</button>
+    <div class="opciones">
+      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+        Proveedor</button>
 
-    <div class="registros">
-      <span>Mostrar
-        <select v-model="itemsPerPage" class="custom-select">
-          <option value="">Todos</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-          <option value="25">25</option>
-        </select> registros
-      </span>
-    </div>
+      <div class="registros">
+        <span>Mostrar
+          <select v-model="itemsPerPage" class="custom-select">
+            <option value="">Todos</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+          </select> registros
+        </span>
+      </div>
 
-    <!-- Barra de búsqueda -->
-    <div class="search-bar">
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar proveedor..." />
+      <!-- Barra de búsqueda -->
+      <div class="search-bar">
+        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar proveedor..." />
+      </div>
     </div>
-</div>
     <div class="table-container">
       <table class="table">
         <thead>
@@ -203,8 +203,8 @@ export default {
   justify-content: space-between;
 }
 
-.opciones{
-  display:flex;
+.opciones {
+  display: flex;
   align-items: center;
   justify-content: space-between;
 }
@@ -217,7 +217,7 @@ export default {
   border-width: 0.5px;
 }
 
-.registros{
+.registros {
   height: 100%;
   padding-bottom: 1%;
 }
@@ -232,7 +232,7 @@ export default {
   font-weight: bold;
 }
 
-.export-button{
+.export-button {
   margin: 0;
 }
 
@@ -438,5 +438,17 @@ select {
 
 .custom-select option {
   font-size: 16px;
+}
+
+.custom-select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 35px;
+  font-size: 16px;
+  padding: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 80px;
+  /* Ajusta el ancho a 120px o el valor que prefieras */
 }
 </style>
