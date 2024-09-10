@@ -10,12 +10,26 @@ import VentasList from '@/Pages/VentasList.vue';
 import ComprasList from '@/Pages/ComprasList.vue';
 import HomeList from '@/Pages/HomeList.vue';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import AdministrarVentas from '@/Pages/AdministrarVentas.vue';
+import AdministrarCompras from '@/Pages/AdministrarCompras.vue';
 
 function getRole() {
   return localStorage.getItem('role'); // Obtiene el rol del usuario desde localStorage
 }
 
 const routes = [
+  {
+    path: '/administrar-compras',
+    name: 'AdministrarCompras',
+    component: AdministrarCompras
+  },
+
+  {
+    path: '/administrar-ventas',
+    name: 'AdministrarVentas',
+    component: AdministrarVentas
+  },
+
   {
     path: '/',
     redirect: '/login' // Redirige a /login cuando se accede a la ruta raíz

@@ -127,7 +127,7 @@ export default {
       },
       // Datos para la tabla de últimas ventas
       sales: [
-        { nombre: 'Ceron Rivera', vendedor: 'Jenni Lemus', numero: '9299-2019', fecha: '2024-07-27 11:20:56', total: 'L. 1,230.00' },
+        { nombre: 'Gerson Rivera', vendedor: 'Jenni Lemus', numero: '9299-2019', fecha: '2024-07-27 11:20:56', total: 'L. 1,230.00' },
         { nombre: 'Axel Arteaga', vendedor: 'Jenni Lemus', numero: '8888-8888', fecha: '2024-07-28 15:40:56', total: 'L. 1,231.00' },
         { nombre: 'Denzer Hernández', vendedor: 'Jenni Lemus', numero: '3333-3333', fecha: '2024-07-28 17:30:56', total: 'L. 1,232.00' },
         { nombre: 'Carlos Sosa', vendedor: 'Jenni Lemus', numero: '0202-0202', fecha: '2024-07-28 05:20:56', total: 'L. 1,242.42' },
@@ -138,11 +138,10 @@ export default {
 </script>
 
 <style scoped>
-
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 * {
-    font-family: 'Montserrat', sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 
 /* Estilo para las tarjetas informativas */

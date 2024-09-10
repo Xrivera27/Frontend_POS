@@ -6,9 +6,17 @@
   <hr>
 
   <!-- Resto del contenido -->
-  <div class="dashboard-container">
+  <div class="button-grid">
     <!-- Texto o contenido adicional debajo de la barra superior -->
 
+    <!-- Botón para administrar ventas -->
+    <router-link to="/administrar-ventas">
+      <button class="navigate-button">Administrar Ventas</button>
+    </router-link>
+
+    <router-link to="/administrar-compras">
+      <button class="navigate-button">Administrar Compras</button>
+    </router-link>
   </div>
 
   <div class="dashboard">
@@ -16,13 +24,9 @@
       <!-- Secciones visibles solo para Administrador -->
       <BarChart />
       <div class="box">
-        <div class="box-header">
-
-        </div>
+        <div class="box-header"></div>
         <!-- Contenido de gestión de usuarios -->
-
       </div>
-
     </div>
 
     <div v-if="role === 'Gerente'">
@@ -126,5 +130,19 @@ h3 {
 .rol {
   color: #969696;
   font-size: 14px;
+}
+
+.navigate-button {
+  margin-left: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.navigate-button:hover {
+  background-color: #0056b3;
 }
 </style>
