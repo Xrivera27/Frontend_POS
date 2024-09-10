@@ -6,7 +6,7 @@
   <hr>
 
   <div class="ventas-wrapper">
-
+<div class="opciones">
     <div class="registros">
       <span>Mostrar
         <select v-model="itemsPerPage" class="custom-select">
@@ -21,12 +21,13 @@
     </div>
 
     <!-- Botón de exportación PDF -->
-    <ExportButton :columns="columns" :rows="rows" fileName="Ventas.pdf" />
+    <ExportButton :columns="columns" :rows="rows" fileName="Ventas.pdf" class="export-button"/>
 
     <!-- Barra de búsqueda -->
     <div class="search-bar">
       <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar venta..." />
     </div>
+  </div>
 
     <!-- Tabla exportable -->
     <div class="table-container" v-pdf-export ref="table">
@@ -209,6 +210,25 @@ export default {
   justify-content: space-between;
 }
 
+.opciones{
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 2% 0 2% 0 ;
+}
+
+.busqueda {
+  float: right;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 10px;
+  border-width: 0.5px;
+}
+
+.export-button{
+  margin: 0;
+}
+
 #btnDetalles {
   font-size: 18px;
   width: 50px;
@@ -230,16 +250,6 @@ export default {
 
 .bi-eye-fill {
   font-size: 20px;
-}
-
-.busqueda {
-  float: right;
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 10px;
-  border-width: 0.5px;
-  margin-top: -40px;
-  margin-bottom: 20px;
 }
 
 .table-container {

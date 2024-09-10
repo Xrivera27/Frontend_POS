@@ -7,29 +7,55 @@
 
   <div class="wrapper">
     <div class="main-container">
-      <form class="inputs-container" @submit.prevent="agregarProducto" autocomplete="off">
+      <form
+        class="inputs-container"
+        @submit.prevent="agregarProducto"
+        autocomplete="off"
+      >
         <div class="codigo-input">
-          <label for="codigo-busqueda" class="label-input">Codigo del producto:</label>
-          <input name="codigo-busqueda" ref="codigo" type="text" class="campo codigo-busqueda" tabindex="1" required
-            v-model="addQuery" />
+          <label for="codigo-busqueda" class="label-input"
+            >Codigo del producto:</label
+          >
+          <input
+            name="codigo-busqueda"
+            ref="codigo"
+            type="text"
+            class="campo codigo-busqueda"
+            tabindex="1"
+            required
+            v-model="addQuery"
+          />
 
-          <router-link to="/productos">
-            <button id="registrar-producto" class="btn btn-success" type="button">
-              Producto Nuevo
-            </button>
-          </router-link>
+          <button
+            class="btn btn-success agregar-producto"  type="submit">
+          <i class="bi bi-plus-circle-fill"> Añadir</i>
+          </button>
+          
         </div>
 
         <div class="input-total-compra">
           <label for="total-compra" class="label-input">Total Compra:</label>
-          <input name="total-compra" class="campo" type="number" step="0.01" tabindex="2" required
-            v-model="addtotalPrice" />
+          <input
+            name="total-compra"
+            class="campo"
+            type="number"
+            step="0.01"
+            tabindex="2"
+            required
+            v-model="addtotalPrice"
+          />
         </div>
 
         <!-- Barra de búsqueda -->
         <div class="input-cantidad">
           <label for="cantidad" class="label-input">Cantidad:</label>
-          <input name="cantidad" class="campo" type="number" tabindex="3" v-model="addQuantity" />
+          <input
+            name="cantidad"
+            class="campo"
+            type="number"
+            tabindex="3"
+            v-model="addQuantity"
+          />
         </div>
       </form>
 
@@ -53,13 +79,25 @@
               <td>{{ producto.total_compra }}</td>
               <td>{{ producto.proveedor }}</td>
               <td class="botones-accion">
-                <button id="btnDisminuir" class="btn btn-botones-accion" @click="disminuirCantidad(index)">
+                <button
+                  id="btnDisminuir"
+                  class="btn btn-botones-accion"
+                  @click="disminuirCantidad(index)"
+                >
                   <b><i class="bi bi-dash-circle-fill"></i></b>
                 </button>
-                <button id="btnAumentar" class="btn btn-botones-accion" @click="aumentarCantidad(index)">
+                <button
+                  id="btnAumentar"
+                  class="btn btn-botones-accion"
+                  @click="aumentarCantidad(index)"
+                >
                   <b><i class="bi bi-plus-circle-fill"></i></b>
                 </button>
-                <button id="btnEliminar" class="btn btn-botones-accion" @click="deleteProducto(index)">
+                <button
+                  id="btnEliminar"
+                  class="btn btn-botones-accion"
+                  @click="deleteProducto(index)"
+                >
                   <b><i class="bi bi-x-circle-fill"></i></b>
                 </button>
               </td>
@@ -74,6 +112,14 @@
       <button class="btn" id="cancelar-compra" @click="cancelarcompra">
         Cancelar compra
       </button>
+      <button
+              id="registrar-producto"
+              class="btn btn-success"
+              type="button"
+              
+            >
+              <b>Registrar nuevo Inv.</b>
+            </button>
       <div class="end-container-cobro">
         <p class="texto-tecla-boton texto-f12">F12</p>
         <button class="btn" id="boton-cobrar" @click="payModalOpen">
@@ -152,7 +198,10 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(proveedor_actual, index) in proveedores_nombre" :key="index">
+            <tr
+              v-for="(proveedor_actual, index) in proveedores_nombre"
+              :key="index"
+            >
               <td>{{ index + 1 }}</td>
               <td>{{ proveedor_actual }}</td>
             </tr>
@@ -303,9 +352,8 @@ export default {
     pushN(event) {
       if (event.key === "n" || event.key === "N") {
         alert("Modal para añadir nuevo producto");
-
+        this.reiniciarInputs();
       }
-      this.reiniciarInputs();
     },
 
     agregarProducto() {
@@ -314,7 +362,10 @@ export default {
         return;
       }
 
-      if (this.addQuantity && isNaN(this.addQuantity) || this.addtotalPrice && isNaN(this.addtotalPrice)) {
+      if (
+        (this.addQuantity && isNaN(this.addQuantity)) ||
+        (this.addtotalPrice && isNaN(this.addtotalPrice))
+      ) {
         alert("Ingresa un dato valido");
         return;
       }
@@ -475,12 +526,12 @@ export default {
 }
 
 #registrar-producto {
-  background-color: #46ce10;
+  background-color: rgb(253, 253, 56);
   margin-left: 30px;
 }
 
 #registrar-producto:hover {
-  background-color: #38a50d;
+  background-color: rgb(228, 228, 48);;
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
@@ -526,17 +577,18 @@ export default {
 }
 
 .agregar-producto {
-  padding: 0;
-  margin-left: 10px;
-  background: transparent;
+  margin-left: 50px;
+  background-color: #46ce10;
+  width: 100px;
   border: none;
-  color: rgb(1, 181, 252);
-  font-size: 24px;
+  color: white;
   cursor: pointer;
 }
 
+
 .agregar-producto:hover {
-  color: rgb(4, 146, 202);
+  background-color: #38a50d;
+  transform: scale(1.05);
   transition: all 0.3s ease;
 }
 
@@ -601,7 +653,6 @@ export default {
 
 .btn {
   padding: 8px 16px;
-  margin: 4px;
   border: none;
   cursor: pointer;
   border-radius: 10px;
