@@ -6,13 +6,15 @@
   <hr>
 
   <div class="productos-wrapper">
-
+<div class="opciones" >
     <div class="action-bar">
       <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">
         Agregar Producto
       </button>
     </div>
 
+    <!-- Botón de exportación PDF -->
+    <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" class="export-button" />
     <div class="registros">
       <span>Mostrar
         <select v-model="itemsPerPage" class="custom-select">
@@ -26,14 +28,11 @@
       </span>
     </div>
 
-    <!-- Botón de exportación PDF -->
-    <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" />
-
     <!-- Barra de búsqueda -->
     <div class="search-bar">
       <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar producto..." />
     </div>
-
+</div>
     <!-- Tabla exportable -->
     <div class="table-container" v-pdf-export ref="table">
       <table class="table">
@@ -288,15 +287,37 @@ export default {
   justify-content: space-between;
 }
 
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+}
+
+.opciones{
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.busqueda {
+  float: right;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 10px;
+  border-width: 0.5px;
+}
+
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
-  width: 200px;
+  width: 170px;
   height: 40px;
   border-radius: 10px;
   color: black;
   font-weight: bold;
-  margin-bottom: 15px;
+}
+
+.export-button{
+  margin: 0;
 }
 
 #btnAdd:hover {
@@ -332,23 +353,8 @@ export default {
   transition: all 0.3s ease;
 }
 
-.busqueda {
-  float: right;
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 10px;
-  border-width: 0.5px;
-  margin-top: -40px;
-  margin-bottom: 20px;
-}
-
-
 .productos-wrapper {
   padding: 16px;
-}
-
-.search-bar {
-  margin-bottom: 16px;
 }
 
 .table-container {
@@ -487,12 +493,6 @@ button {
 
 .custom-select option {
   font-size: 16px;
-}
-
-.action-bar {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
 }
 
 .btn-export {

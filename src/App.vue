@@ -22,7 +22,7 @@
             :class="{ active: isActive('/sucursales') }"
           >
           <i class="bi bi-shop-window"></i>
-            <span class="tooltip-text">Usuario</span>
+            <span class="tooltip-text">Sucursales</span>
           </router-link>
         </li>
 

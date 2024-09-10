@@ -6,7 +6,7 @@
   <hr>
 
   <div class="empleados-wrapper">
-
+    <div class="opciones">
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
       Usuario</button>
 
@@ -27,7 +27,7 @@
     <div class="search-bar">
       <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar empleado..." />
     </div>
-
+  </div>
     <div class="table-container">
       <table class="table">
         <thead>
@@ -276,8 +276,23 @@ export default {
   justify-content: space-between;
 }
 
-.h2-modal-content {
-  margin-top: 0px
+.opciones{
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.busqueda {
+  float: right;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 10px;
+  border-width: 0.5px;
+}
+
+.registros{
+  height: 100%;
+  padding-bottom: 1%;
 }
 
 #btnAdd {
@@ -286,9 +301,23 @@ export default {
   width: 170px;
   height: 40px;
   border-radius: 10px;
-  margin-bottom: 15px;
   color: black;
   font-weight: bold;
+}
+
+.export-button{
+  margin: 0;
+}
+
+
+.opciones{
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.h2-modal-content {
+  margin-top: 0px
 }
 
 #btnAdd:hover {
@@ -350,23 +379,10 @@ select {
   border-radius: 5px;
 }
 
-.busqueda {
-  float: right;
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 10px;
-  border-width: 0.5px;
-  margin-top: -40px;
-  margin-bottom: 20px;
-}
-
 .empleados-wrapper {
   padding: 16px;
 }
 
-.search-bar {
-  margin-bottom: 16px;
-}
 
 .table-container {
   width: 100%;
