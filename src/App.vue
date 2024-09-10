@@ -14,6 +14,18 @@
           </router-link>
         </li>
 
+        <!-- Sucursales -->
+        <li v-if="hasPermission('Sucursal')" class="nav-item">
+          <router-link
+            to="/sucursales"
+            class="nav-link"
+            :class="{ active: isActive('/sucursales') }"
+          >
+          <i class="bi bi-shop-window"></i>
+            <span class="tooltip-text">Usuario</span>
+          </router-link>
+        </li>
+
         <!-- Usuario -->
         <li v-if="hasPermission('Usuario')" class="nav-item">
           <router-link
@@ -140,7 +152,7 @@ export default {
     hasPermission(section) {
       const role = localStorage.getItem('role');
       const permissions = {
-        Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro'],
+        Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal'],
         Gerente: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
         Cajero: ['Home', 'Productos', 'Venta']
       };

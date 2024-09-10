@@ -178,8 +178,8 @@
         </div>
 
         <div class="modal-actions">
-          <button class="btn" @click="confirmPayment">Confirmar Pago</button>
-          <button class="btn" @click="cancelPayment">Cancelar</button>
+          <button class="btn boton-modal-confirmar-venta" @click="confirmPayment">Confirmar Pago</button>
+          <button class="btn boton-modal-cancelar-venta" @click="cancelPayment">Cancelar</button>
         </div>
       </div>
     </div>
@@ -249,21 +249,21 @@ export default {
           nombre: "Pan",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 15,
-          descuento: 2,
+          descuento: 0,
         },
         {
           codigo: "3",
           nombre: "Arroz",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 12,
-          descuento: 1,
+          descuento: 0,
         },
         {
           codigo: "4",
           nombre: "Aceite",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 30,
-          descuento: 3,
+          descuento: 0,
         },
         {
           codigo: "5",
@@ -284,21 +284,21 @@ export default {
           nombre: "Sal",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 5,
-          descuento: 1,
+          descuento: 0,
         },
         {
           codigo: "8",
           nombre: "Café",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 50,
-          descuento: 5,
+          descuento: 0,
         },
         {
           codigo: "9",
           nombre: "Harina",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 20,
-          descuento: 2,
+          descuento: 0,
         },
         {
           codigo: "10",
@@ -312,7 +312,7 @@ export default {
           nombre: "Mantequilla",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 22,
-          descuento: 1,
+          descuento: 0,
         },
         // Más clientes...
       ],
@@ -674,7 +674,7 @@ export default {
   transition: all 0.3s ease;
 }
 
-.close-btn {
+.close-btn, .boton-modal-cancelar-venta {
   background-color: #dc3545;
   color: white;
 }
@@ -857,7 +857,7 @@ export default {
 .modalShowConfirm-Si {
   background-color: #dc3545;
 }
-.modalShowConfirm-no {
-  background-color: #46ce10;
+.modalShowConfirm-no, .boton-modal-confirmar-venta{
+  background-color: #4caf50;
 }
 </style>

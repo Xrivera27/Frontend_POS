@@ -5,20 +5,6 @@
   </div>
   <hr>
 
-  <!-- Resto del contenido -->
-  <div class="button-grid">
-    <!-- Texto o contenido adicional debajo de la barra superior -->
-
-    <!-- Botón para administrar ventas -->
-    <router-link to="/administrar-ventas">
-      <button class="navigate-button">Administrar Ventas</button>
-    </router-link>
-
-    <router-link to="/administrar-compras">
-      <button class="navigate-button">Administrar Compras</button>
-    </router-link>
-  </div>
-
   <div class="dashboard">
     <div v-if="role === 'Administrador'">
       <!-- Secciones visibles solo para Administrador -->

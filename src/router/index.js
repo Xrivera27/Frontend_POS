@@ -12,6 +12,7 @@ import HomeList from '@/Pages/HomeList.vue';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import AdministrarVentas from '@/Pages/AdministrarVentas.vue';
 import AdministrarCompras from '@/Pages/AdministrarCompras.vue';
+import SucursalesList from '@/Pages/SucursalesList.vue';
 
 function getRole() {
   return localStorage.getItem('role'); // Obtiene el rol del usuario desde localStorage
@@ -51,6 +52,14 @@ const routes = [
     component: ClientesList,
     meta: { requiresAuth: true, roles: ['Administrador', 'Gerente'] }
   },
+
+  {
+    path: '/sucursales',
+    name: 'Sucursales',
+    component: SucursalesList,
+    meta: { requiresAuth: true, roles: ['Administrador', 'Gerente'] }
+  },
+
   {
     path: '/proveedores',
     name: 'Proveedores',

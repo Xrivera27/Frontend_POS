@@ -2,16 +2,20 @@
   <div class="dashboard-container">
     <!-- Tarjetas informativas con iconos de Bootstrap y enlaces "Ver más" -->
     <div class="cards-container">
+      
       <div class="card" v-for="(item, index) in cards" :key="index">
         <div class="card-content">
-          <i :class="item.icon" class="card-icon"></i>
-          <div>
+          
+          <div class="value-content">
+            
             <h3>{{ item.title }}</h3>
-            <p>{{ item.value }}</p>
+            <i :class="item.icon" class="card-icon"></i>
+            <p class="item-value">{{ item.value }}</p>
           </div>
         </div>
         <a :href="item.link" class="card-link">Ver más</a>
       </div>
+
     </div>
 
     <!-- Gráfico de ventas y Productos más vendidos (más pequeños) -->
@@ -75,8 +79,8 @@ export default {
     return {
       // Datos para las tarjetas con iconos y enlaces
       cards: [
-        { title: "Total de ventas", value: "L. 21,324", icon: "bi bi-cash", link: "#" },
-        { title: "Ingresos Totales", value: "L. 121,324.50", icon: "bi bi-wallet", link: "#" },
+        { title: "Ventas", value: "L. 21,324", icon: "bi bi-cash", link: "/administrar-ventas" },
+        { title: "Compras Pendientes", value: "35", icon: "bi bi-wallet", link: "/administrar-compras" },
         { title: "Clientes", value: "2,703", icon: "bi bi-people", link: "/clientes" },
         { title: "Categorías", value: "7", icon: "bi bi-tags", link: "/categorias" },
       ],
@@ -167,10 +171,16 @@ export default {
   gap: 0.5rem;
 }
 
+
 .card-icon {
   margin-top: 3rem;
   font-size: 1.75rem;
   color: #333;
+}
+
+.item-value{
+  display: inline;
+  padding: 10px;
 }
 
 .card h3 {

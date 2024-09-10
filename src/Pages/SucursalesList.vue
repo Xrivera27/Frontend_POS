@@ -1,18 +1,14 @@
 <template>
   <div class="encabezado">
-    <h1>Clientes</h1>
+    <h1>Administración Sucursales</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   </div>
   <hr>
 
-  <div class="clientes-wrapper">
+  <div class="sucursales-wrapper">
 
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-      Clientes</button>
-
-      <router-link to="/sucursales">
-      <button class="navigate-button">Boton prueba sucursales</button>
-    </router-link>
+      sucursales</button>
 
     <div class="registros">
       <span>Mostrar
@@ -27,11 +23,11 @@
       </span>
     </div>
 
-    <ExportButton :columns="columns" :rows="rows" fileName="Clientes.pdf" />
+    <ExportButton :columns="columns" :rows="rows" fileName="Sucursales.pdf" />
 
     <!-- Barra de búsqueda -->
     <div class="search-bar">
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
+      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar sucursal..." />
     </div>
 
     <div class="table-container">
@@ -39,26 +35,26 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Nombre</th>
-            <th>DNI / RTN</th>
-            <th>Teléfono</th>
-            <th>Total Compras</th>
-            <th>Última Compra</th>
+            <th>Nombre Administrativo</th>
+            <th>Ciudad</th>
+            <th>Telefono</th>
+            <th>Correo</th>
+            <th>Dirección</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(cliente, index) in paginatedClientes" :key="index">
+          <tr v-for="(sucursal, index) in paginatedSucursales" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ cliente.nombre }}</td>
-            <td>{{ cliente.documentoId }}</td>
-            <td>{{ cliente.telefono }}</td>
-            <td>{{ cliente.totalCompras }}</td>
-            <td>{{ cliente.ultimaCompra }}</td>
+            <td>{{ sucursal.nombre }}</td>
+            <td>{{ sucursal.ciudad }}</td>
+            <td>{{ sucursal.telefono }}</td>
+            <td>{{ sucursal.direccion }}</td>
+            <td>{{ sucursal.correo }}</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editCliente(index)"><i
+              <button id="btnEditar" class="btn btn-warning" @click="editSucursal(index)"><i
                   class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(index)"><b><i
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteSucursal(index)"><b><i
                     class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
@@ -67,34 +63,34 @@
       </table>
     </div>
 
-    <!-- Modal para agregar o editar clientes -->
+    <!-- Modal para agregar o editar Sucursales -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
-        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Cliente' : 'Agregar Cliente' }}</h2>
+        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Sucursal' : 'Agregar Sucursal' }}</h2>
 
         <div class="form-group">
           <label>Nombre:</label>
-          <input v-model="clienteForm.nombre" type="text" required>
+          <input v-model="sucursalForm.nombre" type="text" required>
         </div>
 
         <div class="form-group">
-          <label>DNI / RTN:</label>
-          <input v-model="clienteForm.documentoId" type="text" required>
+          <label>Correo:</label>
+          <input v-model="sucursalForm.correo" type="text" required>
         </div>
 
 
         <div class="form-group">
           <label>Teléfono:</label>
-          <input v-model="clienteForm.telefono" type="text" required>
+          <input v-model="sucursalForm.telefono" type="text" required>
         </div>
 
         <div class="form-group">
           <label>Dirección:</label>
-          <input v-model="clienteForm.direccion" type="text" required>
+          <input v-model="sucursalForm.direccion" type="text" required>
         </div>
 
-        <button id="AddClienteModal" class="btn btn-primary" @click="guardarCliente">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Cliente' }}
+        <button id="AddSucursalModal" class="btn btn-primary" @click="guardarSucursal">
+          {{ isEditing ? 'Guardar Cambios' : 'Agregar Sucursal' }}
         </button>
         <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
       </div>
@@ -118,57 +114,82 @@ export default {
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
-      clienteForm: {
+      sucursalForm: {
         nombre: '',
-        documentoId: '',
+        ciudad: '',
         telefono: '',
         direccion: '',
-        totalCompras: 0,
-        ultimaCompra: new Date().toISOString().split('T')[0] // Fecha actual
+        correo: '',
+        
       },
-      clientes: [
-        {
-          nombre: 'Juan Villegas',
-          documentoId: '8161123',
-          telefono: '555 57 67',
-          direccion: 'calle 27 # 40 - 36',
-          totalCompras: 35,
-          ultimaCompra: '2017-12-11'
-        },
-        {
-          nombre: 'María Gómez',
-          documentoId: '1234567',
-          telefono: '555 12 34',
-          direccion: 'avenida 5 # 20 - 15',
-          totalCompras: 20,
-          ultimaCompra: '2020-05-15'
-        },
-        // Resto de clientes...
-      ],
+      sucursales: [
+  {
+    nombre: 'Sucursal principal',
+    ciudad: 'La Ceiba',
+    telefono: '555 57 67',
+    direccion: 'calle 27 # 40 - 36',
+    correo: 'ejemplocorreo',
+  },
+  {
+    nombre: 'Sucursal norte',
+    ciudad: 'San Pedro Sula',
+    telefono: '504 22 33 44',
+    direccion: 'avenida 10, zona norte',
+    correo: 'norte@empresa.com',
+  },
+  {
+    nombre: 'Sucursal sur',
+    ciudad: 'Tegucigalpa',
+    telefono: '504 33 44 55',
+    direccion: 'avenida 5, barrio centro',
+    correo: 'sur@empresa.com',
+  },
+  {
+    nombre: 'Sucursal este',
+    ciudad: 'Choluteca',
+    telefono: '504 11 22 33',
+    direccion: 'calle 12, zona este',
+    correo: 'este@empresa.com',
+  },
+  {
+    nombre: 'Sucursal oeste',
+    ciudad: 'Comayagua',
+    telefono: '504 77 88 99',
+    direccion: 'carrera 4, barrio oeste',
+    correo: 'oeste@empresa.com',
+  },
+  {
+    nombre: 'Sucursal central',
+    ciudad: 'La Esperanza',
+    telefono: '504 44 55 66',
+    direccion: 'plaza principal, zona centro',
+    correo: 'central@empresa.com',
+  }
+],
       // Define tus columnas para la exportación a PDF
       columns: [
         { header: '#', dataKey: 'index' },
         { header: 'Nombre', dataKey: 'nombre' },
-        { header: 'DNI / RTN', dataKey: 'documentoId' },
+        { header: 'Ciudad', dataKey: 'ciudad' },
         { header: 'Teléfono', dataKey: 'telefono' },
-        { header: 'Total Compras', dataKey: 'totalCompras' },
-        { header: 'Última Compra', dataKey: 'ultimaCompra' }
+        { header: 'Correo', dataKey: 'correo' },
+       
       ],
       rows: [] // Inicialmente vacío, se llena después
     };
   },
   computed: {
-    filteredClientes() {
-      // Filtra los clientes basados en el texto de búsqueda
-      return this.clientes.filter(cliente =>
-        cliente.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        cliente.documentoId.includes(this.searchQuery)
+    filteredSucursales() {
+      // Filtra los sucursales basados en el texto de búsqueda
+      return this.sucursales.filter(sucursal =>
+        sucursal.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        sucursal.ciudad.includes(this.searchQuery)
       );
     },
-    paginatedClientes() {
+    paginatedSucursales() {
       return this.itemsPerPage === "" || this.itemsPerPage === null
-        ? this.filteredClientes
-        : this.filteredClientes.slice(0, this.itemsPerPage);
+        ? this.filteredSucursales
+        : this.filteredSucursales.slice(0, this.itemsPerPage);
     }
   },
   methods: {
@@ -178,48 +199,48 @@ export default {
     closeModal() {
       this.isModalOpen = false;
       this.isEditing = false;
-      this.clienteForm = {
+      this.sucursalForm = {
         nombre: '',
-        documentoId: '',
+        ciudad: '',
         telefono: '',
         direccion: '',
-        totalCompras: 0,
-        ultimaCompra: new Date().toISOString().split('T')[0]
+        correo: '',
+       
       };
     },
-    guardarCliente() {
+    guardarSucursal() {
       if (this.isEditing) {
-        Object.assign(this.clientes[this.editIndex], this.clienteForm);
+        Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
       } else {
-        this.clientes.push({ ...this.clienteForm });
+        this.sucursales.push({ ...this.sucursalForm });
       }
       this.closeModal();
     },
-    editCliente(index) {
+    editSucursal(index) {
       this.isModalOpen = true;
       this.isEditing = true;
       this.editIndex = index;
-      this.clienteForm = { ...this.clientes[index] };
+      this.sucursalForm = { ...this.sucursales[index] };
     },
-    deleteCliente(index) {
-      this.clientes.splice(index, 1);
+    deleteSucursal(index) {
+      this.sucursales.splice(index, 1);
     },
     generateRows() {
-      // Genera las filas basadas en los clientes paginados
-      this.rows = this.paginatedClientes.map((cliente, index) => ({
+      // Genera las filas basadas en los sucursales paginados
+      this.rows = this.paginatedSucursales.map((sucursal, index) => ({
         index: index + 1,
-        nombre: cliente.nombre,
-        documentoId: cliente.documentoId,
-        telefono: cliente.telefono,
-        totalCompras: cliente.totalCompras,
-        ultimaCompra: cliente.ultimaCompra
+        nombre: sucursal.nombre,
+        ciudad: sucursal.ciudad,
+        telefono: sucursal.telefono,
+        correo: sucursal.correo,
+       
       }));
       console.log('Filas generadas:', this.rows);
     }
   },
   watch: {
     // Cuando cambie la paginación o el filtro, actualiza las filas
-    paginatedClientes() {
+    paginatedSucursales() {
       this.generateRows();
     }
   },
@@ -327,7 +348,7 @@ select {
   margin-bottom: 20px;
 }
 
-.clientes-wrapper {
+.sucursales-wrapper {
   padding: 16px;
 }
 
@@ -388,7 +409,7 @@ select {
   cursor: pointer;
 }
 
-#AddClienteModal {
+#AddSucursalModal {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
