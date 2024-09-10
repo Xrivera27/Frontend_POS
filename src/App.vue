@@ -14,6 +14,7 @@
           </router-link>
         </li>
 
+       
         <!-- Sucursales -->
         <li v-if="hasPermission('Sucursal')" class="nav-item">
           <router-link
@@ -21,8 +22,8 @@
             class="nav-link"
             :class="{ active: isActive('/sucursales') }"
           >
-          <i class="bi bi-shop-window"></i>
-            <span class="tooltip-text">Sucursales</span>
+            <i class="bi bi-shop-window"></i>
+            <span class="tooltip-text">Sucursal</span>
           </router-link>
         </li>
 
@@ -86,30 +87,45 @@
           </router-link>
         </li>
 
-        <!-- Compra -->
-        <li v-if="hasPermission('Compra')" class="nav-item">
-          <router-link
-            to="/compras"
-            class="nav-link"
-            :class="{ active: isActive('/compras') }"
-          >
-            <i class="bi bi-cart-plus-fill"></i>
-            <span class="tooltip-text">Compra</span>
-          </router-link>
-        </li>
-
-        <!-- Venta -->
-        <li v-if="hasPermission('Venta')" class="nav-item">
-          <router-link
-            to="/ventas"
-            class="nav-link"
-            :class="{ active: isActive('/ventas') }"
-          >
+         <!-- Ventas con menú desplegable -->
+         <li v-if="hasPermission('Venta')" class="nav-item dropdown" @click="toggleDropdown('ventas')">
+          <a href="#" class="nav-link">
             <i class="bi bi-cash-stack"></i>
-            <span class="tooltip-text">Venta</span>
-          </router-link>
+            <span class="tooltip-text">Ventas</span>
+            <i class="bi bi-chevron-right"></i>
+          </a>
+          <ul v-show="dropdowns.ventas" class="dropdown-menu">
+            <li>
+              <router-link to="/administrar-ventas" class="nav-link">Administrar ventas</router-link>
+            </li>
+            <li>
+              <router-link to="/venta" class="nav-link">Crear venta</router-link>
+            </li>
+            <li>
+              <router-link to="/reporte-ventas" class="nav-link">Reporte de ventas</router-link>
+            </li>
+          </ul>
         </li>
 
+        <!-- Compras con menú desplegable -->
+        <li v-if="hasPermission('Compra')" class="nav-item dropdown" @click="toggleDropdown('compras')">
+          <a href="#" class="nav-link">
+            <i class="bi bi-cart-plus-fill"></i>
+            <span class="tooltip-text">Compras</span>
+            <i class="bi bi-chevron-right"></i>
+          </a>
+          <ul v-show="dropdowns.compras" class="dropdown-menu">
+            <li>
+              <router-link to="/administrar-compras" class="nav-link">Administrar compras</router-link>
+            </li>
+            <li>
+              <router-link to="/compras" class="nav-link">Crear compra</router-link>
+            </li>
+            <li>
+              <router-link to="/reporte-compras" class="nav-link">Reporte de compras</router-link>
+            </li>
+          </ul>
+        </li>
         <!-- TEST REGISTRO | BORRAR AL FINALIZAR EL TEST -->
         <li v-if="hasPermission('Registro')" class="nav-item">
           <router-link
@@ -133,16 +149,22 @@
     </aside>
 
     <main class="main-content">
-      <!-- Aquí se carga el contenido dinámico según la ruta -->
       <router-view />
     </main>
   </div>
 </template>
 
-
 <script>
 export default {
   name: 'App',
+  data() {
+    return {
+      dropdowns: {
+        ventasDropdown: false,
+        comprasDropdown: false
+      }
+    };
+  },
   computed: {
     isLoginRoute() {
       return this.$route.path === '/login';
@@ -159,14 +181,18 @@ export default {
 
       return role && permissions[role]?.includes(section);
     },
+    
+    toggleDropdown(dropdown) {
+      this.dropdowns[dropdown] = !this.dropdowns[dropdown];
+    },
 
     isActive(route) {
       return this.$route.path === route;
     },
 
     logout() {
-      localStorage.clear(); // Limpiar el localStorage
-      this.$router.push('/login'); // Redirigir a la página de login
+      localStorage.clear();
+      this.$router.push('/login');
     }
   }
 };
@@ -251,24 +277,55 @@ export default {
   font-size: 14px;
   transform: translateY(-50%);
   white-space: nowrap;
-  background-color: #585757;
-  font-family: 'Montserrat', sans-serif;
+  background-color: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 5px 10px;
-  border-radius: 4px;
-  z-index: 1000;
+  border-radius: 5px;
+  pointer-events: none;
 }
 
-.sidebar .nav-link:hover .tooltip-text {
+.nav-link:hover .tooltip-text {
   display: block;
 }
 
 .main-content {
-  margin-left: 100px; /* Deja espacio para el sidebar */
-  flex-grow: 1;
+  margin-left: 80px;
+  width: calc(100% - 80px);
+  background-color: #f5f5f5;
   padding: 20px;
-  background-color: #f4f4f4;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+/* Estilos adicionales para los dropdowns */
+.nav-item.dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  display: block;
+  background-color: #ebebeb;
+  margin-top: 0; /* Ajusta para eliminar espacio superior */
+  padding: 0;
+  position: absolute;
+  top: 0; /* Mantiene el menú alineado verticalmente con el botón */
+  left: 100%; /* Desplaza el menú hacia la derecha del botón */
+  min-width: 150px; /* Ancho mínimo del menú desplegable */
+  z-index: 1; /* Asegura que esté sobre otros elementos */
+}
+
+.dropdown-menu li {
+  list-style: none;
+  padding: 5px 0;
+}
+
+.dropdown-menu .nav-link {
+  color: rgb(255, 179, 0);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  padding-left: 10px; /* Ajusta para que no se solapen los textos */
+}
+
+.dropdown-menu .nav-link:hover {
+  background-color: #cecece;
 }
 </style>
-
-
