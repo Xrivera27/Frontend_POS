@@ -9,50 +9,27 @@
     <div class="main-container">
       <form class="inputs-container" @submit.prevent="agregarProducto" autocomplete="off">
         <div class="codigo-input">
-          <label for="codigo-busqueda" class="label-input"
-            >Codigo del producto:</label
-          >
-          <input
-            name="codigo-busqueda"
-            ref="codigo"
-            type="text"
-            class="campo codigo-busqueda"
-            tabindex="1"
-            required
-            v-model="addQuery"
-          />
-          <button
-            class="agregar-producto bi bi-plus-circle-fill"
-            type="submit"
-          ></button>
-          <button id="registrar-producto" class="btn btn-success" type="button" >
-            Producto Nuevo
-          </button>
+          <label for="codigo-busqueda" class="label-input">Codigo del producto:</label>
+          <input name="codigo-busqueda" ref="codigo" type="text" class="campo codigo-busqueda" tabindex="1" required
+            v-model="addQuery" />
+
+          <router-link to="/productos">
+            <button id="registrar-producto" class="btn btn-success" type="button">
+              Producto Nuevo
+            </button>
+          </router-link>
         </div>
 
         <div class="input-total-compra">
           <label for="total-compra" class="label-input">Total Compra:</label>
-          <input
-            name="total-compra"
-            class="campo"
-            type="number"
-            step="0.01"
-            tabindex="2"
-            required
-            v-model="addtotalPrice"
-          />
+          <input name="total-compra" class="campo" type="number" step="0.01" tabindex="2" required
+            v-model="addtotalPrice" />
         </div>
 
         <!-- Barra de búsqueda -->
         <div class="input-cantidad">
           <label for="cantidad" class="label-input">Cantidad:</label>
-          <input
-            name="cantidad"
-            class="campo"
-            type="number"
-            tabindex="3"
-            v-model="addQuantity"
-          />
+          <input name="cantidad" class="campo" type="number" tabindex="3" v-model="addQuantity" />
         </div>
       </form>
 
@@ -76,25 +53,13 @@
               <td>{{ producto.total_compra }}</td>
               <td>{{ producto.proveedor }}</td>
               <td class="botones-accion">
-                <button
-                  id="btnDisminuir"
-                  class="btn btn-botones-accion"
-                  @click="disminuirCantidad(index)"
-                >
+                <button id="btnDisminuir" class="btn btn-botones-accion" @click="disminuirCantidad(index)">
                   <b><i class="bi bi-dash-circle-fill"></i></b>
                 </button>
-                <button
-                  id="btnAumentar"
-                  class="btn btn-botones-accion"
-                  @click="aumentarCantidad(index)"
-                >
+                <button id="btnAumentar" class="btn btn-botones-accion" @click="aumentarCantidad(index)">
                   <b><i class="bi bi-plus-circle-fill"></i></b>
                 </button>
-                <button
-                  id="btnEliminar"
-                  class="btn btn-botones-accion"
-                  @click="deleteProducto(index)"
-                >
+                <button id="btnEliminar" class="btn btn-botones-accion" @click="deleteProducto(index)">
                   <b><i class="bi bi-x-circle-fill"></i></b>
                 </button>
               </td>
@@ -187,10 +152,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="(proveedor_actual, index) in proveedores_nombre"
-              :key="index"
-            >
+            <tr v-for="(proveedor_actual, index) in proveedores_nombre" :key="index">
               <td>{{ index + 1 }}</td>
               <td>{{ proveedor_actual }}</td>
             </tr>
@@ -341,7 +303,7 @@ export default {
     pushN(event) {
       if (event.key === "n" || event.key === "N") {
         alert("Modal para añadir nuevo producto");
-        
+
       }
       this.reiniciarInputs();
     },
@@ -352,7 +314,7 @@ export default {
         return;
       }
 
-       if (this.addQuantity && isNaN(this.addQuantity) || this.addtotalPrice && isNaN(this.addtotalPrice)) {
+      if (this.addQuantity && isNaN(this.addQuantity) || this.addtotalPrice && isNaN(this.addtotalPrice)) {
         alert("Ingresa un dato valido");
         return;
       }
@@ -516,6 +478,7 @@ export default {
   background-color: #46ce10;
   margin-left: 30px;
 }
+
 #registrar-producto:hover {
   background-color: #38a50d;
   transform: scale(1.05);
@@ -549,6 +512,7 @@ export default {
   display: flex;
   justify-content: space-between;
 }
+
 .campo {
   padding: 5px 0px;
   padding-left: 10px;
@@ -575,6 +539,7 @@ export default {
   color: rgb(4, 146, 202);
   transition: all 0.3s ease;
 }
+
 .codigo-input,
 .boton-input,
 .input-cantidad,
@@ -601,6 +566,7 @@ export default {
   border-collapse: separate;
   border-spacing: 0;
 }
+
 .table th,
 .table td {
   padding: 8px;
@@ -726,6 +692,7 @@ export default {
   margin: 0;
   color: #094688;
 }
+
 #total {
   font-weight: bolder;
   font-size: 40px;
@@ -794,9 +761,11 @@ export default {
 .product-list li {
   margin-bottom: 10px;
 }
+
 .payment-methods {
   display: flex;
 }
+
 .payment-methods label {
   display: block;
   margin-bottom: 10px;
@@ -813,25 +782,32 @@ export default {
 .div-modal-resumen {
   display: flex;
   align-items: center;
-  margin-bottom: 10px; /* Espacio entre los campos */
+  margin-bottom: 10px;
+  /* Espacio entre los campos */
 }
 
 .div-modal-resumen label {
-  width: 120px; /* Ajusta el ancho del label según sea necesario */
-  margin-right: 10px; /* Espacio entre el label y el input */
+  width: 120px;
+  /* Ajusta el ancho del label según sea necesario */
+  margin-right: 10px;
+  /* Espacio entre el label y el input */
 }
 
 .div-modal-resumen input {
-  flex: 1; /* El input ocupará el resto del espacio disponible */
+  flex: 1;
+  /* El input ocupará el resto del espacio disponible */
 }
+
 .div-modal-resumen-rtn {
   margin-left: 30px;
 }
+
 .modalShowConfirm-Si,
 .cancelar,
 .close-btn {
   background-color: #dc3545;
 }
+
 .modalShowConfirm-no,
 .confirmar-pago {
   background-color: #4caf50;

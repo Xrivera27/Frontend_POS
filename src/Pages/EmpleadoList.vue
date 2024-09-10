@@ -110,7 +110,7 @@
           </select>
         </div>
 
-        <div class="form-group">
+        <div id="form-tel" class="form-group">
           <label>Telefono:</label>
           <input v-model="empleadoForm.telefono" type="text" required>
         </div>
@@ -542,5 +542,9 @@ button {
 
 .password-wrapper .toggle-password:hover {
   color: #000;
+}
+
+#form-tel{
+  width: 30%;
 }
 </style>
