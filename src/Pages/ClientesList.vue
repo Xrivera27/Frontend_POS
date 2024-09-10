@@ -79,7 +79,7 @@
         </div>
 
 
-        <div class="form-group">
+        <div id="form-tel" class="form-group">
           <label>Teléfono:</label>
           <input v-model="clienteForm.telefono" type="text" required>
         </div>
@@ -241,6 +241,10 @@ export default {
 
 .h2-modal-content {
   margin-top: 0px;
+}
+
+#form-tel {
+  width: 30%;
 }
 
 #btnAdd {

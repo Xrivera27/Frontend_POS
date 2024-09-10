@@ -68,7 +68,7 @@
           <input v-model="proveedorForm.nombre" type="text" required>
         </div>
 
-        <div class="form-group">
+        <div id="form-tel" class="form-group">
           <label>Teléfono:</label>
           <input v-model="proveedorForm.telefono" type="text" required>
         </div>
@@ -201,6 +201,10 @@ export default {
 .encabezado {
   display: flex;
   justify-content: space-between;
+}
+
+#form-tel {
+  width: 30%;
 }
 
 #btnAdd {
