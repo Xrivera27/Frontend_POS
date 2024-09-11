@@ -244,7 +244,6 @@ export default {
   color: rgb(255, 179, 0);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
   text-align: center;
-  position: relative;
   text-decoration: none;
   transition: all 0.3s ease;
   width: 70px;
@@ -252,9 +251,6 @@ export default {
   height: 50px;
   border-radius: 12px;
   margin: 5px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .sidebar .nav-link.active {
@@ -294,10 +290,14 @@ export default {
   padding: 5px 10px;
   border-radius: 5px;
   pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.nav-link:hover .tooltip-text {
+.nav-item:hover .tooltip-text {
   display: block;
+  opacity: 1;
 }
 
 .main-content {
