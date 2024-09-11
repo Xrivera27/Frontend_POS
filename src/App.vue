@@ -67,7 +67,7 @@
           <a href="#" class="nav-link">
             <i class="bi bi-cash-stack"></i>
             <span v-if="expanded" class="tooltip-text">Ventas</span>
-            <i class="bi bi-chevron-right"></i>
+            <i class="bi bi-chevron-right" style="margin-left: auto;"></i>
           </a>
           <ul v-show="dropdowns.ventas" class="dropdown-menu">
             <li>
@@ -87,7 +87,7 @@
           <a href="#" class="nav-link">
             <i class="bi bi-cart-plus-fill"></i>
             <span v-if="expanded" class="tooltip-text">Compras</span>
-            <i class="bi bi-chevron-right"></i>
+            <i class="bi bi-chevron-right" style="margin-left: auto;"></i>
           </a>
           <ul v-show="dropdowns.compras" class="dropdown-menu">
             <li>
@@ -101,6 +101,7 @@
             </li>
           </ul>
         </li>
+
 
         <!-- Cerrar sesión -->
         <li class="nav-item">
@@ -168,7 +169,6 @@ export default {
   font-family: 'Montserrat', sans-serif;
 }
 
-
 .app-wrapper {
   display: flex;
   min-height: 100vh;
@@ -180,6 +180,8 @@ export default {
   position: fixed;
   height: 100%;
   transition: width 0.3s ease;
+  padding-top: 20px;
+  /* Añade espacio al principio del sidebar */
 }
 
 .sidebar.expanded {
@@ -208,22 +210,26 @@ export default {
 
 .nav-item {
   margin-bottom: 10px;
-  text-align: center;
   position: relative;
+  justify-content: center;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 10px;
+  justify-content: start;
+  /* Alinea el contenido a la izquierda */
+  padding: 10px 25px;
   color: #ffb300;
   text-decoration: none;
   transition: background-color 0.3s ease;
+  border-radius: 8px;
+  /* Redondeado del borde para un efecto más suave */
 }
 
 .nav-link i {
   font-size: 24px;
+  margin-right: 10px;
 }
 
 .nav-link:hover {
@@ -233,6 +239,7 @@ export default {
 .nav-link.active {
   background-color: #ffb300;
   color: #ffffff;
+  border-radius: 8px;
 }
 
 .nav-link.active i {
@@ -240,7 +247,14 @@ export default {
 }
 
 .tooltip-text {
+  display: none;
+  /* Oculta el texto cuando el sidebar está colapsado */
+}
+
+.sidebar.expanded .tooltip-text {
+  display: inline-block;
   margin-left: 10px;
+  /* Añade espacio entre el ícono y el texto */
 }
 
 .dropdown-menu {
@@ -266,6 +280,7 @@ export default {
   /* Desactiva eventos cuando está oculto */
 }
 
+
 .nav-item:hover .dropdown-menu,
 .dropdown-menu.open {
   max-height: 300px;
@@ -282,5 +297,9 @@ export default {
   margin-left: 80px;
   width: calc(100% - 80px);
   padding: 20px;
+}
+
+.bi {
+  color: #ffbb1a;
 }
 </style>
