@@ -181,7 +181,6 @@ export default {
 
 .sidebar {
   width: 80px;
-  /* Ancho del sidebar */
   background-color: #ebebeb;
   color: white;
   padding-top: 20px;
@@ -192,6 +191,8 @@ export default {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
+  overflow-y: auto;
+  /* Permitir scroll cuando sea necesario */
 }
 
 .sidebar .nav {
@@ -277,11 +278,14 @@ export default {
 
 .main-content {
   margin-left: 80px;
+  /* Deja el espacio necesario para el sidebar */
   width: calc(100% - 80px);
   background-color: #f5f5f5;
   padding: 20px;
   box-sizing: border-box;
   min-height: 100vh;
+  overflow: auto;
+  /* Asegura el scroll en el contenido principal también */
 }
 
 .nav-item.dropdown {
