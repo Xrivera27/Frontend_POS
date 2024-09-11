@@ -1,6 +1,6 @@
 <template>
   <div class="app-wrapper">
-    <aside v-if="!isLoginRoute" class="sidebar">
+    <aside ref="sidebar" v-if="!isLoginRoute" class="sidebar">
       <ul class="nav flex-column">
         <!-- Home -->
         <li v-if="hasPermission('Home')" class="nav-item">
@@ -59,45 +59,45 @@
           </router-link>
         </li>
 
-        <!-- Ventas con menú desplegable -->
-        <li v-if="hasPermission('Venta')" class="nav-item dropdown" @click="toggleDropdown('ventas')">
-          <a href="#" class="nav-link">
-            <i class="bi bi-cash-stack"></i>
-            <span class="tooltip-text">Ventas</span>
-            <i class="bi bi-chevron-right"></i>
-          </a>
-          <ul v-show="dropdowns.ventas" class="dropdown-menu">
-            <li>
-              <router-link to="/administrar-ventas" class="nav-link">Administrar ventas</router-link>
-            </li>
-            <li>
-              <router-link to="/ventas" class="nav-link">Crear venta</router-link>
-            </li>
-            <li>
-              <router-link to="/administrar-ventas" class="nav-link">Reporte de ventas</router-link>
-            </li>
-          </ul>
-        </li>
+      <!-- Ventas con menú desplegable -->
+<li v-if="hasPermission('Venta')" class="nav-item dropdown" @click="toggleDropdown('ventas')">
+  <a href="#" class="nav-link">
+    <i class="bi bi-cash-stack"></i>
+    <span class="tooltip-text">Ventas</span>
+    <i class="bi bi-chevron-right"></i>
+  </a>
+  <ul v-show="dropdowns.ventas" class="dropdown-menu">
+    <li>
+      <router-link to="/administrar-ventas" class="nav-link">Administrar ventas</router-link>
+    </li>
+    <li>
+      <router-link to="/ventas" class="nav-link">Crear venta</router-link>
+    </li>
+    <li>
+      <router-link to="/administrar-ventas" class="nav-link">Reporte de ventas</router-link>
+    </li>
+  </ul>
+</li>
 
-        <!-- Compras con menú desplegable -->
-        <li v-if="hasPermission('Compra')" class="nav-item dropdown" @click="toggleDropdown('compras')">
-          <a href="#" class="nav-link">
-            <i class="bi bi-cart-plus-fill"></i>
-            <span class="tooltip-text">Compras</span>
-            <i class="bi bi-chevron-right"></i>
-          </a>
-          <ul v-show="dropdowns.compras" class="dropdown-menu">
-            <li>
-              <router-link to="/administrar-compras" class="nav-link">Administrar compras</router-link>
-            </li>
-            <li>
-              <router-link to="/compras" class="nav-link">Crear compra</router-link>
-            </li>
-            <li>
-              <router-link to="/administrar-compras" class="nav-link">Reporte de compras</router-link>
-            </li>
-          </ul>
-        </li>
+<!-- Compras con menú desplegable -->
+<li v-if="hasPermission('Compra')" class="nav-item dropdown" @click="toggleDropdown('compras')">
+  <a href="#" class="nav-link">
+    <i class="bi bi-cart-plus-fill"></i>
+    <span class="tooltip-text">Compras</span>
+    <i class="bi bi-chevron-right"></i>
+  </a>
+  <ul v-show="dropdowns.compras" class="dropdown-menu">
+    <li>
+      <router-link to="/administrar-compras" class="nav-link">Administrar compras</router-link>
+    </li>
+    <li>
+      <router-link to="/compras" class="nav-link">Crear compra</router-link>
+    </li>
+    <li>
+      <router-link to="/administrar-compras" class="nav-link">Reporte de compras</router-link>
+    </li>
+  </ul>
+</li>
         <!-- TEST REGISTRO | BORRAR AL FINALIZAR EL TEST -->
         <li v-if="hasPermission('Registro')" class="nav-item">
           <router-link to="/registro" class="nav-link" :class="{ active: isActive('/registro') }">
@@ -128,9 +128,10 @@ export default {
   data() {
     return {
       dropdowns: {
-        ventasDropdown: false,
-        comprasDropdown: false
-      }
+        ventas: false,
+        compras: false
+      },
+      clickOutsideHandler: null
     };
   },
   computed: {
@@ -151,7 +152,18 @@ export default {
     },
 
     toggleDropdown(dropdown) {
-      this.dropdowns[dropdown] = !this.dropdowns[dropdown];
+      if (this.dropdowns[dropdown]) {
+        // Si el dropdown ya está abierto, lo cerramos
+        this.dropdowns[dropdown] = false;
+      } else {
+        // Cierra todos los dropdowns y abre el seleccionado
+        for (const key in this.dropdowns) {
+          if (key !== dropdown) {
+            this.dropdowns[key] = false;
+          }
+        }
+        this.dropdowns[dropdown] = true;
+      }
     },
 
     isActive(route) {
@@ -161,11 +173,24 @@ export default {
     logout() {
       localStorage.clear();
       this.$router.push('/login');
+    },
+
+    handleClickOutside(event) {
+      const sidebar = this.$refs.sidebar;
+      if (sidebar && !sidebar.contains(event.target)) {
+        this.dropdowns.ventas = false;
+        this.dropdowns.compras = false;
+      }
     }
+  },
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  unmounted() {
+    document.removeEventListener('click', this.handleClickOutside);
   }
 };
 </script>
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
