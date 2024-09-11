@@ -118,6 +118,10 @@ export default {
 
 }
 
+.btn-config{
+    white-space: nowrap;
+}
+
 /* Efecto al pasar el mouse por encima */
 .btn-config:hover {
     background-color: #e0e0e0;
