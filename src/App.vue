@@ -1,10 +1,11 @@
 <template>
   <div class="app-wrapper">
     <aside ref="sidebar" v-if="!isLoginRoute" class="sidebar" :class="{ expanded }">
-      <div class="toggle-btn" @click="toggleSidebar">
-        <i class="bi" :class="expanded ? 'bi-chevron-left' : 'bi-chevron-right'"></i>
-      </div>
+
       <ul class="nav flex-column">
+        <li class="nav-item toggle-btn" @click="toggleSidebar">
+          <i class="bi" :class="expanded ? 'bi-chevron-double-left' : 'bi-chevron-double-right'"></i>
+        </li>
         <!-- Home -->
         <li v-if="hasPermission('Home')" class="nav-item">
           <router-link to="/home" class="nav-link" :class="{ active: isActive('/home') }">
@@ -186,13 +187,18 @@ export default {
 }
 
 .toggle-btn {
-  position: absolute;
-  top: 20px;
-  left: 100%;
   background-color: #d4d4d4;
   border-radius: 50%;
   padding: 5px;
   cursor: pointer;
+  text-align: center;
+  margin: 10px auto;
+  /* Centra el botón horizontalmente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
 }
 
 .nav {
@@ -222,6 +228,15 @@ export default {
 
 .nav-link:hover {
   background-color: #cecece;
+}
+
+.nav-link.active {
+  background-color: #ffb300;
+  color: #ffffff;
+}
+
+.nav-link.active i {
+  color: #ffffff;
 }
 
 .tooltip-text {
