@@ -15,6 +15,13 @@
 
     <!-- Botón de exportación PDF -->
     <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" class="export-button" />
+
+    <RouterLink
+    to="promociones-producto"
+    >
+    <button class="button-promocion" >Promociones</button>
+    </RouterLink>
+    
     <div class="registros">
       <span>Mostrar
         <select v-model="itemsPerPage" class="custom-select">
@@ -314,6 +321,19 @@ export default {
   border-radius: 10px;
   color: black;
   font-weight: bold;
+}
+
+.button-promocion {
+    background-color: #4cafaf;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+.button-promocion:hover {
+    background-color: #3d8d8d;
 }
 
 .export-button{

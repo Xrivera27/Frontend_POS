@@ -1,0 +1,478 @@
+<template>
+    <div class="encabezado">
+      <h1>Promociones de Productos</h1>
+      <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
+    </div>
+    <hr>
+  
+    <div class="categorias-wrapper">
+        <form @submit.prevent="agregarPromocion"
+        autocomplete="off">
+            <div class="contenedor-principal">
+            <div class="contenedor-interno contenedor-izquierdo">
+<label for="producto">Producto:</label>
+  <input type="text" id="input-codigo-producto" name="producto" v-model="promForm.producto" required>
+  
+
+  <!-- Nombre de la promoción -->
+  <label for="nombre_promocion">Nombre de la promoción:</label>
+  <input type="text" id="nombre_promocion" v-model="promForm.nombre_promocion" name="nombre_promocion" required>
+  
+
+  <!-- Porcentaje de descuento -->
+  <label for="porcentaje_descuento">Porcentaje de descuento:</label>
+  <input type="number" id="porcentaje_descuento" name="porcentaje_descuento" v-model="promForm.porcentaje_descuento" min="0" max="100" step="0.01" required>
+  
+            </div>
+  <!-- Producto ID -->
+<div class="contenedor-interno contenedor-derecho">
+    <label for="fecha_inicio">Fecha de inicio:</label>
+  <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promForm.fecha_inicio" required>
+  
+
+  <!-- Fecha final -->
+  <label for="fecha_final">Fecha final:</label>
+  <input type="date" id="fecha_final" name="fecha_final" v-model="promForm.fecha_final" required>
+  
+
+  <!-- Enviar el formulario -->
+  
+</div>
+</div>
+<div class="contenedor-boton">
+    <button type="submit" class="btn registrar-producto">Registrar promoción</button>
+    <button type="button" class="btn cerrar">Cancelar</button>
+</div>
+
+  <!-- Fecha de inicio -->
+  
+</form>
+
+<div class="tabla-busqueda" >
+<div>
+<input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar promoción..." />
+<button class="btn activar-form">Nueva promocion</button>
+</div>
+<div class="table-container" v-pdf-export ref="table">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Producto</th>
+            <th>Nombre Promocion</th>
+            <th>%</th>
+            <th>Fechas inicio</th>
+            <th>Fecha final</th>
+            <th>Estado</th>
+            <th>Opciones</th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr  v-for="(p, index) in filterPromociones" :key="index" >
+            <td>{{ index + 1 }}</td>
+            <td>{{ p.producto }}</td>
+            <td>{{ p.nombre_promocion }}</td>
+            <td>{{ p.porcentaje_descuento }}</td>
+            <td>{{ p.fecha_inicio }}</td>
+            <td>{{ p.fecha_final }}</td>
+            <td>{{ p.estado }}</td>
+            <td>
+              <button id="btnEditar" class="btn btn-warning" @click="editarPromocion(index)">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteProducto(index)">
+                <b><i class="bi bi-x-lg"></i></b>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+</div>
+  
+<div v-if="isShowModal" class="modal">
+      <div class="modal-content">
+        <form @submit.prevent="agregarPromocion"
+        autocomplete="off">
+            <div class="contenedor-principal">
+            <div class="contenedor-interno contenedor-izquierdo">
+<label for="producto">Producto:</label>
+  <input type="text" id="input-codigo-producto" name="producto" v-model="promFormModal.producto" required>
+  
+
+  <!-- Nombre de la promoción -->
+  <label for="nombre_promocion">Nombre de la promoción:</label>
+  <input type="text" id="nombre_promocion" v-model="promFormModal.nombre_promocion" name="nombre_promocion" required>
+  
+
+  <!-- Porcentaje de descuento -->
+  <label for="porcentaje_descuento">Porcentaje de descuento:</label>
+  <input type="number" id="porcentaje_descuento" name="porcentaje_descuento" v-model="promFormModal.porcentaje_descuento" min="0" max="100" step="0.01" required>
+  
+            </div>
+  <!-- Producto ID -->
+<div class="contenedor-interno contenedor-derecho">
+    <label for="fecha_inicio">Fecha de inicio:</label>
+  <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promFormModal.fecha_inicio" required>
+  
+
+  <!-- Fecha final -->
+  <label for="fecha_final">Fecha final:</label>
+  <input type="date" id="fecha_final" name="fecha_final" v-model="promFormModal.fecha_final" required>
+  
+
+  <!-- Enviar el formulario -->
+  
+</div>
+</div>
+<div class="contenedor-boton">
+    <button type="submit" class="btn registrar-producto">Guardar cambios</button>
+    <button type="button"  @click="closeModal" class="btn cerrar">Cancelar</button>
+</div>
+
+  <!-- Fecha de inicio -->
+  
+</form>
+        
+      </div>
+    </div>
+
+    </div>
+  </template>
+  
+  <script>
+  import ProfileButton from '../components/ProfileButton.vue';
+  //import ExportButton from '../components/ExportButton.vue';
+  
+  export default {
+    components:
+    {
+      ProfileButton,
+    },
+    data() {
+      return {
+        searchQuery:'',
+        isEditing: false,
+        editIndex: null,
+        isShowModal: false,
+        promForm: {
+        producto: '',
+        nombre_promocion: '',
+        porcentaje_descuento: '',
+        fecha_inicio: '',
+        fecha_final: '',
+        estado: 'active'
+        },
+
+        promFormModal: {
+        producto: '',
+        nombre_promocion: '',
+        porcentaje_descuento: '',
+        fecha_inicio: '',
+        fecha_final: '',
+        estado: 'active'
+        },
+        
+        promociones: [
+        {
+    producto: "Camiseta Básica",
+    nombre_promocion: "Descuento de Verano",
+    porcentaje_descuento: 15,
+    fecha_inicio: "2024-06-01",
+    fecha_final: "2024-06-30",
+    estado: "active"
+  },
+  {
+    producto: "Pantalones Jean",
+    nombre_promocion: "Ofertas de Primavera",
+    porcentaje_descuento: 10,
+    fecha_inicio: "2024-03-15",
+    fecha_final: "2024-04-15",
+    estado: "inactive"
+  },
+  {
+    producto: "Zapatillas Deportivas",
+    nombre_promocion: "Descuento de Fin de Año",
+    porcentaje_descuento: 20,
+    fecha_inicio: "2024-12-01",
+    fecha_final: "2024-12-31",
+    estado: "active"
+  },
+  {
+    producto: "Chaqueta de Cuero",
+    nombre_promocion: "Promoción de Otoño",
+    porcentaje_descuento: 25,
+    fecha_inicio: "2024-09-01",
+    fecha_final: "2024-10-15",
+    estado: "inactive"
+  },
+  {
+    producto: "Gafas de Sol",
+    nombre_promocion: "Descuento de Black Friday",
+    porcentaje_descuento: 30,
+    fecha_inicio: "2024-11-25",
+    fecha_final: "2024-11-29",
+    estado: "active"
+  },
+  {
+    producto: "Reloj de Pulsera",
+    nombre_promocion: "Ofertas de Navidad",
+    porcentaje_descuento: 20,
+    fecha_inicio: "2024-12-15",
+    fecha_final: "2024-12-25",
+    estado: "inactive"
+  },
+  {
+    producto: "Bolso de Mano",
+    nombre_promocion: "Descuento de Año Nuevo",
+    porcentaje_descuento: 15,
+    fecha_inicio: "2024-12-26",
+    fecha_final: "2025-01-10",
+    estado: "active"
+  },
+  {
+    producto: "Camisa de Lino",
+    nombre_promocion: "Promoción de Rebajas",
+    porcentaje_descuento: 10,
+    fecha_inicio: "2024-01-10",
+    fecha_final: "2024-02-10",
+    estado: "inactive"
+  },
+  {
+    producto: "Pantalones Cortos",
+    nombre_promocion: "Descuento de Primavera",
+    porcentaje_descuento: 20,
+    fecha_inicio: "2024-03-01",
+    fecha_final: "2024-03-31",
+    estado: "active"
+  },
+  {
+    producto: "Bufanda de Lana",
+    nombre_promocion: "Ofertas de Verano",
+    porcentaje_descuento: 18,
+    fecha_inicio: "2024-07-01",
+    fecha_final: "2024-08-15",
+    estado: "inactive"
+  }
+        ],
+      };
+    },
+    computed: {
+        filterPromociones() {
+      return this.promociones.filter(promocion =>
+        promocion.nombre_promocion.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        promocion.producto.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    },
+      
+    },
+    methods: {
+        clearForm(){
+        this.promForm = {
+        producto: '',
+        nombre_promocion: '',
+        porcentaje_descuento: '',
+        fecha_inicio: '',
+        fecha_final: '',
+        };
+        this.isEditing = false;
+        this.editIndex = null;
+    },
+
+    agregarPromocion(){
+        if (!this.isEditing){
+
+            
+        this.promociones.push(this.promForm);
+        
+        }
+        else{
+
+            this.promociones[this.editIndex] = { ...this.promFormModal };
+            this.isShowModal = false;
+        }
+        this.clearForm();
+        this.isShowModal = false;
+       
+        
+    },
+
+    editarPromocion(index){
+        this.promFormModal = { 
+            ...this.promociones[index]
+         };
+         this.editIndex = index;
+         this.isEditing = true;
+         this.showModal();
+    },
+
+    showModal(){
+        this.isShowModal = true;
+    },
+
+    closeModal(){
+        this.isShowModal = false;
+    }
+
+
+
+
+    }
+  };
+  </script>
+  
+  
+  <style scoped>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+  
+  * {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .contenedor-principal{
+    display: flex;
+    justify-content: space-around;
+
+  }
+
+  form{
+    border: 1px solid rgb(110, 109, 109);
+    padding: 3% 0 2% 0;
+    border-radius: 10px;
+  }
+
+  .contenedor-boton{
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center
+  }
+
+  input{
+    padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  }
+  .contenedor-principal input{
+    width: 95%;
+  height: 25%;
+  
+  justify-content: center;
+  }
+
+  .contenedor-principal input{
+    margin-bottom: 4%;
+  }
+
+  .table th,
+.table td {
+  padding: 8px;
+}
+
+.table thead th {
+  background-color: #e7e4e4;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.table tbody td {
+  text-align: center;
+  border-top: 1px solid #ddd;
+}
+
+.table thead th:first-child {
+  border-top-left-radius: 10px;
+}
+
+.table thead th:last-child {
+  border-top-right-radius: 10px;
+}
+
+.table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 10px;
+}
+
+.table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 10px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-container {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  margin-top: 16px;
+}
+
+.registrar-producto, .cerrar{
+    background-color: #c9c7c7;
+}
+
+.registrar-producto:hover, .cerrar:hover{
+    background-color: #aaa9a9;
+    transition: all 0.3s ease;
+}
+
+  .btn {
+  padding: 8px 16px;
+  margin: 4px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+  .contenedor-interno{
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    padding: 0 2%;
+  }
+  
+  .encabezado {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .activar-form{
+    background-color: rgb(101, 217, 221);
+    margin-left: 20px;
+  }
+
+  .activar-form:hover{
+    background-color: rgb(79, 185, 189);
+    transition: all 0.3s ease;
+  }
+  
+  .categorias-wrapper {
+    padding: 16px;
+  }
+
+  .modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+  max-width: 500px;
+  width: 100%;
+}
+
+  </style>
+  

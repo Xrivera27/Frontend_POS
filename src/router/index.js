@@ -13,6 +13,7 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import AdministrarVentas from '@/Pages/AdministrarVentas.vue';
 import AdministrarCompras from '@/Pages/AdministrarCompras.vue';
 import SucursalesList from '@/Pages/SucursalesList.vue';
+import PromocionesProductos from '@/Pages/PromocionesProductos.vue';
 
 function getRole() {
   return localStorage.getItem('role'); // Obtiene el rol del usuario desde localStorage
@@ -98,6 +99,11 @@ const routes = [
     path: '/ventas',
     name: 'Ventas',
     component: VentasList,
+  },
+  {
+    path: '/promociones-producto',
+    name: 'Promociones-producto',
+    component: PromocionesProductos,
   },
 
   {
