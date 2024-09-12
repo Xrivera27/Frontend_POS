@@ -1,411 +1,276 @@
 <template>
-  <div class="encabezado">
-    <h1>Administración Sucursales</h1>
-    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-  </div>
-  <hr>
-
-  <div class="sucursales-wrapper">
-    <div class="opciones">
-      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-      sucursales</button>
-      <ExportButton :columns="columns" :rows="rows" fileName="Sucursales.pdf" class="export-button" />
-    <div class="registros">
-      <span>Mostrar
-        <select v-model="itemsPerPage" class="custom-select">
-          <option value="">Todos</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-          <option value="25">25</option>
-        </select> registros
-      </span>
+  <div class="configuracion-usuario">
+    <div class="encabezado">
+      <h1>Configuración de Usuario</h1>
+      <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
     </div>
-    <!-- Barra de búsqueda -->
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar sucursal..." />
-    </div>
-   
+    <hr />
 
-    <div class="table-container">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nombre Administrativo</th>
-            <th>Ciudad</th>
-            <th>Telefono</th>
-            <th>Direccion</th>
-            <th>Correo</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(sucursal, index) in paginatedSucursales" :key="index">
-            <td>{{ index + 1 }}</td>
-            <td>{{ sucursal.nombre }}</td>
-            <td>{{ sucursal.ciudad }}</td>
-            <td>{{ sucursal.telefono }}</td>
-            <td>{{ sucursal.direccion }}</td>
-            <td>{{ sucursal.correo }}</td>
-            <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editSucursal(index)"><i
-                  class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteSucursal(index)"><b><i
-                    class="bi bi-x-lg"></i></b></button>
-            </td>
-          </tr>
+    <div class="config-wrapper">
+      <div class="usuario-config" v-if="showUser">
+        <form autocomplete="off" class="formulario form-basic-user">
+          <div class="contenedor-titulo">
+            <h2 class="titulo-form">Configuración</h2>
+          </div>
 
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Modal para agregar o editar Sucursales -->
-    <div v-if="isModalOpen" class="modal">
-      <div class="modal-content">
-        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Sucursal' : 'Agregar Sucursal' }}</h2>
-
-        <div class="form-group">
-          <label>Nombre:</label>
-          <input v-model="sucursalForm.nombre" type="text" required>
-        </div>
-
-        <div class="form-group">
-          <label>Correo:</label>
-          <input v-model="sucursalForm.correo" type="text" required>
-        </div>
+          <div class="contenedor-principal">
+            <div class="contenedor-interno contenedor-izquierdo">
+              <label for="nombre-usuario">Nombre de usuario:</label>
+              <input type="text" id="nombre-usuario" name="nombre-usuario" required />
 
 
-        <div class="form-group">
-          <label>Teléfono:</label>
-          <input v-model="sucursalForm.telefono" type="text" required>
-        </div>
+              <label for="telefono">Teléfono:</label>
+              <input type="text" id="telefono" name="telefono" required />
 
-        <div class="form-group">
-          <label>Dirección:</label>
-          <input v-model="sucursalForm.direccion" type="text" required>
-        </div>
 
-        <button id="AddSucursalModal" class="btn btn-primary" @click="guardarSucursal">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Sucursal' }}
-        </button>
-        <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
+              <label for="direccion">Dirección:</label>
+              <input type="text" id="direccion" name="direccion" required />
+            </div>
+
+
+            <div class="contenedor-interno contenedor-derecho">
+              <label for="contrasena">Contraseña actual:</label>
+              <input type="password" id="input-codigo-contrasena" name="contrasena" required />
+
+
+              <label for="contrasena-nueva">Contraseña nueva:</label>
+              <input type="password" id="contrasena-nueva" name="contrasena-nueva" required />
+
+
+              <label for="contrasena-confirmar">Confirmar contraseña:</label>
+              <input type="password" id="contrasena-confirmar" name="contrasena-confirmar" required />
+            </div>
+          </div>
+
+
+          <!-- Fecha de inicio -->
+        </form>
+
+        <form autocomplete="off" class="formulario form-avanced-user">
+          <div class="contenedor-titulo">
+            <h2 class="titulo-form">Configuración avanzada</h2>
+          </div>
+
+          <div class="contenedor-principal">
+            <div class="contenedor-interno contenedor-izquierdo">
+              <label for="Nombre">Nombre:</label>
+              <input type="text" id="Nombre" name="Nombre" required />
+
+
+              <label for="apellido">Apellido:</label>
+              <input type="text" id="apellido" name="apellido" required />
+
+
+              <label for="correo">Correo:</label>
+              <input type="email" id="correo" name="correo" required />
+            </div>
+          </div>
+
+
+          <!-- Fecha de inicio -->
+        </form>
       </div>
+
+      <div class="company-config" v-if="showCompany">
+        <form autocomplete="off" class="formulario form-company">
+          <div class="contenedor-titulo">
+            <h2 class="titulo-form">Configuración Empresa</h2>
+          </div>
+
+          <div class="contenedor-principal">
+            <div class="contenedor-interno contenedor-izquierdo">
+              <label for="nombre-company">Nombre de la empresa:</label>
+              <input type="text" id="nombre-company" name="nombre-company" required />
+
+
+              <label for="telefono-empresa">Telefono principal:</label>
+              <input type="text" id="telefono-empresa" name="telefono-empresa" required />
+
+
+              <label for="correo-principal">Correo principal:</label>
+              <input type="email" id="correo-principal" principal de la empresa name="correo" required />
+            </div>
+          </div>
+
+
+          <!-- Fecha de inicio -->
+        </form>
+
+        <form autocomplete="off" class="formulario form-company-SAR">
+          <div class="contenedor-titulo">
+            <h2 class="titulo-form">Configuración Empresa</h2>
+          </div>
+
+          <div class="contenedor-principal">
+            <div class="contenedor-interno contenedor-izquierdo">
+              <label for="categoria">Numero CAI:</label>
+              <input type="text" id="numero_cai" name="numero_cai" required />
+
+              <!-- Porcentaje de descuento -->
+              <label for="rango_inical">Rango Inicial:</label>
+              <input type="number" id="rango_inical" name="rango_inical" required />
+
+              <label for="rango_inical">Rango Final:</label>
+              <input type="number" id="rango_final" name="rango_final" required />
+            </div>
+            <!-- Categoria ID -->
+            <div class="contenedor-interno contenedor-derecho">
+              <label for="fecha_autorizacion">Fecha de autorización:</label>
+              <input type="date" id="fecha_autorizacion" name="fecha_autorizacion" required />
+
+              <!-- Fecha final -->
+              <label for="fecha_vencimiento">Fecha de vencimiento:</label>
+              <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required />
+
+              <!-- Enviar el formulario -->
+            </div>
+          </div>
+
+
+          <!-- Fecha de inicio -->
+        </form>
+      </div>
+
+
+      <button @click="switchBools" :class="{ 'activo': userActive, 'inactivo': !userActive }" :disabled="userBoton"
+        class="btn boton-switch">Config. Usuario</button>
+      <button @click="switchBools" :class="{ 'inactivo': userActive, 'activo': !userActive }" :disabled="companyBoton"
+        class="btn boton-switch">Config. Empresa</button>
+
     </div>
   </div>
 </template>
 
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
-import ExportButton from '../components/ExportButton.vue';
 
 export default {
   components: {
     ProfileButton,
-    ExportButton
+
   },
   data() {
     return {
-      searchQuery: '', // Almacena el texto de búsqueda
-      itemsPerPage: "", // Valor por defecto para mostrar todos los registros
-      isModalOpen: false,
-      isEditing: false,
-      editIndex: null,
-      sucursalForm: {
-        nombre: '',
-        ciudad: '',
-        telefono: '',
-        direccion: '',
-        correo: '',
-        
-      },
-      sucursales: [
-  {
-    nombre: 'Sucursal principal',
-    ciudad: 'La Ceiba',
-    telefono: '555 57 67',
-    direccion: 'calle 27 # 40 - 36',
-    correo: 'ejemplocorreo',
-  },
-  {
-    nombre: 'Sucursal norte',
-    ciudad: 'San Pedro Sula',
-    telefono: '504 22 33 44',
-    direccion: 'avenida 10, zona norte',
-    correo: 'norte@empresa.com',
-  },
-  {
-    nombre: 'Sucursal sur',
-    ciudad: 'Tegucigalpa',
-    telefono: '504 33 44 55',
-    direccion: 'avenida 5, barrio centro',
-    correo: 'sur@empresa.com',
-  },
-  {
-    nombre: 'Sucursal este',
-    ciudad: 'Choluteca',
-    telefono: '504 11 22 33',
-    direccion: 'calle 12, zona este',
-    correo: 'este@empresa.com',
-  },
-  {
-    nombre: 'Sucursal oeste',
-    ciudad: 'Comayagua',
-    telefono: '504 77 88 99',
-    direccion: 'carrera 4, barrio oeste',
-    correo: 'oeste@empresa.com',
-  },
-  {
-    nombre: 'Sucursal central',
-    ciudad: 'La Esperanza',
-    telefono: '504 44 55 66',
-    direccion: 'plaza principal, zona centro',
-    correo: 'central@empresa.com',
-  }
-],
-      // Define tus columnas para la exportación a PDF
-      columns: [
-        { header: '#', dataKey: 'index' },
-        { header: 'Nombre', dataKey: 'nombre' },
-        { header: 'Ciudad', dataKey: 'ciudad' },
-        { header: 'Teléfono', dataKey: 'telefono' },
-        { header: 'Correo', dataKey: 'correo' },
-       
+      switchForm: 'user',
+      userBoton: true,
+      companyBoton: false,
+      showUser: true,
+      showCompany: false,
+      userActive: true,
+      userForm: [
+        {
+          nombreUsuario: '',
+          telefono: '',
+          direccion: '',
+          contrasena_actual: '',
+          contrasena_nueva: '',
+          contrasena_confirm: '',
+        }
       ],
-      rows: [] // Inicialmente vacío, se llena después
+      userFormAdvanced: [
+        {
+          nombre: '',
+          apellido: '',
+          correo: '',
+        }
+      ],
+      companyForm: [
+        {
+          nombre: '',
+          apellido: '',
+          correo: '',
+        }
+      ],
     };
   },
-  computed: {
-    filteredSucursales() {
-      // Filtra los sucursales basados en el texto de búsqueda
-      return this.sucursales.filter(sucursal =>
-        sucursal.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        sucursal.ciudad.includes(this.searchQuery)
-      );
-    },
-    paginatedSucursales() {
-      return this.itemsPerPage === "" || this.itemsPerPage === null
-        ? this.filteredSucursales
-        : this.filteredSucursales.slice(0, this.itemsPerPage);
-    }
-  },
   methods: {
-    openModal() {
-      this.isModalOpen = true;
+    switchBools() {
+      this.userBoton = !this.userBoton;
+      this.companyBoton = !this.companyBoton;
+      this.showUser = !this.showUser;
+      this.showCompany = !this.showCompany;
+      this.userActive = !this.userActive;
     },
-    closeModal() {
-      this.isModalOpen = false;
-      this.isEditing = false;
-      this.sucursalForm = {
-        nombre: '',
-        ciudad: '',
-        telefono: '',
-        direccion: '',
-        correo: '',
-       
-      };
-    },
-    guardarSucursal() {
-      if (this.isEditing) {
-        Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
-      } else {
-        this.sucursales.push({ ...this.sucursalForm });
-      }
-      this.closeModal();
-    },
-    editSucursal(index) {
-      this.isModalOpen = true;
-      this.isEditing = true;
-      this.editIndex = index;
-      this.sucursalForm = { ...this.sucursales[index] };
-    },
-    deleteSucursal(index) {
-      this.sucursales.splice(index, 1);
-    },
-    generateRows() {
-      // Genera las filas basadas en los sucursales paginados
-      this.rows = this.paginatedSucursales.map((sucursal, index) => ({
-        index: index + 1,
-        nombre: sucursal.nombre,
-        ciudad: sucursal.ciudad,
-        telefono: sucursal.telefono,
-        correo: sucursal.correo,
-       
-      }));
-      console.log('Filas generadas:', this.rows);
-    }
+
   },
-  watch: {
-    // Cuando cambie la paginación o el filtro, actualiza las filas
-    paginatedSucursales() {
-      this.generateRows();
-    }
-  },
-  mounted() {
-    // Genera las filas al cargar el componente
-    this.generateRows();
-  }
 };
 </script>
 
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-
-* {
-  font-family: 'Montserrat', sans-serif;
-}
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
 
 .encabezado {
   display: flex;
   justify-content: space-between;
 }
 
-.opciones{
-  display:flex;
-  align-items: center;
-  justify-content: space-between;
+.contenedor-principal {
+  display: flex;
+  justify-content: space-around;
 }
 
-.busqueda {
-  float: right;
-  padding: 10px;
-  font-size: 14px;
+form {
+  border: 1px solid rgb(110, 109, 109);
+  padding: 3% 0 2% 0;
   border-radius: 10px;
-  border-width: 0.5px;
+  min-width: 800px;
+  min-height: 200px;
+  position: relative;
 }
 
-.registros{
-  height: 100%;
-  padding-bottom: 1%;
+.formulario {
+  margin-bottom: 5%;
 }
 
-#btnAdd {
-  background-color: #c09d62;
-  font-size: 16px;
-  width: 170px;
-  height: 40px;
-  border-radius: 10px;
-  color: black;
-  font-weight: bold;
+.contenedor-principal input {
+  margin-bottom: 4%;
 }
 
-.export-button{
+.titulo-form {
+  position: absolute;
+  top: -11.5%;
+  background-color: #f5f5f5;
+  padding: 0 10px;
+  color: #858585;
+}
+
+.contenedor-titulo {
   margin: 0;
-}
-
-.h2-modal-content {
-  margin-top: 0px;
-}
-
-#btnAdd:hover {
-  background-color: #a38655;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#btnEditar {
-  font-size: 18px;
-  width: 50px;
-  height: 40px;
-  border-radius: 10px;
-}
-
-#btnEditar:hover {
-  background-color: #e8af06;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#btnEliminar {
-  font-size: 18px;
-  width: 50px;
-  height: 40px;
-  border-radius: 10px;
-  color: black;
-}
-
-#btnEliminar:hover {
-  background-color: #b72433;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#campana {
-  margin-right: 10px;
-  font-size: 18px;
-  color: #a38655;
-}
-
-.container-top {
+  padding: 0;
   width: 100%;
-  text-align: right;
+  display: flex;
+  justify-content: center;
 }
 
-.rol {
-  color: #969696;
-  font-size: 14px;
-}
-
-select {
-  border: 1px solid #ccc;
-  margin-top: 10px;
-  margin-left: 5px;
-  margin-right: 5px;
-  width: 60px;
-  height: 35px;
-  border-radius: 5px;
-}
-
-.sucursales-wrapper {
-  padding: 16px;
-}
-
-
-.table-container {
+.contenedor-boton {
+  display: flex;
   width: 100%;
-  border-radius: 10px;
-  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+}
+
+input {
+  padding: 0.5rem;
   border: 1px solid #ddd;
-  margin-top: 16px;
+  border-radius: 4px;
 }
 
-.table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+.contenedor-principal input {
+  width: 95%;
+  height: 25%;
+
+  justify-content: center;
 }
 
-.table th,
-.table td {
-  padding: 8px;
+.contenedor-interno {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  padding: 0 2%;
 }
 
-.table thead th {
-  background-color: #e7e4e4;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-}
-
-.table tbody td {
-  text-align: center;
-  border-top: 1px solid #ddd;
-}
-
-.table thead th:first-child {
-  border-top-left-radius: 10px;
-}
-
-.table thead th:last-child {
-  border-top-right-radius: 10px;
-}
-
-.table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: 10px;
-}
-
-.table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 10px;
+.config-wrapper {
+  padding: 16px;
 }
 
 .btn {
@@ -415,98 +280,18 @@ select {
   cursor: pointer;
 }
 
-
-#AddSucursalModal {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  background-color: #007bff;
-  cursor: pointer;
-  margin-right: 1rem;
+.boton-switch.activo:hover {
+  padding: 10px 18px;
+  transition: all 0.3s ease;
 }
 
-#BtnCerrar {
-  background-color: rgb(93, 100, 104);
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-.btn-warning {
-  background-color: #ffc107;
-  color: black;
-}
-
-.btn-danger {
-  background-color: #dc3545;
+.activo {
+  background-color: rgb(62, 238, 62);
   color: white;
 }
 
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.inactivo {
+  background-color: rgb(238, 62, 62);
+  color: white;
 }
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 500px;
-  width: 100%;
-}
-
-.form-group {
-  margin-bottom: 16px;
-
-}
-
-.form-group label {
-  display: flexbox;
-  margin-bottom: 8px;
-}
-
-.form-group input {
-  width: 95%;
-  height: 25%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  justify-content: center;
-}
-
-.custom-select {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  height: 35px;
-  font-size: 16px;
-  padding: 5px;
-  background-color: #fff;
-  cursor: pointer;
-  width: 80px;
-  /* Ajusta el ancho a 120px o el valor que prefieras */
-}
-
-.custom-select:focus {
-  outline: none;
-  border-color: #a38655;
-  /* Ajusta el color del borde al de tu diseño */
-}
-
-.custom-select option {
-  font-size: 16px;
-}
-
 </style>

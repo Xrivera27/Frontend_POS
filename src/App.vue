@@ -8,12 +8,6 @@
           <i class="bi" :class="expanded ? 'bi-chevron-double-left' : 'bi-chevron-double-right'"></i>
         </li>
 
-        <!-- Toggle Dark Mode -->
-        <li class="nav-item toggle-btn" @click="toggleDarkMode">
-          <i class="bi" :class="isDarkMode ? 'bi-brightness-high' : 'bi-moon-stars-fill'"></i>
-          <span v-if="expanded" class="tooltip-text">{{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}</span>
-        </li>
-
         <!-- Home -->
         <li v-if="hasPermission('Home')" class="nav-item">
           <router-link to="/home" class="nav-link" :class="{ active: isActive('/home') }">
@@ -131,6 +125,12 @@
             <span v-if="expanded" class="tooltip-text">Cerrar sesión</span>
           </a>
         </li>
+
+        <!-- Toggle Dark Mode -->
+        <li class="nav-item toggle-btn" @click="toggleDarkMode">
+          <i class="bi" :class="isDarkMode ? 'bi-brightness-high' : 'bi-moon-stars-fill'"></i>
+          <span v-if="expanded" class="tooltip-text">{{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}</span>
+        </li> 
       </ul>
     </aside>
 
@@ -156,7 +156,7 @@ export default {
     hasPermission(section) {
       const role = localStorage.getItem('role');
       const permissions = {
-        Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal'],
+        Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced'],
         Gerente: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
         Cajero: ['Home', 'Productos', 'Venta'],
       };

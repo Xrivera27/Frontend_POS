@@ -272,7 +272,7 @@ export default {
 }
 
 .table th {
-  background-color: #f8f9fa;
+  background-color: none;
   font-weight: bold;
 }
 

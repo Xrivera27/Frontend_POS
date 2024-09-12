@@ -364,7 +364,7 @@ select {
 }
 
 .table thead th {
-  background-color: #e7e4e4;
+  background-color: none;
   text-align: center;
   border-bottom: 1px solid #ddd;
 }
