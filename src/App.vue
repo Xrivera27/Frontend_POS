@@ -67,7 +67,7 @@
           <a href="#" class="nav-link">
             <i class="bi bi-cash-stack"></i>
             <span v-if="expanded" class="tooltip-text">Ventas</span>
-            <i class="bi bi-chevron-right" style="margin-left: auto;"></i>
+            <i class="bi bi-chevron-right"></i>
           </a>
           <ul v-show="dropdowns.ventas" class="dropdown-menu">
             <li>
@@ -87,7 +87,7 @@
           <a href="#" class="nav-link">
             <i class="bi bi-cart-plus-fill"></i>
             <span v-if="expanded" class="tooltip-text">Compras</span>
-            <i class="bi bi-chevron-right" style="margin-left: auto;"></i>
+            <i class="bi bi-chevron-right"></i>
           </a>
           <ul v-show="dropdowns.compras" class="dropdown-menu">
             <li>
@@ -113,7 +113,7 @@
       </ul>
     </aside>
 
-    <main class="main-content">
+    <main class="main-content" :class="{ expanded }" >
       <router-view />
     </main>
   </div>
@@ -194,8 +194,21 @@ export default {
   /* Añade espacio al principio del sidebar */
 }
 
+a.nav-link{
+  display: flex;
+  justify-content: center;
+}
+
+ul.nav{
+  padding: 0 15px;
+}
+
 .sidebar.expanded {
   width: 240px;
+}
+
+.main-content.expanded{
+  margin-left: 255px;
 }
 
 .toggle-btn {
@@ -219,6 +232,7 @@ export default {
 }
 
 .nav-item {
+  
   margin-bottom: 10px;
   position: relative;
   justify-content: center;
@@ -229,8 +243,8 @@ export default {
   align-items: center;
   justify-content: start;
   /* Alinea el contenido a la izquierda */
-  padding: 10px 25px;
-  color: #ffb300;
+  padding: 5px 15px;
+  color: #c09d62;
   text-decoration: none;
   transition: background-color 0.3s ease;
   border-radius: 8px;
@@ -238,8 +252,7 @@ export default {
 }
 
 .nav-link i {
-  font-size: 24px;
-  margin-right: 10px;
+  font-size: 20px;
 }
 
 .nav-link:hover {
@@ -247,7 +260,7 @@ export default {
 }
 
 .nav-link.active {
-  background-color: #ffb300;
+  background-color: #c09d62;
   color: #ffffff;
   border-radius: 8px;
 }
@@ -309,9 +322,11 @@ export default {
   width: calc(100% - 80px);
   padding: 20px;
   background-color: #f5f5f5;
+  transition: margin 0.3s ease;
 }
 
 .bi {
-  color: #ffbb1a;
+  color: #c09d62;;
+  font-size: 24px;
 }
 </style>
