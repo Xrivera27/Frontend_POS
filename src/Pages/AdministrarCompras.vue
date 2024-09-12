@@ -6,28 +6,28 @@
   <hr>
 
   <div class="compras-wrapper">
-<div class="opciones">
-    <div class="registros">
-      <span>Mostrar
-        <select v-model="itemsPerPage" class="custom-select">
-          <option value="">Todos</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-          <option value="25">25</option>
-        </select> registros
-      </span>
-    </div>
+    <div class="opciones">
+      <div class="registros">
+        <span>Mostrar
+          <select v-model="itemsPerPage" class="custom-select">
+            <option value="">Todos</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+          </select> registros
+        </span>
+      </div>
 
-    <!-- Botón de exportación PDF -->
-    <ExportButton :columns="columns" :rows="rows" fileName="Compras.pdf" class="export-button"/>
+      <!-- Botón de exportación PDF -->
+      <ExportButton :columns="columns" :rows="rows" fileName="Compras.pdf" class="export-button" />
 
-    <!-- Barra de búsqueda -->
-    <div class="search-bar">
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar compra..." />
+      <!-- Barra de búsqueda -->
+      <div class="search-bar">
+        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar compra..." />
+      </div>
     </div>
-  </div>
 
     <!-- Tabla exportable -->
     <div class="table-container" v-pdf-export ref="table">
@@ -209,8 +209,8 @@ export default {
   justify-content: space-between;
 }
 
-.opciones{
-  display:flex;
+.opciones {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 2%;
@@ -225,7 +225,7 @@ export default {
   border-width: 0.5px;
 }
 
-.export-button{
+.export-button {
   margin: 0;
 }
 
@@ -274,10 +274,6 @@ export default {
 .table th {
   background-color: #f8f9fa;
   font-weight: bold;
-}
-
-.table tr:nth-child(even) {
-  background-color: #f2f2f2;
 }
 
 .modal {
