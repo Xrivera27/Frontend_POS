@@ -35,8 +35,8 @@
             <th>Nombre Administrativo</th>
             <th>Ciudad</th>
             <th>Telefono</th>
+            <th>Direccion</th>
             <th>Correo</th>
-            <th>Dirección</th>
             <th>Acciones</th>
           </tr>
         </thead>

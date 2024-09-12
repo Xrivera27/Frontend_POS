@@ -304,9 +304,11 @@ export default {
 }
 
 .main-content {
-  margin-left: 80px;
+  margin-top: 10px; 
+  margin-left: 100px;
   width: calc(100% - 80px);
   padding: 20px;
+  background-color: #f5f5f5;
 }
 
 .bi {
