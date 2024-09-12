@@ -200,46 +200,46 @@ export default {
 }
 
 .app-wrapper {
-    display: flex;
-    min-height: 100vh;
-  }
-  
-  .sidebar {
-    width: 80px;
-    background-color: #ebebeb;
-    position: fixed;
-    height: 100%;
-    transition: width 0.3s ease;
-    padding-top: 20px;
-  }
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 80px;
+  background-color: #ebebeb;
+  position: fixed;
+  height: 100%;
+  transition: width 0.3s ease;
+  padding-top: 20px;
+}
 
 .sidebar.dark {
   background-color: #333;
 }
 
 #aside-line {
-    width: 60%;
-    height: 1px;
-    background-color: #c09d62;
-    margin: 10px auto;
-  }
-  
-  a.nav-link {
-    display: flex;
-    justify-content: center;
-  }
-  
-  ul.nav {
-    padding: 0 15px;
-  }
-  
-  .sidebar.expanded {
-    width: 240px;
-  }
-  
-  .main-content.expanded {
-    margin-left: 255px;
-  }
+  width: 60%;
+  height: 1px;
+  background-color: #c09d62;
+  margin: 10px auto;
+}
+
+a.nav-link {
+  display: flex;
+  justify-content: center;
+}
+
+ul.nav {
+  padding: 0 15px;
+}
+
+.sidebar.expanded {
+  width: 240px;
+}
+
+.main-content.expanded {
+  margin-left: 255px;
+}
 
 .main-content {
   margin-left: 80px;
@@ -255,73 +255,89 @@ export default {
 }
 
 .toggle-btn {
-    background-color: #d4d4d4;
-    border-radius: 50%;
-    padding: 5px;
-    cursor: pointer;
-    text-align: center;
-    margin: 10px auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
-  }
+  background-color: #d4d4d4;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+  text-align: center;
+  margin: 10px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+}
+
+.toggle-btn i {
+  font-size: 1.5rem; /* Tamaño uniforme para los íconos */
+  color: #c09d62; /* Color del ícono */
+}
+
+.sidebar.dark .toggle-btn {
+  background-color: #555;
+}
+
+.sidebar.dark .toggle-btn i {
+  color: #c09d62; /* Mantiene el color del ícono en modo oscuro */
+}
 
 .tooltip-text {
   margin-left: 10px;
+  font-weight: bold;
+  font-size: 15px;
 }
 
 .nav {
-    list-style: none;
-    padding: 0;
-  }
+  list-style: none;
+  padding: 0;
+}
+
+.nav-item {
+  margin-bottom: 10px;
+  position: relative;
+  justify-content: center;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 5px 15px;
+  color: #c09d62; /* Color del texto y de los íconos */
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  border-radius: 8px;
+}
+
+.nav-link i {
+  font-size: 1.5rem; /* Tamaño uniforme para los íconos */
+  color: inherit; /* Hereda el color del texto */
+}
+
+.nav-link:hover {
+  background-color: #dadada;
+}
+
+.nav-link.active {
+  background-color: #d4d4d4;
+  color: #79552f; /* Color del texto y los íconos en estado activo */
+}
+
+.sidebar.dark .nav-link {
   
-  .nav-item {
-    margin-bottom: 10px;
-    position: relative;
-    justify-content: center;
-  }
-  
-  .nav-link {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 5px 15px;
-    color: #c09d62;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-    border-radius: 8px;
-  }
-  
-  .nav-link i {
-    font-size: 20px;
-  }
-  
-  .nav-link:hover {
-    background-color: #dadada;
-  }
-  
-  .nav-link.active {
-    background-color: #d4d4d4;
-    color: #79552f;
-  }
-  
-  .tooltip-text {
-    margin-left: 10px;
-    font-weight: bold;
-    font-size: 15px;
-  }
-  
-  .dropdown-menu {
-    padding-left: 10px;
-  }
-  
-  .dropdown-menu a {
-    font-size: 14px;
-  }
-  
-  .dropdown-menu a:hover {
-    background-color: #f0f0f0;
-  }
+  color: #c09d62; /* Mantiene el color del texto y los íconos en modo oscuro */
+}
+
+.dropdown-menu {
+  padding-left: 10px;
+}
+
+.dropdown-menu a {
+  font-size: 14px;
+}
+
+.dropdown-menu a:hover {
+  background-color: #f0f0f0;
+}
 </style>
+
