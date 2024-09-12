@@ -2,7 +2,7 @@
   <div class="app-wrapper" :class="{ dark: isDarkMode }">
     <aside ref="sidebar" v-if="!isLoginRoute" class="sidebar" :class="{ expanded, dark: isDarkMode }">
       <ul class="nav flex-column">
-      
+
         <!-- Toggle Sidebar -->
         <li class="nav-item toggle-btn" @click="toggleSidebar">
           <i class="bi" :class="expanded ? 'bi-chevron-double-left' : 'bi-chevron-double-right'"></i>
@@ -71,43 +71,46 @@
         </li>
 
         <!-- Ventas con menú desplegable -->
-        <li v-if="hasPermission('Venta')" class="nav-item dropdown" @click="toggleDropdown('ventas')">
-  <a href="#" class="nav-link">
-    <i class="bi bi-cash-stack"></i>
-    <span v-if="expanded" class="tooltip-text">Ventas</span>
-    <i class="bi bi-chevron-right"></i>
-  </a>
-  <ul :class="{ 'dropdown-menu': true, 'open': dropdowns.ventas }">
-    <li>
-      <router-link to="/administrar-ventas" class="nav-link">Administrar ventas</router-link>
-    </li>
-    <li>
-      <router-link to="/ventas" class="nav-link">Crear venta</router-link>
-    </li>
-    <li>
-      <router-link to="/reporte-ventas" class="nav-link">Reporte de ventas</router-link>
-    </li>
-  </ul>
-</li>
+        <li v-if="hasPermission('Venta')" class="nav-item dropdown" ref="ventasDropdown"
+          @click="toggleDropdown('ventas')">
+          <a href="#" class="nav-link">
+            <i class="bi bi-cash-stack"></i>
+            <span v-if="expanded" class="tooltip-text">Ventas</span>
+            <i class="bi bi-chevron-right"></i>
+          </a>
+          <ul :class="{ 'dropdown-menu': true, 'open': dropdowns.ventas }">
+            <li>
+              <router-link to="/administrar-ventas" class="nav-link">Administrar ventas</router-link>
+            </li>
+            <li>
+              <router-link to="/ventas" class="nav-link">Crear venta</router-link>
+            </li>
+            <li>
+              <router-link to="/reporte-ventas" class="nav-link">Reporte de ventas</router-link>
+            </li>
+          </ul>
+        </li>
 
-<li v-if="hasPermission('Compra')" class="nav-item dropdown" @click="toggleDropdown('compras')">
-  <a href="#" class="nav-link">
-    <i class="bi bi-cart-plus-fill"></i>
-    <span v-if="expanded" class="tooltip-text">Compras</span>
-    <i class="bi bi-chevron-right"></i>
-  </a>
-  <ul :class="{ 'dropdown-menu': true, 'open': dropdowns.compras }">
-    <li>
-      <router-link to="/administrar-compras" class="nav-link">Administrar compras</router-link>
-    </li>
-    <li>
-      <router-link to="/compras" class="nav-link">Crear compra</router-link>
-    </li>
-    <li>
-      <router-link to="/reporte-compras" class="nav-link">Reporte de compras</router-link>
-    </li>
-  </ul>
-</li>
+        <!-- Compras con menú desplegable -->
+        <li v-if="hasPermission('Compra')" class="nav-item dropdown" ref="comprasDropdown"
+          @click="toggleDropdown('compras')">
+          <a href="#" class="nav-link">
+            <i class="bi bi-cart-plus-fill"></i>
+            <span v-if="expanded" class="tooltip-text">Compras</span>
+            <i class="bi bi-chevron-right"></i>
+          </a>
+          <ul :class="{ 'dropdown-menu': true, 'open': dropdowns.compras }">
+            <li>
+              <router-link to="/administrar-compras" class="nav-link">Administrar compras</router-link>
+            </li>
+            <li>
+              <router-link to="/compras" class="nav-link">Crear compra</router-link>
+            </li>
+            <li>
+              <router-link to="/reporte-compras" class="nav-link">Reporte de compras</router-link>
+            </li>
+          </ul>
+        </li>
       </ul>
 
       <div id="aside-line"></div>
@@ -150,34 +153,65 @@ export default {
     };
   },
   methods: {
-  hasPermission(section) {
-    const role = localStorage.getItem('role');
-    const permissions = {
-      Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal'],
-      Gerente: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
-      Cajero: ['Home', 'Productos', 'Venta'],
-    };
-    return role && permissions[role]?.includes(section);
+    hasPermission(section) {
+      const role = localStorage.getItem('role');
+      const permissions = {
+        Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal'],
+        Gerente: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
+        Cajero: ['Home', 'Productos', 'Venta'],
+      };
+      return role && permissions[role]?.includes(section);
+    },
+    toggleDropdown(dropdown) {
+      // Cerrar todos los dropdowns excepto el que se acaba de hacer clic
+      for (const key in this.dropdowns) {
+        if (key !== dropdown) {
+          this.dropdowns[key] = false;
+        }
+      }
+      // Alternar el dropdown actual
+      this.dropdowns[dropdown] = !this.dropdowns[dropdown];
+    },
+    toggleSidebar() {
+      this.expanded = !this.expanded;
+    },
+    isActive(route) {
+      return this.$route.path === route;
+    },
+    toggleDarkMode() {
+      this.isDarkMode = !this.isDarkMode;
+      localStorage.setItem('isDarkMode', this.isDarkMode);
+    },
+    logout() {
+      localStorage.clear();
+      this.$router.push('/login');
+    },
+    handleClickOutside(event) {
+      // Verificar si el clic fue fuera de los dropdowns
+      if (
+        this.$refs.ventasDropdown &&
+        !this.$refs.ventasDropdown.contains(event.target) &&
+        !this.$refs.sidebar.contains(event.target)
+      ) {
+        this.dropdowns.ventas = false;
+      }
+      if (
+        this.$refs.comprasDropdown &&
+        !this.$refs.comprasDropdown.contains(event.target) &&
+        !this.$refs.sidebar.contains(event.target)
+      ) {
+        this.dropdowns.compras = false;
+      }
+    },
   },
-  toggleDropdown(dropdown) {
-    console.log(`Toggle dropdown: ${dropdown}`); // Agrega esto para depurar
-    this.dropdowns[dropdown] = !this.dropdowns[dropdown];
+  mounted() {
+    // Registrar el evento global para detectar clics fuera de los dropdowns
+    document.addEventListener("click", this.handleClickOutside);
   },
-  toggleSidebar() {
-    this.expanded = !this.expanded;
+  beforeUnmount() {
+    // Remover el evento al destruir el componente
+    document.removeEventListener("click", this.handleClickOutside);
   },
-  isActive(route) {
-    return this.$route.path === route;
-  },
-  toggleDarkMode() {
-    this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('isDarkMode', this.isDarkMode);
-  },
-  logout() {
-    localStorage.clear();
-    this.$router.push('/login');
-  },
-},
   computed: {
     isLoginRoute() {
       return this.$route.path.startsWith('/login');
@@ -190,6 +224,7 @@ export default {
     },
   },
 };
+
 </script>
 
 <style scoped>
@@ -269,8 +304,10 @@ ul.nav {
 }
 
 .toggle-btn i {
-  font-size: 1.5rem; /* Tamaño uniforme para los íconos */
-  color: #c09d62; /* Color del ícono */
+  font-size: 1.5rem;
+  /* Tamaño uniforme para los íconos */
+  color: #c09d62;
+  /* Color del ícono */
 }
 
 .sidebar.dark .toggle-btn {
@@ -278,7 +315,8 @@ ul.nav {
 }
 
 .sidebar.dark .toggle-btn i {
-  color: #c09d62; /* Mantiene el color del ícono en modo oscuro */
+  color: #c09d62;
+  /* Mantiene el color del ícono en modo oscuro */
 }
 
 .tooltip-text {
@@ -303,15 +341,18 @@ ul.nav {
   align-items: center;
   justify-content: flex-start;
   padding: 5px 15px;
-  color: #c09d62; /* Color del texto y de los íconos */
+  color: #c09d62;
+  /* Color del texto y de los íconos */
   text-decoration: none;
   transition: background-color 0.3s ease;
   border-radius: 8px;
 }
 
 .nav-link i {
-  font-size: 1.5rem; /* Tamaño uniforme para los íconos */
-  color: inherit; /* Hereda el color del texto */
+  font-size: 1.5rem;
+  /* Tamaño uniforme para los íconos */
+  color: inherit;
+  /* Hereda el color del texto */
 }
 
 .nav-link:hover {
@@ -320,21 +361,25 @@ ul.nav {
 
 .nav-link.active {
   background-color: #d4d4d4;
-  color: #79552f; /* Color del texto y los íconos en estado activo */
+  color: #79552f;
+  /* Color del texto y los íconos en estado activo */
 }
 
 /* Color de texto del sidebar en modo claro */
 .sidebar a.nav-link {
-  color: #c09d62; /* Color de los íconos y texto */
+  color: #c09d62;
+  /* Color de los íconos y texto */
 }
 
 /* Color de texto del sidebar en modo oscuro */
 .sidebar.dark a.nav-link {
-  color: #c09d62; /* Color del texto y los íconos en modo oscuro */
+  color: #c09d62;
+  /* Color del texto y los íconos en modo oscuro */
 }
 
 .sidebar.dark .nav-link.active {
-  color: #79552f; /* Color del texto y los íconos en estado activo en modo oscuro */
+  color: #79552f;
+  /* Color del texto y los íconos en estado activo en modo oscuro */
 }
 
 .dropdown-menu a {
@@ -346,7 +391,6 @@ ul.nav {
 }
 
 .dropdown-menu {
-  display: block;
   background-color: #ebebeb;
   padding: 0;
   position: absolute;
@@ -368,4 +412,3 @@ ul.nav {
   pointer-events: auto;
 }
 </style>
-
