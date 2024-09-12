@@ -101,9 +101,19 @@
             </li>
           </ul>
         </li>
+      </ul>
+<div id="aside-line"></div>
+<ul class="nav flex-column">
+        <!-- Configuracion -->
+        
 
-
-        <!-- Cerrar sesión -->
+        <li class="nav-item">
+          <router-link to="/config-page" class="nav-link" :class="{ active: isActive('/config-page') }">
+            <i class="bi bi-gear-fill"></i>
+            <span v-if="expanded" class="tooltip-text">Configuración</span>
+          </router-link>
+        </li>
+<!-- Cerrar sesión -->
         <li class="nav-item">
           <a @click="logout" class="nav-link" style="cursor: pointer;">
             <i class="bi bi-box-arrow-right"></i>
@@ -191,6 +201,12 @@ export default {
   height: 100%;
   transition: width 0.3s ease;
   padding-top: 20px;
+}
+
+#aside-line{
+  width: 100%;
+  height: 1px;
+  background-color: #c09d62;
 }
 
 a.nav-link {

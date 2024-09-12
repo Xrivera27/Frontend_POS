@@ -15,6 +15,8 @@ import AdministrarCompras from '@/Pages/AdministrarCompras.vue';
 import SucursalesList from '@/Pages/SucursalesList.vue';
 import PromocionesProductos from '@/Pages/PromocionesProductos.vue';
 import PromocionesCategorias from '@/Pages/PromocionesCategorias.vue';
+import ConfigPage from '@/Pages/ConfigPage.vue';
+
 
 function getRole() {
   return localStorage.getItem('role'); // Obtiene el rol del usuario desde localStorage
@@ -112,6 +114,14 @@ const routes = [
     name: 'Promociones-categorias',
     component: PromocionesCategorias,
   },
+
+  {
+    path: '/config-page',
+    name: 'Config-page',
+    component: ConfigPage,
+  },
+
+  
 
 
   {
