@@ -17,7 +17,7 @@
       </div>
 
     </div>
-
+<div class="graphics-container" >
     <!-- Gráfico de ventas y Productos más vendidos (más pequeños) -->
     <div class="charts-container">
       <div class="line-chart">
@@ -29,7 +29,9 @@
     </div>
 
     <!-- Tabla de últimas ventas -->
-    <table class="sales-table">
+   
+  </div>
+  <table class="sales-table">
       <thead>
         <tr>
           <th>Nombre</th>
@@ -156,6 +158,10 @@ export default {
   margin-bottom: 2rem;
 }
 
+.graphics-container{
+  padding: 0 5%;
+}
+
 .card {
   background-color: #f7f7f7;
   padding: 1.5rem;
@@ -212,8 +218,6 @@ export default {
 .line-chart,
 .pie-chart {
   width: 30%;
-  margin-left: 150px;
-  margin-right: 150px;
 }
 
 /* Estilo para la tabla de ventas */

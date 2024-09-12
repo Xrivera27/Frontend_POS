@@ -439,7 +439,7 @@ select {
 }
 
 .btn-warning {
-  background-color: #c09d62;;
+  background-color: #ffc107;
   color: black;
 }
 
