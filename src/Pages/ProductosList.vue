@@ -101,9 +101,12 @@
           <input v-model="productoForm.categoria" type="text" required>
         </div>
 
-        <div class="form-group">
-          <label>Stock:</label>
+        <div class="form-group stock-group">
+          <label>Stock max:</label>
           <input v-model="productoForm.stock" type="text" required>
+          <label>Stock min:</label>
+          <input type="text" required>
+          
         </div>
 
         <div class="form-group">
@@ -471,8 +474,9 @@ export default {
 
 .form-group {
   margin-bottom: 16px;
-
 }
+
+
 
 .form-group label {
   display: flexbox;
@@ -488,6 +492,17 @@ export default {
   justify-content: center;
 }
 
+.stock-group{
+  
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.stock-group label{
+  margin: 5px;
+}
 
 button {
   cursor: pointer;

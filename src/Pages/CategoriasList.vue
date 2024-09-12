@@ -10,6 +10,12 @@
     <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
       Categoría</button>
 
+      <RouterLink
+    to="promociones-categorias"
+    >
+    <button class="button-promocion" >Promociones</button>
+    </RouterLink>
+
     <div class="registros">
       <span>Mostrar
         <select v-model="itemsPerPage" class="custom-select">
@@ -172,6 +178,15 @@ export default {
   display:flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.button-promocion {
+    background-color: #4cafaf;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
 }
 
 .busqueda {
