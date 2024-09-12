@@ -72,43 +72,42 @@
 
         <!-- Ventas con menú desplegable -->
         <li v-if="hasPermission('Venta')" class="nav-item dropdown" @click="toggleDropdown('ventas')">
-          <a href="#" class="nav-link">
-            <i class="bi bi-cash-stack"></i>
-            <span v-if="expanded" class="tooltip-text">Ventas</span>
-            <i class="bi bi-chevron-right"></i>
-          </a>
-          <ul v-show="dropdowns.ventas" class="dropdown-menu">
-            <li>
-              <router-link to="/administrar-ventas" class="nav-link">Administrar ventas</router-link>
-            </li>
-            <li>
-              <router-link to="/ventas" class="nav-link">Crear venta</router-link>
-            </li>
-            <li>
-              <router-link to="/reporte-ventas" class="nav-link">Reporte de ventas</router-link>
-            </li>
-          </ul>
-        </li>
+  <a href="#" class="nav-link">
+    <i class="bi bi-cash-stack"></i>
+    <span v-if="expanded" class="tooltip-text">Ventas</span>
+    <i class="bi bi-chevron-right"></i>
+  </a>
+  <ul :class="{ 'dropdown-menu': true, 'open': dropdowns.ventas }">
+    <li>
+      <router-link to="/administrar-ventas" class="nav-link">Administrar ventas</router-link>
+    </li>
+    <li>
+      <router-link to="/ventas" class="nav-link">Crear venta</router-link>
+    </li>
+    <li>
+      <router-link to="/reporte-ventas" class="nav-link">Reporte de ventas</router-link>
+    </li>
+  </ul>
+</li>
 
-        <!-- Compras con menú desplegable -->
-        <li v-if="hasPermission('Compra')" class="nav-item dropdown" @click="toggleDropdown('compras')">
-          <a href="#" class="nav-link">
-            <i class="bi bi-cart-plus-fill"></i>
-            <span v-if="expanded" class="tooltip-text">Compras</span>
-            <i class="bi bi-chevron-right"></i>
-          </a>
-          <ul v-show="dropdowns.compras" class="dropdown-menu">
-            <li>
-              <router-link to="/administrar-compras" class="nav-link">Administrar compras</router-link>
-            </li>
-            <li>
-              <router-link to="/compras" class="nav-link">Crear compra</router-link>
-            </li>
-            <li>
-              <router-link to="/reporte-compras" class="nav-link">Reporte de compras</router-link>
-            </li>
-          </ul>
-        </li>
+<li v-if="hasPermission('Compra')" class="nav-item dropdown" @click="toggleDropdown('compras')">
+  <a href="#" class="nav-link">
+    <i class="bi bi-cart-plus-fill"></i>
+    <span v-if="expanded" class="tooltip-text">Compras</span>
+    <i class="bi bi-chevron-right"></i>
+  </a>
+  <ul :class="{ 'dropdown-menu': true, 'open': dropdowns.compras }">
+    <li>
+      <router-link to="/administrar-compras" class="nav-link">Administrar compras</router-link>
+    </li>
+    <li>
+      <router-link to="/compras" class="nav-link">Crear compra</router-link>
+    </li>
+    <li>
+      <router-link to="/reporte-compras" class="nav-link">Reporte de compras</router-link>
+    </li>
+  </ul>
+</li>
       </ul>
 
       <div id="aside-line"></div>
@@ -151,33 +150,34 @@ export default {
     };
   },
   methods: {
-    hasPermission(section) {
-      const role = localStorage.getItem('role');
-      const permissions = {
-        Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal'],
-        Gerente: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
-        Cajero: ['Home', 'Productos', 'Venta'],
-      };
-      return role && permissions[role]?.includes(section);
-    },
-    toggleDropdown(dropdown) {
-      this.dropdowns[dropdown] = !this.dropdowns[dropdown];
-    },
-    toggleSidebar() {
-      this.expanded = !this.expanded;
-    },
-    isActive(route) {
-      return this.$route.path === route;
-    },
-    toggleDarkMode() {
-      this.isDarkMode = !this.isDarkMode;
-      localStorage.setItem('isDarkMode', this.isDarkMode);
-    },
-    logout() {
-      localStorage.clear();
-      this.$router.push('/login');
-    },
+  hasPermission(section) {
+    const role = localStorage.getItem('role');
+    const permissions = {
+      Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal'],
+      Gerente: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
+      Cajero: ['Home', 'Productos', 'Venta'],
+    };
+    return role && permissions[role]?.includes(section);
   },
+  toggleDropdown(dropdown) {
+    console.log(`Toggle dropdown: ${dropdown}`); // Agrega esto para depurar
+    this.dropdowns[dropdown] = !this.dropdowns[dropdown];
+  },
+  toggleSidebar() {
+    this.expanded = !this.expanded;
+  },
+  isActive(route) {
+    return this.$route.path === route;
+  },
+  toggleDarkMode() {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('isDarkMode', this.isDarkMode);
+  },
+  logout() {
+    localStorage.clear();
+    this.$router.push('/login');
+  },
+},
   computed: {
     isLoginRoute() {
       return this.$route.path.startsWith('/login');
@@ -323,13 +323,18 @@ ul.nav {
   color: #79552f; /* Color del texto y los íconos en estado activo */
 }
 
-.sidebar.dark .nav-link {
-  
-  color: #c09d62; /* Mantiene el color del texto y los íconos en modo oscuro */
+/* Color de texto del sidebar en modo claro */
+.sidebar a.nav-link {
+  color: #c09d62; /* Color de los íconos y texto */
 }
 
-.dropdown-menu {
-  padding-left: 10px;
+/* Color de texto del sidebar en modo oscuro */
+.sidebar.dark a.nav-link {
+  color: #c09d62; /* Color del texto y los íconos en modo oscuro */
+}
+
+.sidebar.dark .nav-link.active {
+  color: #79552f; /* Color del texto y los íconos en estado activo en modo oscuro */
 }
 
 .dropdown-menu a {
@@ -338,6 +343,29 @@ ul.nav {
 
 .dropdown-menu a:hover {
   background-color: #f0f0f0;
+}
+
+.dropdown-menu {
+  display: block;
+  background-color: #ebebeb;
+  padding: 0;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  width: 220px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: max-height 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+.dropdown-menu.open {
+  max-height: 300px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 </style>
 
