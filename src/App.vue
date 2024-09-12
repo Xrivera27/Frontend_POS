@@ -156,7 +156,7 @@ export default {
     hasPermission(section) {
       const role = localStorage.getItem('role');
       const permissions = {
-        Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal'],
+        Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal','config-avanced'],
         Gerente: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
         Cajero: ['Home', 'Productos', 'Venta'],
       };
