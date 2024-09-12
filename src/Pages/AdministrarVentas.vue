@@ -7,27 +7,36 @@
 
   <div class="ventas-wrapper">
     <div class="opciones">
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select> registros
-        </span>
-      </div>
+  <div class="registros">
+    <span>Mostrar
+      <select v-model="itemsPerPage" class="custom-select">
+        <option value="">Todos</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+        <option value="25">25</option>
+      </select> registros
+    </span>
+  </div>
 
-      <!-- Botón de exportación PDF -->
-      <ExportButton :columns="columns" :rows="rows" fileName="Ventas.pdf" class="export-button" />
+  <!-- Filtros de fecha -->
+  <div class="date-filter">
+    <label for="start-date">Desde: </label>
+    <input type="date" id="start-date" v-model="startDate">
+    <label for="end-date">Hasta: </label>
+    <input type="date" id="end-date" v-model="endDate">
+    
+  </div>
 
-      <!-- Barra de búsqueda -->
-      <div class="search-bar">
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar venta..." />
-      </div>
-    </div>
+  <!-- Botón de exportación PDF -->
+  <ExportButton :columns="columns" :rows="filteredRows" fileName="Ventas.pdf" class="export-button" />
+
+  <!-- Barra de búsqueda -->
+  <div class="search-bar">
+    <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar venta..." />
+  </div>
+</div>
 
     <!-- Tabla exportable -->
     <div class="table-container" v-pdf-export ref="table">
@@ -119,10 +128,12 @@ export default {
   },
   data() {
     return {
-      searchQuery: '',
-      itemsPerPage: "",
-      isDetallesModalOpen: false,
-      ventaDetalles: [],
+      searchQuery: '', // Para la búsqueda de texto
+      itemsPerPage: "", // Control de paginación
+      startDate: '', // Fecha de inicio para el filtro
+      endDate: '', // Fecha de fin para el filtro
+      isDetallesModalOpen: false, // Modal de detalles
+      ventaDetalles: [], // Detalles de la venta seleccionada
       ventas: [
         { codigo: '1504', nombre: 'Mortal Kombat X', cantidad: 1, preciounitario: 'L. 450.00', descuento: 'L. 50.00', total: 'L. 400.00', fechaHora: '2017-12-11 14:30' },
         { codigo: '1505', nombre: 'Call of Duty: Modern Warfare', cantidad: 2, preciounitario: 'L. 600.00', descuento: 'L. 60.00', total: 'L. 1140.00', fechaHora: '2020-05-21 09:15' },
@@ -140,38 +151,71 @@ export default {
         { header: 'Total', dataKey: 'total' },
         { header: 'Fecha y Hora', dataKey: 'fechaHora' }
       ],
-      rows: []
+      rows: [] // Aquí se almacenarán las filas generadas para la tabla
     };
   },
   computed: {
+    // Filtro de ventas basado en búsqueda y fechas
     filteredVentas() {
-      return this.ventas.filter(venta =>
-        venta.codigo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        venta.nombre.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
+      return this.ventas.filter(venta => {
+        const ventaFecha = new Date(venta.fechaHora); // Convierte la fecha de la venta a un objeto Date
+        const matchesSearchQuery =
+          venta.codigo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          venta.nombre.toLowerCase().includes(this.searchQuery.toLowerCase());
+        const matchesDateRange =
+          (!this.startDate || ventaFecha >= new Date(this.startDate)) &&
+          (!this.endDate || ventaFecha <= new Date(this.endDate));
+
+        return matchesSearchQuery && matchesDateRange;
+      });
     },
+    // Paginación de ventas
     paginatedVentas() {
       if (this.itemsPerPage === "" || this.itemsPerPage === null) {
-        return this.filteredVentas;
+        return this.filteredVentas; // Si no hay paginación, muestra todas las ventas filtradas
       } else {
-        return this.filteredVentas.slice(0, parseInt(this.itemsPerPage));
+        return this.filteredVentas.slice(0, parseInt(this.itemsPerPage)); // Limita el número de ventas según la paginación
       }
+    },
+    // Genera las filas que se mostrarán en la tabla
+    filteredRows() {
+      return this.paginatedVentas.map((venta, index) => ({
+        index: index + 1,
+        codigo: venta.codigo,
+        nombre: venta.nombre,
+        cantidad: venta.cantidad,
+        preciounitario: venta.preciounitario,
+        descuento: venta.descuento,
+        total: venta.total,
+        fechaHora: venta.fechaHora
+      }));
     }
   },
   methods: {
+    // Mostrar detalles de la venta seleccionada
     showDetalles(index) {
-      // Muestra los detalles de la venta seleccionada
       this.ventaDetalles = [
-        { codigo: this.ventas[index].codigo, nombre: this.ventas[index].nombre, cantidad: this.ventas[index].cantidad, preciounitario: this.ventas[index].preciounitario, descuento: this.ventas[index].descuento, rtnCliente: '12345678901234', subtotal: this.ventas[index].cantidad * parseFloat(this.ventas[index].preciounitario.replace('L. ', '')), total: this.ventas[index].total, fechaHora: this.ventas[index].fechaHora }
+        {
+          codigo: this.ventas[index].codigo,
+          nombre: this.ventas[index].nombre,
+          cantidad: this.ventas[index].cantidad,
+          preciounitario: this.ventas[index].preciounitario,
+          descuento: this.ventas[index].descuento,
+          rtnCliente: '12345678901234',
+          subtotal: this.ventas[index].cantidad * parseFloat(this.ventas[index].preciounitario.replace('L. ', '')),
+          total: this.ventas[index].total,
+          fechaHora: this.ventas[index].fechaHora
+        }
       ];
       this.isDetallesModalOpen = true;
     },
+    // Cerrar el modal de detalles
     closeDetallesModal() {
       this.isDetallesModalOpen = false;
       this.ventaDetalles = [];
     },
+    // Generar las filas para mostrar en la tabla
     generateRows() {
-      // Genera las filas basadas en las ventas paginadas
       this.rows = this.paginatedVentas.map((venta, index) => ({
         index: index + 1,
         codigo: venta.codigo,
@@ -183,6 +227,10 @@ export default {
         fechaHora: venta.fechaHora
       }));
       console.log('Filas generadas:', this.rows);
+    },
+    // Aplicar el filtro por fechas y regenerar las filas
+    applyDateFilter() {
+      this.generateRows(); // Regenerar las filas después de aplicar el filtro de fechas
     }
   },
   watch: {
@@ -334,4 +382,35 @@ export default {
   border-radius: 5px;
   border: 1px solid #ced4da;
 }
+
+.date-filter {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.date-filter label {
+  margin-right: 10px;
+}
+
+.date-filter input {
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  margin-right: 20px;
+}
+
+.date-filter button {
+  padding: 5px 10px;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.date-filter button:hover {
+  background-color: #0056b3;
+}
+
 </style>
