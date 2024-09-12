@@ -113,7 +113,7 @@
       </ul>
     </aside>
 
-    <main class="main-content" :class="{ expanded }" >
+    <main class="main-content" :class="{ expanded }">
       <router-view />
     </main>
   </div>
@@ -161,11 +161,11 @@ export default {
   },
 
   watch: {
-  '$route.path'() {
-    // Colapsar el sidebar cuando se cambia de ruta
-    this.expanded = false;
+    '$route.path'() {
+      // Colapsar el sidebar cuando se cambia de ruta
+      this.expanded = false;
+    }
   }
-}
 
 };
 
@@ -191,15 +191,15 @@ export default {
   height: 100%;
   transition: width 0.3s ease;
   padding-top: 20px;
-  /* Añade espacio al principio del sidebar */
 }
 
-a.nav-link{
+a.nav-link {
   display: flex;
   justify-content: center;
+  /* Centra el ícono cuando está colapsado */
 }
 
-ul.nav{
+ul.nav {
   padding: 0 15px;
 }
 
@@ -207,7 +207,7 @@ ul.nav{
   width: 240px;
 }
 
-.main-content.expanded{
+.main-content.expanded {
   margin-left: 255px;
 }
 
@@ -218,7 +218,6 @@ ul.nav{
   cursor: pointer;
   text-align: center;
   margin: 10px auto;
-  /* Centra el botón horizontalmente */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -232,7 +231,6 @@ ul.nav{
 }
 
 .nav-item {
-  
   margin-bottom: 10px;
   position: relative;
   justify-content: center;
@@ -241,14 +239,13 @@ ul.nav{
 .nav-link {
   display: flex;
   align-items: center;
-  justify-content: start;
-  /* Alinea el contenido a la izquierda */
+  justify-content: flex-start;
+  /* Alinea el contenido a la izquierda cuando está expandido */
   padding: 5px 15px;
   color: #c09d62;
   text-decoration: none;
   transition: background-color 0.3s ease;
   border-radius: 8px;
-  /* Redondeado del borde para un efecto más suave */
 }
 
 .nav-link i {
@@ -288,36 +285,25 @@ ul.nav{
   left: 100%;
   top: 0;
   width: 220px;
-
   max-height: 0;
-  /* Esconde el menú cuando no está desplegado */
+  /* Oculto cuando no está desplegado */
   overflow: hidden;
-  /* Asegura que el contenido no se desborde */
   opacity: 0;
-  /* Invisibilidad inicial */
   transform: translateY(-10px);
-  /* Mueve ligeramente hacia arriba al estar oculto */
   transition: max-height 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
-  /* Aplica la transición */
   pointer-events: none;
-  /* Desactiva eventos cuando está oculto */
 }
-
 
 .nav-item:hover .dropdown-menu,
 .dropdown-menu.open {
   max-height: 300px;
-  /* Altura máxima cuando está desplegado (ajusta según el contenido) */
   opacity: 1;
-  /* Totalmente visible */
   transform: translateY(0);
-  /* Retorna a su posición original */
   pointer-events: auto;
-  /* Reactiva eventos */
 }
 
 .main-content {
-  margin-top: 10px; 
+  margin-top: 10px;
   margin-left: 100px;
   width: calc(100% - 80px);
   padding: 20px;
@@ -326,7 +312,17 @@ ul.nav{
 }
 
 .bi {
-  color: #c09d62;;
+  color: #c09d62;
   font-size: 24px;
+}
+
+.sidebar.expanded .nav-link {
+  justify-content: flex-start;
+  /* Alinea el contenido a la izquierda cuando el sidebar está expandido */
+}
+
+.sidebar .nav-link {
+  justify-content: center;
+  /* Centra el ícono cuando el sidebar está colapsado */
 }
 </style>
