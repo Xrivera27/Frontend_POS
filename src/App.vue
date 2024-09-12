@@ -159,7 +159,17 @@ export default {
       return this.$route.path.startsWith('/login');
     }
   },
+
+  watch: {
+  '$route.path'() {
+    // Colapsar el sidebar cuando se cambia de ruta
+    this.expanded = false;
+  }
+}
+
 };
+
+
 </script>
 
 <style scoped>
