@@ -1,11 +1,19 @@
 <template>
-  <div class="app-wrapper">
-    <aside ref="sidebar" v-if="!isLoginRoute" class="sidebar" :class="{ expanded }">
-
+  <div class="app-wrapper" :class="{ dark: isDarkMode }">
+    <aside ref="sidebar" v-if="!isLoginRoute" class="sidebar" :class="{ expanded, dark: isDarkMode }">
       <ul class="nav flex-column">
+      
+        <!-- Toggle Sidebar -->
         <li class="nav-item toggle-btn" @click="toggleSidebar">
           <i class="bi" :class="expanded ? 'bi-chevron-double-left' : 'bi-chevron-double-right'"></i>
         </li>
+
+        <!-- Toggle Dark Mode -->
+        <li class="nav-item toggle-btn" @click="toggleDarkMode">
+          <i class="bi" :class="isDarkMode ? 'bi-brightness-high' : 'bi-moon-stars-fill'"></i>
+          <span v-if="expanded" class="tooltip-text">{{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}</span>
+        </li>
+
         <!-- Home -->
         <li v-if="hasPermission('Home')" class="nav-item">
           <router-link to="/home" class="nav-link" :class="{ active: isActive('/home') }">
@@ -77,7 +85,7 @@
               <router-link to="/ventas" class="nav-link">Crear venta</router-link>
             </li>
             <li>
-              <router-link to="/administrar-ventas" class="nav-link">Reporte de ventas</router-link>
+              <router-link to="/reporte-ventas" class="nav-link">Reporte de ventas</router-link>
             </li>
           </ul>
         </li>
@@ -97,22 +105,23 @@
               <router-link to="/compras" class="nav-link">Crear compra</router-link>
             </li>
             <li>
-              <router-link to="/administrar-compras" class="nav-link">Reporte de compras</router-link>
+              <router-link to="/reporte-compras" class="nav-link">Reporte de compras</router-link>
             </li>
           </ul>
         </li>
       </ul>
+
       <div id="aside-line"></div>
+
       <ul class="nav flex-column">
-        <!-- Configuracion -->
-
-
+        <!-- Configuración -->
         <li class="nav-item">
           <router-link to="/config-page" class="nav-link" :class="{ active: isActive('/config-page') }">
             <i class="bi bi-gear-fill"></i>
             <span v-if="expanded" class="tooltip-text">Configuración</span>
           </router-link>
         </li>
+
         <!-- Cerrar sesión -->
         <li class="nav-item">
           <a @click="logout" class="nav-link" style="cursor: pointer;">
@@ -123,7 +132,7 @@
       </ul>
     </aside>
 
-    <main class="main-content" :class="{ expanded }">
+    <main class="main-content" :class="{ expanded, dark: isDarkMode }">
       <router-view />
     </main>
   </div>
@@ -136,8 +145,9 @@ export default {
       expanded: false,
       dropdowns: {
         ventas: false,
-        compras: false
-      }
+        compras: false,
+      },
+      isDarkMode: localStorage.getItem('isDarkMode') === 'true',
     };
   },
   methods: {
@@ -146,7 +156,7 @@ export default {
       const permissions = {
         Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal'],
         Gerente: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
-        Cajero: ['Home', 'Productos', 'Venta']
+        Cajero: ['Home', 'Productos', 'Venta'],
       };
       return role && permissions[role]?.includes(section);
     },
@@ -159,27 +169,27 @@ export default {
     isActive(route) {
       return this.$route.path === route;
     },
+    toggleDarkMode() {
+      this.isDarkMode = !this.isDarkMode;
+      localStorage.setItem('isDarkMode', this.isDarkMode);
+    },
     logout() {
       localStorage.clear();
       this.$router.push('/login');
-    }
+    },
   },
   computed: {
     isLoginRoute() {
       return this.$route.path.startsWith('/login');
-    }
+    },
   },
-
   watch: {
     '$route.path'() {
       // Colapsar el sidebar cuando se cambia de ruta
       this.expanded = false;
-    }
-  }
-
+    },
+  },
 };
-
-
 </script>
 
 <style scoped>
@@ -190,156 +200,128 @@ export default {
 }
 
 .app-wrapper {
-  display: flex;
-  min-height: 100vh;
-}
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  .sidebar {
+    width: 80px;
+    background-color: #ebebeb;
+    position: fixed;
+    height: 100%;
+    transition: width 0.3s ease;
+    padding-top: 20px;
+  }
 
-.sidebar {
-  width: 80px;
-  background-color: #ebebeb;
-  position: fixed;
-  height: 100%;
-  transition: width 0.3s ease;
-  padding-top: 20px;
+.sidebar.dark {
+  background-color: #333;
 }
 
 #aside-line {
-  width: 60%;
-  height: 1px;
-  background-color: #c09d62;
-  margin: 10px auto;
+    width: 60%;
+    height: 1px;
+    background-color: #c09d62;
+    margin: 10px auto;
+  }
+  
+  a.nav-link {
+    display: flex;
+    justify-content: center;
+  }
+  
+  ul.nav {
+    padding: 0 15px;
+  }
+  
+  .sidebar.expanded {
+    width: 240px;
+  }
+  
+  .main-content.expanded {
+    margin-left: 255px;
+  }
+
+.main-content {
+  margin-left: 80px;
+  padding: 20px;
+  width: 100%;
+  transition: margin-left 0.3s ease, background-color 0.3s ease;
+  background-color: #f5f5f5;
 }
 
-a.nav-link {
-  display: flex;
-  justify-content: center;
-  /* Centra el ícono cuando está colapsado */
-}
-
-ul.nav {
-  padding: 0 15px;
-}
-
-.sidebar.expanded {
-  width: 240px;
-}
-
-.main-content.expanded {
-  margin-left: 255px;
+.main-content.dark {
+  background-color: #1e1e1e;
+  color: #ffffff;
 }
 
 .toggle-btn {
-  background-color: #d4d4d4;
-  border-radius: 50%;
-  padding: 5px;
-  cursor: pointer;
-  text-align: center;
-  margin: 10px auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 40px;
-  height: 40px;
+    background-color: #d4d4d4;
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
+    text-align: center;
+    margin: 10px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+  }
+
+.tooltip-text {
+  margin-left: 10px;
 }
 
 .nav {
-  list-style: none;
-  padding: 0;
-}
-
-.nav-item {
-  margin-bottom: 10px;
-  position: relative;
-  justify-content: center;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  /* Alinea el contenido a la izquierda cuando está expandido */
-  padding: 5px 15px;
-  color: #c09d62;
-  text-decoration: none;
-  transition: background-color 0.3s ease;
-  border-radius: 8px;
-}
-
-.nav-link i {
-  font-size: 20px;
-}
-
-.nav-link:hover {
-  background-color: #cecece;
-}
-
-.nav-link.active {
-  background-color: #c09d62;
-  color: #ffffff;
-  border-radius: 8px;
-}
-
-.nav-link.active i {
-  color: #ffffff;
-}
-
-.tooltip-text {
-  display: none;
-  /* Oculta el texto cuando el sidebar está colapsado */
-}
-
-.sidebar.expanded .tooltip-text {
-  display: inline-block;
-  margin-left: 10px;
-  /* Añade espacio entre el ícono y el texto */
-}
-
-.dropdown-menu {
-  display: block;
-  background-color: #ebebeb;
-  padding: 0;
-  position: absolute;
-  left: 100%;
-  top: 0;
-  width: 220px;
-  max-height: 0;
-  /* Oculto cuando no está desplegado */
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: max-height 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
-  pointer-events: none;
-}
-
-.nav-item:hover .dropdown-menu,
-.dropdown-menu.open {
-  max-height: 300px;
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.main-content {
-  margin-top: 10px;
-  margin-left: 100px;
-  width: calc(100% - 80px);
-  padding: 20px;
-  background-color: #f5f5f5;
-  transition: margin 0.3s ease;
-}
-
-.bi {
-  color: #c09d62;
-  font-size: 24px;
-}
-
-.sidebar.expanded .nav-link {
-  justify-content: flex-start;
-  /* Alinea el contenido a la izquierda cuando el sidebar está expandido */
-}
-
-.sidebar .nav-link {
-  justify-content: center;
-  /* Centra el ícono cuando el sidebar está colapsado */
-}
+    list-style: none;
+    padding: 0;
+  }
+  
+  .nav-item {
+    margin-bottom: 10px;
+    position: relative;
+    justify-content: center;
+  }
+  
+  .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 5px 15px;
+    color: #c09d62;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    border-radius: 8px;
+  }
+  
+  .nav-link i {
+    font-size: 20px;
+  }
+  
+  .nav-link:hover {
+    background-color: #dadada;
+  }
+  
+  .nav-link.active {
+    background-color: #d4d4d4;
+    color: #79552f;
+  }
+  
+  .tooltip-text {
+    margin-left: 10px;
+    font-weight: bold;
+    font-size: 15px;
+  }
+  
+  .dropdown-menu {
+    padding-left: 10px;
+  }
+  
+  .dropdown-menu a {
+    font-size: 14px;
+  }
+  
+  .dropdown-menu a:hover {
+    background-color: #f0f0f0;
+  }
 </style>
