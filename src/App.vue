@@ -129,8 +129,8 @@
         <!-- Toggle Dark Mode -->
         <li class="nav-item toggle-btn" @click="toggleDarkMode">
           <i class="bi" :class="isDarkMode ? 'bi-brightness-high' : 'bi-moon-stars-fill'"></i>
-          <span v-if="expanded" class="tooltip-text">{{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}</span>
-        </li> 
+          <span v-if="expanded" class="tooltip-text">{{ isDarkMode ? 'Light Mode' : '' }}</span>
+        </li>
       </ul>
     </aside>
 
