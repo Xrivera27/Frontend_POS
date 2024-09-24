@@ -22,10 +22,10 @@
             required
           />
           <button
-            class="agregar-producto bi bi-plus-circle-fill"
-            type="submit"
-            
-          ></button>
+            class="btn btn-success agregar-producto"  type="submit">
+          <i class="bi bi-plus-circle-fill"> Añadir</i>
+          </button>
+          
         </div>
 
         <!-- Barra de búsqueda -->
@@ -571,17 +571,17 @@ export default {
 }
 
 .agregar-producto {
-  padding: 0;
-  margin-left: 10px;
-  background: transparent;
-  border: none;
-  color: rgb(18, 228, 18);
-  font-size: 24px;
-  cursor: pointer;
+margin-left: 40px;
+background-color: #46ce10;
+width: 100px;
+border: none;
+color: white;
+cursor: pointer;
 }
 
 .agregar-producto:hover {
-  color: rgb(11, 173, 11);
+  background-color: #38a50d;
+  transform: scale(1.05);
   transition: all 0.3s ease;
 }
 
@@ -641,7 +641,7 @@ export default {
 
 .btn {
   padding: 8px 16px;
-  margin: 4px;
+  
   border: none;
   cursor: pointer;
   border-radius: 10px;

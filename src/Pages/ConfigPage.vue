@@ -98,7 +98,7 @@
 
         <form autocomplete="off" class="formulario form-company-SAR">
           <div class="contenedor-titulo">
-            <h2 class="titulo-form">Configuración Empresa</h2>
+            <h2 class="titulo-form">Configuración SAR</h2>
           </div>
 
           <div class="contenedor-principal">

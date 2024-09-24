@@ -577,7 +577,7 @@ export default {
 }
 
 .agregar-producto {
-  margin-left: 50px;
+  margin-left: 40px;
   background-color: #46ce10;
   width: 100px;
   border: none;
