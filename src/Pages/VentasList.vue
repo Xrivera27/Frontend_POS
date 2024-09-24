@@ -19,6 +19,7 @@
             class="campo codigo-producto"
             v-model="addQuery"
             tabindex="1"
+            :disabled="isEditing"
             required
           />
           <button
@@ -60,7 +61,7 @@
             <th style="width: 100px">Opciones</th>
           </thead>
           <tbody>
-            <tr v-for="(producto, index) in productosLista" :key="index">
+            <tr v-for="(producto, index) in productosLista" :key="index" @click="editingTrue(index)" >
               <td>{{ index + 1 }}</td>
               <td>{{ producto.codigo }}</td>
               <td>{{ producto.nombre }}</td>
@@ -235,6 +236,7 @@ export default {
       paymentMethod: "",
       confirmModal: "",
       showConfirmModal: false,
+      isEditing: false,
 
       productos: [
         {
@@ -332,6 +334,11 @@ export default {
   methods: {
     pushEsc(event) {
       if (event.key === "Esc" || event.key === "Escape") {
+        if (this.isEditing){
+          this.isEditing = false;
+          this.reiniciarInputs();
+          return;
+        }
         this.cancelarVenta();
       }
     },
@@ -372,6 +379,8 @@ export default {
         (p) => p.codigo === this.addQuery
       );
 
+      if (!this.isEditing){
+
       if (!newProduct) {
         alert("No existe el producto");
         this.reiniciarInputs();
@@ -385,9 +394,20 @@ export default {
         }
         this.reiniciarInputs();
         this.$refs.codigoRef.focus();
-
       }
+      }
+      else {
+        exitProduct.cantidad = Number(this.addQuantity);
+      }
+      
     },
+
+    editingTrue(index){
+      this.addQuery = this.productosLista[index].codigo;
+      this.addQuantity = this.productosLista[index].cantidad;
+      this.isEditing = true;
+    },
+
     disminuirCantidad(index) {
       if (this.productosLista[index].cantidad > 0) {
         this.productosLista[index].cantidad -= 1;

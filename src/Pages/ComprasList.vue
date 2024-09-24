@@ -24,6 +24,7 @@
             tabindex="1"
             required
             v-model="addQuery"
+            :disabled="isEditing"
           />
 
           <button
@@ -71,7 +72,7 @@
             <th style="width: 100px">Opciones</th>
           </thead>
           <tbody>
-            <tr v-for="(producto, index) in productosLista" :key="index">
+            <tr v-for="(producto, index) in productosLista" :key="index" @click="isEditingTrue(index)" >
               <td>{{ index + 1 }}</td>
               <td>{{ producto.codigo }}</td>
               <td>{{ producto.nombre }}</td>
@@ -233,6 +234,7 @@ export default {
       showProveedores: false,
       addtotalPrice: "",
       articulos_cant: "",
+      isEditing: false,
       productos: [
         {
           codigo: "1",
@@ -327,6 +329,11 @@ export default {
   methods: {
     pushEsc(event) {
       if (event.key === "Esc" || event.key === "Escape") {
+        if (this.isEditing){
+          this.isEditing = false;
+          this.reiniciarInputs();
+          return;
+        }
         this.cancelarcompra();
       }
     },
@@ -386,7 +393,9 @@ export default {
         (p) => p.codigo === this.addQuery
       );
 
-      if (!newProduct) {
+
+      if (!this.isEditing){
+        if (!newProduct) {
         alert("No existe el producto");
       } else {
         if (exitProduct) {
@@ -400,7 +409,21 @@ export default {
         this.reiniciarInputs();
         this.$refs.codigo.focus();
       }
+      }
+      else{
+        exitProduct.cantidad = Number(this.addQuantity);
+        exitProduct.total_compra = Number(this.addtotalPrice);
+      }
+      
     },
+
+    isEditingTrue(index){
+      this.isEditing = true;
+      this.addQuantity = this.productosLista[index].cantidad;
+      this.addQuery = this.productosLista[index].codigo;
+      this.addtotalPrice = this.productosLista[index].total_compra;
+    },
+
     disminuirCantidad(index) {
       if (this.productosLista[index].cantidad > 0) {
         this.productosLista[index].cantidad -= 1;
