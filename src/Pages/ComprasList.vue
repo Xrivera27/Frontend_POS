@@ -414,10 +414,15 @@ export default {
     },
 
     isEditingTrue(index){
-      this.isEditing = true;
-      this.addQuantity = this.productosLista[index].cantidad;
+      
+      if (this.productosLista[index]){
+        this.isEditing = true;
+        this.addQuantity = this.productosLista[index].cantidad;
       this.addQuery = this.productosLista[index].codigo;
       this.addtotalPrice = this.productosLista[index].total_compra;
+
+      }
+     
     },
 
     disminuirCantidad(index) {

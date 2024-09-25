@@ -8,7 +8,8 @@
   <div class="wrapper">
     <div class="main-container">
       <form class="inputs-container" @submit.prevent="agregarProducto" autocomplete="off">
-        <div class="codigo-input">
+        
+        <div class="input-container">
           <label for="codigo-producto" class="label-input"
             >Codigo del producto:</label
           >
@@ -22,19 +23,37 @@
             :disabled="isEditing"
             required
           />
+          </div>
+
+          <div class="input-container">
+          <label class="label-input" >
+            Buscar por nombre: </label>
+            <input list="idDataList" class="campo" :disabled="isEditing" v-model="addName" @input="colocarCodigo">
+            <datalist id="idDataList">
+              <option 
+              v-for="(producto,index) in productos" :key="index"
+              :value="producto.codigo"
+              >
+              {{ producto.codigo }} : {{ producto.nombre }}
+              
+            </option>
+            </datalist>
+          </div>
+
+          <div class="input-container">
           <button
             class="btn btn-success agregar-producto"  type="submit">
-          <i class="bi bi-plus-circle-fill"> Añadir</i>
+          <i class="bi bi-plus-circle-fill">Añadir</i>
           </button>
           
         </div>
 
-        <!-- Barra de búsqueda -->
-        <div class="input-cantidad">
+        
+        <div class="input-container">
           <label for="cantidad" class="label-input">Cantidad:</label>
           <input
             name="cantidad"
-            class="campo cantida-producto"
+            class="campo campo-cantidad"
             type="number"
             tabindex="2"
             ref="cantidadRef"
@@ -42,7 +61,7 @@
           />
         </div>
 
-        <div class="boton-input">
+        <div class="input-container">
           <button id="delete-last-producto" type="button" class="btn" @click="deleteUltimo">
             Cancelar ultimo
           </button>
@@ -140,7 +159,7 @@
         <div class="div-modal-resumen div-modal-resumen-rtn">
           <label for="rtn">RTN:</label>
           <input type="text" id="rtn" v-model="rtn" />
-          <button class="agregar-cliente bi bi-plus-circle-fill"></button>
+          <AgregarCliente/>
         </div>
 
         <div class="payment-methods">
@@ -217,14 +236,17 @@
 
 <script>
 import ProfileButton from "../components/ProfileButton.vue";
+import AgregarCliente from "@/components/AgregarCliente.vue";
 export default {
   components: {
     ProfileButton,
+    AgregarCliente,
   },
   data() {
     return {
       addQuery: "",
       addQuantity: "",
+      addName: "",
       payModal: false,
       subtotal: "",
       discounts: "",
@@ -328,7 +350,7 @@ export default {
         (p) => (totalActual += p.precioUnitario * p.cantidad)
       );
       return totalActual;
-    },
+    }
   },
 
   methods: {
@@ -402,10 +424,25 @@ export default {
       
     },
 
+    colocarCodigo(){
+      const productoSeleccionado = this.productos.find(producto => producto.codigo === this.addName);
+      // Si existe, asignamos el código al campo correspondiente
+      if (productoSeleccionado) {
+        this.addQuery = productoSeleccionado.codigo;
+        this.addName = productoSeleccionado.nombre;
+      } else {
+        this.addQuery = ''; // Si no encuentra coincidencia, vacía el código
+      }
+    },
+
     editingTrue(index){
+      if (this.productosLista[index]){
       this.addQuery = this.productosLista[index].codigo;
       this.addQuantity = this.productosLista[index].cantidad;
+      this.addName = this.productosLista[index].nombre;
       this.isEditing = true;
+      }
+      
     },
 
     disminuirCantidad(index) {
@@ -445,6 +482,7 @@ export default {
     reiniciarInputs() {
       this.addQuery = "";
       this.addQuantity = "";
+      this.addName = "";
     },
 
     payModalOpen() {
@@ -514,6 +552,12 @@ export default {
   justify-content: space-between;
 }
 
+.input-container{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .wrapper {
   padding: 16px;
   display: flex;
@@ -574,29 +618,32 @@ export default {
 .inputs-container {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 .campo {
-  padding: 10px;
+  padding: 0px 10px;
   font-size: 14px;
+  width: 40%;
+  min-height: 30px;
   border-radius: 10px;
   border-width: 0.5px;
+}
+
+.campo-cantidad{
+  width: 50%;
 }
 
 .label-input {
   margin-right: 10px;
 }
-.input-container {
-  margin-bottom: 20px;
-  margin-right: 20px;
-}
 
 .agregar-producto {
-margin-left: 40px;
 background-color: #46ce10;
 width: 100px;
 border: none;
 color: white;
 cursor: pointer;
+margin-right: 15px;
 }
 
 .agregar-producto:hover {
@@ -605,12 +652,7 @@ cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.codigo-input,
-.boton-input,
-.input-cantidad {
-  display: flex;
-  align-items: center;
-}
+
 
 .table-container {
   max-height: 40vh;
@@ -661,7 +703,6 @@ cursor: pointer;
 
 .btn {
   padding: 8px 16px;
-  
   border: none;
   cursor: pointer;
   border-radius: 10px;
