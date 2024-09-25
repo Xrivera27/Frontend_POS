@@ -113,14 +113,8 @@
       <button class="btn" id="cancelar-compra" @click="cancelarcompra">
         Cancelar compra
       </button>
-      <button
-              id="registrar-producto"
-              class="btn btn-success"
-              type="button"
-              
-            >
-              <b>Registrar nuevo Inv.</b>
-            </button>
+      <AgregarProductoModal />
+
       <div class="end-container-cobro">
         <p class="texto-tecla-boton texto-f12">F12</p>
         <button class="btn" id="boton-cobrar" @click="payModalOpen">
@@ -218,9 +212,11 @@
 
 <script>
 import ProfileButton from "../components/ProfileButton.vue";
+import AgregarProductoModal from "../components/AgregarProductoModal.vue";
 export default {
   components: {
     ProfileButton,
+    AgregarProductoModal,
   },
   data() {
     return {
@@ -546,17 +542,6 @@ export default {
   border-radius: 10px;
   color: white;
   font-weight: bold;
-}
-
-#registrar-producto {
-  background-color: rgb(253, 253, 56);
-  margin-left: 30px;
-}
-
-#registrar-producto:hover {
-  background-color: rgb(228, 228, 48);;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
 }
 
 #btnEliminar:hover {
