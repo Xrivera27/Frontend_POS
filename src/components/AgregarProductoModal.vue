@@ -48,11 +48,17 @@
         <div class="contenedor contenedor-derecho">
           <div class="form-group">
             <label for="proveedor">Selecciona proveedor del producto:</label>
-            <select class="form-select" id="proveedor" name="proveedor">
+            <div id="proveedor-contenedor" >
+                <select class="form-select" id="proveedor" name="proveedor">
               <option value="impuesto1">Proveedor 1</option>
               <option value="impuesto2">Proveedor 2</option>
               <option value="impuesto3">Proveedor 3</option>
             </select>
+            <Proveedor/>
+            </div>
+            
+            
+
           </div>
 
           <div class="form-group">
@@ -134,7 +140,11 @@
 </template>
 
 <script>
+import Proveedor from "../components/AgregarProveedor.vue"
 export default {
+    components:{
+        Proveedor,
+    },
   data() {
     return {
       searchQuery: "",
@@ -232,12 +242,14 @@ export default {
       this.editIndex = null;
     },
     guardarProducto() {
+        
       if (this.isEditing) {
         this.productos[this.editIndex] = { ...this.productoForm };
       } else {
         this.productos.push({ ...this.productoForm });
       }
       this.closeModal();
+      
     },
     editProducto(index) {
       this.productoForm = { ...this.productos[index] };
@@ -276,6 +288,11 @@ export default {
 .form-categoria {
   display: flex;
   flex-direction: column;
+}
+
+#proveedor-contenedor{
+    display: flex;
+    align-items: center
 }
 
 .primer-label{
