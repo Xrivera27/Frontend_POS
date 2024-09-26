@@ -4,12 +4,13 @@
       <h1>Configuración de Usuario</h1>
       <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
     </div>
-    <hr />
+    <hr/>
 
     <div class="config-wrapper">
       <div class="usuario-config" v-if="showUser">
         <form autocomplete="off" class="formulario form-basic-user">
-          <div class="contenedor-titulo">
+          <fieldset :disabled="usuarioEditing" >
+            <div class="contenedor-titulo">
             <h2 class="titulo-form">Configuración</h2>
           </div>
 
@@ -40,14 +41,20 @@
               <label for="contrasena-confirmar">Confirmar contraseña:</label>
               <input type="password" id="contrasena-confirmar" name="contrasena-confirmar" required />
             </div>
+            
           </div>
+          </fieldset>
+          
 
-
-          <!-- Fecha de inicio -->
+          <div class="botones-container">
+              <button class="btn editar" @click="isEditing(1)" :disabled="!usuarioEditing" >Editar</button>
+              <button class="btn guardar" :disabled="usuarioEditing" >Guardar</button>
+            </div>
         </form>
 
         <form autocomplete="off" class="formulario form-avanced-user">
-          <div class="contenedor-titulo">
+          <fieldset :disabled="usuarioAvancedEditing" >
+            <div class="contenedor-titulo">
             <h2 class="titulo-form">Configuración avanzada</h2>
           </div>
 
@@ -66,6 +73,12 @@
             </div>
           </div>
 
+          </fieldset>
+          
+          <div class="botones-container">
+              <button class="btn editar" @click="isEditing(2)" :disabled="!usuarioAvancedEditing" >Editar</button>
+              <button class="btn guardar" :disabled="usuarioAvancedEditing" >Guardar</button>
+            </div>
 
           <!-- Fecha de inicio -->
         </form>
@@ -73,7 +86,8 @@
 
       <div class="company-config" v-if="showCompany">
         <form autocomplete="off" class="formulario form-company">
-          <div class="contenedor-titulo">
+          <fieldset :disabled="businessEditing" >
+            <div class="contenedor-titulo">
             <h2 class="titulo-form">Configuración Empresa</h2>
           </div>
 
@@ -91,13 +105,19 @@
               <input type="email" id="correo-principal" principal de la empresa name="correo" required />
             </div>
           </div>
+          </fieldset>
+          <div class="botones-container">
+              <button class="btn editar" @click="isEditing(3)" :disabled="!businessEditing" >Editar</button>
+              <button class="btn guardar" :disabled="businessEditing" >Guardar</button>
+            </div>
 
 
           <!-- Fecha de inicio -->
         </form>
 
         <form autocomplete="off" class="formulario form-company-SAR">
-          <div class="contenedor-titulo">
+          <fieldset :disabled="busisnessSarEditing" >
+            <div class="contenedor-titulo">
             <h2 class="titulo-form">Configuración SAR</h2>
           </div>
 
@@ -125,6 +145,12 @@
               <!-- Enviar el formulario -->
             </div>
           </div>
+          </fieldset>
+          
+          <div class="botones-container">
+              <button class="btn editar" @click="isEditing(4)" :disabled="!busisnessSarEditing" >Editar</button>
+              <button class="btn guardar" :disabled="busisnessSarEditing" >Guardar</button>
+            </div>
 
 
           <!-- Fecha de inicio -->
@@ -157,6 +183,10 @@ export default {
       showUser: true,
       showCompany: false,
       userActive: true,
+      usuarioEditing: true,
+      usuarioAvancedEditing: true,
+      businessEditing: true,
+      busisnessSarEditing: true,
       userForm: [
         {
           nombreUsuario: '',
@@ -184,6 +214,16 @@ export default {
     };
   },
   methods: {
+
+    pushEsc(event){
+      if (event.key === "Esc" || event.key === "Escape") {
+        this.usuarioEditing = true;
+        this.busisnessSarEditing = true;
+        this.businessEditing = true;
+        this.usuarioAvancedEditing = true;
+      }
+    },
+
     switchBools() {
       this.userBoton = !this.userBoton;
       this.companyBoton = !this.companyBoton;
@@ -192,7 +232,50 @@ export default {
       this.userActive = !this.userActive;
     },
 
+    isEditing(orden){
+      switch (orden){
+        case 1: this.usuarioEditing = false;
+                this.busisnessSarEditing = true;
+                this.businessEditing = true;
+                this.usuarioAvancedEditing = true;
+        break;
+
+        case 2: this.usuarioEditing = true;
+                this.busisnessSarEditing = true;
+                this.businessEditing = true;
+                this.usuarioAvancedEditing = false;
+        break;
+
+        case 3: this.usuarioEditing = true;
+                this.busisnessSarEditing = true;
+                this.businessEditing = false;
+                this.usuarioAvancedEditing = true;
+        break;
+
+        case 4: this.usuarioEditing = true;
+                this.busisnessSarEditing = false;
+                this.businessEditing = true;
+                this.usuarioAvancedEditing = true;
+        break;
+
+        default:
+          alert("Ha ocurrido un error");
+      }
+    },
+
+
+
   },
+
+  mounted() {
+    // Añade el manejador de eventos cuando el componente se monta
+    window.addEventListener("keydown", this.pushEsc);
+  },
+  beforeUnmount() {
+    // Elimina el manejador de eventos cuando el componente se destruye
+    window.removeEventListener("keydown", this.pushEsc);
+  },
+
 };
 </script>
 
@@ -216,6 +299,21 @@ form {
   min-width: 800px;
   min-height: 200px;
   position: relative;
+}
+ 
+
+fieldset{
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+fieldset:disabled label, fieldset:disabled input {
+  color: #858585;
+}
+
+.botones-container .btn:disabled{
+  background-color: #888787;
 }
 
 .formulario {
@@ -273,11 +371,33 @@ input {
   padding: 16px;
 }
 
+.botones-container{
+  display: flex;
+  justify-content: end;
+  margin-right: 2.5%;
+}
+
+.botones-container .btn{
+  border-radius: 5px;
+}
+
 .btn {
   padding: 8px 16px;
   margin: 4px;
   border: none;
   cursor: pointer;
+}
+
+.guardar{
+  background-color: #009b15;
+  font-weight: bolder;
+  color: rgb(255, 255, 255);
+}
+
+.editar{
+  background-color: #5a5a5a;
+  font-weight: bolder;
+  color: rgb(255, 255, 255);
 }
 
 .boton-switch.activo:hover {
