@@ -17,10 +17,11 @@
             name="codigo-producto"
             ref="codigoRef"
             type="text"
-            class="campo codigo-producto"
+            class="campo"
             v-model="addQuery"
             tabindex="1"
             :disabled="isEditing"
+            placeholder="Ingresar codigo"
             required
           />
           </div>
@@ -28,7 +29,13 @@
           <div class="input-container">
           <label class="label-input" >
             Buscar por nombre: </label>
-            <input list="idDataList" class="campo" :disabled="isEditing" v-model="addName" @input="colocarCodigo">
+            <input 
+            list="idDataList" 
+            class="campo" 
+            :disabled="isEditing" 
+            v-model="addName" 
+            placeholder="Ingresar nombre"
+            @input="colocarCodigo">
             <datalist id="idDataList">
               <option 
               v-for="(producto,index) in productos" :key="index"
@@ -43,7 +50,7 @@
           <div class="input-container">
           <button
             class="btn btn-success agregar-producto"  type="submit">
-          <i class="bi bi-plus-circle-fill">Añadir</i>
+          <i class="bi bi-plus-circle-fill"> Añadir</i>
           </button>
           
         </div>
@@ -56,6 +63,7 @@
             class="campo campo-cantidad"
             type="number"
             tabindex="2"
+            placeholder="Ingresar cantidad"
             ref="cantidadRef"
             v-model="addQuantity"
           />
@@ -620,6 +628,7 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
+
 .campo {
   padding: 0px 10px;
   font-size: 14px;
@@ -651,8 +660,6 @@ margin-right: 15px;
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
-
-
 
 .table-container {
   max-height: 40vh;

@@ -10,9 +10,9 @@
       <form
         class="inputs-container"
         @submit.prevent="agregarProducto"
-        autocomplete="off"
-      >
-        <div class="codigo-input">
+        autocomplete="off">
+        
+      <div class="input-container">
           <label for="codigo-busqueda" class="label-input"
             >Codigo del producto:</label
           >
@@ -24,17 +24,41 @@
             tabindex="1"
             required
             v-model="addQuery"
+            placeholder="Ingresar codigo"
             :disabled="isEditing"
           />
 
+        </div>
+
+        <div class="input-container">
+          <label class="label-input" >
+            Buscar por nombre: </label>
+            <input 
+            list="idDataList" 
+            class="campo" 
+            :disabled="isEditing" 
+            v-model="addName" 
+            placeholder="Ingresar nombre"
+            @input="colocarCodigo">
+            <datalist id="idDataList">
+              <option 
+              v-for="(producto,index) in productos" :key="index"
+              :value="producto.codigo"
+              >
+              {{ producto.codigo }} : {{ producto.nombre }}
+              
+            </option>
+            </datalist>
+          </div>
+
+        <div class="input-container">
           <button
             class="btn btn-success agregar-producto"  type="submit">
           <i class="bi bi-plus-circle-fill"> Añadir</i>
           </button>
-          
         </div>
 
-        <div class="input-total-compra">
+        <div class="input-container">
           <label for="total-compra" class="label-input">Total Compra:</label>
           <input
             name="total-compra"
@@ -42,19 +66,20 @@
             type="number"
             step="0.01"
             tabindex="2"
+            placeholder="Total compra"
             required
             v-model="addtotalPrice"
           />
         </div>
 
-        <!-- Barra de búsqueda -->
-        <div class="input-cantidad">
+        <div class="input-container">
           <label for="cantidad" class="label-input">Cantidad:</label>
           <input
             name="cantidad"
             class="campo"
             type="number"
             tabindex="3"
+            placeholder="Cantidad"
             v-model="addQuantity"
           />
         </div>
@@ -373,6 +398,11 @@ export default {
         return;
       }
 
+      if (this.addQuantity < 0 || this.addtotalPrice < 0 ) {
+        alert("Ingresa un dato mayor a 0");
+        return;
+      }
+
       if (!this.addQuantity) {
         this.addQuantity = "1";
       }
@@ -413,6 +443,18 @@ export default {
       
     },
 
+    colocarCodigo(){
+      const productoSeleccionado = this.productos.find(producto => producto.codigo === this.addName);
+      // Si existe, asignamos el código al campo correspondiente
+      if (productoSeleccionado) {
+        this.addQuery = productoSeleccionado.codigo;
+        this.addName = productoSeleccionado.nombre;
+      } else {
+        this.addQuery = ''; // Si no encuentra coincidencia, vacía el código
+      }
+    },
+
+
     isEditingTrue(index){
       
       if (this.productosLista[index]){
@@ -420,6 +462,7 @@ export default {
         this.addQuantity = this.productosLista[index].cantidad;
       this.addQuery = this.productosLista[index].codigo;
       this.addtotalPrice = this.productosLista[index].total_compra;
+      this.addName = this.productosLista[index].nombre;
 
       }
      
@@ -473,6 +516,7 @@ export default {
       this.addQuery = "";
       this.addQuantity = "";
       this.addtotalPrice = "";
+      this.addName = "";
     },
 
     payModalOpen() {
@@ -542,6 +586,12 @@ export default {
   justify-content: space-between;
 }
 
+.input-container{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 #delete-last-producto {
   background-color: rgb(207, 57, 57);
   border-radius: 10px;
@@ -575,22 +625,20 @@ export default {
 .inputs-container {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .campo {
-  padding: 5px 0px;
-  padding-left: 10px;
+  padding: 0px 10px;
   font-size: 14px;
+  width: 35%;
+  min-height: 30px;
   border-radius: 10px;
   border-width: 0.5px;
 }
 
-.label-input {
-  margin-right: 10px;
-}
-
 .agregar-producto {
-  margin-left: 40px;
+  margin-right: 10px;
   background-color: #46ce10;
   width: 100px;
   border: none;
@@ -598,6 +646,10 @@ export default {
   cursor: pointer;
 }
 
+.label-input {
+  font-size: 14px;
+  margin-right: 10px;
+}
 
 .agregar-producto:hover {
   background-color: #38a50d;
