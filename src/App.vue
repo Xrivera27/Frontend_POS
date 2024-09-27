@@ -340,7 +340,7 @@ ul.nav {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 5px 15px;
+  padding: 0.5vh 1.5vh;
   color: #c09d62;
   /* Color del texto y de los íconos */
   text-decoration: none;
