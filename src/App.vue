@@ -246,6 +246,7 @@ export default {
   height: 100%;
   transition: width 0.3s ease;
   padding-top: 20px;
+  z-index: 10;
 }
 
 .sidebar.dark {
@@ -274,6 +275,7 @@ ul.nav {
 
 .main-content.expanded {
   margin-left: 255px;
+  z-index: 1;
 }
 
 .main-content {
@@ -331,7 +333,7 @@ ul.nav {
 }
 
 .nav-item {
-  margin-bottom: 10px;
+  margin-bottom: 0.10vh;
   position: relative;
   justify-content: center;
 }
@@ -349,7 +351,7 @@ ul.nav {
 }
 
 .nav-link i {
-  font-size: 1.5rem;
+  font-size: 4vh;
   /* Tamaño uniforme para los íconos */
   color: inherit;
   /* Hereda el color del texto */

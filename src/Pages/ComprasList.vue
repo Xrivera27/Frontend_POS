@@ -3,16 +3,16 @@
     <h1>Registro Compra</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   </div>
-  <hr />
+  <hr/>
 
   <div class="wrapper">
     <div class="main-container">
       <form
-        class="inputs-container"
         @submit.prevent="agregarProducto"
         autocomplete="off">
-        
-      <div class="input-container">
+
+        <div class="input-container input-superior" >
+          <div class="input-container" id="div_codigo">
           <label for="codigo-busqueda" class="label-input"
             >Codigo del producto:</label
           >
@@ -20,7 +20,8 @@
             name="codigo-busqueda"
             ref="codigo"
             type="text"
-            class="campo codigo-busqueda"
+            class="campo"
+            id="campo_codigo"
             tabindex="1"
             required
             v-model="addQuery"
@@ -30,12 +31,13 @@
 
         </div>
 
-        <div class="input-container">
+        <div class="input-container" id="div_nombre">
           <label class="label-input" >
             Buscar por nombre: </label>
             <input 
             list="idDataList" 
             class="campo" 
+            id="campo_nombre"
             :disabled="isEditing" 
             v-model="addName" 
             placeholder="Ingresar nombre"
@@ -50,50 +52,71 @@
             </option>
             </datalist>
           </div>
+        </div>
 
-        <div class="input-container">
-          <button
-            class="btn btn-success agregar-producto"  type="submit">
-          <i class="bi bi-plus-circle-fill"> Añadir</i>
-          </button>
+        <div class="input-container-exterior">
+          
+          <div class="input-container">
+          <label for="cantidad" class="label-input">Cant. Unitaria:</label>
+          <input
+            name="cantidad"
+            class="campo"
+            type="text"
+            tabindex="3"
+            placeholder="Cantidad unitaria"
+            v-model="addQuantity"
+          />
         </div>
 
         <div class="input-container">
-          <label for="total-compra" class="label-input">Total Compra:</label>
+          <label for="cantidad" class="label-input">Cant. paquetes:</label>
+          <input
+            name="cantidad"
+            class="campo"
+            type="text"
+            tabindex="3"
+            placeholder="Cantidad total de paquetes"
+            v-model="addQuantityPackage"
+          />
+        </div>
+
+        <div class="input-container">
+          <label for="total-compra" class="label-input">Prec./paquete:</label>
           <input
             name="total-compra"
             class="campo"
-            type="number"
+            type="text"
             step="0.01"
             tabindex="2"
-            placeholder="Total compra"
+            placeholder="Total compra por paquete"
             required
             v-model="addtotalPrice"
           />
         </div>
 
-        <div class="input-container">
-          <label for="cantidad" class="label-input">Cantidad:</label>
-          <input
-            name="cantidad"
-            class="campo"
-            type="number"
-            tabindex="3"
-            placeholder="Cantidad"
-            v-model="addQuantity"
-          />
+        <div class="boton-container">
+          <button
+            class="btn btn-success agregar-producto"  type="submit">
+          <i class="bi bi-plus-circle-fill"> Añadir</i>
+          </button>
         </div>
+        </div>
+     
+
+       
       </form>
 
       <div class="table-container">
-        <table class="table">
+        <table class="table" border="2">
           <thead>
-            <th>No. Producto</th>
-            <th>Codigo</th>
-            <th>Nombre</th>
-            <th>Cantidad</th>
-            <th>Total Compra</th>
-            <th>Proveedor</th>
+            <th class="th_small" >N.º</th>
+            <th  class="th_medium">Codigo</th>
+            <th class="th_large">Nombre</th>
+            <th class="th_small">Paquetes</th>
+            <th class="th_small" >Unidad/Paquetes</th>
+            <th class="medium" >Proveedor</th>
+            <th class="th_small">Total Compra</th>
+            
             <th style="width: 100px">Opciones</th>
           </thead>
           <tbody>
@@ -101,9 +124,10 @@
               <td>{{ index + 1 }}</td>
               <td>{{ producto.codigo }}</td>
               <td>{{ producto.nombre }}</td>
+              <td>{{ producto.paquetes }}</td>
               <td>{{ producto.cantidad }}</td>
-              <td>{{ producto.total_compra }}</td>
               <td>{{ producto.proveedor }}</td>
+              <td>{{ producto.total_compra }}</td>
               <td class="botones-accion">
                 <button
                   id="btnDisminuir"
@@ -134,15 +158,19 @@
     </div>
 
     <div class="end-container">
-      <p class="texto-tecla-boton texto-esc">Esc</p>
-      <button class="btn" id="cancelar-compra" @click="cancelarcompra">
+      <div class="end-container-cancelar">
+        <p class="texto-tecla-boton texto-esc">Esc</p>
+      <button class="btn btn-end" id="cancelar-compra" @click="cancelarcompra">
         Cancelar compra
       </button>
+      </div>
+      
       <AgregarProductoModal />
 
       <div class="end-container-cobro">
+        
         <p class="texto-tecla-boton texto-f12">F12</p>
-        <button class="btn" id="boton-cobrar" @click="payModalOpen">
+        <button class="btn btn-end" id="boton-cobrar" @click="payModalOpen">
           Pagar
         </button>
         <div class="end-container-cobro-p">
@@ -247,6 +275,7 @@ export default {
     return {
       addQuery: "",
       addQuantity: "",
+      addQuantityPackage: "",
       payModal: false,
       subtotal: "",
       total: "",
@@ -392,13 +421,14 @@ export default {
 
       if (
         (this.addQuantity && isNaN(this.addQuantity)) ||
-        (this.addtotalPrice && isNaN(this.addtotalPrice))
+        (this.addtotalPrice && isNaN(this.addtotalPrice)) ||
+        (this.addQuantityPackage && isNaN(this.addQuantityPackage))
       ) {
         alert("Ingresa un dato valido");
         return;
       }
 
-      if (this.addQuantity < 0 || this.addtotalPrice < 0 ) {
+      if (this.addQuantity < 0 || this.addtotalPrice < 0 || this.addQuantityPackage < 0 ) {
         alert("Ingresa un dato mayor a 0");
         return;
       }
@@ -407,12 +437,12 @@ export default {
         this.addQuantity = "1";
       }
 
-      if (
-        isNaN(Number(this.addQuantity) || isNaN(Number(this.addtotalPrice)))
-      ) {
-        alert("Ingresa un dato valido");
-        return;
+      
+      if (!this.addQuantityPackage) {
+        this.addQuantityPackage = "1";
       }
+
+     
 
       const newProduct = this.productos.find((p) => p.codigo === this.addQuery);
       const exitProduct = this.productosLista.find(
@@ -517,6 +547,7 @@ export default {
       this.addQuantity = "";
       this.addtotalPrice = "";
       this.addName = "";
+      this.addQuantityPackage = "";
     },
 
     payModalOpen() {
@@ -586,10 +617,31 @@ export default {
   justify-content: space-between;
 }
 
+.input-container label{
+  white-space: nowrap;
+}
+
+
 .input-container{
   display: flex;
   flex-direction: row;
   align-items: center;
+}
+
+.input-superior{
+  width: 100%;
+  margin-bottom: 1%;
+}
+
+.input-container-exterior {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#div_nombre{
+ width: 80%;
+ padding-left: 20px;
 }
 
 #delete-last-producto {
@@ -622,23 +674,22 @@ export default {
   font-size: 14px;
 }
 
-.inputs-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .campo {
   padding: 0px 10px;
+  width: 100%;
   font-size: 14px;
-  width: 35%;
   min-height: 30px;
   border-radius: 10px;
   border-width: 0.5px;
 }
 
+.input-container label{
+  margin-right: 0.5vw;
+}
+
+
+
 .agregar-producto {
-  margin-right: 10px;
   background-color: #46ce10;
   width: 100px;
   border: none;
@@ -648,7 +699,7 @@ export default {
 
 .label-input {
   font-size: 14px;
-  margin-right: 10px;
+  margin-right: 2%;
 }
 
 .agregar-producto:hover {
@@ -657,16 +708,9 @@ export default {
   transition: all 0.3s ease;
 }
 
-.codigo-input,
-.boton-input,
-.input-cantidad,
-.input-total-compra {
+.boton-container {
   display: flex;
-  align-items: center;
-}
-
-.boton-input {
-  margin: 0;
+  align-items: end;
 }
 
 .table-container {
@@ -686,7 +730,7 @@ export default {
 
 .table th,
 .table td {
-  padding: 8px;
+  padding: 8px 0;
 }
 
 .table thead th {
@@ -797,6 +841,12 @@ export default {
   border-top: solid rgb(75, 75, 75) 1px;
 }
 
+.end-container-cancelar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .end-container-cobro-p {
   display: flex;
   flex-direction: column;
@@ -843,6 +893,11 @@ export default {
 
 .texto-esc {
   color: #d30015;
+}
+
+.btn-end{
+  min-height:80px;
+  max-width: 90px;
 }
 
 .modal-overlay {
