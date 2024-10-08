@@ -34,7 +34,7 @@
 
         <!-- Categorías -->
         <li v-if="hasPermission('Categorias')" class="nav-item">
-          <router-link to="/categorias" class="nav-link" :class="{ active: isActive('/categorias') }">
+          <router-link to="/registro" class="nav-link" :class="{ active: isActive('/registro') }">
             <i class="bi bi-tags-fill"></i>
             <span v-if="expanded" class="tooltip-text">Categorías</span>
           </router-link>
@@ -141,6 +141,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -152,26 +154,45 @@ export default {
       isDarkMode: localStorage.getItem('isDarkMode') === 'true',
     };
   },
+  computed: {
+    // Computed property para verificar si la ruta es la de login
+    isLoginRoute() {
+      return this.$route.path === '/login';
+    }
+  },
   methods: {
     hasPermission(section) {
       const role = localStorage.getItem('role');
       const permissions = {
-        Administrador: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced'],
-        Gerente: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
-        Cajero: ['Home', 'Productos', 'Venta'],
+        1: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced'],
+        2: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
+        3: ['Home', 'Productos', 'Venta'],
       };
       return role && permissions[role]?.includes(section);
     },
-    toggleDropdown(dropdown) {
-      // Cerrar todos los dropdowns excepto el que se acaba de hacer clic
-      for (const key in this.dropdowns) {
-        if (key !== dropdown) {
-          this.dropdowns[key] = false;
-        }
-      }
-      // Alternar el dropdown actual
-      this.dropdowns[dropdown] = !this.dropdowns[dropdown];
+
+    isAuthenticated() {
+      const token = localStorage.getItem('token');
+      return !!token; // Verifica si hay un token
     },
+
+    async logout() {
+      try {
+        await axios.post('/api/logout', {}, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        localStorage.clear();
+        this.$router.push('/login');
+      } catch (error) {
+        console.error("Error al cerrar sesión", error);
+        localStorage.clear();
+        this.$router.push('/login');
+      }
+    },
+
     toggleSidebar() {
       this.expanded = !this.expanded;
     },
@@ -181,10 +202,6 @@ export default {
     toggleDarkMode() {
       this.isDarkMode = !this.isDarkMode;
       localStorage.setItem('isDarkMode', this.isDarkMode);
-    },
-    logout() {
-      localStorage.clear();
-      this.$router.push('/login');
     },
     handleClickOutside(event) {
       // Verificar si el clic fue fuera de los dropdowns
@@ -203,28 +220,43 @@ export default {
         this.dropdowns.compras = false;
       }
     },
+
+    async login(nombre_usuario, contraseña) {
+      try {
+        const response = await axios.post('/api/login', { nombre_usuario, contraseña });
+
+        const { token, role } = response.data;
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('role', role); // Guarda el rol del usuario
+        this.$router.push('/home');
+      } catch (error) {
+        console.error('Error en el inicio de sesión', error);
+      }
+    },
+
+    toggleDropdown(menu) {
+      this.dropdowns[menu] = !this.dropdowns[menu];
+    },
   },
   mounted() {
-    // Registrar el evento global para detectar clics fuera de los dropdowns
-    document.addEventListener("click", this.handleClickOutside);
+    // Verifica si el usuario está autenticado y tiene rol
+    if (!this.isAuthenticated()) {
+      this.$router.push('/login');
+    } else {
+      const role = localStorage.getItem('role');
+      if (!role) {
+        this.$router.push('/login');
+      }
+    }
+
+    // Listener para clics fuera del menú desplegable
+    document.addEventListener('click', this.handleClickOutside);
   },
   beforeUnmount() {
-    // Remover el evento al destruir el componente
     document.removeEventListener("click", this.handleClickOutside);
-  },
-  computed: {
-    isLoginRoute() {
-      return this.$route.path.startsWith('/login');
-    },
-  },
-  watch: {
-    '$route.path'() {
-      // Colapsar el sidebar cuando se cambia de ruta
-      this.expanded = false;
-    },
-  },
+  }
 };
-
 </script>
 
 <style scoped>

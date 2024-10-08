@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import LoadingSpinner from '@/components/LoadingSpinnerList.vue';
 
 export default {
   components: {
@@ -58,60 +58,72 @@ export default {
       password: '',
       rememberMe: false,
       showPassword: false, // Controla la visibilidad de la contraseña
-      isRecoveringPassword: false, // Nuevo estado para controlar la vista de recuperación de contraseña
+      isRecoveringPassword: false, // Controla la vista de recuperación de contraseña
       recoveryEmail: '',
-      users: [
-        {
-          username: 'admin',
-          password: 'admin123',
-          role: 'Administrador'
-        },
-        {
-          username: 'gerente',
-          password: 'gerente123',
-          role: 'Gerente'
-        },
-        {
-          username: 'cajero',
-          password: 'cajero123',
-          role: 'Cajero'
-        }
-      ]
     };
   },
   methods: {
-    login() {
-      const user = this.users.find(
-        u => u.username === this.username && u.password === this.password
-      );
-      if (user) {
+    async login() {
+      try {
         this.isLoading = true;
-        console.log('Loading state before timeout:', this.isLoading); // Verificar si el valor cambia
-        setTimeout(() => {
+
+        const response = await fetch('http://localhost:3000/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: this.username, password: this.password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('auth', data.token);
+          localStorage.setItem('role', data.role); // Guarda el rol
           this.isLoading = false;
-          console.log('Loading state after timeout:', this.isLoading); // Verificar si se desactiva
-          this.$router.push('/home');
-        }, 300); // Spinner aparece durante 1.5 segundos
-        localStorage.setItem('auth', 'true');
-        localStorage.setItem('role', user.role); // Almacena correctamente el rol
-        console.log('Rol guardado:', user.role); // Verificar en la consola si se guarda correctamente
-      } else {
-        alert('Credenciales incorrectas');
+          this.$router.push('/home'); // Redirecciona al home
+        } else {
+          this.isLoading = false;
+          alert(data.message); // Muestra el mensaje de error
+        }
+      } catch (error) {
+        this.isLoading = false;
+        console.error('Error:', error);
       }
     },
-    togglePasswordVisibility() {
-      this.showPassword = !this.showPassword;
-    },
-    togglePasswordRecovery() {
-      // Verifica si el estado se cambia correctamente
-      console.log('Antes de cambiar:', this.isRecoveringPassword);
-      this.isRecoveringPassword = !this.isRecoveringPassword;
-      console.log('Después de cambiar:', this.isRecoveringPassword);
-    },
-    recoverPassword() {
-      // Lógica de recuperación de contraseña
+
+    async recoverPassword() {
+    try {
+      this.isLoading = true;
+
+      const response = await fetch('http://localhost:3000/api/recuperar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: this.recoveryEmail })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+      alert(data.message); // Muestra el mensaje de éxito
+      this.isRecoveringPassword = false; // Volver a la vista de login
+    } else {
+      alert(data.message); // Muestra el mensaje de error
     }
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    this.isLoading = false;
   }
+},
+  
+  togglePasswordRecovery() {
+    this.isRecoveringPassword = !this.isRecoveringPassword;
+  },
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+}
+  
 };
 </script>
 

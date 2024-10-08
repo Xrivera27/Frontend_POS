@@ -6,7 +6,7 @@
   <hr>
 
   <div class="dashboard">
-    <div v-if="role === 'Administrador'">
+    <div v-if="role === 1">
       <!-- Secciones visibles solo para Administrador -->
       <BarChart />
       <div class="box">
@@ -15,7 +15,7 @@
       </div>
     </div>
 
-    <div v-if="role === 'Gerente'">
+    <div v-if="role === 2">
       <!-- Secciones visibles solo para Gerente -->
       <h3>Panel de Gerente</h3>
       <BarChart />
@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <div v-if="role === 'Cajero'">
+    <div v-if="role === 3">
       <!-- Secciones visibles solo para Cajero -->
       <h3>Panel de Cajero</h3>
       <BarChart />
@@ -61,12 +61,11 @@ export default {
   },
   data() {
     return {
-      role: localStorage.getItem('role') || '', // Recupera el rol del localStorage
+      role: Number(localStorage.getItem('role')) || 0, // Asegúrate de convertir el valor de role a número
     };
   },
 };
 </script>
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
