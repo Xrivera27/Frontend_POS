@@ -2,8 +2,13 @@
   <div class="encabezado">
     <h1>Productos</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
+    
   </div>
   <hr>
+
+  <!-- <btnGuardarModal :texto = "'Guardar Produtco'" ></btnGuardarModal> -->
+  <!-- <btnCerrarModal :texto = "'Cerrar'" ></btnCerrarModal> -->
+  
 
   <div class="productos-wrapper">
 <div class="opciones" >
@@ -15,7 +20,7 @@
 
     <!-- Botón de exportación PDF -->
     <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" class="export-button" />
-
+    
     <RouterLink
     to="promociones-producto"
     >
@@ -141,11 +146,15 @@
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
 import ExportButton from '../components/ExportButton.vue';
+// import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
+// import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
 export default {
   components: {
     ProfileButton,
-    ExportButton
+    ExportButton,
+    // btnGuardarModal
+    // btnCerrarModal
   },
   data() {
     return {
