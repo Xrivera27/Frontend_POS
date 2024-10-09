@@ -118,15 +118,6 @@ const handleSubmit = async () => {
   font-family: 'Montserrat', sans-serif;
 }
 
-#categoria {
-  width: 100%;
-}
-
-#btnSubmit {
-  color: white;
-  font-size: 2rem;
-}
-
 .register-container {
   display: flex;
   justify-content: center;
@@ -258,5 +249,14 @@ input[type="checkbox"] {
   border-radius: 5px;
   padding: 0.5rem 1rem;
   cursor: pointer;
+}
+
+#btnSubmit {
+  color: white;
+  font-size: 2rem;
+}
+
+#categoria {
+  width: 100%;
 }
 </style>

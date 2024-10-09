@@ -194,27 +194,22 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+/* Fuentes */
 * {
   font-family: 'Montserrat', sans-serif;
 }
 
+/* Encabezado */
 .encabezado {
   display: flex;
   justify-content: space-between;
 }
 
+/* Opciones */
 .opciones {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.busqueda {
-  float: right;
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 10px;
-  border-width: 0.5px;
 }
 
 .registros {
@@ -222,30 +217,37 @@ export default {
   padding-bottom: 1%;
 }
 
+/* Selección personalizada */
+.custom-select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 35px;
+  font-size: 16px;
+  padding: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 80px;
+}
+
+/* Botones */
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
-  width: 170px;
+  width: 200px;
+  /* Ancho ajustado */
   height: 40px;
   border-radius: 10px;
   color: black;
   font-weight: bold;
-}
-
-.export-button {
-  margin: 0;
-}
-
-#form-tel {
-  width: 30%;
+  transition: all 0.3s ease;
 }
 
 #btnAdd:hover {
   background-color: #a38655;
   transform: scale(1.05);
-  transition: all 0.3s ease;
 }
 
+/* Botón de edición */
 #btnEditar {
   font-size: 18px;
   width: 50px;
@@ -256,9 +258,9 @@ export default {
 #btnEditar:hover {
   background-color: #e8af06;
   transform: scale(1.05);
-  transition: all 0.3s ease;
 }
 
+/* Botón de eliminación */
 #btnEliminar {
   font-size: 18px;
   width: 50px;
@@ -270,39 +272,32 @@ export default {
 #btnEliminar:hover {
   background-color: #b72433;
   transform: scale(1.05);
-  transition: all 0.3s ease;
 }
 
-#campana {
-  margin-right: 10px;
-  font-size: 18px;
-  color: #a38655;
-}
-
-.container-top {
-  width: 100%;
-  text-align: right;
-}
-
-.rol {
-  color: #969696;
+/* Estilo de la búsqueda */
+.busqueda {
+  float: right;
+  padding: 10px;
   font-size: 14px;
+  border-radius: 10px;
+  border-width: 0.5px;
 }
 
+/* Selección */
 select {
   border: 1px solid #ccc;
-  margin-top: 10px;
-  margin-left: 5px;
-  margin-right: 5px;
+  margin: 10px 5px;
   width: 60px;
   height: 35px;
   border-radius: 5px;
 }
 
+/* Contenedor de proveedores */
 .proveedores-wrapper {
   padding: 16px;
 }
 
+/* Contenedor de tabla */
 .table-container {
   width: 100%;
   border-radius: 10px;
@@ -311,6 +306,7 @@ select {
   margin-top: 16px;
 }
 
+/* Estilo de la tabla */
 .table {
   width: 100%;
   border-collapse: separate;
@@ -320,16 +316,14 @@ select {
 .table th,
 .table td {
   padding: 8px;
+  text-align: center;
 }
 
 .table thead th {
-  background-color: none;
-  text-align: center;
   border-bottom: 1px solid #ddd;
 }
 
 .table tbody td {
-  text-align: center;
   border-top: 1px solid #ddd;
 }
 
@@ -349,6 +343,7 @@ select {
   border-bottom-right-radius: 10px;
 }
 
+/* Botones generales */
 .btn {
   padding: 8px 16px;
   margin: 4px;
@@ -366,10 +361,7 @@ select {
   color: white;
 }
 
-.h2-modal-content {
-  margin-top: 0px;
-}
-
+/* Modal */
 .modal {
   position: fixed;
   top: 0;
@@ -391,65 +383,23 @@ select {
   width: 100%;
 }
 
+/* Estilo de formulario */
 .form-group {
   margin-bottom: 16px;
-
 }
 
 .form-group label {
-  display: flexbox;
   margin-bottom: 8px;
 }
 
 .form-group input {
   width: 95%;
-  height: 25%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  justify-content: center;
-}
-
-#AddProveedorModal {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  background-color: #007bff;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-#BtnCerrar {
-  background-color: rgb(93, 100, 104);
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-.custom-select:focus {
-  outline: none;
-  border-color: #a38655;
-}
-
-.custom-select option {
-  font-size: 16px;
-}
-
-.custom-select {
-  border: 1px solid #ccc;
-  border-radius: 5px;
   height: 35px;
-  font-size: 16px;
-  padding: 5px;
-  background-color: #fff;
-  cursor: pointer;
-  width: 80px;
-  /* Ajusta el ancho a 120px o el valor que prefieras */
+  /* Ajustado para mejor estética */
+}
+
+/* Otros estilos */
+.h2-modal-content {
+  margin-top: 0px;
 }
 </style>

@@ -252,21 +252,25 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+/* Fuentes y estilos generales */
 * {
   font-family: 'Montserrat', sans-serif;
 }
 
+/* Encabezado */
 .encabezado {
   display: flex;
   justify-content: space-between;
 }
 
+/* Opciones de sucursales */
 .opciones {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+/* Estilos de búsqueda */
 .busqueda {
   float: right;
   padding: 10px;
@@ -275,11 +279,13 @@ export default {
   border-width: 0.5px;
 }
 
+/* Registro de sucursales */
 .registros {
   height: 100%;
   padding-bottom: 1%;
 }
 
+/* Botones */
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
@@ -294,14 +300,39 @@ export default {
   margin: 0;
 }
 
+/* Modal */
 .h2-modal-content {
-  margin-top: 0px;
+  margin-top: 0;
 }
 
-#btnAdd:hover {
-  background-color: #a38655;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
+#AddSucursalModal {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #007bff;
+  cursor: pointer;
+  margin-right: 1rem;
+}
+
+#BtnCerrar {
+  background-color: rgb(93, 100, 104);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 1rem;
+}
+
+/* Estilos de botones en la tabla */
+.btn {
+  padding: 8px 16px;
+  margin: 4px;
+  border: none;
+  cursor: pointer;
 }
 
 #btnEditar {
@@ -309,12 +340,6 @@ export default {
   width: 50px;
   height: 40px;
   border-radius: 10px;
-}
-
-#btnEditar:hover {
-  background-color: #e8af06;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
 }
 
 #btnEliminar {
@@ -325,43 +350,26 @@ export default {
   color: black;
 }
 
+/* Hover effects */
+#btnAdd:hover {
+  background-color: #a38655;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+#btnEditar:hover {
+  background-color: #e8af06;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
 #btnEliminar:hover {
   background-color: #b72433;
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
 
-#campana {
-  margin-right: 10px;
-  font-size: 18px;
-  color: #a38655;
-}
-
-.container-top {
-  width: 100%;
-  text-align: right;
-}
-
-.rol {
-  color: #969696;
-  font-size: 14px;
-}
-
-select {
-  border: 1px solid #ccc;
-  margin-top: 10px;
-  margin-left: 5px;
-  margin-right: 5px;
-  width: 60px;
-  height: 35px;
-  border-radius: 5px;
-}
-
-.sucursales-wrapper {
-  padding: 16px;
-}
-
-
+/* Tabla */
 .table-container {
   width: 100%;
   border-radius: 10px;
@@ -379,11 +387,12 @@ select {
 .table th,
 .table td {
   padding: 8px;
+  text-align: center;
+  border-top: 1px solid #ddd;
 }
 
 .table thead th {
   background-color: #e7e4e4;
-  text-align: center;
   border-bottom: 1px solid #ddd;
 }
 
@@ -408,46 +417,7 @@ select {
   border-bottom-right-radius: 10px;
 }
 
-.btn {
-  padding: 8px 16px;
-  margin: 4px;
-  border: none;
-  cursor: pointer;
-}
-
-
-#AddSucursalModal {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  background-color: #007bff;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-#BtnCerrar {
-  background-color: rgb(93, 100, 104);
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-.btn-warning {
-  background-color: #ffc107;
-  color: black;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
-}
-
+/* Modal */
 .modal {
   position: fixed;
   top: 0;
@@ -469,9 +439,9 @@ select {
   width: 100%;
 }
 
+/* Formulario */
 .form-group {
   margin-bottom: 16px;
-
 }
 
 .form-group label {
@@ -481,32 +451,60 @@ select {
 
 .form-group input {
   width: 95%;
-  height: 25%;
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  justify-content: center;
 }
 
+/* Selección personalizada */
 .custom-select {
   border: 1px solid #ccc;
   border-radius: 5px;
   height: 35px;
-  font-size: 16px;
-  padding: 5px;
-  background-color: #fff;
-  cursor: pointer;
-  width: 80px;
-  /* Ajusta el ancho a 120px o el valor que prefieras */
+  font-size: 14px;
 }
 
-.custom-select:focus {
-  outline: none;
-  border-color: #a38655;
-  /* Ajusta el color del borde al de tu diseño */
+select {
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
+  width: 60px;
+  height: 35px;
+  border-radius: 5px;
 }
 
-.custom-select option {
-  font-size: 16px;
+/* Estilos de rol y campana */
+.rol {
+  color: #969696;
+  font-size: 14px;
+}
+
+#campana {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #a38655;
+}
+
+/* Contenedor superior */
+.container-top {
+  width: 100%;
+  text-align: right;
+}
+
+/* Estilos para advertencias */
+.btn-warning {
+  background-color: #ffc107;
+  color: black;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Responsividad */
+.sucursales-wrapper {
+  padding: 16px;
 }
 </style>

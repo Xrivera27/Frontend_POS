@@ -6,29 +6,29 @@
   <hr>
 
   <div class="clientes-wrapper">
-<div class="opciones">
-    <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-      Clientes</button>
+    <div class="opciones">
+      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+        Clientes</button>
 
-      <ExportButton :columns="columns" :rows="rows" fileName="Clientes.pdf" class="export-button"/>
+      <ExportButton :columns="columns" :rows="rows" fileName="Clientes.pdf" class="export-button" />
 
-    <div class="registros">
-      <span>Mostrar
-        <select v-model="itemsPerPage" class="custom-select">
-          <option value="">Todos</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-          <option value="25">25</option>
-        </select> registros
-      </span>
-    </div>
+      <div class="registros">
+        <span>Mostrar
+          <select v-model="itemsPerPage" class="custom-select">
+            <option value="">Todos</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+          </select> registros
+        </span>
+      </div>
 
-    <!-- Barra de búsqueda -->
-    <div class="search-bar">
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
-    </div>
+      <!-- Barra de búsqueda -->
+      <div class="search-bar">
+        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
+      </div>
     </div>
 
     <div class="table-container">
@@ -231,17 +231,20 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+/* Fuente global */
 * {
   font-family: 'Montserrat', sans-serif;
 }
 
+/* Encabezado */
 .encabezado {
   display: flex;
   justify-content: space-between;
 }
 
-.opciones{
-  display:flex;
+/* Opciones y búsqueda */
+.opciones {
+  display: flex;
   align-items: center;
   justify-content: space-between;
 }
@@ -254,11 +257,12 @@ export default {
   border-width: 0.5px;
 }
 
-.registros{
+.registros {
   height: 100%;
   padding-bottom: 1%;
 }
 
+/* Botones */
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
@@ -269,29 +273,27 @@ export default {
   font-weight: bold;
 }
 
-.export-button{
-  margin: 0;
-}
-
-.h2-modal-content {
-  margin-top: 0px;
-}
-
-#form-tel {
-  width: 30%;
-}
-
 #btnAdd:hover {
   background-color: #a38655;
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
 
-#btnEditar {
+.export-button {
+  margin: 0;
+}
+
+#btnEditar,
+#btnEliminar {
   font-size: 18px;
   width: 50px;
   height: 40px;
   border-radius: 10px;
+}
+
+#btnEditar {
+  background-color: #ffc107;
+  color: black;
 }
 
 #btnEditar:hover {
@@ -301,10 +303,6 @@ export default {
 }
 
 #btnEliminar {
-  font-size: 18px;
-  width: 50px;
-  height: 40px;
-  border-radius: 10px;
   color: black;
 }
 
@@ -314,32 +312,52 @@ export default {
   transition: all 0.3s ease;
 }
 
-#campana {
-  margin-right: 10px;
-  font-size: 18px;
-  color: #a38655;
+#AddClienteModal,
+#BtnCerrar {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 1rem;
 }
 
-.container-top {
+#AddClienteModal {
+  background-color: #007bff;
+}
+
+#BtnCerrar {
+  background-color: rgb(93, 100, 104);
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  text-align: right;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
-.rol {
-  color: #969696;
-  font-size: 14px;
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+  max-width: 500px;
+  width: 100%;
 }
 
-select {
-  border: 1px solid #ccc;
-  margin-top: 10px;
-  margin-left: 5px;
-  margin-right: 5px;
-  width: 60px;
-  height: 35px;
-  border-radius: 5px;
+.h2-modal-content {
+  margin-top: 0px;
 }
 
+/* Tabla */
 .clientes-wrapper {
   padding: 16px;
 }
@@ -364,7 +382,6 @@ select {
 }
 
 .table thead th {
-  background-color: none;
   text-align: center;
   border-bottom: 1px solid #ddd;
 }
@@ -390,73 +407,13 @@ select {
   border-bottom-right-radius: 10px;
 }
 
-.btn {
-  padding: 8px 16px;
-  margin: 4px;
-  border: none;
-  cursor: pointer;
-}
-
-#AddClienteModal {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  background-color: #007bff;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-#BtnCerrar {
-  background-color: rgb(93, 100, 104);
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-.btn-warning {
-  background-color: #ffc107;
-  color: black;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 500px;
-  width: 100%;
-}
-
+/* Formulario */
 .form-group {
   margin-bottom: 16px;
-
 }
 
 .form-group label {
-  display: flexbox;
+  display: flex;
   margin-bottom: 8px;
 }
 
@@ -469,6 +426,11 @@ select {
   justify-content: center;
 }
 
+#form-tel {
+  width: 30%;
+}
+
+/* Selección personalizada */
 .custom-select {
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -478,16 +440,38 @@ select {
   background-color: #fff;
   cursor: pointer;
   width: 80px;
-  /* Ajusta el ancho a 120px o el valor que prefieras */
 }
 
 .custom-select:focus {
   outline: none;
   border-color: #a38655;
-  /* Ajusta el color del borde al de tu diseño */
 }
 
 .custom-select option {
   font-size: 16px;
+}
+
+/* Estilos generales */
+.btn {
+  padding: 8px 16px;
+  margin: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.rol {
+  color: #969696;
+  font-size: 14px;
+}
+
+#campana {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #a38655;
+}
+
+.container-top {
+  width: 100%;
+  text-align: right;
 }
 </style>

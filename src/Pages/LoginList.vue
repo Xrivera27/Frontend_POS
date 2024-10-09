@@ -130,28 +130,56 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+/* Estilos Generales */
 * {
   font-family: 'Montserrat', sans-serif;
 }
 
+/* Contenedor del Login */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: transparent;
+  background-image: url('@/../public/img/fondo-login.jpg');
+  /* Ruta de la imagen */
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  /* Para el pseudo-elemento */
 }
 
+/* Capa de oscurecimiento */
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Oscurecimiento con opacidad */
+  z-index: 1;
+  /* Asegúrate de que esté por debajo del contenido */
+}
+
+/* Tarjeta de Login */
 .login-card {
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.9);
+  /* Fondo blanco con un poco de transparencia */
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   max-width: 400px;
   width: 100%;
+  position: relative;
+  /* Para que esté por encima del pseudo-elemento */
+  z-index: 2;
+  /* Asegúrate de que esté por encima del oscurecimiento */
 }
 
+/* Títulos */
 h2 {
   font-size: 24px;
   font-weight: 600;
@@ -159,22 +187,26 @@ h2 {
   margin-bottom: 20px;
 }
 
+/* Mensajes de bienvenida */
 .welcome-message {
   font-size: 16px;
   margin-bottom: 10px;
   color: #888;
 }
 
+/* Texto de separación */
 .or-text {
   margin-bottom: 20px;
   font-size: 16px;
   color: #333;
 }
 
+/* Grupos de formulario */
 .form-group {
   margin-bottom: 1rem;
 }
 
+/* Estilos de Inputs */
 input[type="text"],
 input[type="password"],
 input[type="email"],
@@ -186,10 +218,12 @@ input[type="tel"] {
   font-size: 1rem;
 }
 
+/* Grupo de contraseña */
 .password-group {
   position: relative;
 }
 
+/* Icono de visibilidad de contraseña */
 .toggle-password {
   position: absolute;
   top: 50%;
@@ -199,6 +233,7 @@ input[type="tel"] {
   color: #888;
 }
 
+/* Botón de envío */
 .submit-btn {
   background-color: #39b378;
   border: none;
@@ -220,7 +255,7 @@ input[type="tel"] {
   /* Asegúrate de que el tamaño sea consistente */
 }
 
-
+/* Opciones de formulario */
 .form-options {
   display: flex;
   justify-content: space-between;

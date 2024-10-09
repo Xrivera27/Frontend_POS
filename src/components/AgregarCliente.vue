@@ -1,47 +1,43 @@
 <template>
-  <button
-    id="crear-cliente"
-    class="btn btn-success"
-    type="button"
-    @click="openModal"
-  ><b><i class="bi bi-plus-circle-fill"></i></b>
+  <button id="crear-cliente" class="btn btn-success" type="button" @click="openModal"><b><i
+        class="bi bi-plus-circle-fill"></i></b>
   </button>
 
   <div v-if="isModalOpen" class="modal">
-      <div class="modal-content">
-        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Cliente' : 'Agregar Cliente' }}</h2>
+    <div class="modal-content">
+      <h2 class="h2-modal-content">{{ isEditing ? 'Editar Cliente' : 'Agregar Cliente' }}</h2>
 
-        <div class="form-group">
-          <label>Nombre Completo:</label>
-          <input v-model="clienteForm.nombre" type="text" required>
-        </div>
-
-        <div class="form-group">
-          <label>RTN:</label>
-          <input v-model="clienteForm.rtn" type="text" required>
-        </div>
-
-        <div id="form-tel" class="form-group">
-          <label>Teléfono:</label>
-          <input v-model="clienteForm.telefono" type="text">
-        </div>
-
-        <div class="form-group">
-          <label>Email:</label>
-          <input v-model="clienteForm.email" type="text">
-        </div>
-
-        <div class="form-group">
-          <label>Dirección:</label>
-          <input v-model="clienteForm.direccion" type="text">
-        </div>
-
-        <button id="AddClienteModal" class="btn btn-primary" @click="guardarCliente">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Cliente' }}
-        </button>
-        <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
+      <div class="form-group">
+        <label>Nombre Completo:</label>
+        <input v-model="clienteForm.nombre" type="text" required>
       </div>
+
+      <div class="form-group">
+        <label>RTN:</label>
+        <input v-model="clienteForm.rtn" type="text" required>
+      </div>
+
+      <div id="form-tel" class="form-group">
+        <label>Teléfono:</label>
+        <input v-model="clienteForm.telefono" type="text">
+      </div>
+
+      <div class="form-group">
+        <label>Email:</label>
+        <input v-model="clienteForm.email" type="text">
+      </div>
+
+      <div class="form-group">
+        <label>Dirección:</label>
+        <input v-model="clienteForm.direccion" type="text">
+      </div>
+
+      <button id="AddClienteModal" class="btn btn-primary" @click="guardarCliente">
+        {{ isEditing ? 'Guardar Cambios' : 'Agregar Cliente' }}
+      </button>
+      <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
     </div>
+  </div>
 </template>
 
 <script>
@@ -81,7 +77,7 @@ export default {
       this.isEditing = false;
       this.editIndex = null;
     },
-    
+
     guardarCliente() {
       /*
       if (this.isEditing) {
@@ -127,7 +123,6 @@ select {
   padding: 16px;
 }
 
-
 .btn {
   padding: 0.35rem;
   font-size: 17px;
@@ -163,15 +158,13 @@ select {
 }
 
 .form-group {
-display: flex;
-flex-direction: column;
-align-items: start;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
   margin-bottom: 16px;
-
 }
 
 .form-group label {
-  display: flexbox;
   margin-bottom: 8px;
 }
 

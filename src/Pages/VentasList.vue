@@ -9,74 +9,47 @@
   <div class="wrapper">
     <div class="main-container">
       <form class="inputs-container" @submit.prevent="agregarProducto" autocomplete="off">
-        
+
         <div class="input-container input-superior">
-          <label class="label-input" >
+          <label class="label-input">
             Buscar por nombre: </label>
-            <input 
-            list="idDataList" 
-            class="campo" 
-            :disabled="isEditing" 
-            v-model="addName" 
-            placeholder="Ingresar nombre"
+          <input list="idDataList" class="campo" :disabled="isEditing" v-model="addName" placeholder="Ingresar nombre"
             @input="colocarCodigo">
-            <datalist id="idDataList">
-              <option 
-              v-for="(producto,index) in productos" :key="index"
-              :value="producto.codigo"
-              >
+          <datalist id="idDataList">
+            <option v-for="(producto, index) in productos" :key="index" :value="producto.codigo">
               {{ producto.codigo }} : {{ producto.nombre }}
-              
+
             </option>
-            </datalist>
-          </div>
+          </datalist>
+        </div>
         <div class="input-container-exterior">
           <div class="input-container">
-          <label for="codigo-producto" class="label-input"
-            >Codigo del producto:</label
-          >
-          <input
-            name="codigo-producto"
-            ref="codigoRef"
-            type="text"
-            class="campo"
-            v-model="addQuery"
-            tabindex="1"
-            :disabled="isEditing"
-            placeholder="Ingresar codigo"
-            required
-          />
+            <label for="codigo-producto" class="label-input">Codigo del producto:</label>
+            <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
+              :disabled="isEditing" placeholder="Ingresar codigo" required />
           </div>
 
-        <div class="input-container">
-          <label for="cantidad" class="label-input">Cantidad:</label>
-          <input
-            name="cantidad"
-            class="campo campo-cantidad"
-            type="number"
-            tabindex="2"
-            placeholder="Ingresar cantidad"
-            ref="cantidadRef"
-            v-model="addQuantity"
-          />
+          <div class="input-container">
+            <label for="cantidad" class="label-input">Cantidad:</label>
+            <input name="cantidad" class="campo campo-cantidad" type="number" tabindex="2"
+              placeholder="Ingresar cantidad" ref="cantidadRef" v-model="addQuantity" />
+          </div>
+
+          <div class="input-container">
+            <button class="btn btn-success agregar-producto" type="submit">
+              <i class="bi bi-plus-circle-fill"> Añadir</i>
+            </button>
+
+          </div>
+
+          <div class="input-container">
+            <button id="delete-last-producto" type="button" class="btn" @click="deleteUltimo">
+              Cancelar ultimo
+            </button>
+          </div>
         </div>
 
-        <div class="input-container">
-          <button
-            class="btn btn-success agregar-producto"  type="submit">
-          <i class="bi bi-plus-circle-fill"> Añadir</i>
-          </button>
-          
-        </div>
 
-        <div class="input-container">
-          <button id="delete-last-producto" type="button" class="btn" @click="deleteUltimo">
-            Cancelar ultimo
-          </button>
-        </div>
-        </div>
-        
-        
       </form>
 
       <div class="table-container">
@@ -91,7 +64,7 @@
             <th style="width: 100px">Opciones</th>
           </thead>
           <tbody>
-            <tr v-for="(producto, index) in productosLista" :key="index" @click="editingTrue(index)" >
+            <tr v-for="(producto, index) in productosLista" :key="index" @click="editingTrue(index)">
               <td>{{ index + 1 }}</td>
               <td>{{ producto.codigo }}</td>
               <td>{{ producto.nombre }}</td>
@@ -99,25 +72,13 @@
               <td>{{ producto.precioUnitario }}</td>
               <td>{{ producto.descuento }}</td>
               <td class="botones-accion">
-                <button
-                  id="btnDisminuir"
-                  class="btn btn-botones-accion"
-                  @click="disminuirCantidad(index)"
-                >
+                <button id="btnDisminuir" class="btn btn-botones-accion" @click="disminuirCantidad(index)">
                   <b><i class="bi bi-dash-circle-fill"></i></b>
                 </button>
-                <button
-                  id="btnAumentar"
-                  class="btn btn-botones-accion"
-                  @click="aumentarCantidad(index)"
-                >
+                <button id="btnAumentar" class="btn btn-botones-accion" @click="aumentarCantidad(index)">
                   <b><i class="bi bi-plus-circle-fill"></i></b>
                 </button>
-                <button
-                  id="btnEliminar"
-                  class="btn btn-botones-accion"
-                  @click="deleteProducto(index)"
-                >
+                <button id="btnEliminar" class="btn btn-botones-accion" @click="deleteProducto(index)">
                   <b><i class="bi bi-x-circle-fill"></i></b>
                 </button>
               </td>
@@ -130,19 +91,19 @@
     <div class="end-container">
       <div class="end-container-cancelar">
         <p class="texto-tecla-boton texto-esc">Esc</p>
-      <button class="btn btn-end" id="cancelar-venta" @click="cancelarVenta">
-        Cancelar Venta
-      </button>
+        <button class="btn btn-end" id="cancelar-venta" @click="cancelarVenta">
+          Cancelar Venta
+        </button>
       </div>
-      
+
       <div class="end-container-cobro">
         <div class="end-container-boton-cobro">
           <p class="texto-tecla-boton texto-f12">F12</p>
-        <button class="btn btn-end" id="boton-cobrar" @click="payModalOpen">
-          Cobrar
-        </button>
+          <button class="btn btn-end" id="boton-cobrar" @click="payModalOpen">
+            Cobrar
+          </button>
         </div>
-        
+
         <div class="end-container-cobro-p">
           <p id="total">{{ calcularTotal }}</p>
           <p id="moneda">Lempiras</p>
@@ -176,26 +137,16 @@
         <div class="div-modal-resumen div-modal-resumen-rtn">
           <label for="rtn">RTN:</label>
           <input type="text" id="rtn" v-model="rtn" />
-          <AgregarCliente/>
+          <AgregarCliente />
         </div>
 
         <div class="payment-methods">
           <label>
-            <input
-              type="radio"
-              v-model="paymentMethod"
-              @change="selectRadioButton('cash')"
-              value="cash"
-            />
+            <input type="radio" v-model="paymentMethod" @change="selectRadioButton('cash')" value="cash" />
             Efectivo
           </label>
           <label>
-            <input
-              type="radio"
-              v-model="paymentMethod"
-              @change="selectRadioButton('card')"
-              value="card"
-            />
+            <input type="radio" v-model="paymentMethod" @change="selectRadioButton('card')" value="card" />
             Tarjeta
           </label>
           <!-- Añadir otros métodos si es necesario -->
@@ -373,7 +324,7 @@ export default {
   methods: {
     pushEsc(event) {
       if (event.key === "Esc" || event.key === "Escape") {
-        if (this.isEditing){
+        if (this.isEditing) {
           this.isEditing = false;
           this.reiniciarInputs();
           return;
@@ -418,30 +369,30 @@ export default {
         (p) => p.codigo === this.addQuery
       );
 
-      if (!this.isEditing){
+      if (!this.isEditing) {
 
-      if (!newProduct) {
-        alert("No existe el producto");
-        this.reiniciarInputs();
-        this.$refs.codigoRef.focus();
-      } else {
-        if (exitProduct) {
-          exitProduct.cantidad += Number(this.addQuantity);
+        if (!newProduct) {
+          alert("No existe el producto");
+          this.reiniciarInputs();
+          this.$refs.codigoRef.focus();
         } else {
-          newProduct.cantidad = Number(this.addQuantity);
-          this.productosLista.push(newProduct);
+          if (exitProduct) {
+            exitProduct.cantidad += Number(this.addQuantity);
+          } else {
+            newProduct.cantidad = Number(this.addQuantity);
+            this.productosLista.push(newProduct);
+          }
+          this.reiniciarInputs();
+          this.$refs.codigoRef.focus();
         }
-        this.reiniciarInputs();
-        this.$refs.codigoRef.focus();
-      }
       }
       else {
         exitProduct.cantidad = Number(this.addQuantity);
       }
-      
+
     },
 
-    colocarCodigo(){
+    colocarCodigo() {
       const productoSeleccionado = this.productos.find(producto => producto.codigo === this.addName);
       // Si existe, asignamos el código al campo correspondiente
       if (productoSeleccionado) {
@@ -452,14 +403,14 @@ export default {
       }
     },
 
-    editingTrue(index){
-      if (this.productosLista[index]){
-      this.addQuery = this.productosLista[index].codigo;
-      this.addQuantity = this.productosLista[index].cantidad;
-      this.addName = this.productosLista[index].nombre;
-      this.isEditing = true;
+    editingTrue(index) {
+      if (this.productosLista[index]) {
+        this.addQuery = this.productosLista[index].codigo;
+        this.addQuantity = this.productosLista[index].cantidad;
+        this.addName = this.productosLista[index].nombre;
+        this.isEditing = true;
       }
-      
+
     },
 
     disminuirCantidad(index) {
@@ -577,7 +528,7 @@ export default {
 
   display: flex;
   justify-content: space-between;
-  
+
 }
 
 .rol {
@@ -585,11 +536,11 @@ export default {
   font-size: 14px;
 }
 
-.input-container label{
+.input-container label {
   white-space: nowrap;
 }
 
-.input-container{
+.input-container {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -610,7 +561,7 @@ export default {
   align-items: center;
 }
 
-.input-superior{
+.input-superior {
   width: 80%;
   margin-bottom: 1%;
 }
@@ -629,12 +580,12 @@ export default {
 }
 
 .agregar-producto {
-background-color: #46ce10;
-width: 100px;
-border: none;
-color: white;
-cursor: pointer;
-margin-right: 15px;
+  background-color: #46ce10;
+  width: 100px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-right: 15px;
 }
 
 .agregar-producto:hover {
@@ -705,6 +656,7 @@ margin-right: 15px;
 .table tbody tr:last-child td:last-child {
   border-bottom-right-radius: 10px;
 }
+
 #btnEditar {
   font-size: 18px;
   width: 50px;
@@ -748,7 +700,7 @@ margin-right: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
 }
 
 .modal-content {
@@ -767,7 +719,8 @@ margin-right: 15px;
 
 
 
-.close-btn, .boton-modal-cancelar-venta {
+.close-btn,
+.boton-modal-cancelar-venta {
   background-color: #dc3545;
   color: white;
 }
@@ -813,6 +766,7 @@ margin-right: 15px;
 .payment-methods {
   display: flex;
 }
+
 .payment-methods label {
   display: block;
   margin-bottom: 10px;
@@ -829,29 +783,37 @@ margin-right: 15px;
 .div-modal-resumen {
   display: flex;
   align-items: center;
-  margin-bottom: 10px; /* Espacio entre los campos */
+  margin-bottom: 10px;
+  /* Espacio entre los campos */
 }
 
 .div-modal-resumen label {
-  width: 120px; /* Ajusta el ancho del label según sea necesario */
-  margin-right: 10px; /* Espacio entre el label y el input */
+  width: 120px;
+  /* Ajusta el ancho del label según sea necesario */
+  margin-right: 10px;
+  /* Espacio entre el label y el input */
 }
 
 .div-modal-resumen input {
-  flex: 1; /* El input ocupará el resto del espacio disponible */
+  flex: 1;
+  /* El input ocupará el resto del espacio disponible */
 }
+
 .div-modal-resumen-rtn {
   margin-left: 30px;
 }
+
 .modalShowConfirm-Si {
   background-color: #dc3545;
 }
-.modalShowConfirm-no, .boton-modal-confirmar-venta{
+
+.modalShowConfirm-no,
+.boton-modal-confirmar-venta {
   background-color: #4caf50;
 }
 
 /* End container */
-.end-container-cobro-p{
+.end-container-cobro-p {
   margin-left: 5px;
 }
 
@@ -875,12 +837,13 @@ margin-right: 15px;
   transform: rotate(-90deg);
 }
 
-.btn-end{
-  min-height:80px;
+.btn-end {
+  min-height: 80px;
   max-width: 90px;
 }
 
-.end-container-cancelar,.end-container-cobro {
+.end-container-cancelar,
+.end-container-cobro {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -890,7 +853,7 @@ margin-right: 15px;
   padding-top: 1%;
   display: flex;
   flex-direction: row;
-  align-items:end;
+  align-items: end;
   justify-content: space-between;
   border-top: solid rgb(75, 75, 75) 1px;
 }
@@ -900,6 +863,7 @@ margin-right: 15px;
   margin: 0;
   color: #094688;
 }
+
 #total {
   font-weight: bolder;
   font-size: 40px;

@@ -6,40 +6,38 @@
   <hr>
 
   <div class="productos-wrapper">
-<div class="opciones" >
-    <div class="action-bar">
-      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">
-        Agregar Producto
-      </button>
-    </div>
+    <div class="opciones">
+      <div class="action-bar">
+        <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">
+          Agregar Producto
+        </button>
+      </div>
 
-    <!-- Botón de exportación PDF -->
-    <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" class="export-button" />
+      <!-- Botón de exportación PDF -->
+      <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" class="export-button" />
 
-    <RouterLink
-    to="promociones-producto"
-    >
-    <button class="button-promocion" >Promociones</button>
-    </RouterLink>
-    
-    <div class="registros">
-      <span>Mostrar
-        <select v-model="itemsPerPage" class="custom-select">
-          <option value="">Todos</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-          <option value="25">25</option>
-        </select> registros
-      </span>
-    </div>
+      <RouterLink to="promociones-producto">
+        <button class="button-promocion">Promociones</button>
+      </RouterLink>
 
-    <!-- Barra de búsqueda -->
-    <div class="search-bar">
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar producto..." />
+      <div class="registros">
+        <span>Mostrar
+          <select v-model="itemsPerPage" class="custom-select">
+            <option value="">Todos</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+          </select> registros
+        </span>
+      </div>
+
+      <!-- Barra de búsqueda -->
+      <div class="search-bar">
+        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar producto..." />
+      </div>
     </div>
-</div>
     <!-- Tabla exportable -->
     <div class="table-container" v-pdf-export ref="table">
       <table class="table">
@@ -106,7 +104,7 @@
           <input v-model="productoForm.stock" type="text" required>
           <label>Stock min:</label>
           <input type="text" required>
-          
+
         </div>
 
         <div class="form-group">
@@ -302,8 +300,8 @@ export default {
   justify-content: space-between;
 }
 
-.opciones{
-  display:flex;
+.opciones {
+  display: flex;
   align-items: center;
   justify-content: space-between;
 }
@@ -327,19 +325,19 @@ export default {
 }
 
 .button-promocion {
-    background-color: #4cafaf;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    border-radius: 10px;
+  background-color: #4cafaf;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
 }
 
 .button-promocion:hover {
-    background-color: #3d8d8d;
+  background-color: #3d8d8d;
 }
 
-.export-button{
+.export-button {
   margin: 0;
 }
 
@@ -493,15 +491,15 @@ export default {
   justify-content: center;
 }
 
-.stock-group{
-  
+.stock-group {
+
   display: flex;
   width: 100%;
   align-items: center;
   justify-content: center;
 }
 
-.stock-group label{
+.stock-group label {
   margin: 5px;
 }
 

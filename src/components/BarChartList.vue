@@ -17,21 +17,21 @@
       </div>
 
     </div>
-<div class="graphics-container" >
-    <!-- Gráfico de ventas y Productos más vendidos (más pequeños) -->
-    <div class="charts-container">
-      <div class="line-chart">
-        <LineChart :chart-data="lineChartData" :options="lineChartOptions" />
+    <div class="graphics-container">
+      <!-- Gráfico de ventas y Productos más vendidos (más pequeños) -->
+      <div class="charts-container">
+        <div class="line-chart">
+          <LineChart :chart-data="lineChartData" :options="lineChartOptions" />
+        </div>
+        <div class="pie-chart">
+          <PieChart :chart-data="pieChartData" :options="pieChartOptions" />
+        </div>
       </div>
-      <div class="pie-chart">
-        <PieChart :chart-data="pieChartData" :options="pieChartOptions" />
-      </div>
-    </div>
 
-    <!-- Tabla de últimas ventas -->
-   
-  </div>
-  <table class="sales-table">
+      <!-- Tabla de últimas ventas -->
+
+    </div>
+    <table class="sales-table">
       <thead>
         <tr>
           <th>Nombre</th>
@@ -150,7 +150,7 @@ export default {
   font-family: 'Montserrat', sans-serif;
 }
 
-/* Estilo para las tarjetas informativas */
+/* Contenedor de las tarjetas */
 .cards-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -158,10 +158,12 @@ export default {
   margin-bottom: 2rem;
 }
 
-.graphics-container{
+/* Contenedor de los gráficos */
+.graphics-container {
   padding: 0 5%;
 }
 
+/* Estilo para las tarjetas */
 .card {
   background-color: #f7f7f7;
   padding: 1.5rem;
@@ -176,7 +178,6 @@ export default {
   align-items: center;
   gap: 0.5rem;
 }
-
 
 .card-icon {
   margin-top: 3rem;
@@ -208,7 +209,7 @@ export default {
   font-weight: bold;
 }
 
-/* Estilo para los gráficos más pequeños */
+/* Contenedor de los gráficos */
 .charts-container {
   display: flex;
   justify-content: space-between;

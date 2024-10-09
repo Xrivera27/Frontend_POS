@@ -3,124 +3,80 @@
     <h1>Registro Compra</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   </div>
-  <hr/>
+  <hr />
 
   <div class="wrapper">
     <div class="main-container">
-      <form
-        @submit.prevent="agregarProducto"
-        autocomplete="off">
+      <form @submit.prevent="agregarProducto" autocomplete="off">
 
-        <div class="input-container input-superior" >
+        <div class="input-container input-superior">
           <div class="input-container" id="div_codigo">
-          <label for="codigo-busqueda" class="label-input"
-            >Codigo del producto:</label
-          >
-          <input
-            name="codigo-busqueda"
-            ref="codigo"
-            type="text"
-            class="campo"
-            id="campo_codigo"
-            tabindex="1"
-            required
-            v-model="addQuery"
-            placeholder="Ingresar codigo"
-            :disabled="isEditing"
-          />
+            <label for="codigo-busqueda" class="label-input">Codigo del producto:</label>
+            <input name="codigo-busqueda" ref="codigo" type="text" class="campo" id="campo_codigo" tabindex="1" required
+              v-model="addQuery" placeholder="Ingresar codigo" :disabled="isEditing" />
 
-        </div>
+          </div>
 
-        <div class="input-container" id="div_nombre">
-          <label class="label-input" >
-            Buscar por nombre: </label>
-            <input 
-            list="idDataList" 
-            class="campo" 
-            id="campo_nombre"
-            :disabled="isEditing" 
-            v-model="addName" 
-            placeholder="Ingresar nombre"
-            @input="colocarCodigo">
+          <div class="input-container" id="div_nombre">
+            <label class="label-input">
+              Buscar por nombre: </label>
+            <input list="idDataList" class="campo" id="campo_nombre" :disabled="isEditing" v-model="addName"
+              placeholder="Ingresar nombre" @input="colocarCodigo">
             <datalist id="idDataList">
-              <option 
-              v-for="(producto,index) in productos" :key="index"
-              :value="producto.codigo"
-              >
-              {{ producto.codigo }} : {{ producto.nombre }}
-              
-            </option>
+              <option v-for="(producto, index) in productos" :key="index" :value="producto.codigo">
+                {{ producto.codigo }} : {{ producto.nombre }}
+
+              </option>
             </datalist>
           </div>
         </div>
 
         <div class="input-container-exterior">
-          
+
           <div class="input-container">
-          <label for="cantidad" class="label-input">Cant. Unitaria:</label>
-          <input
-            name="cantidad"
-            class="campo"
-            type="text"
-            tabindex="3"
-            placeholder="Cantidad unitaria"
-            v-model="addQuantity"
-          />
+            <label for="cantidad" class="label-input">Cant. Unitaria:</label>
+            <input name="cantidad" class="campo" type="text" tabindex="3" placeholder="Cantidad unitaria"
+              v-model="addQuantity" />
+          </div>
+
+          <div class="input-container">
+            <label for="cantidad" class="label-input">Cant. paquetes:</label>
+            <input name="cantidad" class="campo" type="text" tabindex="3" placeholder="Cantidad total de paquetes"
+              v-model="addQuantityPackage" />
+          </div>
+
+          <div class="input-container">
+            <label for="total-compra" class="label-input">Prec./paquete:</label>
+            <input name="total-compra" class="campo" type="text" step="0.01" tabindex="2"
+              placeholder="Total compra por paquete" required v-model="addtotalPrice" />
+          </div>
+
+          <div class="boton-container">
+            <button class="btn btn-success agregar-producto" type="submit">
+              <i class="bi bi-plus-circle-fill"> Añadir</i>
+            </button>
+          </div>
         </div>
 
-        <div class="input-container">
-          <label for="cantidad" class="label-input">Cant. paquetes:</label>
-          <input
-            name="cantidad"
-            class="campo"
-            type="text"
-            tabindex="3"
-            placeholder="Cantidad total de paquetes"
-            v-model="addQuantityPackage"
-          />
-        </div>
 
-        <div class="input-container">
-          <label for="total-compra" class="label-input">Prec./paquete:</label>
-          <input
-            name="total-compra"
-            class="campo"
-            type="text"
-            step="0.01"
-            tabindex="2"
-            placeholder="Total compra por paquete"
-            required
-            v-model="addtotalPrice"
-          />
-        </div>
 
-        <div class="boton-container">
-          <button
-            class="btn btn-success agregar-producto"  type="submit">
-          <i class="bi bi-plus-circle-fill"> Añadir</i>
-          </button>
-        </div>
-        </div>
-     
-
-       
       </form>
 
       <div class="table-container">
         <table class="table" border="2">
           <thead>
-            <th class="th_small" >N.º</th>
-            <th  class="th_medium">Codigo</th>
+            <th class="th_small">N.º</th>
+            <th class="th_medium">Codigo</th>
             <th class="th_large">Nombre</th>
             <th class="th_small">Paquetes</th>
-            <th class="th_small" >Unidad/Paquetes</th>
-            <th class="medium" >Proveedor</th>
+            <th class="th_small">Unidad/Paquetes</th>
+            <th class="medium">Proveedor</th>
             <th class="th_small">Total Compra</th>
-            
+
             <th style="width: 100px">Opciones</th>
           </thead>
           <tbody>
-            <tr v-for="(producto, index) in productosLista" :key="index" @click="isEditingTrue(index)" >
+            <tr v-for="(producto, index) in productosLista" :key="index" @click="isEditingTrue(index)">
               <td>{{ index + 1 }}</td>
               <td>{{ producto.codigo }}</td>
               <td>{{ producto.nombre }}</td>
@@ -129,25 +85,13 @@
               <td>{{ producto.proveedor }}</td>
               <td>{{ producto.total_compra }}</td>
               <td class="botones-accion">
-                <button
-                  id="btnDisminuir"
-                  class="btn btn-botones-accion"
-                  @click="disminuirCantidad(index)"
-                >
+                <button id="btnDisminuir" class="btn btn-botones-accion" @click="disminuirCantidad(index)">
                   <b><i class="bi bi-dash-circle-fill"></i></b>
                 </button>
-                <button
-                  id="btnAumentar"
-                  class="btn btn-botones-accion"
-                  @click="aumentarCantidad(index)"
-                >
+                <button id="btnAumentar" class="btn btn-botones-accion" @click="aumentarCantidad(index)">
                   <b><i class="bi bi-plus-circle-fill"></i></b>
                 </button>
-                <button
-                  id="btnEliminar"
-                  class="btn btn-botones-accion"
-                  @click="deleteProducto(index)"
-                >
+                <button id="btnEliminar" class="btn btn-botones-accion" @click="deleteProducto(index)">
                   <b><i class="bi bi-x-circle-fill"></i></b>
                 </button>
               </td>
@@ -160,15 +104,15 @@
     <div class="end-container">
       <div class="end-container-cancelar">
         <p class="texto-tecla-boton texto-esc">Esc</p>
-      <button class="btn btn-end" id="cancelar-compra" @click="cancelarcompra">
-        Cancelar compra
-      </button>
+        <button class="btn btn-end" id="cancelar-compra" @click="cancelarcompra">
+          Cancelar compra
+        </button>
       </div>
-      
+
       <AgregarProductoModal />
 
       <div class="end-container-cobro">
-        
+
         <p class="texto-tecla-boton texto-f12">F12</p>
         <button class="btn btn-end" id="boton-cobrar" @click="payModalOpen">
           Pagar
@@ -246,10 +190,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="(proveedor_actual, index) in proveedores_nombre"
-              :key="index"
-            >
+            <tr v-for="(proveedor_actual, index) in proveedores_nombre" :key="index">
               <td>{{ index + 1 }}</td>
               <td>{{ proveedor_actual }}</td>
             </tr>
@@ -379,7 +320,7 @@ export default {
   methods: {
     pushEsc(event) {
       if (event.key === "Esc" || event.key === "Escape") {
-        if (this.isEditing){
+        if (this.isEditing) {
           this.isEditing = false;
           this.reiniciarInputs();
           return;
@@ -428,7 +369,7 @@ export default {
         return;
       }
 
-      if (this.addQuantity < 0 || this.addtotalPrice < 0 || this.addQuantityPackage < 0 ) {
+      if (this.addQuantity < 0 || this.addtotalPrice < 0 || this.addQuantityPackage < 0) {
         alert("Ingresa un dato mayor a 0");
         return;
       }
@@ -437,12 +378,12 @@ export default {
         this.addQuantity = "1";
       }
 
-      
+
       if (!this.addQuantityPackage) {
         this.addQuantityPackage = "1";
       }
 
-     
+
 
       const newProduct = this.productos.find((p) => p.codigo === this.addQuery);
       const exitProduct = this.productosLista.find(
@@ -450,30 +391,30 @@ export default {
       );
 
 
-      if (!this.isEditing){
+      if (!this.isEditing) {
         if (!newProduct) {
-        alert("No existe el producto");
-      } else {
-        if (exitProduct) {
-          exitProduct.cantidad += Number(this.addQuantity);
-          exitProduct.total_compra += Number(this.addtotalPrice);
+          alert("No existe el producto");
         } else {
-          newProduct.cantidad = Number(this.addQuantity);
-          newProduct.total_compra = Number(this.addtotalPrice);
-          this.productosLista.push(newProduct);
+          if (exitProduct) {
+            exitProduct.cantidad += Number(this.addQuantity);
+            exitProduct.total_compra += Number(this.addtotalPrice);
+          } else {
+            newProduct.cantidad = Number(this.addQuantity);
+            newProduct.total_compra = Number(this.addtotalPrice);
+            this.productosLista.push(newProduct);
+          }
+          this.reiniciarInputs();
+          this.$refs.codigo.focus();
         }
-        this.reiniciarInputs();
-        this.$refs.codigo.focus();
       }
-      }
-      else{
+      else {
         exitProduct.cantidad = Number(this.addQuantity);
         exitProduct.total_compra = Number(this.addtotalPrice);
       }
-      
+
     },
 
-    colocarCodigo(){
+    colocarCodigo() {
       const productoSeleccionado = this.productos.find(producto => producto.codigo === this.addName);
       // Si existe, asignamos el código al campo correspondiente
       if (productoSeleccionado) {
@@ -485,17 +426,17 @@ export default {
     },
 
 
-    isEditingTrue(index){
-      
-      if (this.productosLista[index]){
+    isEditingTrue(index) {
+
+      if (this.productosLista[index]) {
         this.isEditing = true;
         this.addQuantity = this.productosLista[index].cantidad;
-      this.addQuery = this.productosLista[index].codigo;
-      this.addtotalPrice = this.productosLista[index].total_compra;
-      this.addName = this.productosLista[index].nombre;
+        this.addQuery = this.productosLista[index].codigo;
+        this.addtotalPrice = this.productosLista[index].total_compra;
+        this.addName = this.productosLista[index].nombre;
 
       }
-     
+
     },
 
     disminuirCantidad(index) {
@@ -598,401 +539,152 @@ export default {
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
-
-* {
-  font-family: "Montserrat", sans-serif;
+/* Estilos generales */
+body {
+  font-family: Arial, sans-serif;
 }
 
+/* Encabezado */
 .encabezado {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
+h1 {
+  font-size: 2em;
+}
+
+/* Línea horizontal */
+hr {
+  margin: 20px 0;
+}
+
+/* Contenedor principal */
 .wrapper {
-  padding: 16px;
   display: flex;
-  height: 80%;
   flex-direction: column;
-  justify-content: space-between;
+  margin: 20px;
 }
 
-.input-container label{
-  white-space: nowrap;
-}
-
-
-.input-container{
+/* Formulario */
+.main-container {
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
 }
 
-.input-superior{
-  width: 100%;
-  margin-bottom: 1%;
-}
-
+/* Contenedores de entrada */
+.input-container,
 .input-container-exterior {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-#div_nombre{
- width: 80%;
- padding-left: 20px;
-}
-
-#delete-last-producto {
-  background-color: rgb(207, 57, 57);
-  border-radius: 10px;
-  color: white;
-  font-weight: bold;
-}
-
-#btnEliminar:hover {
-  color: #b72433;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#btnAumentar:hover {
-  color: #46ce10;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#btnDisminuir:hover {
-  color: #13e4d9;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-.rol {
-  color: #969696;
-  font-size: 14px;
-}
-
-.campo {
-  padding: 0px 10px;
-  width: 100%;
-  font-size: 14px;
-  min-height: 30px;
-  border-radius: 10px;
-  border-width: 0.5px;
-}
-
-.input-container label{
-  margin-right: 0.5vw;
-}
-
-
-
-.agregar-producto {
-  background-color: #46ce10;
-  width: 100px;
-  border: none;
-  color: white;
-  cursor: pointer;
+  margin-bottom: 15px;
 }
 
 .label-input {
-  font-size: 14px;
-  margin-right: 2%;
+  display: block;
+  margin-bottom: 5px;
 }
 
-.agregar-producto:hover {
-  background-color: #38a50d;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
+/* Campos de entrada */
+.campo {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
+/* Botones */
 .boton-container {
-  display: flex;
-  align-items: end;
-}
-
-.table-container {
-  max-height: 40vh;
-  overflow-y: scroll;
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  margin-top: 16px;
-}
-
-.table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.table th,
-.table td {
-  padding: 8px 0;
-}
-
-.table thead th {
-  background-color: #e7e4e4;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-}
-
-.table tbody td {
-  text-align: center;
-  border-top: 1px solid #ddd;
-}
-
-.table thead th:first-child {
-  border-top-left-radius: 10px;
-}
-
-.table thead th:last-child {
-  border-top-right-radius: 10px;
-}
-
-.table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: 10px;
-}
-
-.table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 10px;
+  margin-top: 20px;
 }
 
 .btn {
-  padding: 8px 16px;
+  padding: 10px 15px;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
-  border-radius: 10px;
 }
 
-.btn-botones-accion {
-  background: transparent;
-  border: none;
-  padding: 0;
-  font-size: 22px;
-}
-
-#cancelar-compra {
-  background-color: #d30015;
-  color: black;
-}
-
-#cancelar-compra:hover {
-  background-color: #ad0314;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-.close-btn {
+.btn-success {
+  background-color: #28a745;
   color: white;
 }
 
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
+/* Contenedor de tabla */
+.table-container {
+  margin-top: 20px;
+  overflow-x: auto;
+  /* Permite desplazamiento horizontal si es necesario */
+}
+
+/* Tabla */
+.table {
   width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  border-collapse: collapse;
 }
 
-#AddClienteModal {
-  background: #a38655;
-  border-radius: 15px;
-  font-size: 16px;
+th,
+td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
 }
 
-#BtnCerrar {
-  border-radius: 15px;
-  background-color: #ebebeb;
-  font-size: 16px;
+.th_small {
+  width: 50px;
 }
 
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 500px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+.th_medium {
+  width: 100px;
 }
 
-.end-container-cobro {
-  display: flex;
-  width: 100%;
-  justify-content: end;
-  align-items: center;
-  height: 100px;
+.th_large {
+  width: 200px;
 }
 
+.medium {
+  width: 150px;
+}
+
+/* Contenedor de acciones al final */
 .end-container {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  border-top: solid rgb(75, 75, 75) 1px;
+  justify-content: space-between;
+  margin-top: 20px;
 }
 
-.end-container-cancelar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.end-container-cobro-p {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.end-container-cobro p {
-  text-align: center;
-  margin: 0;
-  color: #094688;
-}
-
-#total {
-  font-weight: bolder;
-  font-size: 40px;
-}
-
-#boton-cobrar {
-  height: 70px;
-  margin-right: 15px;
-  background-color: #094688;
-  font-weight: bold;
-  color: white;
-}
-
-#boton-cobrar:hover {
-  background-color: #093c72;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#cancelar-compra {
-  height: 60%;
-  margin-right: 15px;
-  background-color: rgb(185, 10, 10);
-  font-weight: bold;
-  font-size: 12px;
-  color: white;
-}
-
-#cancelar-compra span {
-  font-size: 15px;
-}
-
-.texto-esc {
-  color: #d30015;
-}
-
-.btn-end{
-  min-height:80px;
-  max-width: 90px;
-}
-
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .modal-content {
   background: white;
   padding: 20px;
-  border-radius: 8px;
-  width: 400px;
+  border-radius: 4px;
+  width: 300px;
+  /* Ancho del modal */
+}
+
+/* Estilos de botones dentro del modal */
+.confirmar-pago,
+.cancelar {
+  margin-top: 10px;
 }
 
 .texto-tecla-boton {
-  display: inline-block;
-  transform: rotate(-90deg);
+  margin: 0;
+  font-size: 12px;
 }
 
-.product-list {
-  list-style-type: none;
-  padding: 0;
-}
-
-.product-list li {
-  margin-bottom: 10px;
-}
-
-.payment-methods {
-  display: flex;
-}
-
-.payment-methods label {
-  display: block;
-  margin-bottom: 10px;
-}
-
-.modal-actions {
-  margin-top: 20px;
-}
-
-.modal-actions button {
-  margin-right: 10px;
-}
-
-.div-modal-resumen {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  /* Espacio entre los campos */
-}
-
-.div-modal-resumen label {
-  width: 120px;
-  /* Ajusta el ancho del label según sea necesario */
-  margin-right: 10px;
-  /* Espacio entre el label y el input */
-}
-
-.div-modal-resumen input {
-  flex: 1;
-  /* El input ocupará el resto del espacio disponible */
-}
-
-.div-modal-resumen-rtn {
-  margin-left: 30px;
-}
-
-.modalShowConfirm-Si,
-.cancelar,
-.close-btn {
-  background-color: #dc3545;
-}
-
-.modalShowConfirm-no,
-.confirmar-pago {
-  background-color: #4caf50;
-}
-
-.modalShowConfirm-no:hover,
-.confirmar-pago:hover {
-  background-color: #45a049;
-}
-
-.modalShowConfirm-Si:hover,
-.cancelar:hover,
-.close-btn:hover {
-  background-color: #bd0d1f;
+.texto-f12 {
+  font-size: 14px;
 }
 </style>

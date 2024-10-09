@@ -36,7 +36,7 @@
 
             <!-- Categorías -->
             <li v-if="hasPermission('Categorias')" class="nav-item">
-                <router-link to="/registro" class="nav-link" :class="{ active: isActive('/registro') }">
+                <router-link to="/categorias" class="nav-link" :class="{ active: isActive('/registro') }">
                     <i class="bi bi-tags-fill"></i>
                     <span v-if="expanded" class="tooltip-text">Categorías</span>
                 </router-link>

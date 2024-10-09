@@ -1,10 +1,5 @@
 <template>
-  <button
-    id="registrar-producto"
-    class="btn btn-success"
-    type="button"
-    @click="openModal"
-  >
+  <button id="registrar-producto" class="btn btn-success" type="button" @click="openModal">
     <b>Registrar nuevo Inv.</b>
   </button>
 
@@ -33,11 +28,7 @@
 
           <div class="form-group">
             <label>Precio Mayorista:</label>
-            <input
-              v-model="productoForm.preciomayorista"
-              type="text"
-              required
-            />
+            <input v-model="productoForm.preciomayorista" type="text" required />
           </div>
 
           <div class="form-group">
@@ -48,16 +39,16 @@
         <div class="contenedor contenedor-derecho">
           <div class="form-group">
             <label for="proveedor">Selecciona proveedor del producto:</label>
-            <div id="proveedor-contenedor" >
-                <select class="form-select" id="proveedor" name="proveedor">
-              <option value="impuesto1">Proveedor 1</option>
-              <option value="impuesto2">Proveedor 2</option>
-              <option value="impuesto3">Proveedor 3</option>
-            </select>
-            <Proveedor/>
+            <div id="proveedor-contenedor">
+              <select class="form-select" id="proveedor" name="proveedor">
+                <option value="impuesto1">Proveedor 1</option>
+                <option value="impuesto2">Proveedor 2</option>
+                <option value="impuesto3">Proveedor 3</option>
+              </select>
+              <Proveedor />
             </div>
-            
-            
+
+
 
           </div>
 
@@ -86,37 +77,31 @@
           </div>
 
           <div v-if="isModalCategoriaOpen" class="modal">
-            <div class="modal-content modal-content-categoria" >
-<div class="categoria-encabezado" >
-    <h3>Selecciona categorias del producto</h3>
+            <div class="modal-content modal-content-categoria">
+              <div class="categoria-encabezado">
+                <h3>Selecciona categorias del producto</h3>
                 <div class="search-bar form-group">
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar categoria..." />
-    </div>
-</div>
-                
-                    <div class="categoria-contenedor">
-                        <form class="form-form-categoria">
-                            
-                            <label class="label-categoria"
-                            v-for="(categoria, index) in filteredCategorias"
-                            :key="index"
-                            :class="{ 'primer-label': (index+1)%2 == 0 }"
-                            ><input 
-                            type="checkbox" 
-                            name="{{ categoria.nombre }}" 
-                            id="{{ categoria.nombre }}"
-                            >{{ categoria.nombre }}
-                            <br v-if="(index+1)%2 == 0" class="br-label">
-                        </label>
-                        
-                        
-                        </form>
-                    </div>
-                    <div class="categoria-botones" >
-
-                    <button @click="closeModalCategoria" class="btn btn-primary">Guardar</button>
-                    <button @click="closeModalCategoria" class="btn btn-secondary">Cerrar</button>
+                  <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar categoria..." />
                 </div>
+              </div>
+
+              <div class="categoria-contenedor">
+                <form class="form-form-categoria">
+
+                  <label class="label-categoria" v-for="(categoria, index) in filteredCategorias" :key="index"
+                    :class="{ 'primer-label': (index + 1) % 2 == 0 }"><input type="checkbox"
+                      name="{{ categoria.nombre }}" id="{{ categoria.nombre }}">{{ categoria.nombre }}
+                    <br v-if="(index + 1) % 2 == 0" class="br-label">
+                  </label>
+
+
+                </form>
+              </div>
+              <div class="categoria-botones">
+
+                <button @click="closeModalCategoria" class="btn btn-primary">Guardar</button>
+                <button @click="closeModalCategoria" class="btn btn-secondary">Cerrar</button>
+              </div>
 
             </div>
 
@@ -125,11 +110,7 @@
         </div>
       </div>
 
-      <button
-        id="AddProductoModal"
-        class="btn btn-primary"
-        @click="guardarProducto"
-      >
+      <button id="AddProductoModal" class="btn btn-primary" @click="guardarProducto">
         {{ isEditing ? "Guardar Cambios" : "Agregar Producto" }}
       </button>
       <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">
@@ -142,9 +123,9 @@
 <script>
 import Proveedor from "../components/AgregarProveedor.vue"
 export default {
-    components:{
-        Proveedor,
-    },
+  components: {
+    Proveedor,
+  },
   data() {
     return {
       searchQuery: "",
@@ -166,38 +147,38 @@ export default {
         preciodescuento: "",
         fecha: "",
       },
-    categorias: [
-    { nombre: 'Videojuegos' },
-    { nombre: 'Electrónica' },
-    { nombre: 'Ropa' },
-    { nombre: 'Calzado' },
-    { nombre: 'Juguetes' },
-    { nombre: 'Libros' },
-    { nombre: 'Muebles' },
-    { nombre: 'Hogar y Cocina' },
-    { nombre: 'Herramientas' },
-    { nombre: 'Deportes' },
-    { nombre: 'Accesorios' },
-    { nombre: 'Instrumentos Musicales' },
-    { nombre: 'Salud y Belleza' },
-    { nombre: 'Jardinería' },
-    { nombre: 'Automóviles' },
-    { nombre: 'Mascotas' },
-    { nombre: 'Fotografía' },
-    { nombre: 'Alimentos y Bebidas' },
-    { nombre: 'Papelería' },
-    { nombre: 'Relojes' },
-    { nombre: 'Teléfonos Móviles' },
-    { nombre: 'Bicicletas' },
-    { nombre: 'Equipos de Camping' },
-    { nombre: 'Arte y Manualidades' },
-    { nombre: 'Viajes' },
-    { nombre: 'Películas' },
-    { nombre: 'Cómics' },
-    { nombre: 'Coleccionables' },
-    { nombre: 'Joyería' },
-    { nombre: 'Vinos y Licores' }
-]
+      categorias: [
+        { nombre: 'Videojuegos' },
+        { nombre: 'Electrónica' },
+        { nombre: 'Ropa' },
+        { nombre: 'Calzado' },
+        { nombre: 'Juguetes' },
+        { nombre: 'Libros' },
+        { nombre: 'Muebles' },
+        { nombre: 'Hogar y Cocina' },
+        { nombre: 'Herramientas' },
+        { nombre: 'Deportes' },
+        { nombre: 'Accesorios' },
+        { nombre: 'Instrumentos Musicales' },
+        { nombre: 'Salud y Belleza' },
+        { nombre: 'Jardinería' },
+        { nombre: 'Automóviles' },
+        { nombre: 'Mascotas' },
+        { nombre: 'Fotografía' },
+        { nombre: 'Alimentos y Bebidas' },
+        { nombre: 'Papelería' },
+        { nombre: 'Relojes' },
+        { nombre: 'Teléfonos Móviles' },
+        { nombre: 'Bicicletas' },
+        { nombre: 'Equipos de Camping' },
+        { nombre: 'Arte y Manualidades' },
+        { nombre: 'Viajes' },
+        { nombre: 'Películas' },
+        { nombre: 'Cómics' },
+        { nombre: 'Coleccionables' },
+        { nombre: 'Joyería' },
+        { nombre: 'Vinos y Licores' }
+      ]
 
     };
   },
@@ -205,12 +186,12 @@ export default {
   computed: {
     filteredCategorias() {
       return this.categorias.filter(categoria =>
-      categoria.nombre.toLowerCase().includes(this.searchQuery.toLowerCase())
+        categoria.nombre.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
   },
 
- 
+
 
   methods: {
     openModal() {
@@ -242,14 +223,14 @@ export default {
       this.editIndex = null;
     },
     guardarProducto() {
-        
+
       if (this.isEditing) {
         this.productos[this.editIndex] = { ...this.productoForm };
       } else {
         this.productos.push({ ...this.productoForm });
       }
       this.closeModal();
-      
+
     },
     editProducto(index) {
       this.productoForm = { ...this.productos[index] };
@@ -268,110 +249,7 @@ export default {
   font-family: "Montserrat", sans-serif;
 }
 
-#modal-producto{
-    max-width: 60%;
-    min-width: 500px;
-    justify-content: center;
-    align-items: center;
-}
-
-.contenedor-principal {
-  display: flex;
-  width: 100%;
-  justify-content: space-around;
-}
-
-.contenedor {
-  width: 45%;
-}
-
-.form-categoria {
-  display: flex;
-  flex-direction: column;
-}
-
-#proveedor-contenedor{
-    display: flex;
-    align-items: center
-}
-
-.primer-label{
-    margin-left: 10px;
-}
-
-.br-label{
-margin-bottom: 10px;
-}
-
-.modal-content-categoria{
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    width: 30%;
-    height: 72%;
-    min-height: 500px;
-    min-width: 300px;
-}
-
-.form-form-categoria{
-    padding: 20px;
-    padding-top: 0;
-    height: 240px;
-    overflow-y: scroll;
-}
-
-.categoria-botones{
-    width: 100%;
-    margin-top: 20px;
-    display: flex;
-    justify-content: space-evenly;
-}
-
-.btn {
-  padding: 8px 16px;
-  margin-bottom: 4px;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-#AddProductoModal, #BtnCerrar{
-    width: 80%;
-}
-
-.form-select {
-  width: 100%;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  padding: 8px 16px;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #066bd8;
-  color: white;
-}
-
-.btn-warning {
-  background-color: #ffc107;
-  color: black;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
-}
-
-.h2-modal-content {
-  margin-top: 0px;
-}
-
+/* Modal general */
 .modal {
   position: fixed;
   top: 0;
@@ -392,6 +270,34 @@ margin-bottom: 10px;
   border-radius: 4px;
 }
 
+#modal-producto {
+  max-width: 60%;
+  min-width: 500px;
+  justify-content: center;
+  align-items: center;
+}
+
+.h2-modal-content {
+  margin-top: 0;
+}
+
+#AddProductoModal,
+#BtnCerrar {
+  width: 80%;
+}
+
+/* Contenedores */
+.contenedor-principal {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+}
+
+.contenedor {
+  width: 45%;
+}
+
+/* Formularios */
 .form-group {
   margin-bottom: 16px;
 }
@@ -421,10 +327,45 @@ margin-bottom: 10px;
   margin: 5px;
 }
 
-button {
+/* Selectores */
+.form-select {
+  width: 100%;
+  border: none;
   cursor: pointer;
+  border-radius: 5px;
+  padding: 8px 16px;
 }
 
+/* Botones */
+.btn {
+  padding: 8px 16px;
+  margin-bottom: 4px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #066bd8;
+  color: white;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: black;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Botón registrar producto */
 #registrar-producto {
   background-color: rgb(253, 253, 56);
   margin-left: 30px;
@@ -434,5 +375,70 @@ button {
   background-color: rgb(228, 228, 48);
   transform: scale(1.05);
   transition: all 0.3s ease;
+}
+
+/* Categorías */
+.form-categoria {
+  display: flex;
+  flex-direction: column;
+}
+
+#proveedor-contenedor {
+  display: flex;
+  align-items: center;
+}
+
+/* Modal de categorías */
+.modal-content-categoria {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 30%;
+  height: 72%;
+  min-height: 500px;
+  min-width: 300px;
+}
+
+.form-form-categoria {
+  padding: 20px;
+  padding-top: 0;
+  height: 240px;
+  overflow-y: scroll;
+}
+
+.categoria-botones {
+  width: 100%;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.categoria-encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.label-categoria {
+  display: inline-block;
+  margin-right: 20px;
+  margin-bottom: 10px;
+}
+
+.primer-label {
+  margin-left: 10px;
+}
+
+.br-label {
+  margin-bottom: 10px;
 }
 </style>

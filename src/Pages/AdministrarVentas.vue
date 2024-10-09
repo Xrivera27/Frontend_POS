@@ -7,36 +7,36 @@
 
   <div class="ventas-wrapper">
     <div class="opciones">
-  <div class="registros">
-    <span>Mostrar
-      <select v-model="itemsPerPage" class="custom-select">
-        <option value="">Todos</option>
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="15">15</option>
-        <option value="20">20</option>
-        <option value="25">25</option>
-      </select> registros
-    </span>
-  </div>
+      <div class="registros">
+        <span>Mostrar
+          <select v-model="itemsPerPage" class="custom-select">
+            <option value="">Todos</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+          </select> registros
+        </span>
+      </div>
 
-  <!-- Filtros de fecha -->
-  <div class="date-filter">
-    <label for="start-date">Desde: </label>
-    <input type="date" id="start-date" v-model="startDate">
-    <label for="end-date">Hasta: </label>
-    <input type="date" id="end-date" v-model="endDate">
-    
-  </div>
+      <!-- Filtros de fecha -->
+      <div class="date-filter">
+        <label for="start-date">Desde: </label>
+        <input type="date" id="start-date" v-model="startDate">
+        <label for="end-date">Hasta: </label>
+        <input type="date" id="end-date" v-model="endDate">
 
-  <!-- Botón de exportación PDF -->
-  <ExportButton :columns="columns" :rows="filteredRows" fileName="Ventas.pdf" class="export-button" />
+      </div>
 
-  <!-- Barra de búsqueda -->
-  <div class="search-bar">
-    <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar venta..." />
-  </div>
-</div>
+      <!-- Botón de exportación PDF -->
+      <ExportButton :columns="columns" :rows="filteredRows" fileName="Ventas.pdf" class="export-button" />
+
+      <!-- Barra de búsqueda -->
+      <div class="search-bar">
+        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar venta..." />
+      </div>
+    </div>
 
     <!-- Tabla exportable -->
     <div class="table-container" v-pdf-export ref="table">
@@ -249,22 +249,26 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+/* Estilos globales */
 * {
   font-family: 'Montserrat', sans-serif;
 }
 
+/* Encabezado */
 .encabezado {
   display: flex;
   justify-content: space-between;
 }
 
+/* Opciones */
 .opciones {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 2% 0 2% 0;
+  margin: 2% 0;
 }
 
+/* Barra de búsqueda */
 .busqueda {
   float: right;
   padding: 10px;
@@ -273,10 +277,12 @@ export default {
   border-width: 0.5px;
 }
 
+/* Botón de exportación */
 .export-button {
   margin: 0;
 }
 
+/* Botón de detalles */
 #btnDetalles {
   font-size: 18px;
   width: 50px;
@@ -300,12 +306,14 @@ export default {
   font-size: 20px;
 }
 
+/* Contenedor de la tabla */
 .table-container {
   display: flex;
   justify-content: center;
   width: 100%;
 }
 
+/* Estilos de la tabla */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -317,14 +325,13 @@ export default {
   border: 1px solid #dee2e6;
   padding: 8px;
   text-align: center;
-  background-color: none;
 }
 
 .table th {
-  background-color: none;
   font-weight: bold;
 }
 
+/* Modal */
 .modal {
   position: fixed;
   top: 0;
@@ -351,6 +358,7 @@ export default {
   margin-bottom: 20px;
 }
 
+/* Botones */
 .btn {
   border: none;
   padding: 10px 20px;
@@ -378,12 +386,14 @@ export default {
   background-color: #5a6268;
 }
 
+/* Select personalizado */
 .custom-select {
   padding: 5px;
   border-radius: 5px;
   border: 1px solid #ced4da;
 }
 
+/* Filtro de fechas */
 .date-filter {
   display: flex;
   align-items: center;
@@ -413,5 +423,4 @@ export default {
 .date-filter button:hover {
   background-color: #0056b3;
 }
-
 </style>

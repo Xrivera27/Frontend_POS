@@ -84,11 +84,13 @@ export default {
 </script>
 
 <style scoped>
+/* Estilos para el contenedor del botón de exportación */
 .export-button {
     position: relative;
     display: inline-block;
 }
 
+/* Estilos para el botón principal de exportar */
 .dropdown-toggle {
     background-color: #4CAF50;
     color: white;
@@ -102,9 +104,10 @@ export default {
 
 .dropdown-toggle i {
     margin-right: 10px;
-    /* Espacio entre el icono y el texto */
+    /* Espacio entre el icono y el texto en el botón */
 }
 
+/* Estilos para el menú desplegable */
 .dropdown-menu {
     display: flex;
     flex-direction: column;
@@ -116,6 +119,7 @@ export default {
     border-radius: 10px;
 }
 
+/* Estilos para los botones dentro del menú desplegable */
 .dropdown-menu button {
     background-color: white;
     color: #4CAF50;
@@ -125,17 +129,20 @@ export default {
     border-radius: 10px;
     display: flex;
     align-items: center;
+    transition: background-color 0.3s ease;
 }
 
 .dropdown-menu button i {
     margin-right: 10px;
-    /* Espacio entre el icono y el texto */
+    /* Espacio entre el icono y el texto en los botones */
 }
 
 .dropdown-menu button:hover {
     background-color: #f1f1f1;
+    /* Efecto hover para los botones del menú */
 }
 
+/* Estilos para el icono de la flecha hacia abajo */
 .bi-chevron-down {
     margin-left: 10px;
 }

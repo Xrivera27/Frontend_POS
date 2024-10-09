@@ -66,23 +66,32 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+/* Estilos Generales */
 * {
   font-family: 'Montserrat', sans-serif;
 }
 
+/* Encabezado */
 .encabezado {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+h1 {
+  color: #39b378;
+}
+
+/* Dashboard */
 .dashboard {
   padding: 20px;
 }
 
+/* Caja */
 .box {
   background: #f5f5f5;
   padding: 20px;
@@ -93,14 +102,12 @@ export default {
   margin: 0;
 }
 
-h1 {
-  color: #39b378;
-}
-
+/* Encabezados */
 h3 {
   color: #333;
 }
 
+/* Contenido adicional */
 .container-top {
   width: 100%;
   text-align: right;
@@ -117,6 +124,7 @@ h3 {
   font-size: 14px;
 }
 
+/* Botones de Navegación */
 .navigate-button {
   margin-left: 10px;
   background-color: #007bff;

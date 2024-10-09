@@ -172,6 +172,10 @@ export default {
   justify-content: space-between;
 }
 
+.categorias-wrapper {
+  padding: 16px;
+}
+
 .opciones {
   display: flex;
   align-items: center;
@@ -187,17 +191,16 @@ export default {
   border-radius: 10px;
 }
 
-.busqueda {
-  float: right;
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 10px;
-  border-width: 0.5px;
+.btn {
+  padding: 8px 16px;
+  margin: 4px;
+  border: none;
+  cursor: pointer;
 }
 
-.registros {
-  height: 100%;
-  padding-bottom: 1%;
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
 }
 
 #btnAdd {
@@ -210,26 +213,22 @@ export default {
   font-weight: bold;
 }
 
-.export-button {
-  margin: 0;
-}
-
-
-.h2-modal-content {
-  margin-top: 0px;
-}
-
 #btnAdd:hover {
   background-color: #a38655;
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
 
-#btnEditar {
+#btnEditar,
+#btnEliminar {
   font-size: 18px;
   width: 50px;
   height: 40px;
   border-radius: 10px;
+}
+
+#btnEditar {
+  background-color: #ffc107;
 }
 
 #btnEditar:hover {
@@ -239,10 +238,6 @@ export default {
 }
 
 #btnEliminar {
-  font-size: 18px;
-  width: 50px;
-  height: 40px;
-  border-radius: 10px;
   color: black;
 }
 
@@ -252,12 +247,91 @@ export default {
   transition: all 0.3s ease;
 }
 
-#campana {
-  margin-right: 10px;
-  font-size: 18px;
-  color: #a38655;
+#AddCategoriaModal,
+#BtnCerrar {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-right: 1rem;
 }
 
+#AddCategoriaModal {
+  background-color: #007bff;
+  color: #fff;
+}
+
+#BtnCerrar {
+  background-color: rgb(93, 100, 104);
+  color: #fff;
+}
+
+.export-button {
+  margin: 0;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+  max-width: 500px;
+  width: 100%;
+}
+
+/* Formulario */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.descriptionForm {
+  width: 95%;
+  height: 25%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.descriptionForm {
+  resize: vertical;
+}
+
+/* Estilos para textarea */
+textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  resize: vertical;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #a38655;
+  box-shadow: 0 0 5px rgba(163, 134, 85, 0.5);
+}
+
+/* Estilos generales */
 .container-top {
   width: 100%;
   text-align: right;
@@ -268,21 +342,41 @@ export default {
   font-size: 14px;
 }
 
-select {
+select,
+.custom-select {
   border: 1px solid #ccc;
-  margin-top: 10px;
-  margin-left: 5px;
-  margin-right: 5px;
-  width: 60px;
-  height: 35px;
   border-radius: 5px;
+  height: 35px;
+  font-size: 16px;
+  margin: 10px 5px;
 }
 
-.categorias-wrapper {
-  padding: 16px;
+.custom-select {
+  padding: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 80px;
 }
 
+.custom-select:focus {
+  outline: none;
+  border-color: #a38655;
+}
 
+.custom-select option {
+  font-size: 16px;
+}
+
+/* Barra de búsqueda */
+.busqueda {
+  float: right;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 10px;
+  border-width: 0.5px;
+}
+
+/* Tabla */
 .table-container {
   width: 100%;
   border-radius: 10px;
@@ -303,7 +397,6 @@ select {
 }
 
 .table thead th {
-  background-color: none;
   text-align: center;
   border-bottom: 1px solid #ddd;
 }
@@ -327,142 +420,5 @@ select {
 
 .table tbody tr:last-child td:last-child {
   border-bottom-right-radius: 10px;
-}
-
-.btn {
-  padding: 8px 16px;
-  margin: 4px;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
-.descriptionForm {
-  width: 95%;
-  height: 25%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  justify-content: center;
-}
-
-.btn-warning {
-  background-color: #ffc107;
-  color: black;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
-}
-
-#AddCategoriaModal {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  background-color: #007bff;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-#BtnCerrar {
-  background-color: rgb(93, 100, 104);
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 500px;
-  width: 100%;
-}
-
-.form-group {
-  margin-bottom: 16px;
-
-}
-
-.form-group label {
-  display: flexbox;
-  margin-bottom: 8px;
-}
-
-.form-group input {
-  width: 95%;
-  height: 25%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  justify-content: center;
-}
-
-
-/* Estilos para el textarea */
-textarea {
-  width: 100%;
-  height: auto;
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  resize: vertical;
-}
-
-textarea:focus {
-  outline: none;
-  border-color: #a38655;
-  box-shadow: 0 0 5px rgba(163, 134, 85, 0.5);
-}
-
-button {
-  cursor: pointer;
-}
-
-.custom-select {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  height: 35px;
-  font-size: 16px;
-  padding: 5px;
-  background-color: #fff;
-  cursor: pointer;
-  width: 80px;
-  /* Ajusta el ancho a 120px o el valor que prefieras */
-}
-
-.custom-select:focus {
-  outline: none;
-  border-color: #a38655;
-  /* Ajusta el color del borde al de tu diseño */
-}
-
-.custom-select option {
-  font-size: 16px;
 }
 </style>

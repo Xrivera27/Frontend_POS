@@ -248,7 +248,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
@@ -288,6 +287,12 @@ export default {
   border-radius: 10px;
   color: black;
   font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+#btnAdd:hover {
+  background-color: #a38655;
+  transform: scale(1.05);
 }
 
 .export-button {
@@ -298,13 +303,8 @@ export default {
   margin-top: 0px;
 }
 
-#btnAdd:hover {
-  background-color: #a38655;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#btnEditar {
+#btnEditar,
+#btnEliminar {
   font-size: 18px;
   width: 50px;
   height: 40px;
@@ -318,10 +318,6 @@ export default {
 }
 
 #btnEliminar {
-  font-size: 18px;
-  width: 50px;
-  height: 40px;
-  border-radius: 10px;
   color: black;
 }
 
@@ -349,18 +345,27 @@ export default {
 
 select {
   border: 1px solid #ccc;
-  margin-top: 10px;
-  margin-left: 5px;
-  margin-right: 5px;
+  margin: 10px 5px 0 5px;
   width: 60px;
   height: 35px;
   border-radius: 5px;
 }
 
+/* Selección personalizada */
+.custom-select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 35px;
+  font-size: 16px;
+  padding: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 80px;
+}
+
 .sucursales-wrapper {
   padding: 16px;
 }
-
 
 .table-container {
   width: 100%;
@@ -379,16 +384,14 @@ select {
 .table th,
 .table td {
   padding: 8px;
+  text-align: center;
 }
 
 .table thead th {
-  background-color: none;
-  text-align: center;
   border-bottom: 1px solid #ddd;
 }
 
 .table tbody td {
-  text-align: center;
   border-top: 1px solid #ddd;
 }
 
@@ -415,27 +418,23 @@ select {
   cursor: pointer;
 }
 
-
-#AddSucursalModal {
+#AddSucursalModal,
+#BtnCerrar {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
   font-size: 1rem;
   color: #fff;
-  background-color: #007bff;
   cursor: pointer;
   margin-right: 1rem;
 }
 
+#AddSucursalModal {
+  background-color: #007bff;
+}
+
 #BtnCerrar {
   background-color: rgb(93, 100, 104);
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  cursor: pointer;
-  margin-right: 1rem;
 }
 
 .btn-warning {
@@ -459,7 +458,6 @@ select {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  /* Asegúrate de tener un z-index alto */
 }
 
 .modal-content {
@@ -472,11 +470,9 @@ select {
 
 .form-group {
   margin-bottom: 16px;
-
 }
 
 .form-group label {
-  display: flexbox;
   margin-bottom: 8px;
 }
 
@@ -486,28 +482,5 @@ select {
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  justify-content: center;
-}
-
-.custom-select {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  height: 35px;
-  font-size: 16px;
-  padding: 5px;
-  background-color: #fff;
-  cursor: pointer;
-  width: 80px;
-  /* Ajusta el ancho a 120px o el valor que prefieras */
-}
-
-.custom-select:focus {
-  outline: none;
-  border-color: #a38655;
-  /* Ajusta el color del borde al de tu diseño */
-}
-
-.custom-select option {
-  font-size: 16px;
 }
 </style>
