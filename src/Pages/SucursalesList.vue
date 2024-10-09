@@ -86,10 +86,8 @@
           <input v-model="sucursalForm.direccion" type="text" required>
         </div>
 
-        <button id="AddSucursalModal" class="btn btn-primary" @click="guardarSucursal">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Sucursal' }}
-        </button>
-        <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
+        <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Sucursal' " @click="guardarSucursal"></btnGuardarModal>
+        <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
       </div>
     </div>
   </div>
@@ -98,11 +96,15 @@
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
 import ExportButton from '../components/ExportButton.vue';
+import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
+import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
 export default {
   components: {
     ProfileButton,
-    ExportButton
+    ExportButton,
+    btnGuardarModal,
+    btnCerrarModal
   },
   data() {
     return {
