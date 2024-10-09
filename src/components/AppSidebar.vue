@@ -1,6 +1,13 @@
 <template>
-    <aside ref="sidebar" v-if="!isLoginRoute" class="sidebar" :class="{ expanded, dark: isDarkMode }"
-        @mouseover="expandSidebar" @mouseleave="collapseSidebar">
+    <aside ref="sidebar" v-if="!isLoginRoute" class="sidebar" :class="{ expanded, dark: isDarkMode }">
+        <!-- Toggle button for expanding/collapsing -->
+        <!-- Toggle Sidebar Arrow -->
+        <li class="nav-item toggle-btn" @click="toggleSidebar">
+            <i class="bi" :class="expanded ? 'bi-chevron-left' : 'bi-chevron-right'"></i>
+        </li>
+
+
+        <!-- Toggle button for expanding/collapsing -->
         <ul class="nav flex-column">
 
             <!-- Home -->
@@ -218,22 +225,24 @@ ul.nav {
 .toggle-btn {
     background-color: #d4d4d4;
     border-radius: 50%;
+    /* Mantiene la forma circular */
     padding: 5px;
     cursor: pointer;
     text-align: center;
     margin: 10px auto;
+    /* Centra horizontalmente */
     display: flex;
     justify-content: center;
+    /* Una sola vez es suficiente */
     align-items: center;
     width: 40px;
+    /* Ancho fijo */
     height: 40px;
-}
-
-.toggle-btn i {
-    font-size: 1.5rem;
-    /* Tamaño uniforme para los íconos */
-    color: #c09d62;
-    /* Color del ícono */
+    /* Alto fijo */
+    position: relative;
+    /* Esto está bien si no usas `absolute` en hijos o elementos relacionados */
+    flex-shrink: 0;
+    /* Evita que se encoja con el sidebar */
 }
 
 .tooltip-text {
@@ -252,6 +261,7 @@ ul.nav {
     position: relative;
     justify-content: center;
 }
+
 
 .nav-link {
     display: flex;
@@ -299,6 +309,10 @@ ul.nav {
 
     .nav-item {
         padding-left: 40px
+    }
+
+    .toggle-btn {
+        padding: 0;
     }
 }
 
