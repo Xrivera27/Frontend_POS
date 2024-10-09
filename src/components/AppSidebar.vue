@@ -175,22 +175,16 @@ export default {
 </script>
 
 <style scoped>
+/* =======================================================
+   Importación de Fuentes
+======================================================= */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+/* =======================================================
+   Estilos Base
+======================================================= */
 * {
     font-family: 'Montserrat', sans-serif;
-}
-
-.app-wrapper {
-    display: flex;
-    min-height: 100vh;
-}
-
-#aside-line {
-    width: 60%;
-    height: 1px;
-    background-color: #c09d62;
-    margin: 10px auto;
 }
 
 a.nav-link {
@@ -199,69 +193,76 @@ a.nav-link {
     /* Alinea el contenido a la izquierda */
 }
 
-
-ul.nav {
-    padding: 0 15px;
-}
-
-.main-content.expanded {
-    padding-left: 0px;
-    z-index: 1;
-}
-
-.main-content {
-    margin-left: 80px;
-    padding: 20px;
-    width: 100%;
-    transition: margin-left 0.3s ease, background-color 0.3s ease;
-    background-color: #f5f5f5;
-}
-
-.main-content.dark {
-    background-color: #1e1e1e;
-    color: #ffffff;
-}
-
-.toggle-btn {
-    background-color: #d4d4d4;
-    border-radius: 50%;
-    /* Mantiene la forma circular */
-    padding: 5px;
-    cursor: pointer;
-    text-align: center;
-    margin: 10px auto;
-    /* Centra horizontalmente */
-    display: flex;
-    justify-content: center;
-    /* Una sola vez es suficiente */
-    align-items: center;
-    width: 40px;
-    /* Ancho fijo */
-    height: 40px;
-    /* Alto fijo */
-    position: relative;
-    /* Esto está bien si no usas `absolute` en hijos o elementos relacionados */
-    flex-shrink: 0;
-    /* Evita que se encoja con el sidebar */
-}
-
-.tooltip-text {
-    margin-left: 10px;
-    font-weight: bold;
-    font-size: 15px;
-}
-
 .nav {
     list-style: none;
     padding: 0;
 }
 
-.nav-item {
-    margin-bottom: 0.10vh;
-    position: relative;
-    justify-content: center;
+ul.nav {
+    padding: 0 15px;
 }
 
+/* =======================================================
+   Estilos del Sidebar
+======================================================= */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 80px;
+    height: 100%;
+    background-color: #ebebeb;
+    color: #c09d62;
+    padding-top: 20px;
+    padding-right: 0;
+    margin: 0;
+    z-index: 10;
+    transition: width 0.3s ease;
+}
+
+.sidebar.expanded {
+    width: 255px;
+}
+
+.sidebar.expanded .nav-item {
+    padding-left: 40px;
+}
+
+.sidebar.expanded .toggle-btn {
+    padding: 0;
+}
+
+/* =======================================================
+   Estilos en Modo Oscuro para el Sidebar
+======================================================= */
+.sidebar.dark {
+    background-color: #333;
+}
+
+.sidebar.dark a.nav-link {
+    color: #c09d62;
+    /* Color de los íconos y texto en modo oscuro */
+}
+
+.sidebar.dark .nav-link.active {
+    color: #79552f;
+    /* Color del texto y los íconos en estado activo en modo oscuro */
+}
+
+.sidebar.dark .toggle-btn,
+.sidebar.dark .toggle-btn i {
+    color: #c09d62;
+    /* Mantiene el color del ícono en modo oscuro */
+}
+
+/* =======================================================
+   Estilos de los Elementos de Navegación
+======================================================= */
+.nav-item {
+    position: relative;
+    justify-content: center;
+    margin-bottom: 0.10vh;
+}
 
 .nav-link {
     display: flex;
@@ -271,10 +272,9 @@ ul.nav {
     padding: 1vh 1.5vh;
     color: #c09d62;
     text-decoration: none;
-    transition: background-color 0.3s ease;
     border-radius: 8px;
+    transition: background-color 0.3s ease;
 }
-
 
 .nav-link i {
     font-size: 3.5vh;
@@ -293,64 +293,55 @@ ul.nav {
     /* Color del texto y los íconos en estado activo */
 }
 
-.sidebar {
-    width: 80px;
-    background-color: #ebebeb;
-    position: fixed;
-    height: 100%;
-    padding-top: 20px;
-    padding-right: 0;
-    z-index: 10;
-    margin: 0;
+/* =======================================================
+   Estilos del Botón de Toggle
+======================================================= */
+.toggle-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    /* Ancho fijo */
+    height: 35px;
+    /* Alto fijo */
+    border-radius: 50%;
+    /* Mantiene la forma circular */
+    padding: 5px;
+    cursor: pointer;
+    text-align: center;
+    margin: 10px auto;
+    /* Centra horizontalmente */
+    position: relative;
+    /* Para posicionamiento interno si es necesario */
+    flex-shrink: 0;
+    /* Evita que se encoja con el sidebar */
 }
 
-.sidebar.expanded {
-    width: 255px;
-
-    .nav-item {
-        padding-left: 40px
-    }
-
-    .toggle-btn {
-        padding: 0;
-    }
+.toggle-btn:hover {
+    background-color: #d4d4d4;
 }
 
-/* Color de texto del sidebar en modo claro */
-.sidebar a.nav-link {
-    color: #c09d62;
-    /* Color de los íconos y texto */
+/* =======================================================
+   Estilos del Texto de Tooltip
+======================================================= */
+.tooltip-text {
+    margin-left: 10px;
+    font-weight: bold;
+    font-size: 15px;
 }
 
-/* Color de texto del sidebar en modo oscuro */
-.sidebar.dark a.nav-link {
-    color: #c09d62;
-    /* Color del texto y los íconos en modo oscuro */
-}
-
-.sidebar.dark .nav-link.active {
-    color: #79552f;
-    /* Color del texto y los íconos en estado activo en modo oscuro */
-}
-
-.dropdown-menu a {
-    font-size: 14px;
-    width: auto;
-}
-
-.dropdown-menu a:hover {
-    background-color: #f0f0f0;
-}
-
+/* =======================================================
+   Estilos del Menú Desplegable
+======================================================= */
 .dropdown-menu {
+    position: absolute;
+    top: 0;
+    left: 100%;
     background-color: #ebebeb;
     padding: 0;
-    position: absolute;
     width: auto;
     min-width: 24vh;
     max-width: 25vh;
-    left: 100%;
-    top: 0;
     max-height: 0;
     overflow: hidden;
     opacity: 0;
@@ -366,16 +357,57 @@ ul.nav {
     pointer-events: auto;
 }
 
-.sidebar.dark .toggle-btn {
-    background-color: #555;
+.dropdown-menu a {
+    font-size: 14px;
+    width: auto;
+    text-decoration: none;
+    color: inherit;
 }
 
-.sidebar.dark .toggle-btn i {
-    color: #c09d62;
-    /* Mantiene el color del ícono en modo oscuro */
+.dropdown-menu a:hover {
+    background-color: #f0f0f0;
 }
 
-.sidebar.dark {
-    background-color: #333;
+/* =======================================================
+   Estilos de la Línea del Sidebar
+======================================================= */
+#aside-line {
+    width: 60%;
+    height: 1px;
+    background-color: #c09d62;
+    margin: 10px auto;
 }
+
+/* =======================================================
+   Estilos del Contenedor Principal
+======================================================= */
+.app-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* =======================================================
+   Estilos del Contenido Principal
+======================================================= */
+.main-content {
+    margin-left: 80px;
+    padding: 20px;
+    width: 100%;
+    background-color: #f5f5f5;
+    transition: margin-left 0.3s ease, background-color 0.3s ease;
+}
+
+.main-content.expanded {
+    padding-left: 0px;
+    z-index: 1;
+}
+
+.main-content.dark {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+/* =======================================================
+   Estilos Adicionales
+======================================================= */
 </style>
