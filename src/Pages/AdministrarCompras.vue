@@ -100,8 +100,8 @@
             </tr>
           </tbody>
         </table>
-
-        <button id="BtnCerrarDetalles" class="btn btn-secondary" @click="closeDetallesModal">Cerrar</button>
+       
+        <btnCerrarModal :texto = "'Cerrar'" @click="closeDetallesModal"></btnCerrarModal>
       </div>
     </div>
 
@@ -111,11 +111,13 @@
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
 import ExportButton from '../components/ExportButton.vue';
+import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
 export default {
   components: {
     ProfileButton,
-    ExportButton
+    ExportButton,
+    btnCerrarModal
   },
   data() {
     return {

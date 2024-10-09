@@ -2,6 +2,7 @@
   <div class="encabezado">
     <h1>Productos</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
+    
   </div>
   <hr>
 
@@ -13,25 +14,27 @@
         </button>
       </div>
 
-      <!-- Botón de exportación PDF -->
-      <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" class="export-button" />
+    <!-- Botón de exportación PDF -->
+    <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" class="export-button" />
 
-      <RouterLink to="promociones-producto">
-        <button class="button-promocion">Promociones</button>
-      </RouterLink>
-
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select> registros
-        </span>
-      </div>
+    <RouterLink
+    to="promociones-producto"
+    >
+    <button class="button-promocion" >Promociones</button>
+    </RouterLink>
+    
+    <div class="registros">
+      <span>Mostrar
+        <select v-model="itemsPerPage" class="custom-select">
+          <option value="">Todos</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+        </select> registros
+      </span>
+    </div>
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
@@ -126,11 +129,9 @@
           <label>Fecha:</label>
           <input v-model="productoForm.fecha" type="date" required>
         </div>
+          <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Producto' " @click="guardarProducto"></btnGuardarModal>
+          <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
 
-        <button id="AddProductoModal" class="btn btn-primary" @click="guardarProducto">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Producto' }}
-        </button>
-        <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
       </div>
     </div>
   </div>
@@ -139,11 +140,15 @@
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
 import ExportButton from '../components/ExportButton.vue';
+import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
+import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
 export default {
   components: {
     ProfileButton,
-    ExportButton
+    ExportButton,
+    btnGuardarModal,
+    btnCerrarModal
   },
   data() {
     return {

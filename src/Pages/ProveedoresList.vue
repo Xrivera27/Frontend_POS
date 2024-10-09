@@ -83,10 +83,9 @@
           <input v-model="proveedorForm.direccion" type="text" required>
         </div>
 
-        <button id="AddProveedorModal" class="btn btn-primary" @click="guardarProveedor">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Proveedor' }}
-        </button>
-        <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
+        <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Proveedor' " @click="guardarProveedor"></btnGuardarModal>
+        <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
+
       </div>
     </div>
   </div>
@@ -94,9 +93,13 @@
 
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
+import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
+import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 export default {
   components: {
-    ProfileButton
+    ProfileButton,
+    btnGuardarModal,
+    btnCerrarModal
   },
   data() {
     return {

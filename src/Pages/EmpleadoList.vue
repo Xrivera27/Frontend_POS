@@ -124,10 +124,9 @@
           </select>
         </div>
 
-        <button id="AddEmpleadoModal" class="btn btn-primary" @click="guardarEmpleado">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Empleado' }}
-        </button>
-        <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
+        <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Usuario' " @click="guardarEmpleado"></btnGuardarModal>
+        <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
+
       </div>
     </div>
   </div>
@@ -135,9 +134,13 @@
 
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
+import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
+import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 export default {
   components: {
-    ProfileButton
+    ProfileButton,
+    btnGuardarModal,
+    btnCerrarModal
   },
   data() {
     return {
