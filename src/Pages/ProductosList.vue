@@ -6,9 +6,6 @@
   </div>
   <hr>
 
-
-  
-
   <div class="productos-wrapper">
     <div class="opciones">
       <div class="action-bar">
@@ -133,12 +130,8 @@
           <input v-model="productoForm.fecha" type="date" required>
         </div>
           <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Producto' " @click="guardarProducto"></btnGuardarModal>
-  <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
+          <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
 
-        <!-- <button id="AddProductoModal" class="btn btn-primary" @click="guardarProducto">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Producto' }}
-        </button>
-        <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button> -->
       </div>
     </div>
   </div>
