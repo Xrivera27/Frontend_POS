@@ -107,6 +107,10 @@ export default {
       categoriaForm: { nombre: '', descripcion: '' }, // Objeto para el formulario de categorías
     };
   },
+  mounted() {
+    document.title = "Categorías";
+    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+  },
   computed: {
     filteredCategorias() {
       // Filtra las categorías basados en el texto de búsqueda
@@ -154,6 +158,13 @@ export default {
         this.categorias.push(this.categoriaForm);
       }
       this.closeModal();
+    },
+    changeFavicon(iconPath) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
     }
   }
 };

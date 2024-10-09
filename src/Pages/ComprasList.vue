@@ -1,6 +1,6 @@
 <template>
   <div class="encabezado">
-    <h1>Registro Compra</h1>
+    <h1>Crear Compras</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   </div>
   <hr />
@@ -309,6 +309,7 @@ export default {
       productosLista: [],
     };
   },
+
   computed: {
     calcularTotal() {
       let totalActual = 0;
@@ -518,6 +519,13 @@ export default {
     confirmPaymentClose() {
       this.confirmModal = false;
     },
+    changeFavicon(iconPath) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
+    },
   },
 
   mounted() {
@@ -527,6 +535,8 @@ export default {
     window.addEventListener("keydown", this.pushF12);
     window.addEventListener("keydown", this.pushN);
     this.$refs.codigo.focus();
+    document.title = "Crear Compras";
+    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
   },
   beforeUnmount() {
     // Elimina el manejador de eventos cuando el componente se destruye
@@ -607,6 +617,49 @@ hr {
 .btn-success {
   background-color: #28a745;
   color: white;
+}
+
+.botones-accion {
+  display: flex;
+  /* Usar flexbox */
+  justify-content: space-around;
+  /* Espaciado igual entre botones */
+}
+
+.btn-botones-accion {
+  background-color: transparent;
+  /* Fondo transparente */
+  border: none;
+  /* Sin borde */
+  cursor: pointer;
+  /* Mano al pasar el mouse */
+  transition: color 0.2s;
+  /* Transición suave para el color */
+}
+
+.btn-botones-accion:hover {
+  color: #007bff;
+  /* Color azul al pasar el mouse */
+}
+
+.btn-end {
+  background-color: #dc3545;
+  /* Rojo para cancelar */
+  color: white;
+  /* Texto blanco */
+  border: none;
+  /* Sin borde */
+  padding: 10px 20px;
+  /* Relleno interno */
+  border-radius: 4px;
+  /* Bordes redondeados */
+  cursor: pointer;
+  /* Mano al pasar el mouse */
+}
+
+.btn-end:hover {
+  background-color: #c82333;
+  /* Rojo oscuro al pasar el mouse */
 }
 
 /* Contenedor de tabla */

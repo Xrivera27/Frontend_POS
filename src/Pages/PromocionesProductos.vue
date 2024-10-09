@@ -6,7 +6,7 @@
   <hr />
 
   <div class="categorias-wrapper">
-    <form @submit.prevent="agregarPromocion" autocomplete="off" v-show="activeForm" >
+    <form @submit.prevent="agregarPromocion" autocomplete="off" v-show="activeForm">
       <div class="contenedor-titulo">
         <h2 class="titulo-form">Registro de promociones</h2>
       </div>
@@ -14,57 +14,26 @@
       <div class="contenedor-principal">
         <div class="contenedor-interno contenedor-izquierdo">
           <label for="producto">Producto:</label>
-          <input
-            type="text"
-            id="input-codigo-producto"
-            name="producto"
-            v-model="promForm.producto"
-            required
-          />
+          <input type="text" id="input-codigo-producto" name="producto" v-model="promForm.producto" required />
 
           <!-- Nombre de la promoción -->
           <label for="nombre_promocion">Nombre de la promoción:</label>
-          <input
-            type="text"
-            id="nombre_promocion"
-            v-model="promForm.nombre_promocion"
-            name="nombre_promocion"
-            required
-          />
+          <input type="text" id="nombre_promocion" v-model="promForm.nombre_promocion" name="nombre_promocion"
+            required />
 
           <!-- Porcentaje de descuento -->
           <label for="porcentaje_descuento">Porcentaje de descuento:</label>
-          <input
-            type="number"
-            id="porcentaje_descuento"
-            name="porcentaje_descuento"
-            v-model="promForm.porcentaje_descuento"
-            min="0"
-            max="100"
-            step="0.01"
-            required
-          />
+          <input type="number" id="porcentaje_descuento" name="porcentaje_descuento"
+            v-model="promForm.porcentaje_descuento" min="0" max="100" step="0.01" required />
         </div>
         <!-- Producto ID -->
         <div class="contenedor-interno contenedor-derecho">
           <label for="fecha_inicio">Fecha de inicio:</label>
-          <input
-            type="date"
-            id="fecha_inicio"
-            name="fecha_inicio"
-            v-model="promForm.fecha_inicio"
-            required
-          />
+          <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promForm.fecha_inicio" required />
 
           <!-- Fecha final -->
           <label for="fecha_final">Fecha final:</label>
-          <input
-            type="date"
-            id="fecha_final"
-            name="fecha_final"
-            v-model="promForm.fecha_final"
-            required
-          />
+          <input type="date" id="fecha_final" name="fecha_final" v-model="promForm.fecha_final" required />
 
           <!-- Enviar el formulario -->
         </div>
@@ -73,7 +42,7 @@
         <button type="submit" class="btn registrar-producto" @click="activarForm">
           Registrar promoción
         </button>
-        <button type="button" class="btn cerrar" @click="activarForm" >Cancelar</button>
+        <button type="button" class="btn cerrar" @click="activarForm">Cancelar</button>
       </div>
 
       <!-- Fecha de inicio -->
@@ -81,26 +50,21 @@
 
     <div class="tabla-busqueda" v-if="!activeForm">
       <div>
-        <input
-          class="busqueda"
-          type="text"
-          v-model="searchQuery"
-          placeholder="Buscar promoción..."
-        />
-        <button class="btn activar-form" @click="activarForm" >Nueva promocion</button>
+        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar promoción..." />
+        <button class="btn activar-form" @click="activarForm">Nueva promocion</button>
       </div>
-      <div class="table-container" v-pdf-export ref="table" >
+      <div class="table-container" v-pdf-export ref="table">
         <table class="table">
           <thead>
             <tr>
               <th id="numero-promocion">#</th>
               <th>Producto</th>
               <th>Nombre Promocion</th>
-              <th id="porcentaje" >%</th>
+              <th id="porcentaje">%</th>
               <th>Fechas inicio</th>
               <th>Fecha final</th>
               <th>Estado</th>
-              <th id="opciones" >Opciones</th>
+              <th id="opciones">Opciones</th>
             </tr>
           </thead>
           <tbody>
@@ -112,35 +76,19 @@
               <td>{{ p.fecha_inicio }}</td>
               <td>{{ p.fecha_final }}</td>
               <td>{{ p.estado }}</td>
-              <td class="td-botones" >
-                <button
-                  id="btnEditar"
-                  class="btn btn-warning"
-                  @click="editarPromocion(index)"
-                >
+              <td class="td-botones">
+                <button id="btnEditar" class="btn btn-warning" @click="editarPromocion(index)">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <button
-                v-if="p.estado === 'active'"
-                  id="btnDesactivar"
-                  class="btn btn-danger"
-                  @click="desactivarProm(index)"
-                >
+                <button v-if="p.estado === 'active'" id="btnDesactivar" class="btn btn-danger"
+                  @click="desactivarProm(index)">
                   <b><i class="bi bi-check"></i></b>
                 </button>
-                <button
-                  v-if="p.estado === 'inactive'"
-                  id="btnActivar"
-                  class="btn btn-danger"
-                  @click="activarProm(index)"
-                >
+                <button v-if="p.estado === 'inactive'" id="btnActivar" class="btn btn-danger"
+                  @click="activarProm(index)">
                   <b><i class="bi bi-x"></i></b>
                 </button>
-                <button
-                  id="btnEliminar"
-                  class="btn btn-danger"
-                  @click="eliminarProm(index)"
-                >
+                <button id="btnEliminar" class="btn btn-danger" @click="eliminarProm(index)">
                   <b><i class="bi bi-trash-fill"></i></b>
                 </button>
               </td>
@@ -156,57 +104,26 @@
           <div class="contenedor-principal">
             <div class="contenedor-interno contenedor-izquierdo">
               <label for="producto">Producto:</label>
-              <input
-                type="text"
-                id="input-codigo-producto"
-                name="producto"
-                v-model="promFormModal.producto"
-                required
-              />
+              <input type="text" id="input-codigo-producto" name="producto" v-model="promFormModal.producto" required />
 
               <!-- Nombre de la promoción -->
               <label for="nombre_promocion">Nombre de la promoción:</label>
-              <input
-                type="text"
-                id="nombre_promocion"
-                v-model="promFormModal.nombre_promocion"
-                name="nombre_promocion"
-                required
-              />
+              <input type="text" id="nombre_promocion" v-model="promFormModal.nombre_promocion" name="nombre_promocion"
+                required />
 
               <!-- Porcentaje de descuento -->
               <label for="porcentaje_descuento">Porcentaje de descuento:</label>
-              <input
-                type="number"
-                id="porcentaje_descuento"
-                name="porcentaje_descuento"
-                v-model="promFormModal.porcentaje_descuento"
-                min="0"
-                max="100"
-                step="0.01"
-                required
-              />
+              <input type="number" id="porcentaje_descuento" name="porcentaje_descuento"
+                v-model="promFormModal.porcentaje_descuento" min="0" max="100" step="0.01" required />
             </div>
             <!-- Producto ID -->
             <div class="contenedor-interno contenedor-derecho">
               <label for="fecha_inicio">Fecha de inicio:</label>
-              <input
-                type="date"
-                id="fecha_inicio"
-                name="fecha_inicio"
-                v-model="promFormModal.fecha_inicio"
-                required
-              />
+              <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promFormModal.fecha_inicio" required />
 
               <!-- Fecha final -->
               <label for="fecha_final">Fecha final:</label>
-              <input
-                type="date"
-                id="fecha_final"
-                name="fecha_final"
-                v-model="promFormModal.fecha_final"
-                required
-              />
+              <input type="date" id="fecha_final" name="fecha_final" v-model="promFormModal.fecha_final" required />
 
               <!-- Enviar el formulario -->
             </div>
@@ -278,7 +195,7 @@ export default {
       },
 
       promociones: [
-      {
+        {
           producto: "Camiseta Básica",
           nombre_promocion: "Descuento de Verano",
           porcentaje_descuento: 15,
@@ -361,6 +278,10 @@ export default {
       ],
     };
   },
+  mounted() {
+    document.title = "Promociones Productos";
+    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+  },
   computed: {
     filterPromociones() {
       return this.promociones.filter(
@@ -375,11 +296,11 @@ export default {
     },
   },
   methods: {
-    activarForm(){
-      
-      if ( this.activeForm ){ this.activeForm = false; }
+    activarForm() {
+
+      if (this.activeForm) { this.activeForm = false; }
       else { this.activeForm = true; }
-      
+
     },
     clearForm() {
       this.promForm = {
@@ -414,20 +335,20 @@ export default {
       this.showModal();
     },
 
-    desactivarProm(index){
-      if ( this.promociones[index].estado === 'active' ){
+    desactivarProm(index) {
+      if (this.promociones[index].estado === 'active') {
         this.promociones[index].estado = 'inactive';
       }
     },
-    activarProm(index){
-      if ( this.promociones[index].estado === 'inactive' ){
+    activarProm(index) {
+      if (this.promociones[index].estado === 'inactive') {
         this.promociones[index].estado = 'active';
       }
     },
 
-    eliminarProm(index){
+    eliminarProm(index) {
       this.editIndex = index;
-        this.showConfirmModal = true;
+      this.showConfirmModal = true;
     },
 
     showModal() {
@@ -444,6 +365,13 @@ export default {
     cancelCancel() {
       this.showConfirmModal = false;
     },
+    changeFavicon(iconPath) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
   },
 };
 </script>
@@ -499,6 +427,7 @@ input {
   border: 1px solid #ddd;
   border-radius: 4px;
 }
+
 .contenedor-principal input {
   width: 95%;
   height: 25%;
@@ -587,33 +516,34 @@ input {
   cursor: pointer;
 }
 
-#btnActivar{
+#btnActivar {
   color: white;
   background-color: rgb(141, 141, 141);
 }
 
-#opciones{
+#opciones {
   width: 160px;
 }
 
-#btnDesactivar{
-  
+#btnDesactivar {
+
   background-color: rgb(24, 233, 24);
   color: white;
 }
 
-#btnEliminar{
+#btnEliminar {
   background-color: rgb(235, 23, 23);
   color: white;
 }
 
-.td-botones{
+.td-botones {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-#btnDesactivar, #btnActivar{
+#btnDesactivar,
+#btnActivar {
   font-size: 25px;
   padding: 0px 10.5px;
 }

@@ -262,14 +262,20 @@ export default {
           alert("Ha ocurrido un error");
       }
     },
-
-
-
+    changeFavicon(iconPath) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
   },
 
   mounted() {
     // Añade el manejador de eventos cuando el componente se monta
     window.addEventListener("keydown", this.pushEsc);
+    document.title = "Configuración";
+    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
   },
   beforeUnmount() {
     // Elimina el manejador de eventos cuando el componente se destruye

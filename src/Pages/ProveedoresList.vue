@@ -135,6 +135,10 @@ export default {
       ]
     };
   },
+  mounted() {
+    document.title = "Proveedores";
+    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+  },
   computed: {
     filteredProveedores() {
       // Filtra los proveedores basados en el texto de búsqueda
@@ -186,6 +190,13 @@ export default {
     },
     deleteProveedor(index) {
       this.proveedores.splice(index, 1);
+    },
+    changeFavicon(iconPath) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
     }
   }
 };

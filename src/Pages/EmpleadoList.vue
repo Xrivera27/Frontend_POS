@@ -200,6 +200,10 @@ export default {
 
     };
   },
+  mounted() {
+    document.title = "Usuarios";
+    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+  },
   computed: {
     filteredEmpleados() {
       // Filtra los empleados basados en el texto de búsqueda
@@ -259,6 +263,13 @@ export default {
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
+    },
+    changeFavicon(iconPath) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
     },
   }
 };

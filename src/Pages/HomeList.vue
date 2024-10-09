@@ -23,14 +23,12 @@
         <div class="box-header">
           <h3>Gestión de Inventario</h3>
         </div>
-        <!-- Contenido de gestión de inventario -->
         <p>Aquí puedes gestionar el inventario y visualizar reportes.</p>
       </div>
       <div class="box">
         <div class="box-header">
           <h3>Reportes de Ventas</h3>
         </div>
-        <!-- Contenido de reportes de ventas -->
         <p>Aquí puedes ver los reportes de ventas.</p>
       </div>
     </div>
@@ -43,7 +41,6 @@
         <div class="box-header">
           <h3>Registro de Ventas</h3>
         </div>
-        <!-- Contenido de ventas -->
         <p>Aquí puedes registrar las ventas y emitir facturas.</p>
       </div>
     </div>
@@ -61,8 +58,21 @@ export default {
   },
   data() {
     return {
-      role: Number(localStorage.getItem('role')) || 0, // Asegúrate de convertir el valor de role a número
+      role: Number(localStorage.getItem('role')) || 0,
     };
+  },
+  mounted() {
+    document.title = "Inicio";
+    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+  },
+  methods: {
+    changeFavicon(iconPath) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
+    },
   },
 };
 </script>

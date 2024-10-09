@@ -369,6 +369,7 @@ export default {
 #registrar-producto {
   background-color: rgb(253, 253, 56);
   margin-left: 30px;
+  height: 50px;
 }
 
 #registrar-producto:hover {

@@ -1,4 +1,5 @@
 <template>
+  <title>Nombre de Mi Aplicación</title>
   <div class="login-container">
     <LoadingSpinner :isLoading="isLoading" />
     <div class="login-card">
@@ -62,6 +63,10 @@ export default {
       recoveryEmail: '',
     };
   },
+  mounted() {
+    document.title = "Login";
+    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+  },
   methods: {
     async login() {
       try {
@@ -121,6 +126,14 @@ export default {
 
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
+    },
+
+    changeFavicon(iconPath) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
     }
   }
 

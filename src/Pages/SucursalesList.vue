@@ -233,6 +233,13 @@ export default {
 
       }));
       console.log('Filas generadas:', this.rows);
+    },
+    changeFavicon(iconPath) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
     }
   },
   watch: {
@@ -244,6 +251,8 @@ export default {
   mounted() {
     // Genera las filas al cargar el componente
     this.generateRows();
+    document.title = "Sucursales";
+    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
   }
 };
 </script>

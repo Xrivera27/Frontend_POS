@@ -1,10 +1,9 @@
 <template>
   <div class="encabezado">
-    <h1>Registro Ventas</h1>
+    <h1>Crear Ventas</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   </div>
   <hr>
-
 
   <div class="wrapper">
     <div class="main-container">
@@ -492,6 +491,13 @@ export default {
     confirmPaymentClose() {
       this.confirmModal = false;
     },
+    changeFavicon(iconPath) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
   },
 
   mounted() {
@@ -499,6 +505,8 @@ export default {
     window.addEventListener("keydown", this.pushEsc);
     window.addEventListener("keydown", this.pushF12);
     this.$refs.codigoRef.focus();
+    document.title = "Crear Ventas";
+    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
   },
   beforeUnmount() {
     window.removeEventListener("keydown", this.pushDelete);
