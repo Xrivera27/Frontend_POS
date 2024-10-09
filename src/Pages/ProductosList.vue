@@ -6,8 +6,7 @@
   </div>
   <hr>
 
-  <!-- <btnGuardarModal :texto = "'Guardar Produtco'" ></btnGuardarModal> -->
-  <!-- <btnCerrarModal :texto = "'Cerrar'" ></btnCerrarModal> -->
+
   
 
   <div class="productos-wrapper">
@@ -133,11 +132,13 @@
           <label>Fecha:</label>
           <input v-model="productoForm.fecha" type="date" required>
         </div>
+          <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Producto' " @click="guardarProducto"></btnGuardarModal>
+  <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
 
-        <button id="AddProductoModal" class="btn btn-primary" @click="guardarProducto">
+        <!-- <button id="AddProductoModal" class="btn btn-primary" @click="guardarProducto">
           {{ isEditing ? 'Guardar Cambios' : 'Agregar Producto' }}
         </button>
-        <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
+        <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button> -->
       </div>
     </div>
   </div>
@@ -146,15 +147,15 @@
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
 import ExportButton from '../components/ExportButton.vue';
-// import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
-// import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
+import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
+import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
 export default {
   components: {
     ProfileButton,
     ExportButton,
-    // btnGuardarModal
-    // btnCerrarModal
+    btnGuardarModal,
+    btnCerrarModal
   },
   data() {
     return {
