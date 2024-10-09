@@ -6,34 +6,32 @@
   <hr>
 
   <div class="categorias-wrapper">
-<div class="opciones">
-    <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-      Categoría</button>
+    <div class="opciones">
+      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+        Categoría</button>
 
-      <RouterLink
-    to="promociones-categorias"
-    >
-    <button class="button-promocion" >Promociones</button>
-    </RouterLink>
+      <RouterLink to="promociones-categorias">
+        <button class="button-promocion">Promociones</button>
+      </RouterLink>
 
-    <div class="registros">
-      <span>Mostrar
-        <select v-model="itemsPerPage" class="custom-select">
-          <option value="">Todos</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-          <option value="25">25</option>
-        </select> registros
-      </span>
+      <div class="registros">
+        <span>Mostrar
+          <select v-model="itemsPerPage" class="custom-select">
+            <option value="">Todos</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+          </select> registros
+        </span>
+      </div>
+
+      <!-- Barra de búsqueda -->
+      <div class="search-bar">
+        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar categoría..." />
+      </div>
     </div>
-
-    <!-- Barra de búsqueda -->
-    <div class="search-bar">
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar categoría..." />
-    </div>
-  </div>
     <div class="table-container">
       <table class="table">
         <thead>
@@ -174,19 +172,19 @@ export default {
   justify-content: space-between;
 }
 
-.opciones{
-  display:flex;
+.opciones {
+  display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .button-promocion {
-    background-color: #4cafaf;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-    border-radius: 10px;
+  background-color: #4cafaf;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
 }
 
 .busqueda {
@@ -197,7 +195,7 @@ export default {
   border-width: 0.5px;
 }
 
-.registros{
+.registros {
   height: 100%;
   padding-bottom: 1%;
 }
@@ -212,7 +210,7 @@ export default {
   font-weight: bold;
 }
 
-.export-button{
+.export-button {
   margin: 0;
 }
 
@@ -394,6 +392,7 @@ select {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .modal-content {

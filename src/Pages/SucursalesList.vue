@@ -8,24 +8,24 @@
   <div class="sucursales-wrapper">
     <div class="opciones">
       <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-      sucursales</button>
+        sucursales</button>
       <ExportButton :columns="columns" :rows="rows" fileName="Sucursales.pdf" class="export-button" />
-    <div class="registros">
-      <span>Mostrar
-        <select v-model="itemsPerPage" class="custom-select">
-          <option value="">Todos</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-          <option value="25">25</option>
-        </select> registros
-      </span>
-    </div>
-    <!-- Barra de búsqueda -->
+      <div class="registros">
+        <span>Mostrar
+          <select v-model="itemsPerPage" class="custom-select">
+            <option value="">Todos</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+          </select> registros
+        </span>
+      </div>
+      <!-- Barra de búsqueda -->
       <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar sucursal..." />
     </div>
-   
+
 
     <div class="table-container">
       <table class="table">
@@ -117,52 +117,52 @@ export default {
         telefono: '',
         direccion: '',
         correo: '',
-        
+
       },
       sucursales: [
-  {
-    nombre: 'Sucursal principal',
-    ciudad: 'La Ceiba',
-    telefono: '555 57 67',
-    direccion: 'calle 27 # 40 - 36',
-    correo: 'ejemplocorreo',
-  },
-  {
-    nombre: 'Sucursal norte',
-    ciudad: 'San Pedro Sula',
-    telefono: '504 22 33 44',
-    direccion: 'avenida 10, zona norte',
-    correo: 'norte@empresa.com',
-  },
-  {
-    nombre: 'Sucursal sur',
-    ciudad: 'Tegucigalpa',
-    telefono: '504 33 44 55',
-    direccion: 'avenida 5, barrio centro',
-    correo: 'sur@empresa.com',
-  },
-  {
-    nombre: 'Sucursal este',
-    ciudad: 'Choluteca',
-    telefono: '504 11 22 33',
-    direccion: 'calle 12, zona este',
-    correo: 'este@empresa.com',
-  },
-  {
-    nombre: 'Sucursal oeste',
-    ciudad: 'Comayagua',
-    telefono: '504 77 88 99',
-    direccion: 'carrera 4, barrio oeste',
-    correo: 'oeste@empresa.com',
-  },
-  {
-    nombre: 'Sucursal central',
-    ciudad: 'La Esperanza',
-    telefono: '504 44 55 66',
-    direccion: 'plaza principal, zona centro',
-    correo: 'central@empresa.com',
-  }
-],
+        {
+          nombre: 'Sucursal principal',
+          ciudad: 'La Ceiba',
+          telefono: '555 57 67',
+          direccion: 'calle 27 # 40 - 36',
+          correo: 'ejemplocorreo',
+        },
+        {
+          nombre: 'Sucursal norte',
+          ciudad: 'San Pedro Sula',
+          telefono: '504 22 33 44',
+          direccion: 'avenida 10, zona norte',
+          correo: 'norte@empresa.com',
+        },
+        {
+          nombre: 'Sucursal sur',
+          ciudad: 'Tegucigalpa',
+          telefono: '504 33 44 55',
+          direccion: 'avenida 5, barrio centro',
+          correo: 'sur@empresa.com',
+        },
+        {
+          nombre: 'Sucursal este',
+          ciudad: 'Choluteca',
+          telefono: '504 11 22 33',
+          direccion: 'calle 12, zona este',
+          correo: 'este@empresa.com',
+        },
+        {
+          nombre: 'Sucursal oeste',
+          ciudad: 'Comayagua',
+          telefono: '504 77 88 99',
+          direccion: 'carrera 4, barrio oeste',
+          correo: 'oeste@empresa.com',
+        },
+        {
+          nombre: 'Sucursal central',
+          ciudad: 'La Esperanza',
+          telefono: '504 44 55 66',
+          direccion: 'plaza principal, zona centro',
+          correo: 'central@empresa.com',
+        }
+      ],
       // Define tus columnas para la exportación a PDF
       columns: [
         { header: '#', dataKey: 'index' },
@@ -170,7 +170,7 @@ export default {
         { header: 'Ciudad', dataKey: 'ciudad' },
         { header: 'Teléfono', dataKey: 'telefono' },
         { header: 'Correo', dataKey: 'correo' },
-       
+
       ],
       rows: [] // Inicialmente vacío, se llena después
     };
@@ -202,7 +202,7 @@ export default {
         telefono: '',
         direccion: '',
         correo: '',
-       
+
       };
     },
     guardarSucursal() {
@@ -230,7 +230,7 @@ export default {
         ciudad: sucursal.ciudad,
         telefono: sucursal.telefono,
         correo: sucursal.correo,
-       
+
       }));
       console.log('Filas generadas:', this.rows);
     }
@@ -261,8 +261,8 @@ export default {
   justify-content: space-between;
 }
 
-.opciones{
-  display:flex;
+.opciones {
+  display: flex;
   align-items: center;
   justify-content: space-between;
 }
@@ -275,7 +275,7 @@ export default {
   border-width: 0.5px;
 }
 
-.registros{
+.registros {
   height: 100%;
   padding-bottom: 1%;
 }
@@ -290,7 +290,7 @@ export default {
   font-weight: bold;
 }
 
-.export-button{
+.export-button {
   margin: 0;
 }
 
@@ -458,6 +458,8 @@ select {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
+  /* Asegúrate de tener un z-index alto */
 }
 
 .modal-content {
@@ -508,5 +510,4 @@ select {
 .custom-select option {
   font-size: 16px;
 }
-
 </style>
