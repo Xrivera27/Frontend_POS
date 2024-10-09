@@ -1,12 +1,13 @@
 <template>
   <div class="app-wrapper" :class="{ dark: isDarkMode }">
-    <AppSidebar v-if="!isLoginRoute" :isDarkMode="isDarkMode" :expanded="expanded" :dropdowns="dropdowns"
-      :has-permission="hasPermission" :is-active="isActive" @toggle-sidebar="toggleSidebar"
+    <AppSidebar v-if="!isLoginRoute && isAuthenticated" :isDarkMode="isDarkMode" :expanded="expanded"
+      :dropdowns="dropdowns" :has-permission="hasPermission" :is-active="isActive" @toggle-sidebar="toggleSidebar"
       @open-dropdown="openDropdown" @close-dropdown="closeDropdown" @logout="logout" @toggle-dark-mode="toggleDarkMode"
       @expand-sidebar="expandSidebar" @collapse-sidebar="collapseSidebar" />
-    <main class="main-content" :class="{ expanded, dark: isDarkMode }">
+    <main class="main-content" :class="{ expanded, dark: isDarkMode, login: isLoginRoute }">
       <router-view />
     </main>
+
   </div>
 </template>
 
@@ -15,6 +16,7 @@ import AppSidebar from './components/AppSidebar.vue';
 import axios from 'axios';
 
 export default {
+  name: 'App',
   components: {
     AppSidebar
   },
@@ -31,6 +33,9 @@ export default {
   computed: {
     isLoginRoute() {
       return this.$route.path === '/login';
+    },
+    isAuthenticated() {
+      return !!localStorage.getItem('auth');
     }
   },
   methods: {
@@ -44,16 +49,11 @@ export default {
       return role && permissions[role]?.includes(section);
     },
 
-    isAuthenticated() {
-      const token = localStorage.getItem('token');
-      return !!token; // Verifica si hay un token
-    },
-
     async logout() {
       try {
         await axios.post('/api/logout', {}, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${localStorage.getItem('auth')}`
           }
         });
 
@@ -77,7 +77,6 @@ export default {
       localStorage.setItem('isDarkMode', this.isDarkMode);
     },
     handleClickOutside(event) {
-      // Verificar si el clic fue fuera de los dropdowns
       if (
         this.$refs.ventasDropdown &&
         !this.$refs.ventasDropdown.contains(event.target) &&
@@ -101,40 +100,14 @@ export default {
       this.dropdowns[menu] = false;
     },
 
-    async login(nombre_usuario, contraseña) {
-      try {
-        const response = await axios.post('/api/login', { nombre_usuario, contraseña });
-
-        const { token, role } = response.data;
-
-        localStorage.setItem('token', token);
-        localStorage.setItem('role', role); // Guarda el rol del usuario
-        this.$router.push('/home');
-      } catch (error) {
-        console.error('Error en el inicio de sesión', error);
-      }
-    },
-
-    // Nuevos métodos para manejar el hover del sidebar
-    expandSidebar() {
+    async expandSidebar() {
       this.expanded = true;
     },
-    collapseSidebar() {
+    async collapseSidebar() {
       this.expanded = false;
     },
   },
   mounted() {
-    // Verifica si el usuario está autenticado y tiene rol
-    if (!this.isAuthenticated()) {
-      this.$router.push('/login');
-    } else {
-      const role = localStorage.getItem('role');
-      if (!role) {
-        this.$router.push('/login');
-      }
-    }
-
-    // Listener para clics fuera del menú desplegable
     document.addEventListener('click', this.handleClickOutside);
   },
   beforeUnmount() {
@@ -153,6 +126,11 @@ export default {
 .app-wrapper {
   display: flex;
   min-height: 100vh;
+}
+
+.app-wrapper {
+  padding-right: 0;
+  /* Elimina el padding del lado derecho */
 }
 
 #aside-line {
@@ -189,6 +167,12 @@ ul.nav {
   color: #ffffff;
 }
 
+/* Elimina la sombra en la ruta de login */
+.main-content.login {
+  margin: 0;
+  /* Establece el margen en 0 */
+}
+
 .toggle-btn {
   background-color: #d4d4d4;
   border-radius: 50%;
@@ -205,9 +189,7 @@ ul.nav {
 
 .toggle-btn i {
   font-size: 1.5rem;
-  /* Tamaño uniforme para los íconos */
   color: #c09d62;
-  /* Color del ícono */
 }
 
 .tooltip-text {
@@ -233,7 +215,6 @@ ul.nav {
   justify-content: flex-start;
   padding: 0.5vh 1.5vh;
   color: #c09d62;
-  /* Color del texto y de los íconos */
   text-decoration: none;
   transition: background-color 0.3s ease;
   border-radius: 8px;
@@ -241,9 +222,7 @@ ul.nav {
 
 .nav-link i {
   font-size: 4vh;
-  /* Tamaño uniforme para los íconos */
   color: inherit;
-  /* Hereda el color del texto */
 }
 
 .nav-link:hover {
@@ -253,6 +232,5 @@ ul.nav {
 .nav-link.active {
   background-color: #d4d4d4;
   color: #79552f;
-  /* Color del texto y los íconos en estado activo */
 }
 </style>

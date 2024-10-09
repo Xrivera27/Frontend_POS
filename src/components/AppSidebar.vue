@@ -188,17 +188,17 @@ export default {
 
 a.nav-link {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
+    /* Alinea el contenido a la izquierda */
 }
+
 
 ul.nav {
     padding: 0 15px;
 }
 
-
-
 .main-content.expanded {
-    margin-left: 255px;
+    padding-left: 0px;
     z-index: 1;
 }
 
@@ -236,8 +236,6 @@ ul.nav {
     /* Color del ícono */
 }
 
-
-
 .tooltip-text {
     margin-left: 10px;
     font-weight: bold;
@@ -259,16 +257,17 @@ ul.nav {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    padding: 0.5vh 1.5vh;
+    /* Alinea los íconos a la izquierda */
+    padding: 1vh 1.5vh;
     color: #c09d62;
-    /* Color del texto y de los íconos */
     text-decoration: none;
     transition: background-color 0.3s ease;
     border-radius: 8px;
 }
 
+
 .nav-link i {
-    font-size: 4vh;
+    font-size: 3.5vh;
     /* Tamaño uniforme para los íconos */
     color: inherit;
     /* Hereda el color del texto */
@@ -289,9 +288,18 @@ ul.nav {
     background-color: #ebebeb;
     position: fixed;
     height: 100%;
-    transition: width 0.3s ease;
     padding-top: 20px;
+    padding-right: 0;
     z-index: 10;
+    margin: 0;
+}
+
+.sidebar.expanded {
+    width: 255px;
+
+    .nav-item {
+        padding-left: 40px
+    }
 }
 
 /* Color de texto del sidebar en modo claro */
@@ -313,6 +321,7 @@ ul.nav {
 
 .dropdown-menu a {
     font-size: 14px;
+    width: auto;
 }
 
 .dropdown-menu a:hover {
@@ -323,9 +332,11 @@ ul.nav {
     background-color: #ebebeb;
     padding: 0;
     position: absolute;
+    width: auto;
+    min-width: 24vh;
+    max-width: 25vh;
     left: 100%;
     top: 0;
-    width: 220px;
     max-height: 0;
     overflow: hidden;
     opacity: 0;
@@ -352,9 +363,5 @@ ul.nav {
 
 .sidebar.dark {
     background-color: #333;
-}
-
-.sidebar.expanded {
-    width: 240px;
 }
 </style>

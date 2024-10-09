@@ -91,39 +91,39 @@ export default {
     },
 
     async recoverPassword() {
-    try {
-      this.isLoading = true;
+      try {
+        this.isLoading = true;
 
-      const response = await fetch('http://localhost:3000/api/recuperar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: this.recoveryEmail })
-      });
+        const response = await fetch('http://localhost:3000/api/recuperar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: this.recoveryEmail })
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (response.ok) {
-      alert(data.message); // Muestra el mensaje de éxito
-      this.isRecoveringPassword = false; // Volver a la vista de login
-    } else {
-      alert(data.message); // Muestra el mensaje de error
+        if (response.ok) {
+          alert(data.message); // Muestra el mensaje de éxito
+          this.isRecoveringPassword = false; // Volver a la vista de login
+        } else {
+          alert(data.message); // Muestra el mensaje de error
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    togglePasswordRecovery() {
+      this.isRecoveringPassword = !this.isRecoveringPassword;
+    },
+
+    togglePasswordVisibility() {
+      this.showPassword = !this.showPassword;
     }
-  } catch (error) {
-    console.error('Error:', error);
-  } finally {
-    this.isLoading = false;
   }
-},
-  
-  togglePasswordRecovery() {
-    this.isRecoveringPassword = !this.isRecoveringPassword;
-  },
 
-  togglePasswordVisibility() {
-    this.showPassword = !this.showPassword;
-  }
-}
-  
 };
 </script>
 
