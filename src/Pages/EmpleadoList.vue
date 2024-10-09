@@ -124,7 +124,7 @@
           </select>
         </div>
 
-        <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Producto' " @click="guardarEmpleado"></btnGuardarModal>
+        <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Usuario' " @click="guardarEmpleado"></btnGuardarModal>
         <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
 
       </div>
