@@ -549,195 +549,400 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos generales */
-body {
-  font-family: Arial, sans-serif;
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+* {
+  font-family: "Montserrat", sans-serif;
 }
 
-/* Encabezado */
 .encabezado {
+  display: flex;
+  justify-content: space-between;
+}
+
+.wrapper {
+  padding: 16px;
+  display: flex;
+  height: 80%;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.input-container label {
+  white-space: nowrap;
+}
+
+
+.input-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.input-superior {
+  width: 100%;
+  margin-bottom: 1%;
+}
+
+.input-container-exterior {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-h1 {
-  font-size: 2em;
+#div_nombre {
+  width: 80%;
+  padding-left: 20px;
 }
 
-/* Línea horizontal */
-hr {
-  margin: 20px 0;
+#delete-last-producto {
+  background-color: rgb(207, 57, 57);
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
 }
 
-/* Contenedor principal */
-.wrapper {
-  display: flex;
-  flex-direction: column;
-  margin: 20px;
+#btnEliminar:hover {
+  color: #b72433;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
 }
 
-/* Formulario */
-.main-container {
-  display: flex;
-  flex-direction: column;
+#btnAumentar:hover {
+  color: #46ce10;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
 }
 
-/* Contenedores de entrada */
-.input-container,
-.input-container-exterior {
-  margin-bottom: 15px;
+#btnDisminuir:hover {
+  color: #13e4d9;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+.rol {
+  color: #969696;
+  font-size: 14px;
+}
+
+.campo {
+  padding: 0px 10px;
+  width: 100%;
+  font-size: 14px;
+  min-height: 30px;
+  border-radius: 10px;
+  border-width: 0.5px;
+}
+
+.input-container label {
+  margin-right: 0.5vw;
+}
+
+
+
+.agregar-producto {
+  background-color: #46ce10;
+  width: 100px;
+  border: none;
+  color: white;
+  cursor: pointer;
 }
 
 .label-input {
-  display: block;
-  margin-bottom: 5px;
+  font-size: 14px;
+  margin-right: 2%;
 }
 
-/* Campos de entrada */
-.campo {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.agregar-producto:hover {
+  background-color: #38a50d;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
 }
 
-/* Botones */
 .boton-container {
-  margin-top: 20px;
+  display: flex;
+  align-items: end;
+}
+
+.table-container {
+  max-height: 40vh;
+  overflow-y: scroll;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  margin-top: 16px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table th,
+.table td {
+  padding: 8px 0;
+}
+
+.table thead th {
+  background-color: #e7e4e4;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.table tbody td {
+  text-align: center;
+  border-top: 1px solid #ddd;
+}
+
+.table thead th:first-child {
+  border-top-left-radius: 10px;
+}
+
+.table thead th:last-child {
+  border-top-right-radius: 10px;
+}
+
+.table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 10px;
+}
+
+.table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 10px;
 }
 
 .btn {
-  padding: 10px 15px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
-}
-
-.btn-success {
-  background-color: #28a745;
-  color: white;
-}
-
-.botones-accion {
-  display: flex;
-  /* Usar flexbox */
-  justify-content: space-around;
-  /* Espaciado igual entre botones */
+  border-radius: 10px;
 }
 
 .btn-botones-accion {
-  background-color: transparent;
-  /* Fondo transparente */
+  background: transparent;
   border: none;
-  /* Sin borde */
-  cursor: pointer;
-  /* Mano al pasar el mouse */
-  transition: color 0.2s;
-  /* Transición suave para el color */
+  padding: 0;
+  font-size: 22px;
 }
 
-.btn-botones-accion:hover {
-  color: #007bff;
-  /* Color azul al pasar el mouse */
+#cancelar-compra {
+  background-color: #d30015;
+  color: black;
 }
 
-.btn-end {
-  background-color: #dc3545;
-  /* Rojo para cancelar */
+#cancelar-compra:hover {
+  background-color: #ad0314;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+.close-btn {
   color: white;
-  /* Texto blanco */
-  border: none;
-  /* Sin borde */
-  padding: 10px 20px;
-  /* Relleno interno */
-  border-radius: 4px;
-  /* Bordes redondeados */
-  cursor: pointer;
-  /* Mano al pasar el mouse */
 }
 
-.btn-end:hover {
-  background-color: #c82333;
-  /* Rojo oscuro al pasar el mouse */
-}
-
-/* Contenedor de tabla */
-.table-container {
-  margin-top: 20px;
-  overflow-x: auto;
-  /* Permite desplazamiento horizontal si es necesario */
-}
-
-/* Tabla */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 10px;
-  text-align: left;
-  border: 1px solid #ddd;
-}
-
-.th_small {
-  width: 50px;
-}
-
-.th_medium {
-  width: 100px;
-}
-
-.th_large {
-  width: 200px;
-}
-
-.medium {
-  width: 150px;
-}
-
-/* Contenedor de acciones al final */
-.end-container {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-/* Modal */
-.modal-overlay {
+.modal {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+#AddClienteModal {
+  background: #a38655;
+  border-radius: 15px;
+  font-size: 16px;
+}
+
+#BtnCerrar {
+  border-radius: 15px;
+  background-color: #ebebeb;
+  font-size: 16px;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+  max-width: 500px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.end-container-cobro {
+  display: flex;
+  width: 100%;
+  justify-content: end;
+  align-items: center;
+  height: 100px;
+}
+
+.end-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  border-top: solid rgb(75, 75, 75) 1px;
+}
+
+.end-container-cancelar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.end-container-cobro-p {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.end-container-cobro p {
+  text-align: center;
+  margin: 0;
+  color: #094688;
+}
+
+#total {
+  font-weight: bolder;
+  font-size: 40px;
+}
+
+#boton-cobrar {
+  height: 70px;
+  margin-right: 15px;
+  background-color: #094688;
+  font-weight: bold;
+  color: white;
+}
+
+#boton-cobrar:hover {
+  background-color: #093c72;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+#cancelar-compra {
+  height: 60%;
+  margin-right: 15px;
+  background-color: rgb(185, 10, 10);
+  font-weight: bold;
+  font-size: 12px;
+  color: white;
+}
+
+#cancelar-compra span {
+  font-size: 15px;
+}
+
+.texto-esc {
+  color: #d30015;
+}
+
+.btn-end {
+  min-height: 80px;
+  max-width: 90px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .modal-content {
   background: white;
   padding: 20px;
-  border-radius: 4px;
-  width: 300px;
-  /* Ancho del modal */
-}
-
-/* Estilos de botones dentro del modal */
-.confirmar-pago,
-.cancelar {
-  margin-top: 10px;
+  border-radius: 8px;
+  width: 400px;
 }
 
 .texto-tecla-boton {
-  margin: 0;
-  font-size: 12px;
+  display: inline-block;
+  transform: rotate(-90deg);
 }
 
-.texto-f12 {
-  font-size: 14px;
+.product-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.product-list li {
+  margin-bottom: 10px;
+}
+
+.payment-methods {
+  display: flex;
+}
+
+.payment-methods label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.modal-actions {
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  margin-right: 10px;
+}
+
+.div-modal-resumen {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  /* Espacio entre los campos */
+}
+
+.div-modal-resumen label {
+  width: 120px;
+  /* Ajusta el ancho del label según sea necesario */
+  margin-right: 10px;
+  /* Espacio entre el label y el input */
+}
+
+.div-modal-resumen input {
+  flex: 1;
+  /* El input ocupará el resto del espacio disponible */
+}
+
+.div-modal-resumen-rtn {
+  margin-left: 30px;
+}
+
+.modalShowConfirm-Si,
+.cancelar,
+.close-btn {
+  background-color: #dc3545;
+}
+
+.modalShowConfirm-no,
+.confirmar-pago {
+  background-color: #4caf50;
+}
+
+.modalShowConfirm-no:hover,
+.confirmar-pago:hover {
+  background-color: #45a049;
+}
+
+.modalShowConfirm-Si:hover,
+.cancelar:hover,
+.close-btn:hover {
+  background-color: #bd0d1f;
 }
 </style>
