@@ -148,18 +148,26 @@ export default {
   font-family: 'Montserrat', sans-serif;
 }
 
+body,
+html {
+  margin: 0;
+  padding: 0;
+}
+
 /* Contenedor del Login */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
   background-image: url('@/../public/img/fondo-login.jpg');
-  /* Ruta de la imagen */
-  background-size: cover;
+  background-size: 100% 100%;
   background-position: center;
-  position: relative;
-  /* Para el pseudo-elemento */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* Capa de oscurecimiento */
@@ -178,11 +186,11 @@ export default {
 
 /* Tarjeta de Login */
 .login-card {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.8);
   /* Fondo blanco con un poco de transparencia */
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
   text-align: center;
   max-width: 400px;
   width: 100%;
