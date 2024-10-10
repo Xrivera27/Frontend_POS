@@ -196,92 +196,13 @@ export default {
       },
 
       promociones: [
-        {
-          categoria: "Camisetas",
-          nombre_promocion: "Descuento de Verano",
-          porcentaje_descuento: 15,
-          fecha_inicio: "2024-06-01",
-          fecha_final: "2024-06-30",
-          estado: "active"
-        },
-        {
-          categoria: "Pantalones",
-          nombre_promocion: "Ofertas de Primavera",
-          porcentaje_descuento: 10,
-          fecha_inicio: "2024-03-15",
-          fecha_final: "2024-04-15",
-          estado: "inactive"
-        },
-        {
-          categoria: "Zapatillas",
-          nombre_promocion: "Descuento de Fin de Año",
-          porcentaje_descuento: 20,
-          fecha_inicio: "2024-12-01",
-          fecha_final: "2024-12-31",
-          estado: "active"
-        },
-        {
-          categoria: "Chaquetas",
-          nombre_promocion: "Promoción de Otoño",
-          porcentaje_descuento: 25,
-          fecha_inicio: "2024-09-01",
-          fecha_final: "2024-10-15",
-          estado: "inactive"
-        },
-        {
-          categoria: "Gafas",
-          nombre_promocion: "Descuento de Black Friday",
-          porcentaje_descuento: 30,
-          fecha_inicio: "2024-11-25",
-          fecha_final: "2024-11-29",
-          estado: "active"
-        },
-        {
-          categoria: "Relojes",
-          nombre_promocion: "Ofertas de Navidad",
-          porcentaje_descuento: 20,
-          fecha_inicio: "2024-12-15",
-          fecha_final: "2024-12-25",
-          estado: "inactive"
-        },
-        {
-          categoria: "Bolsos",
-          nombre_promocion: "Descuento de Año Nuevo",
-          porcentaje_descuento: 15,
-          fecha_inicio: "2024-12-26",
-          fecha_final: "2025-01-10",
-          estado: "active"
-        },
-        {
-          categoria: "Camisas",
-          nombre_promocion: "Promoción de Rebajas",
-          porcentaje_descuento: 10,
-          fecha_inicio: "2024-01-10",
-          fecha_final: "2024-02-10",
-          estado: "inactive"
-        },
-        {
-          categoria: "PantalonesCortos",
-          nombre_promocion: "Descuento de Primavera",
-          porcentaje_descuento: 20,
-          fecha_inicio: "2024-03-01",
-          fecha_final: "2024-03-31",
-          estado: "active"
-        },
-        {
-          categoria: "Bufandas",
-          nombre_promocion: "Ofertas de Verano",
-          porcentaje_descuento: 18,
-          fecha_inicio: "2024-07-01",
-          fecha_final: "2024-08-15",
-          estado: "inactive"
-        },
+        // Tus promociones iniciales
       ],
     };
   },
   mounted() {
     document.title = "Promociones Categorías";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    this.changeFavicon('/img/spiderman.ico'); // Asegúrate de que la ruta sea correcta
   },
   computed: {
     filterPromociones() {
@@ -298,10 +219,7 @@ export default {
   },
   methods: {
     activarForm() {
-
-      if (this.activeForm) { this.activeForm = false; }
-      else { this.activeForm = true; }
-
+      this.activeForm = !this.activeForm;
     },
     clearForm() {
       this.promForm = {
@@ -314,11 +232,10 @@ export default {
       this.isEditing = false;
       this.editIndex = null;
     },
-
     agregarPromocion() {
       if (!this.isEditing) {
         this.promForm.estado = 'active';
-        this.promociones.push(this.promForm);
+        this.promociones.push({ ...this.promForm });
       } else {
         this.promociones[this.editIndex] = { ...this.promFormModal };
         this.isShowModal = false;
@@ -326,16 +243,12 @@ export default {
       this.clearForm();
       this.isShowModal = false;
     },
-
     editarPromocion(index) {
-      this.promFormModal = {
-        ...this.promociones[index],
-      };
+      this.promFormModal = { ...this.promociones[index] };
       this.editIndex = index;
       this.isEditing = true;
       this.showModal();
     },
-
     desactivarProm(index) {
       if (this.promociones[index].estado === 'active') {
         this.promociones[index].estado = 'inactive';
@@ -346,16 +259,13 @@ export default {
         this.promociones[index].estado = 'active';
       }
     },
-
     eliminarProm(index) {
       this.editIndex = index;
       this.showConfirmModal = true;
     },
-
     showModal() {
       this.isShowModal = true;
     },
-
     closeModal() {
       this.isShowModal = false;
     },
@@ -366,16 +276,18 @@ export default {
     cancelCancel() {
       this.showConfirmModal = false;
     },
+    // Método corregido
+    changeFavicon(iconPath) {
+      let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
   },
-  hangeFavicon(iconPath) {
-    const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-    link.type = 'image/x-icon';
-    link.rel = 'icon';
-    link.href = iconPath;
-    document.getElementsByTagName('head')[0].appendChild(link);
-  }
 };
 </script>
+
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
