@@ -23,6 +23,9 @@ function getRole() {
 }
 
 const routes = [
+
+  
+  
   {
     path: '/administrar-compras',
     name: 'AdministrarCompras',
@@ -128,16 +131,28 @@ const router = createRouter({
 
 // Verificación de autenticación y control de acceso por roles
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem('auth');
+  const isAuthenticated = Boolean(localStorage.getItem('auth')); // Verifica si el usuario está autenticado
   const role = getRole();
 
-  if (to.matched.some(record => record.meta.requiresAuth) && !isAuthenticated) {
-    next('/login');
-  } else if (to.matched.some(record => record.meta.roles) && !to.meta.roles.includes(role)) {
-    next('/home'); // Si el rol no tiene acceso, lo redirige a Home
-  } else {
-    next();
-  }
-});
+  console.log('Ruta solicitada:', to.path);
+  console.log('Usuario autenticado:', isAuthenticated);
+  console.log('Rol del usuario:', role);
 
+  // Permitir siempre el acceso a la ruta /reset sin autenticación
+  if (to.path === '/reset') {
+    return next(); // Permite el acceso a la ruta de restablecimiento de contraseña
+  }
+
+  // Si la ruta requiere autenticación y el usuario no está autenticado
+  if (to.matched.some(record => record.meta.requiresAuth) && !isAuthenticated) {
+    return next('/login'); // Redirige al login
+  }
+
+  // Si la ruta tiene roles definidos y el rol del usuario no tiene acceso
+  if (to.matched.some(record => record.meta.role) && !to.meta.role.includes(Number(role))) {
+    return next('/home'); // Redirige a Home si el rol no tiene acceso
+  }
+
+  next(); // Permite la navegación
+});
 export default router;
