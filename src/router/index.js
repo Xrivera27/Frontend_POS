@@ -16,6 +16,8 @@ import SucursalesList from '@/Pages/SucursalesList.vue';
 import PromocionesProductos from '@/Pages/PromocionesProductos.vue';
 import PromocionesCategorias from '@/Pages/PromocionesCategorias.vue';
 import ConfigPage from '@/Pages/ConfigPage.vue';
+import ConfigCompany from '@/Pages/ConfigCompany.vue';
+import ConfigSar from '@/Pages/configSar.vue';
 
 // Función para obtener el rol desde localStorage
 function getRole() {
@@ -116,6 +118,16 @@ const routes = [
     path: '/config-page',
     name: 'Config-page',
     component: ConfigPage,
+  },
+  {
+    path: '/config-company',
+    name: 'Config-company',
+    component: ConfigCompany,
+  },
+  {
+    path: '/config-sar',
+    name: 'Config-sar',
+    component: ConfigSar,
   },
   {
     path: '/:pathMatch(.*)*', // Ruta para manejar rutas no encontradas

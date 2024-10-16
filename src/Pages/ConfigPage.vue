@@ -1,7 +1,7 @@
 <template>
   <div class="configuracion-usuario">
     <div class="encabezado">
-      <h1>Configuración de Usuario</h1>
+      <h1>Configuración</h1>
       <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
     </div>
     <hr />
@@ -84,85 +84,18 @@
         </form>
       </div>
 
-      <div class="company-config" v-if="showCompany">
-        <form autocomplete="off" class="formulario form-company">
-          <fieldset :disabled="businessEditing">
-            <div class="contenedor-titulo">
-              <h2 class="titulo-form">Configuración Empresa</h2>
-            </div>
-
-            <div class="contenedor-principal">
-              <div class="contenedor-interno contenedor-izquierdo">
-                <label for="nombre-company">Nombre de la empresa:</label>
-                <input type="text" id="nombre-company" name="nombre-company" required />
 
 
-                <label for="telefono-empresa">Telefono principal:</label>
-                <input type="text" id="telefono-empresa" name="telefono-empresa" required />
 
-
-                <label for="correo-principal">Correo principal:</label>
-                <input type="email" id="correo-principal" principal de la empresa name="correo" required />
-              </div>
-            </div>
-          </fieldset>
-          <div class="botones-container">
-            <button class="btn editar" @click="isEditing(3)" :disabled="!businessEditing">Editar</button>
-            <button class="btn guardar" :disabled="businessEditing">Guardar</button>
-          </div>
-
-
-          <!-- Fecha de inicio -->
-        </form>
-
-        <form autocomplete="off" class="formulario form-company-SAR">
-          <fieldset :disabled="busisnessSarEditing">
-            <div class="contenedor-titulo">
-              <h2 class="titulo-form">Configuración SAR</h2>
-            </div>
-
-            <div class="contenedor-principal">
-              <div class="contenedor-interno contenedor-izquierdo">
-                <label for="categoria">Numero CAI:</label>
-                <input type="text" id="numero_cai" name="numero_cai" required />
-
-                <!-- Porcentaje de descuento -->
-                <label for="rango_inical">Rango Inicial:</label>
-                <input type="number" id="rango_inical" name="rango_inical" required />
-
-                <label for="rango_inical">Rango Final:</label>
-                <input type="number" id="rango_final" name="rango_final" required />
-              </div>
-              <!-- Categoria ID -->
-              <div class="contenedor-interno contenedor-derecho">
-                <label for="fecha_autorizacion">Fecha de autorización:</label>
-                <input type="date" id="fecha_autorizacion" name="fecha_autorizacion" required />
-
-                <!-- Fecha final -->
-                <label for="fecha_vencimiento">Fecha de vencimiento:</label>
-                <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required />
-
-                <!-- Enviar el formulario -->
-              </div>
-            </div>
-          </fieldset>
-
-          <div class="botones-container">
-            <button class="btn editar" @click="isEditing(4)" :disabled="!busisnessSarEditing">Editar</button>
-            <button class="btn guardar" :disabled="busisnessSarEditing">Guardar</button>
-          </div>
-
-
-          <!-- Fecha de inicio -->
-        </form>
-      </div>
-
-
-      <button @click="switchBools" :class="{ 'activo': userActive, 'inactivo': !userActive }" :disabled="userBoton"
+      <button  :class="{ 'activo': userActive, 'inactivo': !userActive }" :disabled="userBoton"
         class="btn boton-switch">Config. Usuario</button>
-      <button @click="switchBools" :class="{ 'inactivo': userActive, 'activo': !userActive }" :disabled="companyBoton"
+      
+      <router-link to ="/config-company" >
+        <button :class="{ 'inactivo': userActive, 'activo': !userActive }" :disabled="companyBoton"
         class="btn boton-switch">Config. Empresa</button>
 
+      </router-link>
+       
     </div>
   </div>
 </template>
