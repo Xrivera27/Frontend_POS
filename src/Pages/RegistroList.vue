@@ -36,14 +36,7 @@
         </div>
 
         <!-- Campos adicionales de SAR (solo se muestran si usa_SAR es true) -->
-        <transition name="fade">
-          <div v-if="form.usa_SAR" class="sar-fields">
-            <div class="form-group">
-              <input id="numeroCai" v-model="form.numeroCai" type="text" placeholder="Número CAI" required />
-            </div>
-            <!-- Otros campos de SAR -->
-          </div>
-        </transition>
+       
 
         <!-- Botón de envío -->
         <div class="form-group button-container">
@@ -90,7 +83,7 @@ onMounted(() => {
 // Función para manejar el envío del formulario
 const handleSubmit = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/empresa', {
+    const response = await fetch('http://localhost:3000/api/empresa', { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -118,6 +111,15 @@ const handleSubmit = async () => {
   font-family: 'Montserrat', sans-serif;
 }
 
+#categoria {
+  width: 100%;
+}
+
+#btnSubmit {
+  color: white;
+  font-size: 2rem;
+}
+
 .register-container {
   display: flex;
   justify-content: center;
@@ -142,6 +144,7 @@ h2 {
 
 .form-group {
   margin-bottom: 1rem;
+ 
 }
 
 input[type="text"],
@@ -249,14 +252,5 @@ input[type="checkbox"] {
   border-radius: 5px;
   padding: 0.5rem 1rem;
   cursor: pointer;
-}
-
-#btnSubmit {
-  color: white;
-  font-size: 2rem;
-}
-
-#categoria {
-  width: 100%;
 }
 </style>

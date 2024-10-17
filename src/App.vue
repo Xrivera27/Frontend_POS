@@ -45,6 +45,8 @@ export default {
         1: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced'],
         2: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
         3: ['Home', 'Productos', 'Venta'],
+        4: ['Home', 'Usuario','sucursales', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced'],
+
       };
       return role && permissions[role]?.includes(section);
     },

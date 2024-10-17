@@ -33,6 +33,25 @@
       </div>
     </div>
 
+
+    <div v-if="role === 4">
+      <!-- Secciones visibles solo para Gerente -->
+      <h3>Panel de Ceo</h3>
+      <BarChart />
+      <div class="box">
+        <div class="box-header">
+          <h3>Dueño de la empresa</h3>
+        </div>
+        <p>Aquí puedes gestionar el inventario y visualizar reportes.</p>
+      </div>
+      <div class="box">
+        <div class="box-header">
+          <h3>Reportes de Ventas</h3>
+        </div>
+        <p>Aquí puedes ver los reportes de ventas.</p>
+      </div>
+    </div>
+
     <div v-if="role === 3">
       <!-- Secciones visibles solo para Cajero -->
       <h3>Panel de Cajero</h3>

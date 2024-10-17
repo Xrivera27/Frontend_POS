@@ -36,7 +36,9 @@ const routes = [
   {
     path: '/administrar-ventas',
     name: 'AdministrarVentas',
-    component: AdministrarVentas
+    component: AdministrarVentas,
+    
+
   },
   {
     path: '/',
@@ -57,37 +59,37 @@ const routes = [
     path: '/clientes',
     name: 'Clientes',
     component: ClientesList,
-    meta: { requiresAuth: true, role: [1, 2] }
+    meta: { requiresAuth: true, role: [1, 2, 4] }
   },
   {
     path: '/sucursales',
     name: 'Sucursales',
     component: SucursalesList,
-    meta: { requiresAuth: true, role: [1, 2] }
+    meta: { requiresAuth: true, role: [4] }
   },
   {
     path: '/proveedores',
     name: 'Proveedores',
     component: ProveedoresList,
-    meta: { requiresAuth: true, role: [1, 2] }
+    meta: { requiresAuth: true, role: [1, 2, 4] }
   },
   {
     path: '/empleados',
     name: 'Empleados',
     component: EmpleadoList,
-    meta: { requiresAuth: true, role: [1] }
+    meta: { requiresAuth: true, role: [1, 4] }
   },
   {
     path: '/categorias',
     name: 'Categorias',
     component: CategoriasList,
-    meta: { requiresAuth: true, role: [1] }
+    meta: { requiresAuth: true, role: [1, 4] }
   },
   {
     path: '/productos',
     name: 'Productos',
     component: ProductosList,
-    meta: { requiresAuth: true, role: [1, 2, 3] }
+    meta: { requiresAuth: true, role: [1, 2, 3, 4] }
   },
   {
     path: '/registro',
@@ -98,11 +100,13 @@ const routes = [
     path: '/compras',
     name: 'Compras',
     component: ComprasList,
+    meta: { requiresAuth: true, role: [1, 2, 3] }
   },
   {
     path: '/ventas',
     name: 'Ventas',
     component: VentasList,
+    meta: { requiresAuth: true, role: [1, 2, 3] }
   },
   {
     path: '/promociones-producto',
@@ -118,16 +122,19 @@ const routes = [
     path: '/config-page',
     name: 'Config-page',
     component: ConfigPage,
+    meta: { requiresAuth: true, role: [1, 2, 3, 4] }
   },
   {
     path: '/config-company',
     name: 'Config-company',
     component: ConfigCompany,
+    meta: { requiresAuth: true, role: [1, 4] }
   },
   {
     path: '/config-sar',
     name: 'Config-sar',
     component: ConfigSar,
+    meta: { requiresAuth: true, role: [1] }
   },
   {
     path: '/:pathMatch(.*)*', // Ruta para manejar rutas no encontradas

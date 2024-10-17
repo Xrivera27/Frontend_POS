@@ -8,193 +8,159 @@
 
     <div class="config-wrapper">
       <div class="usuario-config" v-if="showUser">
-        <form autocomplete="off" class="formulario form-basic-user">
+        <!-- Formulario básico de usuario -->
+        <form @submit.prevent="guardarForm" autocomplete="off" class="formulario form-basic-user">
           <fieldset :disabled="usuarioEditing">
             <div class="contenedor-titulo">
               <h2 class="titulo-form">Configuración</h2>
             </div>
-
             <div class="contenedor-principal">
+              <!-- Datos personales -->
               <div class="contenedor-interno contenedor-izquierdo">
                 <label for="nombre-usuario">Nombre de usuario:</label>
-                <input type="text" id="nombre-usuario" name="nombre-usuario" required />
-
-
+                <input v-model="userForm.nombre_usuario" type="text" id="nombre_usuario" name="nombre_usuario" required />
+                
                 <label for="telefono">Teléfono:</label>
-                <input type="text" id="telefono" name="telefono" required />
-
+                <input v-model="userForm.telefono" type="text" id="telefono" name="telefono" required />
 
                 <label for="direccion">Dirección:</label>
-                <input type="text" id="direccion" name="direccion" required />
+                <input v-model="userForm.direccion" type="text" id="direccion" name="direccion" required />
               </div>
-
-
+              <!-- Seguridad -->
               <div class="contenedor-interno contenedor-derecho">
                 <label for="contrasena">Contraseña actual:</label>
-                <input type="password" id="input-codigo-contrasena" name="contrasena" required />
-
+                <input v-model="userForm.contraseña" type="password" id="contraseña" name="contraseña" required />
 
                 <label for="contrasena-nueva">Contraseña nueva:</label>
-                <input type="password" id="contrasena-nueva" name="contrasena-nueva" required />
-
+                <input v-model="userForm.contrasena_nueva" type="password" id="contraseña" name="contraseña" required />
 
                 <label for="contrasena-confirmar">Confirmar contraseña:</label>
-                <input type="password" id="contrasena-confirmar" name="contrasena-confirmar" required />
+                <input v-model="userForm.contrasena_confirm" type="password" id="contraseña" name="contraseña" required />
               </div>
-
             </div>
           </fieldset>
-
-
+          
           <div class="botones-container">
             <button class="btn editar" @click="isEditing(1)" :disabled="!usuarioEditing">Editar</button>
-            <button class="btn guardar" :disabled="usuarioEditing">Guardar</button>
+            <button type="submit" class="btn guardar" :disabled="usuarioEditing">Guardar</button>
           </div>
         </form>
 
-        <form autocomplete="off" class="formulario form-avanced-user">
+        <!-- Formulario avanzado de usuario -->
+        <form @submit.prevent="guardarFormAvanzado" autocomplete="off" class="formulario form-avanced-user">
           <fieldset :disabled="usuarioAvancedEditing">
             <div class="contenedor-titulo">
               <h2 class="titulo-form">Configuración avanzada</h2>
             </div>
-
             <div class="contenedor-principal">
               <div class="contenedor-interno contenedor-izquierdo">
                 <label for="Nombre">Nombre:</label>
-                <input type="text" id="Nombre" name="Nombre" required />
-
+                <input v-model="userFormAdvanced.nombre" type="text" id="nombre" name="nombre" required />
 
                 <label for="apellido">Apellido:</label>
-                <input type="text" id="apellido" name="apellido" required />
-
+                <input v-model="userFormAdvanced.apellido" type="text" id="apellido" name="apellido" required />
 
                 <label for="correo">Correo:</label>
-                <input type="email" id="correo" name="correo" required />
+                <input v-model="userFormAdvanced.correo" type="email" id="correo" name="correo" required />
               </div>
             </div>
-
           </fieldset>
 
           <div class="botones-container">
             <button class="btn editar" @click="isEditing(2)" :disabled="!usuarioAvancedEditing">Editar</button>
-            <button class="btn guardar" :disabled="usuarioAvancedEditing">Guardar</button>
+            <button type="submit" class="btn guardar" :disabled="usuarioAvancedEditing">Guardar</button>
           </div>
-
-          <!-- Fecha de inicio -->
         </form>
       </div>
 
-
-
-
-      <button  :class="{ 'activo': userActive, 'inactivo': !userActive }" :disabled="userBoton"
-        class="btn boton-switch">Config. Usuario</button>
+      <!-- Botones de navegación -->
+      <button :class="{ 'activo': userActive, 'inactivo': !userActive }" :disabled="userBoton" class="btn boton-switch" @click="switchBools">
+        Config. Usuario
+      </button>
       
-      <router-link to ="/config-company" >
-        <button :class="{ 'inactivo': userActive, 'activo': !userActive }" :disabled="companyBoton"
-        class="btn boton-switch">Config. Empresa</button>
-
+      <router-link to="/config-company">
+        <button :class="{ 'inactivo': userActive, 'activo': !userActive }" :disabled="companyBoton" class="btn boton-switch">
+          Config. Empresa
+        </button>
       </router-link>
-       
     </div>
   </div>
 </template>
 
+
 <script>
-import ProfileButton from '../components/ProfileButton.vue';
+import axios from 'axios';
+//import ProfileButton from '../components/ProfileButton.vue';
 
 export default {
   components: {
-    ProfileButton,
-
+   // ProfileButton,
   },
   data() {
     return {
-      switchForm: 'user',
       userBoton: true,
       companyBoton: false,
       showUser: true,
-      showCompany: false,
       userActive: true,
       usuarioEditing: true,
       usuarioAvancedEditing: true,
-      businessEditing: true,
-      busisnessSarEditing: true,
-      userForm: [
-        {
-          nombreUsuario: '',
-          telefono: '',
-          direccion: '',
-          contrasena_actual: '',
-          contrasena_nueva: '',
-          contrasena_confirm: '',
-        }
-      ],
-      userFormAdvanced: [
-        {
-          nombre: '',
-          apellido: '',
-          correo: '',
-        }
-      ],
-      companyForm: [
-        {
-          nombre: '',
-          apellido: '',
-          correo: '',
-        }
-      ],
+      userForm: {
+        nombreUsuario: '',
+        telefono: '',
+        direccion: '',
+        contrasena_actual: '',
+        contrasena_nueva: '',
+        contrasena_confirm: '',
+      },
+      userFormAdvanced: {
+        nombre: '',
+        apellido: '',
+        correo: '',
+      },
     };
   },
   methods: {
+    async getUserData() {
+  try {
+    const token = localStorage.getItem('auth'); // Usa 'auth' para obtener el token
 
-    pushEsc(event) {
-      if (event.key === "Esc" || event.key === "Escape") {
-        this.usuarioEditing = true;
-        this.busisnessSarEditing = true;
-        this.businessEditing = true;
-        this.usuarioAvancedEditing = true;
+    const response = await axios.get('http://localhost:3000/api/usuarios', { // Cambia a '/usuarios'
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    },
+    });
 
-    switchBools() {
-      this.userBoton = !this.userBoton;
-      this.companyBoton = !this.companyBoton;
-      this.showUser = !this.showUser;
-      this.showCompany = !this.showCompany;
-      this.userActive = !this.userActive;
-    },
+    const userData = response.data;
+    this.userForm.nombre_usuario = userData.nombre_usuario || '';
+    this.userForm.telefono = userData.telefono || '';
+    this.userForm.direccion = userData.direccion || '';
+    this.userForm.contraseña = userData.contraseña || '';
+    this.userFormAdvanced.nombre = userData.nombre || '';
+    this.userFormAdvanced.apellido = userData.apellido || '';
+    this.userFormAdvanced.correo = userData.correo || '';
+  } catch (error) {
+    console.error('Error al obtener los datos del usuario:', error);
+    alert('No se pudo obtener la información del usuario.'); // Mensaje para el usuario
+  }
+},
+
 
     isEditing(orden) {
+      // Maneja los estados de edición
       switch (orden) {
-        case 1: this.usuarioEditing = false;
-          this.busisnessSarEditing = true;
-          this.businessEditing = true;
+        case 1:
+          this.usuarioEditing = false;
           this.usuarioAvancedEditing = true;
           break;
-
-        case 2: this.usuarioEditing = true;
-          this.busisnessSarEditing = true;
-          this.businessEditing = true;
+        case 2:
+          this.usuarioEditing = true;
           this.usuarioAvancedEditing = false;
           break;
-
-        case 3: this.usuarioEditing = true;
-          this.busisnessSarEditing = true;
-          this.businessEditing = false;
-          this.usuarioAvancedEditing = true;
-          break;
-
-        case 4: this.usuarioEditing = true;
-          this.busisnessSarEditing = false;
-          this.businessEditing = true;
-          this.usuarioAvancedEditing = true;
-          break;
-
         default:
-          alert("Ha ocurrido un error");
+          alert('Ha ocurrido un error');
       }
     },
+
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
@@ -203,20 +169,16 @@ export default {
       document.getElementsByTagName('head')[0].appendChild(link);
     }
   },
-
   mounted() {
-    // Añade el manejador de eventos cuando el componente se monta
-    window.addEventListener("keydown", this.pushEsc);
-    document.title = "Configuración";
+    // Obtén los datos del usuario cuando el componente esté montado (ej. usuario con ID 1)
+    this.getUserData(1);
+
+    document.title = "Configuración de Usuario";
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
   },
-  beforeUnmount() {
-    // Elimina el manejador de eventos cuando el componente se destruye
-    window.removeEventListener("keydown", this.pushEsc);
-  },
-
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');

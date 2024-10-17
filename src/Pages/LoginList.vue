@@ -93,6 +93,8 @@ export default {
         this.isLoading = false;
         console.error('Error:', error);
       }
+
+      
     },
 
     async recoverPassword() {

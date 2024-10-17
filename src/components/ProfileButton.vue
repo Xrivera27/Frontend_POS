@@ -2,9 +2,9 @@
     <div>
         <div class="btn-config-container">
             <button class="btn-config" @click="openModal">
-                <i id="campana" class="bi bi-bell-fill"></i>{{ companyName }}
+                <i id="campana" class="bi bi-bell-fill"></i>{{ username }}
                 <br>
-                <span class="rol">{{ role }}</span>
+                <span class="username">{{ username }}</span> <!-- Muestra el nombre del usuario aquí -->
             </button>
         </div>
 
@@ -39,21 +39,13 @@
     </div>
 </template>
 
-
 <script>
+import axios from 'axios';
+
 export default {
-    props: {
-        companyName: {
-            type: String,
-            default: 'Perdomo y Asociados'
-        },
-        role: {
-            type: String,
-            default: 'Gerente'
-        }
-    },
     data() {
         return {
+            username: '',  // Nuevo estado para el nombre de usuario
             isModalOpen: false,
             settings: {
                 email: '',
@@ -73,7 +65,27 @@ export default {
         saveSettings() {
             console.log('Configuración guardada:', this.settings);
             this.closeModal();
+        },
+        fetchUserProfile() {
+    // Llamada a la API para obtener el perfil del usuario
+    axios.get('http://localhost:3000/api/perfil', {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}` // Incluye el token de autenticación
         }
+    })
+    .then(response => {
+        console.log('Respuesta de la API:', response.data); // Muestra la respuesta completa
+        // Asegúrate de que esta línea coincida con la estructura de la respuesta de tu API
+        this.username = response.data.username; // Asignar el nombre de usuario
+    })
+    .catch(error => {
+        console.error('Error al obtener el perfil del usuario:', error);
+    });
+}
+    },
+    mounted() {
+        // Llamar a la API cuando el componente se monte
+        this.fetchUserProfile();
     }
 };
 </script>
