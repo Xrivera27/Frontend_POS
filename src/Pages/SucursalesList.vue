@@ -32,22 +32,21 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Nombre Administrativo</th>
-            <th>Ciudad</th>
+            <th>Nombre</th>
+            <th>Correo</th>
             <th>Telefono</th>
             <th>Direccion</th>
-            <th>Correo</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(sucursal, index) in paginatedSucursales" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ sucursal.nombre }}</td>
-            <td>{{ sucursal.ciudad }}</td>
+            <td>{{ sucursal.nombre_administrativo }}</td>
+            <td>{{ sucursal.correo }}</td>
             <td>{{ sucursal.telefono }}</td>
             <td>{{ sucursal.direccion }}</td>
-            <td>{{ sucursal.correo }}</td>
+
             <td>
               <button id="btnEditar" class="btn btn-warning" @click="editSucursal(index)"><i
                   class="bi bi-pencil-fill"></i></button>
@@ -67,7 +66,7 @@
 
         <div class="form-group">
           <label>Nombre:</label>
-          <input v-model="sucursalForm.nombre" type="text" required>
+          <input v-model="sucursalForm.nombre_administrativo" type="text" required>
         </div>
 
         <div class="form-group">
@@ -108,70 +107,31 @@ export default {
   },
   data() {
     return {
+      id_usuario: 0,
+      id_empresa: 10, //esto es provisional, cuando se cree el controller empresa el sistema sera capaz de reconocer automaitcamente a que empresa pertenece cada usuario
       searchQuery: '', // Almacena el texto de búsqueda
       itemsPerPage: "", // Valor por defecto para mostrar todos los registros
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
       sucursalForm: {
-        nombre: '',
-        ciudad: '',
+        nombre_administrativo: '',
+        correo: '',
         telefono: '',
         direccion: '',
-        correo: '',
+
 
       },
       sucursales: [
-        {
-          nombre: 'Sucursal principal',
-          ciudad: 'La Ceiba',
-          telefono: '555 57 67',
-          direccion: 'calle 27 # 40 - 36',
-          correo: 'ejemplocorreo',
-        },
-        {
-          nombre: 'Sucursal norte',
-          ciudad: 'San Pedro Sula',
-          telefono: '504 22 33 44',
-          direccion: 'avenida 10, zona norte',
-          correo: 'norte@empresa.com',
-        },
-        {
-          nombre: 'Sucursal sur',
-          ciudad: 'Tegucigalpa',
-          telefono: '504 33 44 55',
-          direccion: 'avenida 5, barrio centro',
-          correo: 'sur@empresa.com',
-        },
-        {
-          nombre: 'Sucursal este',
-          ciudad: 'Choluteca',
-          telefono: '504 11 22 33',
-          direccion: 'calle 12, zona este',
-          correo: 'este@empresa.com',
-        },
-        {
-          nombre: 'Sucursal oeste',
-          ciudad: 'Comayagua',
-          telefono: '504 77 88 99',
-          direccion: 'carrera 4, barrio oeste',
-          correo: 'oeste@empresa.com',
-        },
-        {
-          nombre: 'Sucursal central',
-          ciudad: 'La Esperanza',
-          telefono: '504 44 55 66',
-          direccion: 'plaza principal, zona centro',
-          correo: 'central@empresa.com',
-        }
       ],
       // Define tus columnas para la exportación a PDF
       columns: [
         { header: '#', dataKey: 'index' },
         { header: 'Nombre', dataKey: 'nombre' },
-        { header: 'Ciudad', dataKey: 'ciudad' },
-        { header: 'Teléfono', dataKey: 'telefono' },
         { header: 'Correo', dataKey: 'correo' },
+        { header: 'Direccion', dataKey: 'direccion' },
+        { header: 'Teléfono', dataKey: 'telefono' },
+
 
       ],
       rows: [] // Inicialmente vacío, se llena después
@@ -181,8 +141,8 @@ export default {
     filteredSucursales() {
       // Filtra los sucursales basados en el texto de búsqueda
       return this.sucursales.filter(sucursal =>
-        sucursal.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        sucursal.ciudad.includes(this.searchQuery)
+        sucursal.nombre_administrativo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        sucursal.direccion.includes(this.searchQuery)
       );
     },
     paginatedSucursales() {
@@ -199,19 +159,45 @@ export default {
       this.isModalOpen = false;
       this.isEditing = false;
       this.sucursalForm = {
-        nombre: '',
-        ciudad: '',
+        nombre_administrativo: '',
+        correo: '',
         telefono: '',
         direccion: '',
-        correo: '',
 
       };
     },
-    guardarSucursal() {
+   async guardarSucursal() {
+    let response;
       if (this.isEditing) {
-        Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
+
+        try {
+           response = await this.patchSucursal(this.editIndex, this.sucursalForm);
+
+          if ( response == true){
+            Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
+          }
+          else alert(response);
+
+
+        } catch (error) {
+          alert(error);
+        }
+        
       } else {
-        this.sucursales.push({ ...this.sucursalForm });
+
+        try {
+          response = await this.postSucursal(this.sucursalForm);
+        if (response == true){
+          this.sucursales.push({ ...this.sucursalForm });
+        }
+        else {
+          throw response;
+        }
+        } catch (error) {
+          alert(error);
+        }
+        
+
       }
       this.closeModal();
     },
@@ -228,13 +214,13 @@ export default {
       // Genera las filas basadas en los sucursales paginados
       this.rows = this.paginatedSucursales.map((sucursal, index) => ({
         index: index + 1,
-        nombre: sucursal.nombre,
-        ciudad: sucursal.ciudad,
+        nombre: sucursal.nombre_administrativo,
+        direccion: sucursal.direccion,
         telefono: sucursal.telefono,
         correo: sucursal.correo,
 
       }));
-      console.log('Filas generadas:', this.rows);
+      //console.log('Filas generadas:', this.rows);
     },
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
@@ -242,7 +228,80 @@ export default {
       link.rel = 'icon';
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
+    },
+    
+    async fetchUsuario() {
+    try {
+        const response = await fetch('http://localhost:3000/api/sesion-user');
+
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.id_usuario = data[0].id_usuario;
+
+    } catch (error) {
+        console.error('Error al obtener usuario:', error); // Manejo de errores
     }
+},
+async fetchSucursal() {
+    try {
+        const response = await fetch(`http://localhost:3000/api/sucursales/usuario/${this.id_usuario}`);
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.sucursales = data;
+       // console.log(data);
+        
+
+    } catch (error) {
+        console.error('Error al obtener Sucursal:', error); // Manejo de errores
+    }
+},
+async patchSucursal(index, datosActualizados){
+  try {
+    const respuesta = await fetch(`http://localhost:3000/api/sucursales/actualizar-sucursal/${this.sucursales[index].id_sucursal}`,
+    {
+      method: 'PATCH',
+      headers: {
+      'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(datosActualizados)
+    });
+
+    if (!respuesta.ok){
+      throw new Error(`No se pudo actualizar: ${respuesta.statusText}`);
+    }
+
+    else return respuesta.ok;
+  } catch (error) {
+    throw new Error(`Ocurrio un error: ${error.statusText}`);
+  }
+},
+
+async postSucursal(datosNuevos){
+  try {
+    const respuesta = await fetch(`http://localhost:3000/api/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`,
+    {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(datosNuevos)
+    });
+
+    if (!respuesta.ok){
+      throw new Error(`No se pudo actualizar: ${respuesta.statusText}`);
+    }
+
+    else return respuesta.ok;
+  } catch (error) {
+    throw new Error(`Ocurrio un error: ${error.message}`);
+  }
+}
   },
   watch: {
     // Cuando cambie la paginación o el filtro, actualiza las filas
@@ -255,6 +314,8 @@ export default {
     this.generateRows();
     document.title = "Sucursales";
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    this.fetchUsuario();
+    this.fetchSucursal();
   }
 };
 </script>
