@@ -63,7 +63,7 @@
       </form>
 
       <div class="table-container">
-        <table class="table" border="2">
+        <table class="table">
           <thead>
             <th class="th_small">N.º</th>
             <th class="th_medium">Codigo</th>

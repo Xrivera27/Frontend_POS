@@ -107,9 +107,12 @@ export default {
       categoriaForm: { nombre: '', descripcion: '' }, // Objeto para el formulario de categorías
     };
   },
+
   mounted() {
     document.title = "Categorías";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    this.changeFavicon('/img/spiderman.ico');
+    this.fetchCategoria(); // Usar la ruta correcta
+    
   },
   computed: {
     filteredCategorias() {
@@ -165,6 +168,16 @@ export default {
       link.rel = 'icon';
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
+    },
+
+    async fetchCategoria() {
+      try {
+        const response = await fetch('http://localhost:3000/api/categoria-producto');
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        alert('No se pudo encontrar data');
+      }
     }
   }
 };

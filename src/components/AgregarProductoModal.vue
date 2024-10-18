@@ -345,6 +345,11 @@ export default {
   border-radius: 5px;
 }
 
+.btn-success{
+  min-height: 80px;
+  max-width: 90px;
+}
+
 .btn-primary {
   background-color: #007bff;
   color: white;
