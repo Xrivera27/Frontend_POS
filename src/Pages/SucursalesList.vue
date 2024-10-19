@@ -287,26 +287,6 @@ export default {
       document.getElementsByTagName("head")[0].appendChild(link);
     },
 
-    async postSucursal(datosNuevos) {
-      try {
-        const respuesta = await fetch(
-          `http://localhost:3000/api/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(datosNuevos),
-          }
-        );
-
-        if (!respuesta.ok) {
-          throw new Error(`No se pudo actualizar: ${respuesta.statusText}`);
-        } else return respuesta.ok;
-      } catch (error) {
-        throw new Error(`Ocurrio un error: ${error.message}`);
-      }
-    },
   },
   watch: {
     // Cuando cambie la paginación o el filtro, actualiza las filas
