@@ -11,23 +11,21 @@
         Usuario</button>
 
 
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select> registros
-        </span>
-      </div>
+      
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar empleado..." />
       </div>
+
+      <div class="registros">
+        <span>
+          <select  class="custom-select">
+            <option v-for="(sucursal, index) in this.sucursales" :key="index" value="{{ sucursal.nombre_administrativo }}">{{ sucursal.nombre_administrativo }}</option>
+          </select> 
+        </span>
+      </div>
+
     </div>
     <div class="table-container">
       <table class="table">
@@ -148,12 +146,14 @@ export default {
   },
   data() {
     return {
-      searchQuery: '', // Almacena el texto de búsqueda
+      searchQuery: '',
+      id_usuario: 0, // Almacena el texto de búsqueda
       isModalOpen: false,
       isEditing: false,
       showPassword: false,
       editIndex: null,
       itemsPerPage: "",
+      sucursales: [],
       usuarioForm: {
         nombre: "",
         apellido: "",
@@ -178,7 +178,8 @@ export default {
   },
   mounted() {
     document.title = "Usuarios";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    this.changeFavicon('/img/spiderman.ico');
+    this.fetchUsuario(); // Usar la ruta correcta
   },
   computed: {
     filteredEmpleados() {
@@ -248,6 +249,41 @@ export default {
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
     },
+    async fetchUsuario() {
+    try {
+        const response = await fetch('http://localhost:3000/api/sesion-user');
+
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.id_usuario = data[0].id_usuario;
+        this.fetchSucursal();
+
+    } catch (error) {
+        console.error('Error al obtener usuario:', error); // Manejo de errores
+    }
+},
+async fetchSucursal() {
+    try {
+      console.log(this.id_usuario);
+        const response = await fetch(`http://localhost:3000/api/sucursales/usuario/${this.id_usuario}`);
+        
+        if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.sucursales = data;
+
+       return this.sucursales;
+        
+
+    } catch (error) {
+        console.error('Error al obtener Sucursal:', error); // Manejo de errores
+    }
+},
   }
 };
 </script>
@@ -320,7 +356,7 @@ export default {
   min-width: 80%;
   display: flexbox;
   flex-direction: row;
-  margin-bottom: 5px;
+
 }
 
 .form-group input {
@@ -355,7 +391,6 @@ export default {
 /* Botones */
 .btn {
   padding: 8px 16px;
-  margin-bottom: 4px;
   border: none;
   cursor: pointer;
   border-radius: 5px;
@@ -452,22 +487,24 @@ export default {
 }
 
 .opciones {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .busqueda {
-  float: right;
   padding: 10px;
   font-size: 14px;
   border-radius: 10px;
   border-width: 0.5px;
+  min-width: 350px;
 }
 
 .registros {
+  display: flexbox;
   height: 100%;
-  padding-bottom: 1%;
+  align-items: end;
 }
 
 #btnAdd {
@@ -613,12 +650,13 @@ button {
 .custom-select {
   border: 1px solid #ccc;
   border-radius: 5px;
-  height: 35px;
+
   font-size: 16px;
-  padding: 5px;
+  padding: 10px;
   background-color: #fff;
   cursor: pointer;
-  width: 80px;
+  width: 60%;
+  min-width: 400px;
   /* Ajusta el ancho a 120px o el valor que prefieras */
 }
 
