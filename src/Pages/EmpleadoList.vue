@@ -137,6 +137,9 @@ import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
+// importando solicitudes
+import solicitudes from "../../services/solicitudes.js";
+
 export default {
   components: {
     ProfileButton,
@@ -176,10 +179,25 @@ export default {
       ]
     };
   },
-  mounted() {
+  async mounted() {
     document.title = "Usuarios";
     this.changeFavicon('/img/spiderman.ico');
-    this.fetchUsuario(); // Usar la ruta correcta
+     // Usar la ruta correcta
+
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+      try {
+        this.sucursales = await solicitudes.fetchRegistros(
+          `/sucursales/empresa/${this.id_usuario}`
+        );
+
+      } catch (error) {
+        console.log(error); //modal error
+        throw error;
+      }
+    } catch (error) {
+      console.log(error); //modal error pendiente
+    }
   },
   computed: {
     filteredEmpleados() {
@@ -249,41 +267,6 @@ export default {
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
     },
-    async fetchUsuario() {
-    try {
-        const response = await fetch('http://localhost:3000/api/sesion-user');
-
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        this.id_usuario = data[0].id_usuario;
-        this.fetchSucursal();
-
-    } catch (error) {
-        console.error('Error al obtener usuario:', error); // Manejo de errores
-    }
-},
-async fetchSucursal() {
-    try {
-      console.log(this.id_usuario);
-        const response = await fetch(`http://localhost:3000/api/sucursales/usuario/${this.id_usuario}`);
-        
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        this.sucursales = data;
-
-       return this.sucursales;
-        
-
-    } catch (error) {
-        console.error('Error al obtener Sucursal:', error); // Manejo de errores
-    }
-},
   }
 };
 </script>
