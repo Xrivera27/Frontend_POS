@@ -206,7 +206,7 @@ export default {
       let parametros;
       if (this.isEditing) {
         try {
-          console.log(`id de sucursal ${this.sucursales[this.editIndex].id_sucursal}`);
+
           parametros = `/sucursales/actualizar-sucursal/${
             this.sucursales[this.editIndex].id_sucursal
           }`;
@@ -215,9 +215,9 @@ export default {
             this.sucursalForm
           );
           
-          console.log(response);
+
           if (response == true) {
-            console.log('entro aqui');
+
             Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
           } else alert(response);
         } catch (error) {
@@ -232,11 +232,11 @@ export default {
             this.sucursalForm
           );
 
-          console.log(`response = ${response}`);
+
           if (response == true) {
-            console.log(`entro aca para agregar sucursales ${this.sucursalForm.nombre_administrativo } `);
+
             this.sucursales.push({ ...this.sucursalForm });
-            console.log(this.sucursales[this.sucursales.length-1]);
+
           } else {
             throw response;
           }
@@ -258,7 +258,7 @@ export default {
       const datosActualizados = {
         estado: false,
       };
-      console.log(this.sucursales[index].id_sucursal);
+
       const parametros = `/sucursales/desactivar-sucursal/${this.sucursales[index].id_sucursal}`;
 
       try {
@@ -266,7 +266,7 @@ export default {
           parametros,
           datosActualizados
         );
-       // console.log(response);
+
         if (response == true) {
           this.sucursales.splice(index, 1);
         }
@@ -283,7 +283,7 @@ export default {
         telefono: sucursal.telefono,
         correo: sucursal.correo,
       }));
-      //console.log('Filas generadas:', this.rows);
+
     },
     changeFavicon(iconPath) {
       const link =
@@ -315,7 +315,7 @@ export default {
         this.sucursales = await solicitudes.fetchRegistros(
           `/sucursales/empresa/${this.id_usuario}`
         );
-        console.log(this.sucursales);
+
       } catch (error) {
         console.log(error); //modal error
         throw error;
