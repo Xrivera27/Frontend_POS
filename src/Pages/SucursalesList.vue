@@ -152,6 +152,7 @@ export default {
       isEditing: false,
       editIndex: null,
       sucursalForm: {
+        id_sucursal: 0,
         nombre_administrativo: "",
         correo: "",
         telefono: "",
@@ -205,6 +206,7 @@ export default {
       let parametros;
       if (this.isEditing) {
         try {
+          console.log(`id de sucursal ${this.sucursales[this.editIndex].id_sucursal}`);
           parametros = `/sucursales/actualizar-sucursal/${
             this.sucursales[this.editIndex].id_sucursal
           }`;
