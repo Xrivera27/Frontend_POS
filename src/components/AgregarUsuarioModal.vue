@@ -1,112 +1,65 @@
 <template>
-  <button id="registrar-producto" class="btn btn-success" type="button" @click="openModal">
+  <button id="registrar-usuario" class="btn btn-success" type="button" @click="openModal">
     <b>Registrar nuevo Inv.</b>
   </button>
 
   <div v-if="isModalOpen" class="modal">
-    <div id="modal-producto" class="modal-content">
+    <div id="modal-usuario" class="modal-content">
       <h2 class="h2-modal-content">
-        {{ isEditing ? "Editar Producto" : "Agregar Producto" }}
+        {{ isEditing ? "Editar Usuario" : "Agregar Usuario" }}
       </h2>
 
       <div class="contenedor-principal">
         <div class="contenedor contenedor-izquierdo">
           <div class="form-group">
-            <label>Codigo:</label>
-            <input v-model="productoForm.codigo" type="text" required />
+            <label>Nombre:</label>
+            <input v-model="usuarioForm.nombre" type="text" required />
           </div>
 
           <div class="form-group">
-            <label>Descripcion:</label>
-            <input v-model="productoForm.descripcion" type="text" required />
+            <label>Apellido:</label>
+            <input v-model="usuarioForm.apellido" type="text" required />
           </div>
 
           <div class="form-group">
-            <label>Precio Unitario:</label>
-            <input v-model="productoForm.preciounitario" type="text" required />
+            <label>Nombre de Usuario:</label>
+            <input v-model="usuarioForm.nombreUsuario" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Correo:</label>
+            <input v-model="usuarioForm.correo" type="text" required />
           </div>
 
-          <div class="form-group">
-            <label>Precio Mayorista:</label>
-            <input v-model="productoForm.preciomayorista" type="text" required />
-          </div>
-
-          <div class="form-group">
-            <label>Cantidad ingresada en esta ocasión:</label>
-            <input v-model="productoForm.stock" type="text" />
-          </div>
+          
         </div>
         <div class="contenedor contenedor-derecho">
           <div class="form-group">
-            <label for="proveedor">Selecciona proveedor del producto:</label>
-            <div id="proveedor-contenedor">
-              <select class="form-select" id="proveedor" name="proveedor">
-                <option value="impuesto1">Proveedor 1</option>
-                <option value="impuesto2">Proveedor 2</option>
-                <option value="impuesto3">Proveedor 3</option>
-              </select>
-              <Proveedor />
-            </div>
+            <label>Telefono:</label>
+            <input v-model="usuarioForm.telefono" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Direccion:</label>
+            <input v-model="usuarioForm.direccion" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Contraseña:</label>
+            <input v-model="usuarioForm.contra" type="password" required />
           </div>
 
           <div class="form-group">
-            <label for="proveedor">Selecciona impuesto del producto:</label>
-            <select class="form-select" id="isv" name="isv">
-              <option value="impuesto1">Impuesto 1</option>
-              <option value="impuesto2">Impuesto 2</option>
-              <option value="impuesto3">Impuesto 3</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Stock max:</label>
-            <input v-model="productoForm.stockMax" type="text" required />
-          </div>
-
-          <div class="form-group">
-            <label>Stock min:</label>
-            <input v-model="productoForm.stockMin" type="text" required />
-          </div>
-
-          <div class="form-group form-categoria">
-            <label>Asignar categorías al producto:</label>
-            <button @click="openModalCategoria" class="btn">Seleccionar categorías</button>
-          </div>
-
-          <div v-if="isModalCategoriaOpen" class="modal">
-            <div class="modal-content modal-content-categoria">
-              <div class="categoria-encabezado">
-                <h3>Selecciona categorias del producto</h3>
-                <div class="search-bar form-group">
-                  <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar categoria..." />
-                </div>
-              </div>
-
-              <div class="categoria-contenedor">
-                <form class="form-form-categoria">
-
-                  <label class="label-categoria" v-for="(categoria, index) in filteredCategorias" :key="index"
-                    :class="{ 'primer-label': (index + 1) % 2 == 0 }"><input type="checkbox"
-                      name="{{ categoria.nombre }}" id="{{ categoria.nombre }}">{{ categoria.nombre }}
-                    <br v-if="(index + 1) % 2 == 0" class="br-label">
-                  </label>
-                </form>
-              </div>
-              <div class="categoria-botones">
-
-                <button @click="closeModalCategoria" class="btn btn-primary">Guardar</button>
-                <button @click="closeModalCategoria" class="btn btn-secondary">Cerrar</button>
-              </div>
-
-            </div>
-
+            <label>Confirmar Contraseña:</label>
+            <input v-model="usuarioForm.confirmContra" type="password" />
           </div>
 
         </div>
       </div>
-
-      <button id="AddProductoModal" class="btn btn-primary" @click="guardarProducto">
-        {{ isEditing ? "Guardar Cambios" : "Agregar Producto" }}
+      <div class="form-group form-group-select">
+            <label for="sucursal">Selecciona sucursal:</label>
+            <select class="form-select" id="sucursal" name="sucursal">
+            </select>
+          </div>
+      <button id="AddUsuarioModal" class="btn btn-primary" @click="guardarUsuario">
+        {{ isEditing ? "Guardar Cambios" : "Agregar Usuario" }}
       </button>
       <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">
         Cerrar
@@ -116,11 +69,8 @@
 </template>
 
 <script>
-import Proveedor from "../components/AgregarProveedor.vue"
+
 export default {
-  components: {
-    Proveedor,
-  },
   data() {
     return {
       searchQuery: "",
@@ -130,17 +80,15 @@ export default {
       editIndex: null,
       itemsPerPage: "",
       salto: false,
-      productoForm: {
-        codigo: "",
-        descripcion: "",
-        categoria: "",
-        stockMax: "",
-        stockMin: "",
-        stock: "",
-        preciounitario: "",
-        preciomayorista: "",
-        preciodescuento: "",
-        fecha: "",
+      usuarioForm: {
+        nombre: "",
+        apellido: "",
+        nombreUsuario: "",
+        correo: "",
+        telefono: "",
+        direccion: "",
+        contra: "",
+        confirmContra: "",
       },
       categorias: [
         { nombre: 'Videojuegos' },
@@ -186,10 +134,9 @@ export default {
     },
   },
 
-
-
   methods: {
     openModal() {
+      console.log(this.datosUsuario);
       this.isModalOpen = true;
     },
     closeModal() {
@@ -204,7 +151,7 @@ export default {
       this.clearForm();
     },
     clearForm() {
-      this.productoForm = {
+      this.usuarioForm = {
         codigo: "",
         descripcion: "",
         categoria: "",
@@ -217,18 +164,18 @@ export default {
       this.isEditing = false;
       this.editIndex = null;
     },
-    guardarProducto() {
+    guardarUsuario() {
 
       if (this.isEditing) {
-        this.productos[this.editIndex] = { ...this.productoForm };
+        this.usuarios[this.editIndex] = { ...this.usuarioForm };
       } else {
-        this.productos.push({ ...this.productoForm });
+        this.usuarios.push({ ...this.usuarioForm });
       }
       this.closeModal();
 
     },
-    editProducto(index) {
-      this.productoForm = { ...this.productos[index] };
+    editUsuario(index) {
+      this.usuarioForm = { ...this.usuarios[index] };
       this.isEditing = true;
       this.editIndex = index;
       this.openModal();
@@ -265,7 +212,7 @@ export default {
   border-radius: 4px;
 }
 
-#modal-producto {
+#modal-usuario {
   max-width: 60%;
   min-width: 500px;
   justify-content: center;
@@ -276,7 +223,7 @@ export default {
   margin-top: 0;
 }
 
-#AddProductoModal,
+#AddUsuarioModal,
 #BtnCerrar {
   width: 80%;
 }
@@ -300,6 +247,13 @@ export default {
 .form-group label {
   display: flexbox;
   margin-bottom: 8px;
+}
+
+.form-group-select{
+  min-width: 80%;
+  display: flexbox;
+  flex-direction: row;
+  margin-bottom: 5px;
 }
 
 .form-group input {
@@ -365,14 +319,14 @@ export default {
   color: white;
 }
 
-/* Botón registrar producto */
-#registrar-producto {
+/* Botón registrar usuario */
+#registrar-usuario {
   background-color: rgb(253, 253, 56);
   margin-left: 30px;
   height: 50px;
 }
 
-#registrar-producto:hover {
+#registrar-usuario:hover {
   background-color: rgb(228, 228, 48);
   transform: scale(1.05);
   transition: all 0.3s ease;

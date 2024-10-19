@@ -85,7 +85,7 @@ export default {
     },
     mounted() {
         // Llamar a la API cuando el componente se monte
-        this.fetchUserProfile();
+        //this.fetchUserProfile();
     }
 };
 </script>
