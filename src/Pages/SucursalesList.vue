@@ -107,8 +107,8 @@ export default {
   },
   data() {
     return {
-      id_usuario: 0,
-      id_empresa: 10, //esto es provisional, cuando se cree el controller empresa el sistema sera capaz de reconocer automaitcamente a que empresa pertenece cada usuario
+      id_usuario: 1,
+      id_empresa: 11, //esto es provisional, cuando se cree el controller empresa el sistema sera capaz de reconocer automaitcamente a que empresa pertenece cada usuario
       searchQuery: '', // Almacena el texto de búsqueda
       itemsPerPage: "", // Valor por defecto para mostrar todos los registros
       isModalOpen: false,
@@ -169,7 +169,6 @@ export default {
    async guardarSucursal() {
     let response;
       if (this.isEditing) {
-
         try {
            response = await this.patchSucursal(this.editIndex, this.sucursalForm);
 
@@ -207,7 +206,13 @@ export default {
       this.editIndex = index;
       this.sucursalForm = { ...this.sucursales[index] };
     },
-    deleteSucursal(index) {
+   async deleteSucursal(index) {
+      let response;
+      try {
+        response = await this.desactivarSucursal(index);
+      } catch (error) {
+        alert( new Error(response));
+      }
       this.sucursales.splice(index, 1);
     },
     generateRows() {
@@ -240,6 +245,7 @@ export default {
 
         const data = await response.json();
         this.id_usuario = data[0].id_usuario;
+        this.fetchSucursal();
 
     } catch (error) {
         console.error('Error al obtener usuario:', error); // Manejo de errores
@@ -247,14 +253,16 @@ export default {
 },
 async fetchSucursal() {
     try {
+      console.log(this.id_usuario);
         const response = await fetch(`http://localhost:3000/api/sucursales/usuario/${this.id_usuario}`);
+        
         if (!response.ok) {
             throw new Error(`Error: ${response.status}`);
         }
 
         const data = await response.json();
         this.sucursales = data;
-       // console.log(data);
+       console.log(response);
         
 
     } catch (error) {
@@ -264,6 +272,30 @@ async fetchSucursal() {
 async patchSucursal(index, datosActualizados){
   try {
     const respuesta = await fetch(`http://localhost:3000/api/sucursales/actualizar-sucursal/${this.sucursales[index].id_sucursal}`,
+    {
+      method: 'PATCH',
+      headers: {
+      'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(datosActualizados)
+    });
+
+    if (!respuesta.ok){
+      throw new Error(`No se pudo actualizar: ${respuesta.statusText}`);
+    }
+
+    else return respuesta.ok;
+  } catch (error) {
+    throw new Error(`Ocurrio un error: ${error}`);
+  }
+},
+
+async desactivarSucursal(index){
+  const datosActualizados = {
+    estado: false
+  };
+  try {
+    const respuesta = await fetch(`http://localhost:3000/api/sucursales/desactivar-sucursal/${this.sucursales[index].id_sucursal}`,
     {
       method: 'PATCH',
       headers: {
@@ -315,7 +347,7 @@ async postSucursal(datosNuevos){
     document.title = "Sucursales";
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
     this.fetchUsuario();
-    this.fetchSucursal();
+    
   }
 };
 </script>
