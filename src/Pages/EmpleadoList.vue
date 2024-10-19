@@ -48,7 +48,7 @@
             <td>{{ index + 1 }}</td>
             <td>{{ empleado.nombre }}</td>
             <td>{{ empleado.apellido }}</td>
-            <td>{{ empleado.nombreUsuario }}</td>
+            <td>{{ empleado.nombre_usuario }}</td>
             <td>{{ empleado.telefono }}</td>
             <td>{{ empleado.correo }}</td>
             <td>{{ empleado.rol }}</td>
@@ -85,7 +85,7 @@
 
           <div class="form-group">
             <label>Nombre de Usuario:</label>
-            <input v-model="usuarioForm.nombreUsuario" type="text" required />
+            <input v-model="usuarioForm.nombre_usuario" type="text" required />
           </div>
           
 
@@ -111,7 +111,7 @@
 
           <div class="form-group">
             <label for="sucursal">Selecciona sucursal:</label>
-            <select class="form-select" id="sucursal" name="sucursal">
+            <select class="form-select" id="sucursal" name="sucursal" value="nada">
             </select>
           </div>
 
@@ -160,22 +160,14 @@ export default {
       usuarioForm: {
         nombre: "",
         apellido: "",
-        nombreUsuario: "",
+        nombre_usuario: "",
         correo: "",
         telefono: "",
         direccion: "",
         sucursal: "",
-        rol: ""
+        rol: "hola"
       },
       empleados: [
-        { nombre: 'Juan', 
-        apellido: 'Villegas', 
-        nombreUsuario: 'Juvil', 
-        correo: 'junavillega@gmail.com', 
-        rol: 'Cajero', 
-        telefono: '9875875875', 
-        direccion: 'mi casita',
-        sucursal: "norte"},
       ]
     };
   },
@@ -186,15 +178,16 @@ export default {
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
-      try {
-        this.sucursales = await solicitudes.fetchRegistros(
+      
+      this.sucursales = await solicitudes.fetchRegistros(
           `/sucursales/empresa/${this.id_usuario}`
         );
 
-      } catch (error) {
-        console.log(error); //modal error
-        throw error;
-      }
+       this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`); 
+
+      
+
+      
     } catch (error) {
       console.log(error); //modal error pendiente
     }
@@ -205,7 +198,7 @@ export default {
       return this.empleados.filter(empleado =>
         empleado.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         empleado.apellido.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        empleado.nombreUsuario.toLowerCase().includes(this.searchQuery.toLowerCase())
+        empleado.nombre_usuario.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
     paginatedEmpleados() {
@@ -229,7 +222,7 @@ export default {
       this.usuarioForm = {
         nombre: "",
         apellido: "",
-        nombreUsuario: "",
+        nombre_usuario: "",
         correo: "",
         telefono: "",
         direccion: "",
