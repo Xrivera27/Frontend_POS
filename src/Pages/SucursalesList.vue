@@ -98,6 +98,10 @@ import ExportButton from '../components/ExportButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
+// importando solicitudes
+import solicitudes from '../../services/solicitudes.js';
+
+
 export default {
   components: {
     ProfileButton,
@@ -235,22 +239,6 @@ export default {
       document.getElementsByTagName('head')[0].appendChild(link);
     },
     
-    async fetchUsuario() {
-    try {
-        const response = await fetch('http://localhost:3000/api/sesion-user');
-
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        this.id_usuario = data[0].id_usuario;
-        this.fetchSucursal();
-
-    } catch (error) {
-        console.error('Error al obtener usuario:', error); // Manejo de errores
-    }
-},
 async fetchSucursal() {
     try {
       console.log(this.id_usuario);
@@ -341,12 +329,21 @@ async postSucursal(datosNuevos){
       this.generateRows();
     }
   },
-  mounted() {
+  async mounted() {
     // Genera las filas al cargar el componente
+    console.log('entro aqui');
     this.generateRows();
     document.title = "Sucursales";
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
-    this.fetchUsuario();
+   
+    // this.fetchUsuario();
+   try {
+    this.id_usuario = await solicitudes.solicitarUsuario('/sesion-user');
+  
+   } catch (error) {
+    console.log(error); //modal error pendiente
+   }
+    
     
   }
 };
