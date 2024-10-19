@@ -212,8 +212,10 @@ export default {
             parametros,
             this.sucursalForm
           );
-
+          
+          console.log(response);
           if (response == true) {
+            console.log('entro aqui');
             Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
           } else alert(response);
         } catch (error) {
@@ -221,14 +223,18 @@ export default {
         }
       } else {
         //const respuesta = await fetch(`http://localhost:3000/api/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`,
-        parametros = `/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`;
+        parametros = `/sucursales/crear-sucursal/${this.id_usuario}`;
         try {
           response = await solicitudes.postRegistro(
             parametros,
             this.sucursalForm
           );
+
+          console.log(`response = ${response}`);
           if (response == true) {
+            console.log(`entro aca para agregar sucursales ${this.sucursalForm.nombre_administrativo } `);
             this.sucursales.push({ ...this.sucursalForm });
+            console.log(this.sucursales[this.sucursales.length-1]);
           } else {
             throw response;
           }

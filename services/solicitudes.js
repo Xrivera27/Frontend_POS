@@ -94,59 +94,16 @@
             },
             body: JSON.stringify(datosNuevos)
           });
-      
+          console.log(respuesta);
+
           if (!respuesta.ok){
-            throw new Error(`No se pudo actualizar: ${respuesta.statusText}`);
+            throw new Error(`No se pudo crear: ${respuesta.statusText}`);
           }
       
           else return respuesta.ok;
+          
         } catch (error) {
           throw new Error(`Ocurrio un error: ${error.message}`);
         }
       }
   }
-
-// async desactivarSucursal(index){
-//   const datosActualizados = {
-//     estado: false
-//   };
-//   try {
-//     const respuesta = await fetch(`http://localhost:3000/api/sucursales/desactivar-sucursal/${this.sucursales[index].id_sucursal}`,
-//     {
-//       method: 'PATCH',
-//       headers: {
-//       'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify(datosActualizados)
-//     });
-
-//     if (!respuesta.ok){
-//       throw new Error(`No se pudo actualizar: ${respuesta.statusText}`);
-//     }
-
-//     else return respuesta.ok;
-//   } catch (error) {
-//     throw new Error(`Ocurrio un error: ${error.statusText}`);
-//   }
-// },
-
-// async postSucursal(datosNuevos){
-//   try {
-//     const respuesta = await fetch(`http://localhost:3000/api/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`,
-//     {
-//       method: 'POST',
-//       headers: {
-//       'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify(datosNuevos)
-//     });
-
-//     if (!respuesta.ok){
-//       throw new Error(`No se pudo actualizar: ${respuesta.statusText}`);
-//     }
-
-//     else return respuesta.ok;
-//   } catch (error) {
-//     throw new Error(`Ocurrio un error: ${error.message}`);
-//   }
-// }
