@@ -68,7 +68,7 @@ export default {
         },
         fetchUserProfile() {
     // Llamada a la API para obtener el perfil del usuario
-    axios.get('http://localhost:3000/api/perfil', {
+    axios.get('http://localhost:3000/api/', {
         headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}` // Incluye el token de autenticación
         }
