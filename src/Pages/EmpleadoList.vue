@@ -20,8 +20,8 @@
 
       <div class="registros">
         <span>
-          <select  class="custom-select">
-            <option v-for="(sucursal, index) in this.sucursales" :key="index" value="{{ sucursal.nombre_administrativo }}">{{ sucursal.nombre_administrativo }}</option>
+          <select  class="custom-select" >
+            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{ sucursal.nombre_administrativo }}</option>
           </select> 
         </span>
       </div>
@@ -51,12 +51,12 @@
             <td>{{ empleado.nombre_usuario }}</td>
             <td>{{ empleado.telefono }}</td>
             <td>{{ empleado.correo }}</td>
-            <td>{{ empleado.rol }}</td>
+            <td>{{ getRol(empleado.id_rol) }}</td>
 
             <td>
               <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(index)"><i
                   class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteEmpleado(index)"><b><i
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteUsuariol(index)"><b><i
                     class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
@@ -87,18 +87,27 @@
             <label>Nombre de Usuario:</label>
             <input v-model="usuarioForm.nombre_usuario" type="text" required />
           </div>
+          <div class="form-group">
+            <label>Correo:</label>
+            <input v-model="usuarioForm.correo" type="text" required />
+          </div>
           
 
           <div class="form-group">
-            <label for="sucursal">Selecciona rol:</label>
-            <select class="form-select" id="sucursal" name="sucursal" :value="usuarioForm.rol">
+            <label for="rol">Selecciona rol:</label>
+            <select class="form-select" id="rol" name="rol" v-model="usuarioForm.rol">
+              <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option>
             </select>
           </div>
         </div>
         <div class="contenedor contenedor-derecho">
           <div class="form-group">
-            <label>Correo:</label>
-            <input v-model="usuarioForm.correo" type="text" required />
+            <label>Contraseña:</label>
+            <input v-model="usuarioForm.password" type="password" required />
+          </div>
+          <div class="form-group">
+            <label>Confirmar contraseña:</label>
+            <input v-model="usuarioForm.confirmPassword" type="password" required />
           </div>
           <div class="form-group">
             <label>Telefono:</label>
@@ -111,25 +120,21 @@
 
           <div class="form-group">
             <label for="sucursal">Selecciona sucursal:</label>
-            <select class="form-select" id="sucursal" name="sucursal" value="nada">
+            <select class="form-select" id="sucursal" name="sucursal"  v-model="usuarioForm.sucursal" >
+              <option  v-for="(sucursal, index) in sucursales" :key="index" :value="sucursal.id_sucursal">{{ sucursal.nombre_administrativo  }}</option>
             </select>
           </div>
 
         </div>
       </div>
       
-      <button id="AddUsuarioModal" class="btn btn-primary" @click="guardarEmpleado">
-        {{ isEditing ? "Guardar Cambios" : "Agregar Usuario" }}
-      </button>
-      <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">
-        Cerrar
-      </button>
+      <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Usuario' " @click="guardarUsuario"></btnGuardarModal>
+      <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
     </div>
   </div>
 
   </div>
-  <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Usuario' " @click="guardarEmpleado"></btnGuardarModal>
-  <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
+ 
 </template>
 
 <script>
@@ -139,6 +144,7 @@ import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
+import validarCamposService from '../../services/validarCampos.js';
 
 export default {
   components: {
@@ -157,7 +163,9 @@ export default {
       editIndex: null,
       itemsPerPage: "",
       sucursales: [],
+      roles: [],
       usuarioForm: {
+        id_usuario: 0,
         nombre: "",
         apellido: "",
         nombre_usuario: "",
@@ -165,7 +173,9 @@ export default {
         telefono: "",
         direccion: "",
         sucursal: "",
-        rol: "hola"
+        password: '',
+        confirmPassword: '',
+        rol: ''
       },
       empleados: [
       ]
@@ -184,6 +194,7 @@ export default {
         );
 
        this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`); 
+       this.roles = await solicitudes.fetchRegistros('/roles');
 
       
 
@@ -195,7 +206,8 @@ export default {
   computed: {
     filteredEmpleados() {
       // Filtra los empleados basados en el texto de búsqueda
-      return this.empleados.filter(empleado =>
+      return this.empleados.filter(empleado => empleado.id_rol !== 4)
+      .filter(empleado =>
         empleado.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         empleado.apellido.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         empleado.nombre_usuario.toLowerCase().includes(this.searchQuery.toLowerCase())
@@ -220,6 +232,7 @@ export default {
     },
     clearForm() {
       this.usuarioForm = {
+        id_usuario: '',
         nombre: "",
         apellido: "",
         nombre_usuario: "",
@@ -227,20 +240,94 @@ export default {
         telefono: "",
         direccion: "",
         sucursal: "",
-        rol: ""
+        password: '',
+        confirmPassword: '',
+        rol: ''
       };
 
       this.isEditing = false;
       this.editIndex = null;
     },
-    guardarEmpleado() {
+
+    getRol(id_rol){
+      const rol = this.roles.find(rol => rol.id_rol === id_rol);
+      return rol ? rol.cargo : 'Desconocido'; 
+    },
+
+    async guardarUsuario() {
+     let response;
+      let parametros;
+      if(!this.validarCampos(this.usuarioForm)){
+          alert('Hay campos vacios');
+          return;
+        }
       if (this.isEditing) {
-        this.empleados[this.editIndex] = { ...this.usuarioForm };
+        try {
+
+          parametros = `/usuario/actualizar/${
+            this.empleados[this.editIndex].id_usuario
+          }`;
+          response = await solicitudes.patchRegistro(
+            parametros,
+            this.limpiarForm(this.usuarioForm)
+          );
+          
+          if (response == true) {
+
+            Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
+          } else alert(response);
+        } catch (error) {
+          alert(error);
+        }
+
       } else {
-        this.empleados.push({ ...this.usuarioForm });
+        
+       // const respuesta = await fetch(`http://localhost:3000/api/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`,
+        parametros = `/usuario/crear`;
+        try {
+          response = await solicitudes.postRegistro(
+            parametros,
+            this.limpiarForm(this.usuarioForm)
+          );
+
+          if (response == true) {
+
+            this.empleados.push({ ...this.usuarioForm });
+
+          } else {
+            throw response;
+          }
+        } catch (error) {
+          alert(error);
+        }
+        
       }
       this.closeModal();
     },
+
+    async deleteUsuariol(index) {
+      let response;
+
+      const datosActualizados = {
+        estado: false,
+      };
+
+      const parametros = `/usuario/desactivar/${this.empleados[index].id_usuario}`;
+
+      try {
+        response = await solicitudes.desactivarRegistro(
+          parametros,
+          datosActualizados
+        );
+
+        if (response == true) {
+          this.empleados.splice(index, 1);
+        }
+      } catch (error) {
+        alert(new Error(response));
+      }
+    },
+
     editEmpleado(index) {
       this.usuarioForm = { ...this.empleados[index] };
       this.isEditing = true;
@@ -252,6 +339,39 @@ export default {
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
+    },
+
+    validarCampos(formulario){
+
+      if(!validarCamposService.validarPass(this.usuarioForm.password, this.usuarioForm.confirmPassword)){
+          alert('Contraseña incorrecta');
+          return false;
+        }
+
+      for (const atributo in formulario){
+        if ( !validarCamposService.validarEmpty(formulario[atributo]) && atributo != 'id_usuario'){
+          alert(atributo);
+          return false;
+        }
+      }
+
+      return true;
+
+    },
+
+    limpiarForm(formulario){
+      const formLimpio = {
+        nombre: formulario.nombre,
+        apellido: formulario.apellido,
+        nombre_usuario: formulario.nombre_usuario,
+        correo: formulario.correo,
+        telefono: formulario.telefono,
+        direccion: formulario.direccion,
+        id_sucursal: formulario.sucursal,
+        contraseña: formulario.password,
+        id_rol: formulario.rol,
+      }
+      return formLimpio;
     },
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
