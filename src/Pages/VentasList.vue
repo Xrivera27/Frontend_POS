@@ -10,10 +10,11 @@
       <form class="inputs-container" @submit.prevent="agregarProducto" autocomplete="off">
 
         <div class="input-container input-superior">
+
           <div class="input-container">
             <label for="codigo-producto" class="label-input">Codigo del producto:</label>
             <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
-              :disabled="isEditing" placeholder="Ingresar codigo" required @input="colocarNombrePorCodigo" />
+              :disabled="isEditing" placeholder="Ingresar codigo" required />
           </div>
 
           <div class="input-container">
@@ -26,6 +27,7 @@
               </option>
             </datalist>
           </div>
+
         </div>
 
         <div class="input-container-exterior">
@@ -34,6 +36,11 @@
             <label for="cantidad" class="label-input">Cantidad:</label>
             <input name="cantidad" class="campo campo-cantidad" type="number" tabindex="2"
               placeholder="Ingresar cantidad" ref="cantidadRef" v-model="addQuantity" />
+          </div>
+
+          <div class="input-container">
+            <label class="label-input">Descripción:</label>
+            <input type="text" class="campo" v-model="addDescription" :disabled="isEditing" placeholder="Descripción" />
           </div>
 
           <div class="input-container">
@@ -214,6 +221,7 @@ export default {
       addQuery: "",
       addQuantity: "",
       addName: "",
+      addDescription: "",
       payModal: false,
       subtotal: "",
       discounts: "",
@@ -231,6 +239,7 @@ export default {
         {
           codigo: "1",
           nombre: "Leche",
+          descripcion: "Leche entera de 1 litro",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 25,
           descuento: 0,
@@ -238,6 +247,7 @@ export default {
         {
           codigo: "2",
           nombre: "Pan",
+          descripcion: "Pan fresco",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 15,
           descuento: 0,
@@ -245,6 +255,7 @@ export default {
         {
           codigo: "3",
           nombre: "Arroz",
+          descripcion: "Arroz libra",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 12,
           descuento: 0,
@@ -252,6 +263,7 @@ export default {
         {
           codigo: "4",
           nombre: "Aceite",
+          descripcion: "Bolsita de aceita",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 30,
           descuento: 0,
@@ -259,6 +271,7 @@ export default {
         {
           codigo: "5",
           nombre: "Huevos",
+          descripcion: "Carton de 12",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 18,
           descuento: 0,
@@ -266,6 +279,7 @@ export default {
         {
           codigo: "6",
           nombre: "Azúcar",
+          descripcion: "Bolsa de 4 lbs",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 10,
           descuento: 0,
@@ -273,6 +287,7 @@ export default {
         {
           codigo: "7",
           nombre: "Sal",
+          descripcion: "Bolsa pequeña",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 5,
           descuento: 0,
@@ -280,6 +295,7 @@ export default {
         {
           codigo: "8",
           nombre: "Café",
+          descripcion: "Bolsa de 1 lb",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 50,
           descuento: 0,
@@ -287,6 +303,7 @@ export default {
         {
           codigo: "9",
           nombre: "Harina",
+          descripcion: "Bolsa de 5 lbs",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 20,
           descuento: 0,
@@ -294,6 +311,7 @@ export default {
         {
           codigo: "10",
           nombre: "Pasta",
+          descripcion: "Bolsa de 1 lb",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 14,
           descuento: 0,
@@ -301,6 +319,7 @@ export default {
         {
           codigo: "11",
           nombre: "Mantequilla",
+          descripcion: "Mantequilla leyde de 1 lb",
           cantidad: 0, // La cantidad será introducida por el usuario
           precioUnitario: 22,
           descuento: 0,
@@ -310,6 +329,45 @@ export default {
       productosLista: [],
     };
   },
+
+  watch: {
+    addQuery(newQuery) {
+      const productoPorCodigo = this.productos.find(producto => producto.codigo === newQuery);
+      if (productoPorCodigo) {
+        this.addName = productoPorCodigo.nombre;
+        this.addDescription = productoPorCodigo.descripcion; // Actualiza la descripción
+      } else {
+        this.addName = '';
+        this.addDescription = ''; // Limpia la descripción si no se encuentra
+      }
+    },
+    addName(newName) {
+      const productoPorNombre = this.productos.find(producto => producto.nombre === newName);
+      if (productoPorNombre) {
+        this.addQuery = productoPorNombre.codigo;
+        this.addDescription = productoPorNombre.descripcion; // Actualiza la descripción
+      } else {
+        this.addQuery = '';
+        this.addDescription = ''; // Limpia la descripción si no se encuentra
+      }
+    },
+    addDescription(newDescription) {
+      const productosCoincidentes = this.productos.filter(producto =>
+        producto.descripcion.toLowerCase().includes(newDescription.toLowerCase())
+      );
+
+      if (productosCoincidentes.length > 0) {
+        // Si hay coincidencias, toma el primero 
+        const productoPorDescripcion = productosCoincidentes[0];
+        this.addQuery = productoPorDescripcion.codigo; // Actualiza el código 
+        this.addName = productoPorDescripcion.nombre; // Actualiza el nombre 
+      } else {
+        this.addQuery = ''; // Limpia el campo de código si no se encuentra 
+        this.addName = ''; // Limpia el campo de nombre si no se encuentra 
+      }
+    },
+  },
+
   computed: {
     calcularTotal() {
       let totalActual = 0;
@@ -391,23 +449,44 @@ export default {
 
     },
 
-    /* colocarCodigo() {
-       const productoSeleccionado = this.productos.find(producto => producto.codigo === this.addName);
-       // Si existe, asignamos el código al campo correspondiente
-       if (productoSeleccionado) {
-         this.addQuery = productoSeleccionado.codigo;
-         this.addName = productoSeleccionado.nombre;
-       } else {
-         this.addQuery = ''; // Si no encuentra coincidencia, vacía el código
-       }
-     }, */
-    colocarNombrePorCodigo() {
-      const productoSeleccionado = this.productos.find(producto => producto.codigo === this.addQuery);
-      // Si existe, asignamos el nombre al campo correspondiente
-      if (productoSeleccionado) {
-        this.addName = productoSeleccionado.nombre;
-      } else {
-        this.addName = ''; // Si no encuentra coincidencia, vacía el nombre
+    actualizarCampos() {
+      // Si el campo de código está siendo editado
+      if (this.addQuery) {
+        const productoPorCodigo = this.productos.find(producto => producto.codigo === this.addQuery);
+        if (productoPorCodigo) {
+          this.addName = productoPorCodigo.nombre; // Actualiza el nombre
+          this.addDescription = productoPorCodigo.descripcion; // Actualiza la descripción
+        } else {
+          this.addName = ''; // Limpia el campo de nombre si no se encuentra
+          this.addDescription = ''; // Limpia la descripción si no se encuentra
+        }
+      }
+      // Si el campo de nombre está siendo editado
+      else if (this.addName) {
+        const productoPorNombre = this.productos.find(producto => producto.nombre === this.addName);
+        if (productoPorNombre) {
+          this.addQuery = productoPorNombre.codigo; // Actualiza el código
+          this.addDescription = productoPorNombre.descripcion; // Actualiza la descripción
+        } else {
+          this.addQuery = ''; // Limpia el campo de código si no se encuentra
+          this.addDescription = ''; // Limpia la descripción si no se encuentra
+        }
+      }
+      // Si el campo de descripción está siendo editado
+      else if (this.addDescription) {
+        const productosCoincidentes = this.productos.filter(producto =>
+          producto.descripcion.toLowerCase().includes(this.addDescription.toLowerCase())
+        );
+
+        if (productosCoincidentes.length > 0) {
+          // Si hay coincidencias, toma el primero
+          const productoPorDescripcion = productosCoincidentes[0];
+          this.addQuery = productoPorDescripcion.codigo; // Actualiza el código
+          this.addName = productoPorDescripcion.nombre; // Actualiza el nombre
+        } else {
+          this.addQuery = ''; // Limpia el campo de código si no se encuentra
+          this.addName = ''; // Limpia el campo de nombre si no se encuentra
+        }
       }
     },
 
