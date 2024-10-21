@@ -98,10 +98,14 @@ export default {
 
     },
     mounted() {
+
     this.fetchUserProfile();  // Llama al método cuando el componente se monta
 }
 
-};
+        // Llamar a la API cuando el componente se monte
+        //this.fetchUserProfile();
+    }
+
 </script>
 
 

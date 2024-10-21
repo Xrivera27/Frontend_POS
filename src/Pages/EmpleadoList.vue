@@ -10,23 +10,22 @@
       <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
         Usuario</button>
 
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select> registros
-        </span>
-      </div>
+
+      
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar empleado..." />
       </div>
+
+      <div class="registros">
+        <span>
+          <select  class="custom-select" >
+            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{ sucursal.nombre_administrativo }}</option>
+          </select> 
+        </span>
+      </div>
+
     </div>
     <div class="table-container">
       <table class="table">
@@ -36,11 +35,11 @@
             <th>Nombre</th>
             <th>Apellido</th>
             <th>Nombre Usuario</th>
-            <th>Contraseña</th>
+            <th>Telefono</th>
             <th>Email</th>
             <th>Rol</th>
-            <th>Telefono</th>
-            <th>Estado</th>
+
+
             <th>Acciones</th>
           </tr>
         </thead>
@@ -49,171 +48,169 @@
             <td>{{ index + 1 }}</td>
             <td>{{ empleado.nombre }}</td>
             <td>{{ empleado.apellido }}</td>
-            <td>{{ empleado.nombreusuario }}</td>
-            <td>{{ empleado.contraseña }}</td>
-            <td>{{ empleado.email }}</td>
-            <td>{{ empleado.rol }}</td>
+            <td>{{ empleado.nombre_usuario }}</td>
             <td>{{ empleado.telefono }}</td>
-            <td>{{ empleado.estado }}</td>
+            <td>{{ empleado.correo }}</td>
+            <td>{{ getRol(empleado.id_rol) }}</td>
+
             <td>
               <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(index)"><i
                   class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteEmpleado(index)"><b><i
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteUsuariol(index)"><b><i
                     class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-
+    
     <!-- Modal para agregar o editar empleados -->
     <div v-if="isModalOpen" class="modal">
-      <div class="modal-content">
-        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Empleado' : 'Agregar Empleado' }}</h2>
+    <div id="modal-usuario" class="modal-content">
+      <h2 class="h2-modal-content">
+        {{ isEditing ? "Editar Usuario" : "Agregar Usuario" }}
+      </h2>
 
-        <div class="form-group">
-          <label>Nombre:</label>
-          <input v-model="empleadoForm.nombre" type="text" required>
-        </div>
+      <div class="contenedor-principal">
+        <div class="contenedor contenedor-izquierdo">
+          <div class="form-group">
+            <label>Nombre:</label>
+            <input v-model="usuarioForm.nombre" type="text" required />
+          </div>
 
-        <div class="form-group">
-          <label>Apellido:</label>
-          <input v-model="empleadoForm.apellido" type="text" required>
-        </div>
+          <div class="form-group">
+            <label>Apellido:</label>
+            <input v-model="usuarioForm.apellido" type="text" required />
+          </div>
 
-        <div class="form-group">
-          <label>Usuario:</label>
-          <input v-model="empleadoForm.nombreusuario" type="text" required>
-        </div>
+          <div class="form-group">
+            <label>Nombre de Usuario:</label>
+            <input v-model="usuarioForm.nombre_usuario" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Correo:</label>
+            <input v-model="usuarioForm.correo" type="text" required />
+          </div>
+          
 
-        <div class="form-group password-group">
-          <label>Contraseña:</label>
-          <div class="password-wrapper">
-            <input :type="showPassword ? 'text' : 'password'" v-model="password" required />
-            <i :class="showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'" class="toggle-password"
-              @click="togglePasswordVisibility"></i>
+          <div class="form-group">
+            <label for="rol">Selecciona rol:</label>
+            <select class="form-select" id="rol" name="rol" v-model="usuarioForm.rol">
+              <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option>
+            </select>
           </div>
         </div>
+        <div class="contenedor contenedor-derecho">
+          <div class="form-group">
+            <label>Contraseña:</label>
+            <input v-model="usuarioForm.password" type="password" required />
+          </div>
+          <div class="form-group">
+            <label>Confirmar contraseña:</label>
+            <input v-model="usuarioForm.confirmPassword" type="password" required />
+          </div>
+          <div class="form-group">
+            <label>Telefono:</label>
+            <input v-model="usuarioForm.telefono" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Direccion:</label>
+            <input v-model="usuarioForm.direccion" type="text" required />
+          </div>
 
+          <div class="form-group">
+            <label for="sucursal">Selecciona sucursal:</label>
+            <select class="form-select" id="sucursal" name="sucursal"  v-model="usuarioForm.sucursal" >
+              <option  v-for="(sucursal, index) in sucursales" :key="index" :value="sucursal.id_sucursal">{{ sucursal.nombre_administrativo  }}</option>
+            </select>
+          </div>
 
-        <div class="form-group">
-          <label>Email:</label>
-          <input v-model="empleadoForm.email" type="text" required>
         </div>
-
-        <div class="form-group">
-          <label>Rol:</label>
-          <select v-model="empleadoForm.rol" required style="width: 30%; height: 35px; font-size: 16px; padding: 5px;">
-            <option value="Administrador">Administrador</option>
-            <option value="Cajero">Cajero</option>
-            <option value="Gerente">Gerente</option>
-          </select>
-        </div>
-
-        <div id="form-tel" class="form-group">
-          <label>Telefono:</label>
-          <input v-model="empleadoForm.telefono" type="text" required>
-        </div>
-
-        <div class="form-group">
-          <label>Estado:</label>
-          <select v-model="empleadoForm.estado" required
-            style="width: 30%; height: 35px; font-size: 16px; padding: 5px;">
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
-        </div>
-
-        <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Usuario' " @click="guardarEmpleado"></btnGuardarModal>
-        <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
-
       </div>
+      
+      <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Usuario' " @click="guardarUsuario"></btnGuardarModal>
+      <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
     </div>
   </div>
+
+  </div>
+ 
 </template>
 
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
+
+// importando solicitudes
+import solicitudes from "../../services/solicitudes.js";
+import validarCamposService from '../../services/validarCampos.js';
+
 export default {
   components: {
     ProfileButton,
     btnGuardarModal,
-    btnCerrarModal
+    btnCerrarModal,
+
   },
   data() {
     return {
-      searchQuery: '', // Almacena el texto de búsqueda
+      searchQuery: '',
+      id_usuario: 0, // Almacena el texto de búsqueda
       isModalOpen: false,
       isEditing: false,
       showPassword: false,
       editIndex: null,
       itemsPerPage: "",
-      empleadoForm: {
-        nombre: '',
-        apellido: '',
-        nombreusuario: '',
-        contraseña: '',
-        email: '',
-        rol: '',
-        telefono: '',
-        estado: '',
+      sucursales: [],
+      roles: [],
+      usuarioForm: {
+        id_usuario: 0,
+        nombre: "",
+        apellido: "",
+        nombre_usuario: "",
+        correo: "",
+        telefono: "",
+        direccion: "",
+        sucursal: "",
+        password: '',
+        confirmPassword: '',
+        rol: ''
       },
       empleados: [
-        { nombre: 'Juan', apellido: 'Villegas', nombreusuario: 'Juvil', contraseña: '*****', email: 'junavillega@gmail.com', rol: 'Cajero', telefono: '9875875875', estado: 'Activo' },
-        { nombre: 'María', apellido: 'Pérez', nombreusuario: 'Maper', contraseña: '*****', email: 'mariaperez@gmail.com', rol: 'Cajero', telefono: '9876543210', estado: 'Activo' },
-        { nombre: 'Carlos', apellido: 'Ramírez', nombreusuario: 'Cram', contraseña: '*****', email: 'carlosramirez@gmail.com', rol: 'Cajero', telefono: '9876543211', estado: 'Activo' },
-        { nombre: 'Ana', apellido: 'Gómez', nombreusuario: 'Anago', contraseña: '*****', email: 'anagomez@gmail.com', rol: 'Cajero', telefono: '9876543212', estado: 'Activo' },
-        { nombre: 'Luis', apellido: 'Fernández', nombreusuario: 'Lufe', contraseña: '*****', email: 'luisfernandez@gmail.com', rol: 'Cajero', telefono: '9876543213', estado: 'Activo' },
-        { nombre: 'Pedro', apellido: 'Sánchez', nombreusuario: 'Pesan', contraseña: '*****', email: 'pedrosanchez@gmail.com', rol: 'Cajero', telefono: '9876543214', estado: 'Activo' },
-        { nombre: 'Claudia', apellido: 'Rodríguez', nombreusuario: 'Clrod', contraseña: '*****', email: 'claudiarodriguez@gmail.com', rol: 'Cajero', telefono: '9876543215', estado: 'Activo' },
-        { nombre: 'Gabriel', apellido: 'López', nombreusuario: 'Galo', contraseña: '*****', email: 'gabriellopez@gmail.com', rol: 'Cajero', telefono: '9876543216', estado: 'Activo' },
-        { nombre: 'Julia', apellido: 'Castillo', nombreusuario: 'Jucas', contraseña: '*****', email: 'juliacastillo@gmail.com', rol: 'Cajero', telefono: '9876543217', estado: 'Activo' },
-        { nombre: 'Andrés', apellido: 'Ríos', nombreusuario: 'Andri', contraseña: '*****', email: 'andresrios@gmail.com', rol: 'Cajero', telefono: '9876543218', estado: 'Activo' },
-        { nombre: 'Sofía', apellido: 'Torres', nombreusuario: 'Sotor', contraseña: '*****', email: 'sofiatorres@gmail.com', rol: 'Cajero', telefono: '9876543219', estado: 'Activo' },
-        { nombre: 'Ricardo', apellido: 'Morales', nombreusuario: 'Rimo', contraseña: '*****', email: 'ricardomorales@gmail.com', rol: 'Cajero', telefono: '9876543220', estado: 'Activo' },
-        { nombre: 'Carolina', apellido: 'Vargas', nombreusuario: 'Cav', contraseña: '*****', email: 'carolinavargas@gmail.com', rol: 'Cajero', telefono: '9876543221', estado: 'Activo' },
-        { nombre: 'Eduardo', apellido: 'Herrera', nombreusuario: 'Edher', contraseña: '*****', email: 'eduardoherrera@gmail.com', rol: 'Cajero', telefono: '9876543222', estado: 'Activo' },
-        { nombre: 'Patricia', apellido: 'Medina', nombreusuario: 'Pamed', contraseña: '*****', email: 'patriciamedina@gmail.com', rol: 'Cajero', telefono: '9876543223', estado: 'Activo' },
-        { nombre: 'Miguel', apellido: 'Ortiz', nombreusuario: 'Miort', contraseña: '*****', email: 'miguelortiz@gmail.com', rol: 'Cajero', telefono: '9876543224', estado: 'Activo' },
-        { nombre: 'Diana', apellido: 'Ruiz', nombreusuario: 'Dirui', contraseña: '*****', email: 'dianaruiz@gmail.com', rol: 'Cajero', telefono: '9876543225', estado: 'Activo' },
-        { nombre: 'Javier', apellido: 'Mendoza', nombreusuario: 'Jame', contraseña: '*****', email: 'javiermendoza@gmail.com', rol: 'Cajero', telefono: '9876543226', estado: 'Activo' },
-        { nombre: 'Gloria', apellido: 'Peña', nombreusuario: 'Glpea', contraseña: '*****', email: 'gloriapena@gmail.com', rol: 'Cajero', telefono: '9876543227', estado: 'Activo' },
-        { nombre: 'Fernando', apellido: 'Castro', nombreusuario: 'Fecas', contraseña: '*****', email: 'fernandocastro@gmail.com', rol: 'Cajero', telefono: '9876543228', estado: 'Activo' },
-
-        { nombre: 'Lucía', apellido: 'Hernández', nombreusuario: 'Luher', contraseña: '*****', email: 'luciahernandez@gmail.com', rol: 'Gerente', telefono: '9876543229', estado: 'Activo' },
-        { nombre: 'Ricardo', apellido: 'Castillo', nombreusuario: 'Ricas', contraseña: '*****', email: 'ricardocastillo@gmail.com', rol: 'Gerente', telefono: '9876543230', estado: 'Activo' },
-        { nombre: 'Gabriela', apellido: 'Fuentes', nombreusuario: 'Gafu', contraseña: '*****', email: 'gabriela@gmail.com', rol: 'Gerente', telefono: '9876543231', estado: 'Activo' },
-        { nombre: 'José', apellido: 'Maldonado', nombreusuario: 'Jomal', contraseña: '*****', email: 'josemaldonado@gmail.com', rol: 'Gerente', telefono: '9876543232', estado: 'Activo' },
-        { nombre: 'Elena', apellido: 'Rivas', nombreusuario: 'Elriv', contraseña: '*****', email: 'elenarivas@gmail.com', rol: 'Gerente', telefono: '9876543233', estado: 'Activo' },
-
-        { nombre: 'Luis', apellido: 'Ortega', nombreusuario: 'Luort', contraseña: '*****', email: 'luisortega@gmail.com', rol: 'Administrador', telefono: '9876543234', estado: 'Activo' },
-        { nombre: 'Patricia', apellido: 'Reyes', nombreusuario: 'Parey', contraseña: '*****', email: 'patriciareyes@gmail.com', rol: 'Administrador', telefono: '9876543235', estado: 'Activo' },
-        { nombre: 'Sofía', apellido: 'Morales', nombreusuario: 'Somor', contraseña: '*****', email: 'sofimorales@gmail.com', rol: 'Administrador', telefono: '9876543236', estado: 'Activo' },
-        { nombre: 'Andrés', apellido: 'Vargas', nombreusuario: 'Andva', contraseña: '*****', email: 'andresvargas@gmail.com', rol: 'Administrador', telefono: '9876543237', estado: 'Activo' },
-        { nombre: 'Lorena', apellido: 'Padilla', nombreusuario: 'Lopa', contraseña: '*****', email: 'lorenapadilla@gmail.com', rol: 'Administrador', telefono: '9876543238', estado: 'Activo' },
-
-        { nombre: 'Felipe', apellido: 'Mena', nombreusuario: 'Feme', contraseña: '*****', email: 'felipemena@gmail.com', rol: 'Gerente', telefono: '9876543239', estado: 'Activo' },
-        { nombre: 'Marcela', apellido: 'Valdez', nombreusuario: 'Mava', contraseña: '*****', email: 'marcelavaldez@gmail.com', rol: 'Gerente', telefono: '9876543240', estado: 'Activo' },
-        { nombre: 'Alberto', apellido: 'López', nombreusuario: 'Alol', contraseña: '*****', email: 'albertolopez@gmail.com', rol: 'Administrador', telefono: '9876543241', estado: 'Activo' },
-        { nombre: 'Raquel', apellido: 'Pineda', nombreusuario: 'Rapi', contraseña: '*****', email: 'raquelpineda@gmail.com', rol: 'Administrador', telefono: '9876543242', estado: 'Activo' },
-        { nombre: 'Mauricio', apellido: 'Cardona', nombreusuario: 'Maca', contraseña: '*****', email: 'mauriciocardona@gmail.com', rol: 'Cajero', telefono: '9876543243', estado: 'Activo' }
       ]
-
     };
   },
-  mounted() {
+  async mounted() {
     document.title = "Usuarios";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    this.changeFavicon('/img/spiderman.ico');
+     // Usar la ruta correcta
+
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+      
+      this.sucursales = await solicitudes.fetchRegistros(
+          `/sucursales/empresa/${this.id_usuario}`
+        );
+
+       this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`); 
+       this.roles = await solicitudes.fetchRegistros('/roles');
+
+      
+
+      
+    } catch (error) {
+      console.log(error); //modal error pendiente
+    }
   },
   computed: {
     filteredEmpleados() {
       // Filtra los empleados basados en el texto de búsqueda
-      return this.empleados.filter(empleado =>
+      return this.empleados.filter(empleado => empleado.id_rol !== 4)
+      .filter(empleado =>
         empleado.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         empleado.apellido.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        empleado.nombreusuario.toLowerCase().includes(this.searchQuery.toLowerCase())
+        empleado.nombre_usuario.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
     paginatedEmpleados() {
@@ -234,29 +231,105 @@ export default {
       this.clearForm();
     },
     clearForm() {
-      this.empleadoForm = {
-        nombre: '',
-        apellido: '',
-        nombreusuario: '',
-        contraseña: '',
-        email: '',
-        rol: '',
-        telefono: '',
-        estado: '',
+      this.usuarioForm = {
+        id_usuario: '',
+        nombre: "",
+        apellido: "",
+        nombre_usuario: "",
+        correo: "",
+        telefono: "",
+        direccion: "",
+        sucursal: "",
+        password: '',
+        confirmPassword: '',
+        rol: ''
       };
+
       this.isEditing = false;
       this.editIndex = null;
     },
-    guardarEmpleado() {
+
+    getRol(id_rol){
+      const rol = this.roles.find(rol => rol.id_rol === id_rol);
+      return rol ? rol.cargo : 'Desconocido'; 
+    },
+
+    async guardarUsuario() {
+     let response;
+      let parametros;
+      if(!this.validarCampos(this.usuarioForm)){
+          alert('Hay campos vacios');
+          return;
+        }
       if (this.isEditing) {
-        this.empleados[this.editIndex] = { ...this.empleadoForm };
+        try {
+
+          parametros = `/usuario/actualizar/${
+            this.empleados[this.editIndex].id_usuario
+          }`;
+          response = await solicitudes.patchRegistro(
+            parametros,
+            this.limpiarForm(this.usuarioForm)
+          );
+          
+          if (response == true) {
+
+            Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
+          } else alert(response);
+        } catch (error) {
+          alert(error);
+        }
+
       } else {
-        this.empleados.push({ ...this.empleadoForm });
+        
+       // const respuesta = await fetch(`http://localhost:3000/api/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`,
+        parametros = `/usuario/crear`;
+        try {
+          response = await solicitudes.postRegistro(
+            parametros,
+            this.limpiarForm(this.usuarioForm)
+          );
+
+          if (response == true) {
+
+            this.empleados.push({ ...this.usuarioForm });
+
+          } else {
+            throw response;
+          }
+        } catch (error) {
+          alert(error);
+        }
+        
       }
       this.closeModal();
     },
+
+    async deleteUsuariol(index) {
+      let response;
+
+      const datosActualizados = {
+        estado: false,
+      };
+
+      const parametros = `/usuario/desactivar/${this.empleados[index].id_usuario}`;
+
+      try {
+        response = await solicitudes.desactivarRegistro(
+          parametros,
+          datosActualizados
+        );
+
+        if (response == true) {
+          this.empleados.splice(index, 1);
+        }
+      } catch (error) {
+        alert(new Error(response));
+      }
+    },
+
     editEmpleado(index) {
-      this.empleadoForm = { ...this.empleados[index] };
+      this.usuarioForm = { ...this.empleados[index] };
       this.isEditing = true;
       this.editIndex = index;
       this.openModal();
@@ -266,6 +339,39 @@ export default {
     },
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
+    },
+
+    validarCampos(formulario){
+
+      if(!validarCamposService.validarPass(this.usuarioForm.password, this.usuarioForm.confirmPassword)){
+          alert('Contraseña incorrecta');
+          return false;
+        }
+
+      for (const atributo in formulario){
+        if ( !validarCamposService.validarEmpty(formulario[atributo]) && atributo != 'id_usuario'){
+          alert(atributo);
+          return false;
+        }
+      }
+
+      return true;
+
+    },
+
+    limpiarForm(formulario){
+      const formLimpio = {
+        nombre: formulario.nombre,
+        apellido: formulario.apellido,
+        nombre_usuario: formulario.nombre_usuario,
+        correo: formulario.correo,
+        telefono: formulario.telefono,
+        direccion: formulario.direccion,
+        id_sucursal: formulario.sucursal,
+        contraseña: formulario.password,
+        id_rol: formulario.rol,
+      }
+      return formLimpio;
     },
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
@@ -284,6 +390,192 @@ export default {
 * {
   font-family: 'Montserrat', sans-serif;
 }
+/* aqui empieza */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+}
+
+#modal-usuario {
+  max-width: 60%;
+  min-width: 500px;
+  justify-content: center;
+  align-items: center;
+}
+
+.h2-modal-content {
+  margin-top: 0;
+}
+
+#AddUsuarioModal,
+#BtnCerrar {
+  width: 80%;
+}
+
+/* Contenedores */
+.contenedor-principal {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+}
+
+.contenedor {
+  width: 45%;
+}
+
+/* Formularios */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: flexbox;
+  margin-bottom: 8px;
+}
+
+.form-group-select{
+  min-width: 80%;
+  display: flexbox;
+  flex-direction: row;
+
+}
+
+.form-group input {
+  width: 95%;
+  height: 25%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  justify-content: center;
+}
+
+.stock-group {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.stock-group label {
+  margin: 5px;
+}
+
+/* Selectores */
+.form-select {
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 8px 16px;
+}
+
+/* Botones */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.btn-success{
+  min-height: 80px;
+  max-width: 90px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #066bd8;
+  color: white;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: black;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Botón registrar usuario */
+#registrar-usuario {
+  background-color: rgb(253, 253, 56);
+  margin-left: 30px;
+  height: 50px;
+}
+
+#registrar-usuario:hover {
+  background-color: rgb(228, 228, 48);
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+/* Categorías */
+.form-categoria {
+  display: flex;
+  flex-direction: column;
+}
+
+#proveedor-contenedor {
+  display: flex;
+  align-items: center;
+}
+
+/* Modal de categorías */
+.modal-content-categoria {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 30%;
+  height: 72%;
+  min-height: 500px;
+  min-width: 300px;
+}
+
+.form-form-categoria {
+  padding: 20px;
+  padding-top: 0;
+  height: 240px;
+  overflow-y: scroll;
+}
+
+.categoria-botones {
+  width: 100%;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.categoria-encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+
+/* aqui termina el modal */
 
 .encabezado {
   display: flex;
@@ -291,22 +583,24 @@ export default {
 }
 
 .opciones {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .busqueda {
-  float: right;
   padding: 10px;
   font-size: 14px;
   border-radius: 10px;
   border-width: 0.5px;
+  min-width: 350px;
 }
 
 .registros {
+  display: flexbox;
   height: 100%;
-  padding-bottom: 1%;
+  align-items: end;
 }
 
 #btnAdd {
@@ -383,16 +677,6 @@ export default {
   font-size: 14px;
 }
 
-select {
-  border: 1px solid #ccc;
-  margin-top: 10px;
-  margin-left: 5px;
-  margin-right: 5px;
-  width: 60px;
-  height: 35px;
-  border-radius: 5px;
-}
-
 .empleados-wrapper {
   padding: 16px;
 }
@@ -444,36 +728,6 @@ select {
   border-bottom-right-radius: 10px;
 }
 
-.btn {
-  padding: 8px 16px;
-  margin: 4px;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-warning {
-  background-color: #ffc107;
-  color: black;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
 #AddEmpleadoModal {
   padding: 0.75rem 1.5rem;
   border: none;
@@ -485,44 +739,6 @@ select {
   margin-right: 1rem;
 }
 
-#BtnCerrar {
-  background-color: rgb(93, 100, 104);
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 500px;
-  width: 100%;
-}
-
-.form-group {
-  margin-bottom: 16px;
-
-}
-
-.form-group label {
-  display: flexbox;
-  margin-bottom: 8px;
-}
-
-.form-group input {
-  width: 95%;
-  height: 25%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  justify-content: center;
-}
-
 button {
   cursor: pointer;
 }
@@ -530,12 +746,13 @@ button {
 .custom-select {
   border: 1px solid #ccc;
   border-radius: 5px;
-  height: 35px;
+
   font-size: 16px;
-  padding: 5px;
+  padding: 10px;
   background-color: #fff;
   cursor: pointer;
-  width: 80px;
+  width: 60%;
+  min-width: 400px;
   /* Ajusta el ancho a 120px o el valor que prefieras */
 }
 
@@ -575,7 +792,4 @@ button {
   color: #000;
 }
 
-#form-tel {
-  width: 30%;
-}
 </style>
