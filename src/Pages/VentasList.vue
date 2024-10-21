@@ -10,23 +10,25 @@
       <form class="inputs-container" @submit.prevent="agregarProducto" autocomplete="off">
 
         <div class="input-container input-superior">
-          <label class="label-input">
-            Buscar por nombre: </label>
-          <input list="idDataList" class="campo" :disabled="isEditing" v-model="addName" placeholder="Ingresar nombre"
-            @input="colocarCodigo">
-          <datalist id="idDataList">
-            <option v-for="(producto, index) in productos" :key="index" :value="producto.codigo">
-              {{ producto.codigo }} : {{ producto.nombre }}
-
-            </option>
-          </datalist>
-        </div>
-        <div class="input-container-exterior">
           <div class="input-container">
             <label for="codigo-producto" class="label-input">Codigo del producto:</label>
             <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
-              :disabled="isEditing" placeholder="Ingresar codigo" required />
+              :disabled="isEditing" placeholder="Ingresar codigo" required @input="colocarNombrePorCodigo" />
           </div>
+
+          <div class="input-container">
+            <label class="label-input">Buscar por nombre: </label>
+            <input list="idDataList" class="campo" :disabled="isEditing" v-model="addName"
+              placeholder="Ingresar nombre" />
+            <datalist id="idDataList">
+              <option v-for="(producto, index) in productos" :key="index" :value="producto.codigo">
+                {{ producto.codigo }} : {{ producto.nombre }}
+              </option>
+            </datalist>
+          </div>
+        </div>
+
+        <div class="input-container-exterior">
 
           <div class="input-container">
             <label for="cantidad" class="label-input">Cantidad:</label>
@@ -38,7 +40,6 @@
             <button class="btn btn-success agregar-producto" type="submit">
               <i class="bi bi-plus-circle-fill"> Añadir</i>
             </button>
-
           </div>
 
           <div class="input-container">
@@ -47,7 +48,6 @@
             </button>
           </div>
         </div>
-
 
       </form>
 
@@ -391,14 +391,23 @@ export default {
 
     },
 
-    colocarCodigo() {
-      const productoSeleccionado = this.productos.find(producto => producto.codigo === this.addName);
-      // Si existe, asignamos el código al campo correspondiente
+    /* colocarCodigo() {
+       const productoSeleccionado = this.productos.find(producto => producto.codigo === this.addName);
+       // Si existe, asignamos el código al campo correspondiente
+       if (productoSeleccionado) {
+         this.addQuery = productoSeleccionado.codigo;
+         this.addName = productoSeleccionado.nombre;
+       } else {
+         this.addQuery = ''; // Si no encuentra coincidencia, vacía el código
+       }
+     }, */
+    colocarNombrePorCodigo() {
+      const productoSeleccionado = this.productos.find(producto => producto.codigo === this.addQuery);
+      // Si existe, asignamos el nombre al campo correspondiente
       if (productoSeleccionado) {
-        this.addQuery = productoSeleccionado.codigo;
         this.addName = productoSeleccionado.nombre;
       } else {
-        this.addQuery = ''; // Si no encuentra coincidencia, vacía el código
+        this.addName = ''; // Si no encuentra coincidencia, vacía el nombre
       }
     },
 
@@ -549,9 +558,10 @@ export default {
 }
 
 .input-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex: 1 1 auto;
+  /* Permite que los elementos crezcan y se reduzcan */
+  margin-right: 5px;
+  /* Espacio entre elementos */
 }
 
 .wrapper {
@@ -570,8 +580,10 @@ export default {
 }
 
 .input-superior {
-  width: 80%;
   margin-bottom: 1%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .label-input {
@@ -581,7 +593,6 @@ export default {
 .campo {
   padding: 0px 10px;
   font-size: 14px;
-  width: 100%;
   min-height: 30px;
   border-radius: 10px;
   border-width: 0.5px;
