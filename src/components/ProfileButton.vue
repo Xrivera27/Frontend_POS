@@ -2,10 +2,12 @@
     <div>
         <div class="btn-config-container">
             <button class="btn-config" @click="openModal">
-                <i id="campana" class="bi bi-bell-fill"></i>{{ username }}
-                <br>
-                <span class="username">{{ username }}</span> <!-- Muestra el nombre del usuario aquí -->
-            </button>
+    <i id="campana" class="bi bi-bell-fill"></i>{{ username }}
+    <br>
+    <span class="id_usuario">{{ id_usuario }}</span> <!-- Muestra el nombre del usuario aquí -->
+    <br>
+</button>
+
         </div>
 
         <!-- Modal -->
@@ -44,17 +46,19 @@ import axios from 'axios';
 
 export default {
     data() {
-        return {
-            username: '',  // Nuevo estado para el nombre de usuario
-            isModalOpen: false,
-            settings: {
-                email: '',
-                phone: '',
-                address: '',
-                password: ''
-            }
-        };
-    },
+    return {
+        username: '',  // Estado para el nombre de usuario
+        role: '',  // Nuevo estado para el rol
+        id_usuario: '',  // Estado para el id del usuario
+        isModalOpen: false,
+        settings: {
+            email: '',
+            phone: '',
+            address: '',
+            password: ''
+        }
+    };
+},
     methods: {
         openModal() {
             this.isModalOpen = true;
@@ -66,29 +70,40 @@ export default {
             console.log('Configuración guardada:', this.settings);
             this.closeModal();
         },
+
         fetchUserProfile() {
-    // Llamada a la API para obtener el perfil del usuario
-    axios.get('http://localhost:3000/api/', {
+    const token = localStorage.getItem('auth');
+    axios.get('http://localhost:3000/api/perfil', {
         headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}` // Incluye el token de autenticación
+            Authorization: `Bearer ${token}` // Asegúrate de que el token esté correcto
         }
     })
     .then(response => {
-        console.log('Respuesta de la API:', response.data); // Muestra la respuesta completa
-        // Asegúrate de que esta línea coincida con la estructura de la respuesta de tu API
-        this.username = response.data.username; // Asignar el nombre de usuario
+        console.log('Datos de usuario:', response.data);
+        this.id_usuario = response.data.id_usuario;
+        this.username = response.data.nombre_usuario;  // Asigna el nombre de usuario
     })
     .catch(error => {
-        console.error('Error al obtener el perfil del usuario:', error);
+        if (error.response) {
+            console.error('Error al obtener el perfil del usuario:', error.response.data);
+        } else if (error.request) {
+            console.error('Error en la solicitud, no se recibió respuesta del servidor:', error.request);
+        } else {
+            console.error('Error desconocido:', error.message);
+        }
     });
 }
+
+
+
     },
     mounted() {
-        // Llamar a la API cuando el componente se monte
-        this.fetchUserProfile();
-    }
+    this.fetchUserProfile();  // Llama al método cuando el componente se monta
+}
+
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
@@ -211,4 +226,12 @@ export default {
 .modal-content button[type="button"]:hover {
     background-color: #5a6268;
 }
+
+.username{
+    display: block; /* Asegura que cada elemento esté en su propia línea */
+    font-size: 14px;
+    margin-top: 5px; /* Añade un margen para separarlo de la campana */
+    text-align: center; /* Alinea el texto debajo del icono */
+}
+
 </style>
