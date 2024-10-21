@@ -224,7 +224,6 @@ export default {
           alert(error);
         }
       } else {
-        //const respuesta = await fetch(`http://localhost:3000/api/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`,
         parametros = `/sucursales/crear-sucursal/${this.id_usuario}`;
         try {
           response = await solicitudes.postRegistro(

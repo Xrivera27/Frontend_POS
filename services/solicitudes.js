@@ -26,6 +26,7 @@
             const url = `${homeUrl}${parametros}`;
             const response = await fetch(url);
             
+            
             if (!response.ok) {
                 throw new Error(`Error: ${response.status}`);
             }
@@ -34,13 +35,14 @@
             return data;
     
         } catch (error) {
-            console.error('Error al obtener sucursales:', error);
+            console.error('Error al obtener registros:', error);
             throw error; // Manejo de errores
         }
     },
 
     async patchRegistro(parametros, datosActualizados){
         try {
+          console.log(datosActualizados);
             const url = `${homeUrl}${parametros}`;
           const respuesta = await fetch(`${url}`,
           {

@@ -45,7 +45,7 @@
             <td>{{ index + 1 }}</td>
             <td>{{ proveedor.nombre }}</td>
             <td>{{ proveedor.telefono }}</td>
-            <td>{{ proveedor.email }}</td>
+            <td>{{ proveedor.correo }}</td>
             <td>{{ proveedor.direccion }}</td>
             <td>
               <button id="btnEditar" class="btn btn-warning" @click="editProveedor(index)"><i
@@ -75,7 +75,7 @@
 
         <div class="form-group">
           <label>Email:</label>
-          <input v-model="proveedorForm.email" type="text" required>
+          <input v-model="proveedorForm.correo" type="text" required>
         </div>
 
         <div class="form-group">
@@ -95,6 +95,9 @@
 import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
+
+// importando solicitudes
+import solicitudes from "../../services/solicitudes.js";
 export default {
   components: {
     ProfileButton,
@@ -107,45 +110,39 @@ export default {
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
+      id_usuario: 0,
       itemsPerPage: "",
       proveedorForm: {
         nombre: '',
         telefono: '',
-        email: '',
+        correo: '',
         direccion: '',
       },
       proveedores: [
-        { nombre: 'Juan Villegas', telefono: '555 57 67', email: 'Juanavillega@gmail.com', direccion: 'calle 27 # 40 - 36' },
-        { nombre: 'Marta Pérez', telefono: '123 45 67', email: 'martaperez@gmail.com', direccion: 'avenida 15 # 20 - 40' },
-        { nombre: 'Carlos Ramírez', telefono: '987 65 43', email: 'carlosramirez@gmail.com', direccion: 'calle 10 # 12 - 50' },
-        { nombre: 'Ana Gómez', telefono: '654 32 10', email: 'anagomez@gmail.com', direccion: 'carrera 7 # 8 - 60' },
-        { nombre: 'Luis Fernández', telefono: '432 10 98', email: 'luisfernandez@gmail.com', direccion: 'calle 8 # 9 - 70' },
-        { nombre: 'Pedro Sánchez', telefono: '789 01 23', email: 'pedrosanchez@gmail.com', direccion: 'calle 5 # 6 - 80' },
-        { nombre: 'Claudia Rodríguez', telefono: '567 89 01', email: 'claudiarodriguez@gmail.com', direccion: 'avenida 9 # 10 - 90' },
-        { nombre: 'Gabriel López', telefono: '345 67 89', email: 'gabriellopez@gmail.com', direccion: 'calle 3 # 4 - 100' },
-        { nombre: 'Julia Castillo', telefono: '234 56 78', email: 'juliacastillo@gmail.com', direccion: 'carrera 5 # 6 - 110' },
-        { nombre: 'Andrés Ríos', telefono: '890 12 34', email: 'andresrios@gmail.com', direccion: 'calle 4 # 5 - 120' },
-        { nombre: 'Sofía Torres', telefono: '567 89 12', email: 'sofiatorres@gmail.com', direccion: 'carrera 6 # 7 - 130' },
-        { nombre: 'Ricardo Morales', telefono: '234 78 90', email: 'ricardomorales@gmail.com', direccion: 'avenida 3 # 4 - 140' },
-        { nombre: 'Carolina Vargas', telefono: '890 34 56', email: 'carolinavargas@gmail.com', direccion: 'calle 2 # 3 - 150' },
-        { nombre: 'Eduardo Herrera', telefono: '123 56 78', email: 'eduardoherrera@gmail.com', direccion: 'carrera 2 # 3 - 160' },
-        { nombre: 'Patricia Medina', telefono: '456 78 90', email: 'patriciamedina@gmail.com', direccion: 'avenida 7 # 8 - 170' },
-        { nombre: 'Miguel Ortiz', telefono: '789 23 45', email: 'miguelortiz@gmail.com', direccion: 'calle 1 # 2 - 180' },
-        { nombre: 'Diana Ruiz', telefono: '234 90 12', email: 'dianaruiz@gmail.com', direccion: 'carrera 4 # 5 - 190' },
-        { nombre: 'Javier Mendoza', telefono: '567 12 34', email: 'javiermendoza@gmail.com', direccion: 'avenida 6 # 7 - 200' },
-        { nombre: 'Gloria Peña', telefono: '890 45 67', email: 'gloriapena@gmail.com', direccion: 'calle 7 # 8 - 210' },
-        { nombre: 'Fernando Castro', telefono: '123 67 89', email: 'fernandocastro@gmail.com', direccion: 'carrera 3 # 4 - 220' }
       ]
     };
   },
-  mounted() {
+ async mounted() {
     document.title = "Proveedores";
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+
+    
+      this.proveedores = await solicitudes.fetchRegistros(
+          `/proveedores/${this.id_usuario}`
+        );
+
+    } catch (error) {
+      console.log(error); //modal error pendiente
+    }
+  
   },
   computed: {
     filteredProveedores() {
       // Filtra los proveedores basados en el texto de búsqueda
-      return this.proveedores.filter(proveedor =>
+      return this.proveedores.filter(proveedor => proveedor.estado == true && proveedor.estadoLocal == true )
+      .filter(proveedor =>
         proveedor.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         proveedor.telefono.includes(this.searchQuery)
       );
@@ -177,16 +174,60 @@ export default {
       this.isEditing = false;
       this.editIndex = null;
     },
-    guardarProveedor() {
+    // guardarProveedor() {
+    //   if (this.isEditing) {
+    //     this.proveedores[this.editIndex] = { ...this.proveedorForm };
+    //   } else {
+    //     this.proveedores.push({ ...this.proveedorForm });
+    //   }
+    //   this.closeModal();
+    // },
+    async guardarProveedor() {
+      let response;
+      let parametros;
       if (this.isEditing) {
-        this.proveedores[this.editIndex] = { ...this.proveedorForm };
+        try {
+          console.log(this.proveedorForm);
+          parametros = `/proveedores/actualizar-proveedor/${
+            this.proveedores[this.editIndex].id
+          }`;
+          console.log(this.proveedores[this.editIndex].id);
+          response = await solicitudes.patchRegistro(
+            parametros,
+            this.proveedorForm
+          );
+          
+
+          if (response == true) {
+
+            Object.assign(this.proveedores[this.editIndex], this.proveedorForm);
+          } else alert(response);
+        } catch (error) {
+          alert(error);
+        }
       } else {
-        this.proveedores.push({ ...this.proveedorForm });
+        parametros = `/proveedores/crear-proveedor/${this.id_usuario}`;
+        try {
+          response = await solicitudes.postRegistro(
+            parametros,
+            this.sucursalForm
+          );
+
+          if (response == true) {
+            this.sucursales.push({ ...this.sucursalForm });
+
+          } else {
+            throw response;
+          }
+        } catch (error) {
+          alert(error);
+        }
       }
       this.closeModal();
     },
     editProveedor(index) {
       this.proveedorForm = { ...this.proveedores[index] };
+      this.proveedorForm.id_usuario = this.id_usuario;
       this.isEditing = true;
       this.editIndex = index;
       this.openModal();
