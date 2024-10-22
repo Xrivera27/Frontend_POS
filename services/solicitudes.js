@@ -26,6 +26,7 @@
             const url = `${homeUrl}${parametros}`;
             const response = await fetch(url);
             
+            
             if (!response.ok) {
                 throw new Error(`Error: ${response.status}`);
             }
@@ -34,13 +35,14 @@
             return data;
     
         } catch (error) {
-            console.error('Error al obtener sucursales:', error);
+            console.error('Error al obtener registros:', error);
             throw error; // Manejo de errores
         }
     },
 
     async patchRegistro(parametros, datosActualizados){
         try {
+
             const url = `${homeUrl}${parametros}`;
           const respuesta = await fetch(`${url}`,
           {
@@ -94,13 +96,20 @@
             },
             body: JSON.stringify(datosNuevos)
           });
-          console.log(respuesta);
+          
+
 
           if (!respuesta.ok){
             throw new Error(`No se pudo crear: ${respuesta.statusText}`);
           }
-      
-          else return respuesta.ok;
+          
+          
+          else {
+            
+            const nuevoRegistro = await respuesta.json();
+            console.log(nuevoRegistro);
+            return nuevoRegistro;
+          }
           
         } catch (error) {
           throw new Error(`Ocurrio un error: ${error.message}`);

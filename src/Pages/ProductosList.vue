@@ -82,58 +82,73 @@
       </table>
     </div>
 
-    <!-- Modal para agregar o editar productos -->
-    <div v-if="isModalOpen" class="modal">
-      <div class="modal-content">
-        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Producto' : 'Agregar Producto' }}</h2>
+     <!-- Modal para agregar o editar productos -->
+     <div v-if="isModalOpen" class="modal">
+    <div id="modal-producto" class="modal-content">
+      <h2 class="h2-modal-content">
+        {{ isEditing ? "Editar Producto" : "Agregar Producto" }}
+      </h2>
+      <div class="form-group">
+            <label>Codigo unico del producto:</label>
+            <input v-model="productoForm.codigo_producto" type="text" required />
+          </div>
+      <div class="contenedor-principal">
+        <div class="contenedor contenedor-izquierdo">
+          <div class="form-group">
+            <label>Nombre Producto:</label>
+            <input v-model="productoForm.nombre" type="text" required />
+          </div>
 
-        <div class="form-group">
-          <label>Codigo:</label>
-          <input v-model="productoForm.codigo" type="text" required>
+          <div class="form-group">
+            <label for="rol">Proveedor:</label>
+            <select class="form-select" id="proveedor" name="proveedor" v-model="productoForm.proveedor">
+              <!-- <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option> -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="rol">Unidad de medida:</label>
+            <select class="form-select" id="medida" name="medida" v-model="productoForm.unidad_medida">
+              <!-- <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option> -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="rol">Impuesto:</label>
+            <select class="form-select" id="impuesto" name="impuesto" v-model="productoForm.impuesto">
+              <!-- <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option> -->
+            </select>
+          </div>
+
         </div>
+        <div class="contenedor contenedor-derecho">
+          <div class="form-group">
+            <label>Precio por Unidad:</label>
+            <input v-model="productoForm.precio_unitario" type="text" required />
+          </div>
 
-        <div class="form-group">
-          <label>Descripcion:</label>
-          <input v-model="productoForm.descripcion" type="text" required>
+          <div class="form-group">
+            <label>Precio por mayoreo:</label>
+            <input v-model="productoForm.precio_mayorista" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Stock Minimo:</label>
+            <input v-model="productoForm.stock_min" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Stock Maximo:</label>
+            <input v-model="productoForm.stock_max" type="text" required />
+          </div>
+
         </div>
-
-        <div class="form-group">
-          <label>Categoria:</label>
-          <input v-model="productoForm.categoria" type="text" required>
-        </div>
-
-        <div class="form-group stock-group">
-          <label>Stock max:</label>
-          <input v-model="productoForm.stock" type="text" required>
-          <label>Stock min:</label>
-          <input type="text" required>
-
-        </div>
-
-        <div class="form-group">
-          <label>Precio Unitario:</label>
-          <input v-model="productoForm.preciounitario" type="text" required>
-        </div>
-
-        <div class="form-group">
-          <label>Precio Mayorista:</label>
-          <input v-model="productoForm.preciomayorista" type="text" required>
-        </div>
-
-        <div class="form-group">
-          <label>Precio Descuento:</label>
-          <input v-model="productoForm.preciodescuento" type="text" required>
-        </div>
-
-        <div class="form-group">
-          <label>Fecha:</label>
-          <input v-model="productoForm.fecha" type="date" required>
-        </div>
-          <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Producto' " @click="guardarProducto"></btnGuardarModal>
-          <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
-
       </div>
+      
+      <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Producto' " @click="guardarProducto"></btnGuardarModal>
+      <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
     </div>
+  </div>
+
+
   </div>
 </template>
 
@@ -158,14 +173,16 @@ export default {
       editIndex: null,
       itemsPerPage: "",
       productoForm: {
-        codigo: '',
-        descripcion: '',
-        categoria: '',
-        stock: '',
-        preciounitario: '',
-        preciomayorista: '',
-        preciodescuento: '',
-        fecha: ''
+       codigo_producto: '',
+       nombre: '',
+       unidad_medida: '',
+       impuesto: '',
+       proveedor: '',
+       stock_min: '',
+       stock_max: '',
+       precio_unitario: '',
+       precio_mayorista: '',
+
       },
       productos: [
         { codigo: '1504', descripcion: 'Mortal Kombat X', categoria: 'Videojuegos', stock: '45', preciounitario: 'L. 450.00', preciomayorista: 'L. 350.00', preciodescuento: 'L. 400.00', fecha: '2017-12-11' },
@@ -314,10 +331,54 @@ export default {
   justify-content: space-between;
 }
 
+.contenedor-principal {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+}
+
+.contenedor {
+  width: 45%;
+}
+
+/* Formularios */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: flexbox;
+  margin-bottom: 8px;
+}
+
+.form-group-select{
+  min-width: 80%;
+  display: flexbox;
+  flex-direction: row;
+
+}
+
+.form-group input {
+  width: 95%;
+  height: 25%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  justify-content: center;
+}
+
 .opciones {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.form-select {
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 8px 16px;
 }
 
 .busqueda {

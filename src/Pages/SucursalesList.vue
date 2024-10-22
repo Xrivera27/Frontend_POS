@@ -224,7 +224,6 @@ export default {
           alert(error);
         }
       } else {
-        //const respuesta = await fetch(`http://localhost:3000/api/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`,
         parametros = `/sucursales/crear-sucursal/${this.id_usuario}`;
         try {
           response = await solicitudes.postRegistro(
@@ -232,12 +231,11 @@ export default {
             this.sucursalForm
           );
 
-
-          if (response == true) {
-
-            this.sucursales.push({ ...this.sucursalForm });
-
-          } else {
+          if (response.length > 0) {
+           
+           this.sucursales.push( response[0] );
+ 
+           }  else {
             throw response;
           }
         } catch (error) {
