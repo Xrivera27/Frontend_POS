@@ -224,8 +224,28 @@ export default {
       this.editIndex = index;
       this.openModal();
     },
-    deleteProveedor(index) {
-      this.proveedores.splice(index, 1);
+    async deleteProveedor(index) {
+      let response;
+
+      const datosActualizados = {
+        estado: false,
+        id_usuario: this.id_usuario
+      };
+
+      const parametros = `/proveedores/desactivar-proveedor/${this.proveedores[index].id}`;
+
+      try {
+        response = await solicitudes.desactivarRegistro(
+          parametros,
+          datosActualizados
+        );
+
+        if (response == true) {
+          this.proveedores.splice(index, 1);
+        }
+      } catch (error) {
+        console.log(new Error(response));
+      }
     },
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
