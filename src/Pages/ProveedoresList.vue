@@ -118,8 +118,7 @@ export default {
         correo: '',
         direccion: '',
       },
-      proveedores: [
-      ]
+      proveedores: []
     };
   },
  async mounted() {
@@ -127,7 +126,6 @@ export default {
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
     try {
       this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
-
     
       this.proveedores = await solicitudes.fetchRegistros(
           `/proveedores/${this.id_usuario}`
@@ -141,8 +139,7 @@ export default {
   computed: {
     filteredProveedores() {
       // Filtra los proveedores basados en el texto de búsqueda
-      return this.proveedores.filter(proveedor => proveedor.estado == true && proveedor.estadoLocal == true )
-      .filter(proveedor =>
+      return this.proveedores.filter(proveedor =>
         proveedor.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         proveedor.telefono.includes(this.searchQuery)
       );
@@ -174,15 +171,8 @@ export default {
       this.isEditing = false;
       this.editIndex = null;
     },
-    // guardarProveedor() {
-    //   if (this.isEditing) {
-    //     this.proveedores[this.editIndex] = { ...this.proveedorForm };
-    //   } else {
-    //     this.proveedores.push({ ...this.proveedorForm });
-    //   }
-    //   this.closeModal();
-    // },
     async guardarProveedor() {
+      this.proveedorForm.id_usuario = this.id_usuario;
       let response;
       let parametros;
       if (this.isEditing) {
@@ -210,24 +200,26 @@ export default {
         try {
           response = await solicitudes.postRegistro(
             parametros,
-            this.sucursalForm
+            this.proveedorForm
           );
 
-          if (response == true) {
-            this.sucursales.push({ ...this.sucursalForm });
+          if (response.length > 0) {
+           
+          this.proveedores.push( response[0] );
 
           } else {
             throw response;
           }
         } catch (error) {
-          alert(error);
+          console.log(error);
+
         }
       }
       this.closeModal();
     },
     editProveedor(index) {
       this.proveedorForm = { ...this.proveedores[index] };
-      this.proveedorForm.id_usuario = this.id_usuario;
+      
       this.isEditing = true;
       this.editIndex = index;
       this.openModal();

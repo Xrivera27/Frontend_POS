@@ -42,7 +42,7 @@
 
     async patchRegistro(parametros, datosActualizados){
         try {
-          console.log(datosActualizados);
+
             const url = `${homeUrl}${parametros}`;
           const respuesta = await fetch(`${url}`,
           {
@@ -96,13 +96,20 @@
             },
             body: JSON.stringify(datosNuevos)
           });
-          console.log(respuesta);
+          
+
 
           if (!respuesta.ok){
             throw new Error(`No se pudo crear: ${respuesta.statusText}`);
           }
-      
-          else return respuesta.ok;
+          
+          
+          else {
+            
+            const nuevoRegistro = await respuesta.json();
+            console.log(nuevoRegistro);
+            return nuevoRegistro;
+          }
           
         } catch (error) {
           throw new Error(`Ocurrio un error: ${error.message}`);

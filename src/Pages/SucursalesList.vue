@@ -231,12 +231,11 @@ export default {
             this.sucursalForm
           );
 
-
-          if (response == true) {
-
-            this.sucursales.push({ ...this.sucursalForm });
-
-          } else {
+          if (response.length > 0) {
+           
+           this.sucursales.push( response[0] );
+ 
+           }  else {
             throw response;
           }
         } catch (error) {

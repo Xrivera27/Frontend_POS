@@ -194,9 +194,8 @@ export default {
         );
 
        this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`); 
+       console.log(this.empleados);
        this.roles = await solicitudes.fetchRegistros('/roles');
-
-      
 
       
     } catch (error) {
@@ -206,7 +205,7 @@ export default {
   computed: {
     filteredEmpleados() {
       // Filtra los empleados basados en el texto de búsqueda
-      return this.empleados.filter(empleado => empleado.id_rol !== 4)
+      return this.empleados
       .filter(empleado =>
         empleado.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         empleado.apellido.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
@@ -274,7 +273,7 @@ export default {
           
           if (response == true) {
 
-            Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
+            Object.assign(this.empleados[this.editIndex], this.usuarioForm);
           } else alert(response);
         } catch (error) {
           alert(error);
@@ -290,11 +289,11 @@ export default {
             this.limpiarForm(this.usuarioForm)
           );
 
-          if (response == true) {
-
-            this.empleados.push({ ...this.usuarioForm });
-
-          } else {
+          if (response.length > 0) {
+           
+           this.empleados.push( response[0] );
+ 
+           }  else {
             throw response;
           }
         } catch (error) {
