@@ -45,7 +45,7 @@
         <tbody>
           <tr v-for="(categoria, index) in paginatedCategorias" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ categoria.nombre }}</td>
+            <td>{{ categoria.nombre_categoria }}</td>
             <td>{{ categoria.descripcion }}</td>
             <td>
               <button id="btnEditar" class="btn btn-warning" @click="editCategoria(index)"><i
@@ -65,7 +65,7 @@
 
         <div class="form-group">
           <label>Nombre:</label>
-          <input v-model="categoriaForm.nombre" type="text" required>
+          <input v-model="categoriaForm.nombre_categoria" type="text" required>
         </div>
 
         <!-- Campo de descripción estilizado como textarea -->
@@ -86,6 +86,9 @@
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
 
+// importando solicitudes
+import solicitudes from "../../services/solicitudes.js";
+
 export default {
   components:
   {
@@ -94,31 +97,40 @@ export default {
   data() {
     return {
       searchQuery: '', // Almacena el texto de búsqueda
-      itemsPerPage: "", // Valor por defecto para mostrar todos los registros
+      itemsPerPage: "",
+      id_usuario:'', // Valor por defecto para mostrar todos los registros
       categorias: [
-        {
-          nombre: 'Videojuegos',
-          descripcion: 'Todo tipo de videojuegos tanto de consola como de pc',
-        },
-        // ... otras categorías
       ],
       isModalOpen: false, // Estado para controlar si el modal está abierto o cerrado
       isEditing: false, // Estado para verificar si estamos editando una categoría
-      categoriaForm: { nombre: '', descripcion: '' }, // Objeto para el formulario de categorías
+      categoriaForm: { nombre_categoria: '', descripcion: '' }, // Objeto para el formulario de categorías
     };
   },
 
-  mounted() {
+  async mounted() {
     document.title = "Categorías";
     this.changeFavicon('/img/spiderman.ico');
-    this.fetchCategoria(); // Usar la ruta correcta
+
+
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+      console.log(`Id de usuario ${this.id_usuario}`);
+
+      this.categorias = await solicitudes.fetchRegistros(
+        `/categoria-producto/${this.id_usuario}`
+      );
+
+    } catch (error) {
+      console.log(error); //modal error pendiente
+    }
+
     
   },
   computed: {
     filteredCategorias() {
       // Filtra las categorías basados en el texto de búsqueda
       return this.categorias.filter(categoria =>
-        categoria.nombre.toLowerCase().includes(this.searchQuery.toLowerCase())
+        categoria.nombre_categoria.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
     paginatedCategorias() {
@@ -133,7 +145,7 @@ export default {
       // Resetea el formulario y abre el modal
       this.isModalOpen = true;
       this.isEditing = false;
-      this.categoriaForm = { nombre: '', descripcion: '' }; // Resetea el formulario
+      this.categoriaForm = { nombre_categoria: '', descripcion: '' }; // Resetea el formulario
     },
     closeModal() {
       // Cierra el modal
@@ -144,24 +156,95 @@ export default {
       this.isModalOpen = true;
       this.isEditing = true;
       this.categoriaForm = { ...this.categorias[index] };
+      this.editIndex = index;
     },
-    deleteCategoria(index) {
-      // Implementa la lógica para eliminar una categoría
-      this.categorias.splice(index, 1);
+    // deleteCategoria(index) {
+    //   // Implementa la lógica para eliminar una categoría
+    //   this.categorias.splice(index, 1);
+    // },
+    async deleteCategoria(index) {
+      let response;
+
+      const datosActualizados = {
+        estado: false,
+      };
+
+      const parametros = `/categoria-producto/desactivar-categoria/${this.categorias[index].id_categoria}`;
+
+      try {
+        response = await solicitudes.desactivarRegistro(
+          parametros,
+          datosActualizados
+        );
+
+        if (response == true) {
+          this.categorias.splice(index, 1);
+        }
+      } catch (error) {
+        alert(new Error(response));
+      }
     },
-    guardarCategoria() {
+
+    // guardarCategoria() {
+    //   if (this.isEditing) {
+    //     // Actualiza una categoría existente
+    //     const index = this.categorias.findIndex(c => c.nombre_categoria === this.categoriaForm.nombre_categoria);
+    //     if (index !== -1) {
+    //       this.$set(this.categorias, index, this.categoriaForm);
+    //     }
+    //   } else {
+    //     // Agrega una nueva categoría
+    //     this.categorias.push(this.categoriaForm);
+    //   }
+    //   this.closeModal();
+    // },
+    
+    async guardarCategoria() {
+      let response;
+      let parametros;
+      this.categoriaForm.id_usuario = this.id_usuario;
       if (this.isEditing) {
-        // Actualiza una categoría existente
-        const index = this.categorias.findIndex(c => c.nombre === this.categoriaForm.nombre);
-        if (index !== -1) {
-          this.$set(this.categorias, index, this.categoriaForm);
+        try {
+          
+          parametros = `/categoria-producto/actualizar-categoria/${
+            this.categorias[this.editIndex].id_categoria
+          }`;
+          response = await solicitudes.patchRegistro(
+            parametros,
+            this.categoriaForm
+          );
+          
+
+          if (response == true) {
+
+            Object.assign(this.categorias[this.editIndex], this.categoriaForm);
+          } else alert(response);
+        } catch (error) {
+          alert(error);
         }
       } else {
-        // Agrega una nueva categoría
-        this.categorias.push(this.categoriaForm);
+        parametros = `/categoria-producto/crear-categoria`;
+        try {
+          response = await solicitudes.postRegistro(
+            parametros,
+            this.categoriaForm
+          );
+
+          if (response.length > 0) {
+           
+           this.categorias.push( response[0] );
+ 
+           }  else {
+            throw response;
+          }
+        } catch (error) {
+          alert(error);
+        }
       }
       this.closeModal();
     },
+
+
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
@@ -170,15 +253,6 @@ export default {
       document.getElementsByTagName('head')[0].appendChild(link);
     },
 
-    async fetchCategoria() {
-      try {
-        const response = await fetch('http://localhost:3000/api/categoria-producto');
-        const data = await response.json();
-        console.log(data);
-      } catch (error) {
-        alert('No se pudo encontrar data');
-      }
-    }
   }
 };
 </script>
