@@ -10,9 +10,6 @@
       <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
         Usuario</button>
 
-
-      
-
       <!-- Barra de búsqueda -->
       <div class="search-bar">
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar empleado..." />
