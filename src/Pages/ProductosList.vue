@@ -247,14 +247,15 @@ export default {
     },
     clearForm() {
       this.productoForm = {
-        codigo: '',
-        descripcion: '',
-        categoria: '',
-        stock: '',
-        preciounitario: '',
-        preciomayorista: '',
-        preciodescuento: '',
-        fecha: ''
+        codigo_producto: '',
+       nombre: '',
+       unidad_medida: '',
+       impuesto: '',
+       proveedor: '',
+       stock_min: '',
+       stock_max: '',
+       precio_unitario: '',
+       precio_mayorista: '',
       };
       this.isEditing = false;
       this.editIndex = null;
