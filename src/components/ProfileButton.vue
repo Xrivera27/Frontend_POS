@@ -2,10 +2,12 @@
     <div>
         <div class="btn-config-container">
             <button class="btn-config" @click="openModal">
-    <i id="campana" class="bi bi-bell-fill"></i>{{ username }}
+    <i id="campana" class="bi bi-bell-fill"></i>{{ username }}{{ usernamen }}
     <br>
     <span class="id_usuario">{{ id_usuario }}</span> <!-- Muestra el nombre del usuario aquí -->
     <br>
+    {{ rol }}
+
 </button>
 
         </div>
@@ -81,7 +83,9 @@ export default {
     .then(response => {
         console.log('Datos de usuario:', response.data);
         this.id_usuario = response.data.id_usuario;
-        this.username = response.data.nombre_usuario;  // Asigna el nombre de usuario
+        this.username = response.data.nombre;
+        this.usernamen = response.data.apellido;
+        this.rol = response.data.cargo;  // Asigna el nombre de usuario  // Asigna el nombre de usuario
     })
     .catch(error => {
         if (error.response) {
