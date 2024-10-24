@@ -17,9 +17,10 @@
 
       <div class="registros">
         <span>
-          <select  class="custom-select" >
-            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{ sucursal.nombre_administrativo }}</option>
-          </select> 
+          <select class="custom-select">
+            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
+              sucursal.nombre_administrativo }}</option>
+          </select>
         </span>
       </div>
 
@@ -60,84 +61,96 @@
         </tbody>
       </table>
     </div>
-    
+
     <!-- Modal para agregar o editar empleados -->
     <div v-if="isModalOpen" class="modal">
-    <div id="modal-usuario" class="modal-content">
-      <h2 class="h2-modal-content">
-        {{ isEditing ? "Editar Usuario" : "Agregar Usuario" }}
-      </h2>
+      <div id="modal-usuario" class="modal-content">
+        <h2 class="h2-modal-content">
+          {{ isEditing ? "Editar Usuario" : "Agregar Usuario" }}
+        </h2>
 
-      <div class="contenedor-principal">
-        <div class="contenedor contenedor-izquierdo">
-          <div class="form-group">
-            <label>Nombre:</label>
-            <input v-model="usuarioForm.nombre" type="text" required />
-          </div>
+        <div class="contenedor-principal">
+          <div class="contenedor contenedor-izquierdo">
+            <div class="form-group">
+              <label>Nombre:</label>
+              <input v-model="usuarioForm.nombre" type="text" required />
+            </div>
 
-          <div class="form-group">
-            <label>Apellido:</label>
-            <input v-model="usuarioForm.apellido" type="text" required />
-          </div>
+            <div class="form-group">
+              <label>Apellido:</label>
+              <input v-model="usuarioForm.apellido" type="text" required />
+            </div>
 
-          <div class="form-group">
-            <label>Nombre de Usuario:</label>
-            <input v-model="usuarioForm.nombre_usuario" type="text" required />
-          </div>
-          <div class="form-group">
-            <label>Correo:</label>
-            <input v-model="usuarioForm.correo" type="text" required />
-          </div>
-          
+            <div class="form-group">
+              <label>Nombre de Usuario:</label>
+              <input v-model="usuarioForm.nombre_usuario" type="text" required />
+            </div>
+            <div class="form-group">
+              <label>Correo:</label>
+              <input v-model="usuarioForm.correo" type="text" required />
+            </div>
 
-          <div class="form-group">
-            <label for="rol">Selecciona rol:</label>
-            <select class="form-select" id="rol" name="rol" v-model="usuarioForm.rol">
-              <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option>
-            </select>
+
+            <div class="form-group">
+              <label for="rol">Selecciona rol:</label>
+              <select class="form-select" id="rol" name="rol" v-model="usuarioForm.rol">
+                <option value="" disabled selected>Selecciona un rol</option>
+                <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="contenedor contenedor-derecho">
+            <div class="form-group">
+              <label>
+                <span class="info-icon" @mouseover="showTooltip = true" @mouseleave="showTooltip = false">ℹ️</span>
+                Contraseña:
+              </label>
+              <input v-model="usuarioForm.password" type="password" required />
+              <div v-if="showTooltip" class="tooltip">
+                La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un
+                número y un símbolo.
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Confirmar contraseña:</label>
+              <input v-model="usuarioForm.confirmPassword" type="password" required />
+            </div>
+            <div class="form-group">
+              <label>Telefono:</label>
+              <input v-model="usuarioForm.telefono" type="text" />
+            </div>
+            <div class="form-group">
+              <label>Direccion:</label>
+              <input v-model="usuarioForm.direccion" type="text" required />
+            </div>
+
+            <div class="form-group">
+              <label for="sucursal">Selecciona sucursal:</label>
+              <select class="form-select" id="sucursal" name="sucursal" v-model="usuarioForm.sucursal">
+                <option value="" disabled selected>Selecciona una sucursal</option>
+                <option v-for="(sucursal, index) in sucursales" :key="index" :value="sucursal.id_sucursal">{{
+                  sucursal.nombre_administrativo }}</option>
+              </select>
+            </div>
+
           </div>
         </div>
-        <div class="contenedor contenedor-derecho">
-          <div class="form-group">
-            <label>Contraseña:</label>
-            <input v-model="usuarioForm.password" type="password" required />
-          </div>
-          <div class="form-group">
-            <label>Confirmar contraseña:</label>
-            <input v-model="usuarioForm.confirmPassword" type="password" required />
-          </div>
-          <div class="form-group">
-            <label>Telefono:</label>
-            <input v-model="usuarioForm.telefono" type="text" />
-          </div>
-          <div class="form-group">
-            <label>Direccion:</label>
-            <input v-model="usuarioForm.direccion" type="text" required />
-          </div>
 
-          <div class="form-group">
-            <label for="sucursal">Selecciona sucursal:</label>
-            <select class="form-select" id="sucursal" name="sucursal"  v-model="usuarioForm.sucursal" >
-              <option  v-for="(sucursal, index) in sucursales" :key="index" :value="sucursal.id_sucursal">{{ sucursal.nombre_administrativo  }}</option>
-            </select>
-          </div>
-
-        </div>
+        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario">
+        </btnGuardarModal>
+        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
       </div>
-      
-      <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Usuario' " @click="guardarUsuario"></btnGuardarModal>
-      <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
     </div>
-  </div>
 
   </div>
- 
+
 </template>
 
 <script>
 import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
+import { useToast } from "vue-toastification"; // Importación para el popup
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -152,6 +165,7 @@ export default {
   },
   data() {
     return {
+      showTooltip: false,
       searchQuery: '',
       id_usuario: 0, // Almacena el texto de búsqueda
       isModalOpen: false,
@@ -163,13 +177,13 @@ export default {
       roles: [],
       usuarioForm: {
         id_usuario: 0,
-        nombre: "",
-        apellido: "",
-        nombre_usuario: "",
-        correo: "",
-        telefono: "",
-        direccion: "",
-        sucursal: "",
+        nombre: '',
+        apellido: '',
+        nombre_usuario: '',
+        correo: '',
+        telefono: '',
+        direccion: '',
+        sucursal: '',
         password: '',
         confirmPassword: '',
         rol: ''
@@ -181,20 +195,20 @@ export default {
   async mounted() {
     document.title = "Usuarios";
     this.changeFavicon('/img/spiderman.ico');
-     // Usar la ruta correcta
+    // Usar la ruta correcta
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
-      
+
       this.sucursales = await solicitudes.fetchRegistros(
-          `/sucursales/empresa/${this.id_usuario}`
-        );
+        `/sucursales/empresa/${this.id_usuario}`
+      );
 
-       this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`); 
-       console.log(this.empleados);
-       this.roles = await solicitudes.fetchRegistros('/roles');
+      this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
+      console.log(this.empleados);
+      this.roles = await solicitudes.fetchRegistros('/roles');
 
-      
+
     } catch (error) {
       console.log(error); //modal error pendiente
     }
@@ -203,11 +217,11 @@ export default {
     filteredEmpleados() {
       // Filtra los empleados basados en el texto de búsqueda
       return this.empleados
-      .filter(empleado =>
-        empleado.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        empleado.apellido.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        empleado.nombre_usuario.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
+        .filter(empleado =>
+          empleado.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          empleado.apellido.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          empleado.nombre_usuario.toLowerCase().includes(this.searchQuery.toLowerCase())
+        );
     },
     paginatedEmpleados() {
       // Si itemsPerPage es vacío, mostramos todos los registros, de lo contrario aplicamos la paginación
@@ -219,6 +233,21 @@ export default {
     }
   },
   methods: {
+    /* validarEmpty(formulario) {
+       const campos = Object.values(formulario);
+       return campos.every(campo => {
+         // Verifica si el campo es un string y no está vacío
+         if (typeof campo === 'string') {
+           return campo.trim() !== '';
+         }
+         // Verifica si el campo es un valor de selección (select)
+         if (typeof campo === 'number' || typeof campo === 'string') {
+           return campo !== '' && campo !== null; // Cambia '' por el valor que consideres como "no seleccionado"
+         }
+         return campo !== null && campo !== undefined; // Asegúrate de que no sea null o undefined
+       });
+     }, */
+
     openModal() {
       this.isModalOpen = true;
     },
@@ -229,13 +258,13 @@ export default {
     clearForm() {
       this.usuarioForm = {
         id_usuario: '',
-        nombre: "",
-        apellido: "",
-        nombre_usuario: "",
-        correo: "",
-        telefono: "",
-        direccion: "",
-        sucursal: "",
+        nombre: '',
+        apellido: '',
+        nombre_usuario: '',
+        correo: '',
+        telefono: '',
+        direccion: '',
+        sucursal: '',
         password: '',
         confirmPassword: '',
         rol: ''
@@ -245,29 +274,66 @@ export default {
       this.editIndex = null;
     },
 
-    getRol(id_rol){
+    getRol(id_rol) {
       const rol = this.roles.find(rol => rol.id_rol === id_rol);
-      return rol ? rol.cargo : 'Desconocido'; 
+      return rol ? rol.cargo : 'Desconocido';
     },
 
     async guardarUsuario() {
-     let response;
+      const toast = useToast();
+      let response;
       let parametros;
-      if(!this.validarCampos(this.usuarioForm)){
-          alert('Hay campos vacios');
-          return;
-        }
+
+      const email = this.usuarioForm.correo;
+      const password1 = this.usuarioForm.password;
+      const password2 = this.usuarioForm.confirmPassword;
+      const telefono = this.usuarioForm.telefono;
+
+      // Validaciones
+      if (!validarCamposService.validarEmpty(this.usuarioForm)) {
+        console.log('Rellene todos los campos');
+        toast.warning('Rellene todos los campos');
+        return;
+      }
+
+      if (!validarCamposService.validarEmail(email)) {
+        console.log('El correo no es válido o no pertenece a un dominio aceptado');
+        toast.warning('El correo no es válido o no pertenece a un dominio aceptado');
+        return;
+      }
+
+      if (!validarCamposService.validarPasswordSegura(password1)) {
+        console.log('La contraseña no cumple con los requisitos de seguridad');
+        toast.error('La contraseña no cumple con los requisitos de seguridad');
+        return;
+      }
+
+      if (!validarCamposService.validarPass(password1, password2)) {
+        console.log('Las contraseñas no coinciden');
+        toast.error('Las contraseñas no coinciden');
+        return;
+      }
+
+      if (!validarCamposService.validarTelefono(telefono)) {
+        console.log('El teléfono no es válido');
+        toast.error('El teléfono no es válido');
+        return;
+      }
+
+      // Si todas las validaciones pasan, procede a guardar el usuario
+      console.log('Usuario válido, procesando guardado...');
+      toast.success('Usuario válido, procesando guardado...');
+
       if (this.isEditing) {
         try {
 
-          parametros = `/usuario/actualizar/${
-            this.empleados[this.editIndex].id_usuario
-          }`;
+          parametros = `/usuario/actualizar/${this.empleados[this.editIndex].id_usuario
+            }`;
           response = await solicitudes.patchRegistro(
             parametros,
             this.limpiarForm(this.usuarioForm)
           );
-          
+
           if (response == true) {
 
             Object.assign(this.empleados[this.editIndex], this.usuarioForm);
@@ -277,8 +343,8 @@ export default {
         }
 
       } else {
-        
-       // const respuesta = await fetch(`http://localhost:3000/api/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`,
+
+        // const respuesta = await fetch(`http://localhost:3000/api/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`,
         parametros = `/usuario/crear`;
         try {
           response = await solicitudes.postRegistro(
@@ -287,16 +353,16 @@ export default {
           );
 
           if (response.length > 0) {
-           
-           this.empleados.push( response[0] );
- 
-           }  else {
+
+            this.empleados.push(response[0]);
+
+          } else {
             throw response;
           }
         } catch (error) {
           alert(error);
         }
-        
+
       }
       this.closeModal();
     },
@@ -337,15 +403,16 @@ export default {
       this.showPassword = !this.showPassword;
     },
 
-    validarCampos(formulario){
+    validarCampos(formulario) {
+      const toast = useToast();
 
-      if(!validarCamposService.validarPass(this.usuarioForm.password, this.usuarioForm.confirmPassword)){
-          alert('Contraseña incorrecta');
-          return false;
-        }
+      if (!validarCamposService.validarPass(this.usuarioForm.password, this.usuarioForm.confirmPassword)) {
+        toast.error('Las contraseñas no coinciden');
+        return false;
+      }
 
-      for (const atributo in formulario){
-        if ( !validarCamposService.validarEmpty(formulario[atributo]) && atributo != 'id_usuario'){
+      for (const atributo in formulario) {
+        if (!validarCamposService.validarEmpty(formulario[atributo]) && atributo != 'id_usuario') {
           alert(atributo);
           return false;
         }
@@ -355,7 +422,7 @@ export default {
 
     },
 
-    limpiarForm(formulario){
+    limpiarForm(formulario) {
       const formLimpio = {
         nombre: formulario.nombre,
         apellido: formulario.apellido,
@@ -386,6 +453,38 @@ export default {
 * {
   font-family: 'Montserrat', sans-serif;
 }
+
+.info-icon {
+  cursor: pointer;
+  margin-right: 5px;
+  /* Espacio entre el ícono y el texto */
+  vertical-align: middle;
+  /* Alinea el ícono verticalmente con el texto */
+  position: relative;
+  /* Para que el tooltip se posicione en relación a este ícono */
+}
+
+.tooltip {
+  display: inline-block;
+  position: absolute;
+  /* Cambiar a absolute para posicionarlo relativo al ícono */
+  left: 20px;
+  /* Ajusta este valor para que el tooltip esté justo al lado del ícono */
+  top: 0;
+  /* Alinea el tooltip verticalmente con el ícono */
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px;
+  z-index: 1000;
+  /* Asegúrate de que el tooltip esté por encima de otros elementos */
+  width: 250px;
+  /* Ajusta el ancho según sea necesario */
+  margin-top: 5px;
+  /* Espacio entre el ícono y el tooltip */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
 /* aqui empieza */
 .modal {
   position: fixed;
@@ -437,6 +536,7 @@ export default {
 /* Formularios */
 .form-group {
   margin-bottom: 16px;
+  position: relative;
 }
 
 .form-group label {
@@ -444,7 +544,7 @@ export default {
   margin-bottom: 8px;
 }
 
-.form-group-select{
+.form-group-select {
   min-width: 80%;
   display: flexbox;
   flex-direction: row;
@@ -488,7 +588,7 @@ export default {
   border-radius: 5px;
 }
 
-.btn-success{
+.btn-success {
   min-height: 80px;
   max-width: 90px;
 }
@@ -787,5 +887,4 @@ button {
 .password-wrapper .toggle-password:hover {
   color: #000;
 }
-
 </style>

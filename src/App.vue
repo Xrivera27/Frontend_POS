@@ -42,10 +42,10 @@ export default {
     hasPermission(section) {
       const role = localStorage.getItem('role');
       const permissions = {
-        1: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced'],
+        1: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'config-avanced'],
         2: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
         3: ['Home', 'Productos', 'Venta'],
-        4: ['Home', 'Usuario','sucursales', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced'],
+        4: ['Home', 'Usuario', 'sucursales', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced'],
 
       };
       return role && permissions[role]?.includes(section);
