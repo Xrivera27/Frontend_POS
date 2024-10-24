@@ -28,8 +28,9 @@
             </div>
           </fieldset>
           <div class="botones-container">
-            <button class="btn editar" @click="isEditing(3)" :disabled="!businessEditing">Editar</button>
-            <button class="btn guardar" :disabled="businessEditing">Guardar</button>
+            <!-- Asegúrate de prevenir el comportamiento predeterminado -->
+            <button class="btn editar" @click.prevent="isEditing(3)" :disabled="!businessEditing">Editar</button>
+            <button class="btn guardar" :disabled="businessEditing" @click.prevent="updateempresa">Guardar</button>
 
             <router-link to="/config-sar">
               <button type="button" class="btn SAR" :disabled="businessEditing">Config SAR</button>
@@ -47,7 +48,6 @@
   </div>
 </template>
 
-
 <script>
 import axios from 'axios';
 import ProfileButton from '../components/ProfileButton.vue';
@@ -58,17 +58,8 @@ export default {
   },
   data() {
     return {
-      switchForm: 'user',
-      userBoton: true,
-      companyBoton: false,
-      showUser: true,
-      showCompany: false,
-      userActive: true,
-      usuarioEditing: true,
-      usuarioAvancedEditing: true,
-      businessEditing: true,
-      busisnessSarEditing: true,
-    
+      businessEditing: true, // Establece el formulario como deshabilitado por defecto
+
       companyForm: {
         nombre: '',
         telefono_principal: '',
@@ -79,56 +70,60 @@ export default {
   methods: {
     async getCompanyData() {
       try {
-        const token = localStorage.getItem('auth'); // Obtener el token de localStorage
+        const token = localStorage.getItem('auth');
 
         const response = await axios.get('http://localhost:3000/api/configempresa', {
           headers: {
-            Authorization: `Bearer ${token}`, // Incluir el token en las cabeceras
+            Authorization: `Bearer ${token}`,
           },
         });
 
-        const companyData = response.data.empresa; // Acceder a 'empresa'
+        const companyData = response.data.empresa;
 
-        // Actualiza los datos del formulario de la empresa
         this.companyForm.nombre = companyData.nombre || '';
         this.companyForm.telefono_principal = companyData.telefono_principal || '';
         this.companyForm.correo_principal = companyData.correo_principal || '';
-
       } catch (error) {
         console.error('Error al obtener los datos de la empresa:', error);
         alert('No se pudo obtener la información de la empresa.');
       }
     },
 
-    changeFavicon(iconPath) {
-      const favicon = document.querySelector('link[rel="icon"]');
-      if (favicon) {
-        favicon.href = iconPath; // Cambia el favicon a la ruta proporcionada
-      }
+    isEditing(orden) {
+      // Cambia businessEditing según la acción de editar
+      this.businessEditing = orden !== 3;
     },
 
-    isEditing(orden) {
-      this.businessEditing = orden === 3 ? false : true;
-    },
-    
-    pushEsc(event) {
-      // Aquí va tu lógica para el evento de tecla ESC
-      if (event.key === 'Escape') {
-        // Lógica para manejar el ESC
+    async updateempresa() {
+      try {
+        const token = localStorage.getItem('auth');
+
+        const updatedData = {
+          nombre: this.companyForm.nombre,
+          telefono_principal: this.companyForm.telefono_principal,
+          correo_principal: this.companyForm.correo_principal,
+        };
+
+        const response = await axios.put('http://localhost:3000/api/updateempresa', updatedData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.status === 200) {
+          alert('Empresa actualizada exitosamente');
+          window.location.reload(); // Recargar la página después de guardar
+        }
+      } catch (error) {
+        console.error('Error al actualizar los datos de la empresa:', error);
+        alert('Hubo un problema al guardar los datos.');
       }
-    }
+    },
   },
 
   mounted() {
-    // Añade el manejador de eventos cuando el componente se monta
-    this.getCompanyData(); 
-    window.addEventListener("keydown", this.pushEsc);
-    document.title = "Configuración";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
-  },
-  beforeUnmount() {
-    // Elimina el manejador de eventos cuando el componente se destruye
-    window.removeEventListener("keydown", this.pushEsc);
+    this.getCompanyData();
   },
 };
 </script>
