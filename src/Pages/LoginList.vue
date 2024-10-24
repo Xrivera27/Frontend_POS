@@ -1,5 +1,4 @@
 <template>
-  <title>Nombre de Mi Aplicación</title>
   <div class="login-container">
     <LoadingSpinner :isLoading="isLoading" />
     <div class="login-card">
@@ -28,25 +27,13 @@
           </button>
         </div>
       </form>
-
-      <!-- Formulario de Recuperación de Contraseña -->
-      <form v-else @submit.prevent="recoverPassword">
-        <div class="form-group">
-          <input type="email" v-model="recoveryEmail" placeholder="Ingresa tu correo electrónico" required />
-        </div>
-        <div class="form-group button-container">
-          <button type="submit" class="submit-btn">
-            <i class="bi bi-envelope-fill"></i>
-          </button>
-        </div>
-        <p><a href="#" @click.prevent="togglePasswordRecovery">Volver al login</a></p>
-      </form>
     </div>
   </div>
 </template>
 
 <script>
 import LoadingSpinner from '@/components/LoadingSpinnerList.vue';
+import { useToast } from "vue-toastification"; // Importación para el popup
 
 export default {
   components: {
@@ -69,6 +56,7 @@ export default {
   },
   methods: {
     async login() {
+      const toast = useToast(); // Inicializa el toast
       try {
         this.isLoading = true;
 
@@ -87,38 +75,12 @@ export default {
           this.$router.push('/home'); // Redirecciona al home
         } else {
           this.isLoading = false;
-          alert(data.message); // Muestra el mensaje de error
+          toast.error(data.message); // Muestra el mensaje de error en un popup
         }
       } catch (error) {
         this.isLoading = false;
+        toast.error('Error de red o servidor.'); // Popup para errores generales
         console.error('Error:', error);
-      }
-
-      
-    },
-
-    async recoverPassword() {
-      try {
-        this.isLoading = true;
-
-        const response = await fetch('http://localhost:3000/api/recuperar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: this.recoveryEmail })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          alert(data.message); // Muestra el mensaje de éxito
-          this.isRecoveringPassword = false; // Volver a la vista de login
-        } else {
-          alert(data.message); // Muestra el mensaje de error
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        this.isLoading = false;
       }
     },
 
@@ -141,6 +103,7 @@ export default {
 
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');

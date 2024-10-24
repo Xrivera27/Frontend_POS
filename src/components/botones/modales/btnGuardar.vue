@@ -1,5 +1,5 @@
 <template>
-<button id="btnGuardar" class="btn btn-primary">
+  <button id="btnGuardar" class="btn btn-primary">
     {{ texto }}
   </button>
 
@@ -8,12 +8,12 @@
 <script>
 
 export default {
-    props: {
-       texto: {
-        type: String,
-        default: "Agregar"
+  props: {
+    texto: {
+      type: String,
+      default: "Agregar"
     }
-    }
+  }
 }
 </script>
 

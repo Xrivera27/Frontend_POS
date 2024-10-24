@@ -39,79 +39,55 @@
                     </div>
                 </form>
             </div>
+            <!-- Usa router-link sin la función isActive -->
+            <router-link to="/config-page" class="btn-config nav-link">
+                <div class="icon-container">
+                    <i id="campana" class="bi bi-bell-fill"></i>
+                </div>
+                <div class="text-container">
+                    <span class="id_usuario">{{ username }} {{ usernamen }}</span>
+                    <br>
+                    <span class="rol">{{ rol }}</span>
+                </div>
+            </router-link>
         </div>
     </div>
 </template>
-
 <script>
 import axios from 'axios';
 
 export default {
     data() {
-    return {
-        username: '',  // Estado para el nombre de usuario
-        role: '',  // Nuevo estado para el rol
-        id_usuario: '',  // Estado para el id del usuario
-        isModalOpen: false,
-        settings: {
-            email: '',
-            phone: '',
-            address: '',
-            password: ''
-        }
-    };
-},
+        return {
+            username: '',  // Estado para el nombre de usuario
+            role: '',  // Estado para el rol
+            id_usuario: '',  // Estado para el id del usuario
+        };
+    },
     methods: {
-        openModal() {
-            this.isModalOpen = true;
-        },
-        closeModal() {
-            this.isModalOpen = false;
-        },
-        saveSettings() {
-            console.log('Configuración guardada:', this.settings);
-            this.closeModal();
-        },
-
         fetchUserProfile() {
-    const token = localStorage.getItem('auth');
-    axios.get('http://localhost:3000/api/perfil', {
-        headers: {
-            Authorization: `Bearer ${token}` // Asegúrate de que el token esté correcto
+            const token = localStorage.getItem('auth');
+            axios.get('http://localhost:3000/api/perfil', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then(response => {
+                    this.id_usuario = response.data.id_usuario;
+                    this.username = response.data.nombre;
+                    this.usernamen = response.data.apellido;
+                    this.rol = response.data.cargo;
+                })
+                .catch(error => {
+                    console.error('Error al obtener el perfil del usuario:', error);
+                });
         }
-    })
-    .then(response => {
-        console.log('Datos de usuario:', response.data);
-        this.id_usuario = response.data.id_usuario;
-        this.username = response.data.nombre;
-        this.apellido = response.data.apellido;
-        this.rol = response.data.cargo;  // Asigna el nombre de usuario  // Asigna el nombre de usuario
-    })
-    .catch(error => {
-        if (error.response) {
-            console.error('Error al obtener el perfil del usuario:', error.response.data);
-        } else if (error.request) {
-            console.error('Error en la solicitud, no se recibió respuesta del servidor:', error.request);
-        } else {
-            console.error('Error desconocido:', error.message);
-        }
-    });
-}
-
-
-
     },
     mounted() {
-
-    this.fetchUserProfile();  // Llama al método cuando el componente se monta
-}
-
-        // Llamar a la API cuando el componente se monte
-        //this.fetchUserProfile();
+        this.fetchUserProfile();
     }
-
+}
 </script>
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
@@ -126,11 +102,6 @@ export default {
     color: #a38655;
 }
 
-.rol {
-    color: #969696;
-    font-size: 14px;
-}
-
 /* Estilos para el contenedor del botón de configuración */
 .btn-config-container {
     display: flex;
@@ -140,21 +111,38 @@ export default {
 /* Estilos para el botón de configuración */
 .btn-config {
     background-color: #f8f8f8;
+    text-decoration: none;
+    margin-bottom: 0;
     border: none;
     padding: 10px 20px;
     text-align: left;
     width: auto;
     max-width: 300px;
     cursor: pointer;
-    font-size: 18px;
-    color: #a38655;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: block;
-
+    display: flex;
+    align-items: center;
+    /* Alinea verticalmente los elementos */
 }
 
-.btn-config{
-    white-space: nowrap;
+.text-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Estilo para el rol */
+.rol {
+    color: #b0b0b0;
+    font-size: 14px;
+    margin-top: 0;
+}
+
+/* Estilo para el id_usuario */
+.id_usuario {
+    color: #a38655;
+    font-size: 18px;
+    margin-top: 0;
 }
 
 /* Efecto al pasar el mouse por encima */
@@ -163,83 +151,9 @@ export default {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Estilos para el modal */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* Estilo para resaltar el enlace activo */
+.router-link-active {
+    font-weight: bold;
+    color: #a38655;
 }
-
-.modal-content {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 500px;
-    position: relative;
-}
-
-.modal-content h2 {
-    margin-top: 0;
-    font-size: 1.5rem;
-}
-
-.modal-content form {
-    display: flex;
-    flex-direction: column;
-}
-
-.modal-content form div {
-    margin-bottom: 1rem;
-}
-
-.modal-content label {
-    display: block;
-    margin-bottom: 0.5rem;
-}
-
-.modal-content input {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.modal-content button {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    color: #fff;
-    background-color: #007bff;
-    cursor: pointer;
-    margin-right: 1rem;
-}
-
-.modal-content button[type="button"] {
-    background-color: #6c757d;
-}
-
-.modal-content button:hover {
-    background-color: #0056b3;
-}
-
-.modal-content button[type="button"]:hover {
-    background-color: #5a6268;
-}
-
-.username{
-    display: block; /* Asegura que cada elemento esté en su propia línea */
-    font-size: 14px;
-    margin-top: 5px; /* Añade un margen para separarlo de la campana */
-    text-align: center; /* Alinea el texto debajo del icono */
-}
-
 </style>
