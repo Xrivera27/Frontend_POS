@@ -7,7 +7,6 @@
     <hr />
 
     <div class="config-wrapper">
-
       <div class="company-config">
         <form autocomplete="off" class="formulario form-company">
           <fieldset :disabled="businessEditing">
@@ -18,15 +17,13 @@
             <div class="contenedor-principal">
               <div class="contenedor-interno contenedor-izquierdo">
                 <label for="nombre-company">Nombre de la empresa:</label>
-                <input type="text" id="nombre-company" name="nombre-company" required />
+                <input v-model="companyForm.nombre" type="text" id="nombre-company" name="nombre-company" />
 
-
-                <label for="telefono-empresa">Telefono principal:</label>
-                <input type="text" id="telefono-empresa" name="telefono-empresa" required />
-
+                <label for="telefono-empresa">Teléfono principal:</label>
+                <input v-model="companyForm.telefono_principal" type="text" id="telefono_principal" name="telefono_empresa" />
 
                 <label for="correo-principal">Correo principal:</label>
-                <input type="email" id="correo-principal" principal de la empresa name="correo" required />
+                <input v-model="companyForm.correo_principal" type="email" id="correo_principal" name="correo_principal" />
               </div>
             </div>
           </fieldset>
@@ -34,38 +31,30 @@
             <button class="btn editar" @click="isEditing(3)" :disabled="!businessEditing">Editar</button>
             <button class="btn guardar" :disabled="businessEditing">Guardar</button>
 
-            <router-link to = "/config-sar" >
+            <router-link to="/config-sar">
               <button type="button" class="btn SAR" :disabled="businessEditing">Config SAR</button>
             </router-link>
-            
           </div>
-
-
-          <!-- Fecha de inicio -->
         </form>
-
       </div>
 
       <router-link to="/config-page">
-        <button 
-        class="btn boton-switch inactivo">Config. Usuario</button>
-                </router-link>
-     
-        
-      <button
-        class="btn boton-switch activo">Config. Empresa</button>
+        <button class="btn boton-switch inactivo">Config. Usuario</button>
+      </router-link>
 
+      <button class="btn boton-switch activo">Config. Empresa</button>
     </div>
   </div>
 </template>
 
+
 <script>
+import axios from 'axios';
 import ProfileButton from '../components/ProfileButton.vue';
 
 export default {
   components: {
     ProfileButton,
-
   },
   data() {
     return {
@@ -79,92 +68,60 @@ export default {
       usuarioAvancedEditing: true,
       businessEditing: true,
       busisnessSarEditing: true,
-      userForm: [
-        {
-          nombreUsuario: '',
-          telefono: '',
-          direccion: '',
-          contrasena_actual: '',
-          contrasena_nueva: '',
-          contrasena_confirm: '',
-        }
-      ],
-      userFormAdvanced: [
-        {
-          nombre: '',
-          apellido: '',
-          correo: '',
-        }
-      ],
-      companyForm: [
-        {
-          nombre: '',
-          apellido: '',
-          correo: '',
-        }
-      ],
+    
+      companyForm: {
+        nombre: '',
+        telefono_principal: '',
+        correo_principal: ''
+      },
     };
   },
   methods: {
+    async getCompanyData() {
+      try {
+        const token = localStorage.getItem('auth'); // Obtener el token de localStorage
 
-    pushEsc(event) {
-      if (event.key === "Esc" || event.key === "Escape") {
-        this.usuarioEditing = true;
-        this.busisnessSarEditing = true;
-        this.businessEditing = true;
-        this.usuarioAvancedEditing = true;
+        const response = await axios.get('http://localhost:3000/api/configempresa', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Incluir el token en las cabeceras
+          },
+        });
+
+        const companyData = response.data.empresa; // Acceder a 'empresa'
+
+        // Actualiza los datos del formulario de la empresa
+        this.companyForm.nombre = companyData.nombre || '';
+        this.companyForm.telefono_principal = companyData.telefono_principal || '';
+        this.companyForm.correo_principal = companyData.correo_principal || '';
+
+      } catch (error) {
+        console.error('Error al obtener los datos de la empresa:', error);
+        alert('No se pudo obtener la información de la empresa.');
       }
     },
 
-    switchBools() {
-      this.userBoton = !this.userBoton;
-      this.companyBoton = !this.companyBoton;
-      this.showUser = !this.showUser;
-      this.showCompany = !this.showCompany;
-      this.userActive = !this.userActive;
+    changeFavicon(iconPath) {
+      const favicon = document.querySelector('link[rel="icon"]');
+      if (favicon) {
+        favicon.href = iconPath; // Cambia el favicon a la ruta proporcionada
+      }
     },
 
     isEditing(orden) {
-      switch (orden) {
-        case 1: this.usuarioEditing = false;
-          this.busisnessSarEditing = true;
-          this.businessEditing = true;
-          this.usuarioAvancedEditing = true;
-          break;
-
-        case 2: this.usuarioEditing = true;
-          this.busisnessSarEditing = true;
-          this.businessEditing = true;
-          this.usuarioAvancedEditing = false;
-          break;
-
-        case 3: this.usuarioEditing = true;
-          this.busisnessSarEditing = true;
-          this.businessEditing = false;
-          this.usuarioAvancedEditing = true;
-          break;
-
-        case 4: this.usuarioEditing = true;
-          this.busisnessSarEditing = false;
-          this.businessEditing = true;
-          this.usuarioAvancedEditing = true;
-          break;
-
-        default:
-          alert("Ha ocurrido un error");
-      }
+      this.businessEditing = orden === 3 ? false : true;
     },
-    changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
-      link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
+    
+    pushEsc(event) {
+      // Aquí va tu lógica para el evento de tecla ESC
+      if (event.key === 'Escape') {
+        // Lógica para manejar el ESC
+      }
     }
   },
 
   mounted() {
     // Añade el manejador de eventos cuando el componente se monta
+    this.getCompanyData(); 
     window.addEventListener("keydown", this.pushEsc);
     document.title = "Configuración";
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
@@ -173,9 +130,10 @@ export default {
     // Elimina el manejador de eventos cuando el componente se destruye
     window.removeEventListener("keydown", this.pushEsc);
   },
-
 };
 </script>
+
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');

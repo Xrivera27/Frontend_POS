@@ -1,51 +1,13 @@
 <template>
     <div>
         <div class="btn-config-container">
-            <button class="btn-config" @click="openModal">
-    <i id="campana" class="bi bi-bell-fill"></i>{{ username }} {{ apellido }}
-    <br>
-    <span class="id_usuario">{{ id_usuario }}</span> <!-- Muestra el nombre del usuario aquí -->
-    <br>
-    {{ rol }}
-
-</button>
-
-        </div>
-
-        <!-- Modal -->
-        <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-            <div class="modal-content">
-                <h2>Configuración del Perfil</h2>
-                <form @submit.prevent="saveSettings">
-                    <div>
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" v-model="settings.email">
-                    </div>
-                    <div>
-                        <label for="phone">Teléfono:</label>
-                        <input type="tel" id="phone" v-model="settings.phone">
-                    </div>
-                    <div>
-                        <label for="address">Dirección:</label>
-                        <input type="text" id="address" v-model="settings.address">
-                    </div>
-                    <div>
-                        <label for="password">Contraseña:</label>
-                        <input type="password" id="password" v-model="settings.password">
-                    </div>
-                    <div>
-                        <button type="submit">Guardar</button>
-                        <button type="button" @click="closeModal">Cancelar</button>
-                    </div>
-                </form>
-            </div>
             <!-- Usa router-link sin la función isActive -->
             <router-link to="/config-page" class="btn-config nav-link">
                 <div class="icon-container">
                     <i id="campana" class="bi bi-bell-fill"></i>
                 </div>
                 <div class="text-container">
-                    <span class="id_usuario">{{ username }} {{ usernamen }}</span>
+                    <span class="id_usuario">{{ username }} {{ apellido }}</span>
                     <br>
                     <span class="rol">{{ rol }}</span>
                 </div>
@@ -53,6 +15,7 @@
         </div>
     </div>
 </template>
+
 <script>
 import axios from 'axios';
 
@@ -75,7 +38,7 @@ export default {
                 .then(response => {
                     this.id_usuario = response.data.id_usuario;
                     this.username = response.data.nombre;
-                    this.usernamen = response.data.apellido;
+                    this.apellido = response.data.apellido;
                     this.rol = response.data.cargo;
                 })
                 .catch(error => {
