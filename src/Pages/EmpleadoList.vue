@@ -17,7 +17,8 @@
 
       <div class="registros">
         <span>
-          <select class="custom-select">
+          <select class="custom-select" v-model="searchSucursal">
+            <option value="default" selected>Todas</option>
             <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
               sucursal.nombre_administrativo }}</option>
           </select>
@@ -167,6 +168,7 @@ export default {
     return {
       showTooltip: false,
       searchQuery: '',
+      searchSucursal: 'default',
       id_usuario: 0, // Almacena el texto de búsqueda
       isModalOpen: false,
       isEditing: false,
@@ -175,6 +177,7 @@ export default {
       itemsPerPage: "",
       sucursales: [],
       roles: [],
+
       usuarioForm: {
         id_usuario: 0,
         nombre: '',
@@ -205,7 +208,7 @@ export default {
       );
 
       this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
-      console.log(this.empleados);
+
       this.roles = await solicitudes.fetchRegistros('/roles');
 
 
@@ -217,20 +220,31 @@ export default {
     filteredEmpleados() {
       // Filtra los empleados basados en el texto de búsqueda
       return this.empleados
+      .filter(empleado => empleado.sucursales.some( 
+        sucursalUser => sucursalUser.id_sucursal == this.searchSucursal || this.searchSucursal === 'default' ))
         .filter(empleado =>
           empleado.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           empleado.apellido.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           empleado.nombre_usuario.toLowerCase().includes(this.searchQuery.toLowerCase())
         );
+        
     },
+
+    filterbySucursal(){
+      return this.empleados.filter(empleado => empleado.sucursales.some( 
+        sucursalUser => sucursalUser.id_sucursal == this.searchSucursal ));
+    },
+
     paginatedEmpleados() {
       // Si itemsPerPage es vacío, mostramos todos los registros, de lo contrario aplicamos la paginación
-      if (this.itemsPerPage === "" || this.itemsPerPage === null) {
+
+      if (this.itemsPerPage === "" || this.itemsPerPage === null ) {
         return this.filteredEmpleados;
       } else {
         return this.filteredEmpleados.slice(0, parseInt(this.itemsPerPage));
       }
-    }
+
+    },
   },
   methods: {
     /* validarEmpty(formulario) {
