@@ -55,7 +55,7 @@
             <td>
               <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(empleado)"><i
                   class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteUsuariol(index)"><b><i
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteUsuariol(empleado)"><b><i
                     class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
@@ -387,14 +387,14 @@ export default {
       this.closeModal();
     },
 
-    async deleteUsuariol(index) {
+    async deleteUsuariol(empleado) {
       let response;
 
       const datosActualizados = {
         estado: false,
       };
 
-      const parametros = `/usuario/desactivar/${this.empleados[index].id_usuario}`;
+      const parametros = `/usuario/desactivar/${empleado.id_usuario}`; // Usa el id del empleado que se pasa
 
       try {
         response = await solicitudes.desactivarRegistro(
@@ -403,7 +403,11 @@ export default {
         );
 
         if (response == true) {
-          this.empleados.splice(index, 1);
+          // Encuentra el índice del empleado en el array original y lo elimina
+          const index = this.empleados.findIndex(e => e.id_usuario === empleado.id_usuario);
+          if (index !== -1) {
+            this.empleados.splice(index, 1);
+          }
         }
       } catch (error) {
         alert(new Error(response));
