@@ -49,12 +49,10 @@
             <th>#</th>
             <th>Codigo</th>
             <th>Descripcion</th>
-            <th>Categoria</th>
             <th>Stock</th>
             <th>Precio Unitario</th>
             <th>Precio Mayorista</th>
-            <th>Precio Descuento</th>
-            <th>Fecha</th>
+            <th>Promocion Activa</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -63,12 +61,10 @@
             <td>{{ index + 1 }}</td>
             <td>{{ producto.codigo }}</td>
             <td>{{ producto.descripcion }}</td>
-            <td>{{ producto.categoria }}</td>
-            <td>{{ producto.stock }}</td>
-            <td>{{ producto.preciounitario }}</td>
-            <td>{{ producto.preciomayorista }}</td>
-            <td>{{ producto.preciodescuento }}</td>
-            <td>{{ producto.fecha }}</td>
+            <td>{{ producto.stock_actual }}</td>
+            <td>{{ producto.precio_unitario }}</td>
+            <td>{{ producto.precio_mayorista }}</td>
+            <td>Inactivo</td>
             <td>
               <button id="btnEditar" class="btn btn-warning" @click="editProducto(index)">
                 <i class="bi bi-pencil-fill"></i>
@@ -98,20 +94,12 @@
             <label>Nombre Producto:</label>
             <input v-model="productoForm.nombre" type="text" required />
           </div>
-
           <div class="form-group">
-            <label for="rol">Proveedor:</label>
-            <select class="form-select" id="proveedor" name="proveedor" v-model="productoForm.proveedor">
-              <!-- <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option> -->
-            </select>
+            <label>Descripcion:</label>
+            <textarea id="textArea" v-model="productoForm.descripcion" type="text" required />
           </div>
 
-          <div class="form-group">
-            <label for="rol">Unidad de medida:</label>
-            <select class="form-select" id="medida" name="medida" v-model="productoForm.unidad_medida">
-              <!-- <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option> -->
-            </select>
-          </div>
+          
 
           <div class="form-group">
             <label for="rol">Impuesto:</label>
@@ -131,13 +119,19 @@
             <label>Precio por mayoreo:</label>
             <input v-model="productoForm.precio_mayorista" type="text" required />
           </div>
+
           <div class="form-group">
-            <label>Stock Minimo:</label>
-            <input v-model="productoForm.stock_min" type="text" required />
+            <label for="rol">Proveedor:</label>
+            <select class="form-select" id="proveedor" name="proveedor" v-model="productoForm.proveedor">
+              <!-- <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option> -->
+            </select>
           </div>
+
           <div class="form-group">
-            <label>Stock Maximo:</label>
-            <input v-model="productoForm.stock_max" type="text" required />
+            <label for="rol">Unidad de medida:</label>
+            <select class="form-select" id="medida" name="medida" v-model="productoForm.unidad_medida">
+              <!-- <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option> -->
+            </select>
           </div>
 
         </div>
@@ -158,6 +152,9 @@ import ExportButton from '../components/ExportButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
+// importando solicitudes
+import solicitudes from "../../services/solicitudes.js";
+
 export default {
   components: {
     ProfileButton,
@@ -172,6 +169,7 @@ export default {
       isEditing: false,
       editIndex: null,
       itemsPerPage: "",
+      id_usuario: '',
       productoForm: {
        codigo_producto: '',
        nombre: '',
@@ -185,27 +183,7 @@ export default {
 
       },
       productos: [
-        { codigo: '1504', descripcion: 'Mortal Kombat X', categoria: 'Videojuegos', stock: '45', preciounitario: 'L. 450.00', preciomayorista: 'L. 350.00', preciodescuento: 'L. 400.00', fecha: '2017-12-11' },
-        { codigo: '1505', descripcion: 'Call of Duty: Modern Warfare', categoria: 'Videojuegos', stock: '30', preciounitario: 'L. 600.00', preciomayorista: 'L. 500.00', preciodescuento: 'L. 550.00', fecha: '2020-05-21' },
-        { codigo: '1506', descripcion: 'God of War', categoria: 'Videojuegos', stock: '25', preciounitario: 'L. 700.00', preciomayorista: 'L. 600.00', preciodescuento: 'L. 650.00', fecha: '2018-04-15' },
-        { codigo: '1507', descripcion: 'The Last of Us Part II', categoria: 'Videojuegos', stock: '35', preciounitario: 'L. 800.00', preciomayorista: 'L. 700.00', preciodescuento: 'L. 750.00', fecha: '2020-06-19' },
-        { codigo: '1508', descripcion: 'FIFA 21', categoria: 'Videojuegos', stock: '50', preciounitario: 'L. 550.00', preciomayorista: 'L. 450.00', preciodescuento: 'L. 500.00', fecha: '2020-10-09' },
-        { codigo: '1509', descripcion: 'Red Dead Redemption 2', categoria: 'Videojuegos', stock: '20', preciounitario: 'L. 900.00', preciomayorista: 'L. 800.00', preciodescuento: 'L. 850.00', fecha: '2018-10-26' },
-        { codigo: '1510', descripcion: 'Spider-Man', categoria: 'Videojuegos', stock: '40', preciounitario: 'L. 500.00', preciomayorista: 'L. 400.00', preciodescuento: 'L. 450.00', fecha: '2018-09-07' },
-        { codigo: '1511', descripcion: 'Minecraft', categoria: 'Videojuegos', stock: '60', preciounitario: 'L. 350.00', preciomayorista: 'L. 300.00', preciodescuento: 'L. 320.00', fecha: '2019-12-20' },
-        { codigo: '1512', descripcion: 'Fortnite (Paquete Deluxe)', categoria: 'Videojuegos', stock: '70', preciounitario: 'L. 200.00', preciomayorista: 'L. 150.00', preciodescuento: 'L. 180.00', fecha: '2021-03-10' },
-        { codigo: '1513', descripcion: 'NBA 2K21', categoria: 'Videojuegos', stock: '30', preciounitario: 'L. 600.00', preciomayorista: 'L. 500.00', preciodescuento: 'L. 550.00', fecha: '2020-09-04' },
-        { codigo: '1514', descripcion: 'Assassin’s Creed Valhalla', categoria: 'Videojuegos', stock: '28', preciounitario: 'L. 750.00', preciomayorista: 'L. 650.00', preciodescuento: 'L. 700.00', fecha: '2020-11-10' },
-        { codigo: '1515', descripcion: 'Cyberpunk 2077', categoria: 'Videojuegos', stock: '22', preciounitario: 'L. 900.00', preciomayorista: 'L. 800.00', preciodescuento: 'L. 850.00', fecha: '2020-12-10' },
-        { codigo: '1516', descripcion: 'Gears 5', categoria: 'Videojuegos', stock: '40', preciounitario: 'L. 550.00', preciomayorista: 'L. 450.00', preciodescuento: 'L. 500.00', fecha: '2019-09-06' },
-        { codigo: '1517', descripcion: 'Resident Evil Village', categoria: 'Videojuegos', stock: '15', preciounitario: 'L. 800.00', preciomayorista: 'L. 700.00', preciodescuento: 'L. 750.00', fecha: '2021-05-07' },
-        { codigo: '1518', descripcion: 'Grand Theft Auto V', categoria: 'Videojuegos', stock: '50', preciounitario: 'L. 650.00', preciomayorista: 'L. 550.00', preciodescuento: 'L. 600.00', fecha: '2013-09-17' },
-        { codigo: '1519', descripcion: 'Horizon Zero Dawn', categoria: 'Videojuegos', stock: '25', preciounitario: 'L. 700.00', preciomayorista: 'L. 600.00', preciodescuento: 'L. 650.00', fecha: '2017-02-28' },
-        { codigo: '1520', descripcion: 'Dark Souls III', categoria: 'Videojuegos', stock: '20', preciounitario: 'L. 750.00', preciomayorista: 'L. 650.00', preciodescuento: 'L. 700.00', fecha: '2016-04-12' },
-        { codigo: '1521', descripcion: 'Sekiro: Shadows Die Twice', categoria: 'Videojuegos', stock: '30', preciounitario: 'L. 850.00', preciomayorista: 'L. 750.00', preciodescuento: 'L. 800.00', fecha: '2019-03-22' },
-        { codigo: '1522', descripcion: 'The Witcher 3: Wild Hunt', categoria: 'Videojuegos', stock: '35', preciounitario: 'L. 600.00', preciomayorista: 'L. 500.00', preciodescuento: 'L. 550.00', fecha: '2015-05-19' },
-        { codigo: '1523', descripcion: 'Far Cry 5', categoria: 'Videojuegos', stock: '40', preciounitario: 'L. 500.00', preciomayorista: 'L. 400.00', preciodescuento: 'L. 450.00', fecha: '2018-03-27' },
-        { codigo: '1524', descripcion: 'Battlefield V', categoria: 'Videojuegos', stock: '18', preciounitario: 'L. 650.00', preciomayorista: 'L. 550.00', preciodescuento: 'L. 600.00', fecha: '2018-11-20' }
+       
       ],
       columns: [
         { header: '#', dataKey: 'index' },
@@ -248,12 +226,11 @@ export default {
     clearForm() {
       this.productoForm = {
         codigo_producto: '',
-       nombre: '',
+        nombre: '',
+        descripcion: '',
        unidad_medida: '',
        impuesto: '',
        proveedor: '',
-       stock_min: '',
-       stock_max: '',
        precio_unitario: '',
        precio_mayorista: '',
       };
@@ -306,11 +283,20 @@ export default {
       this.generateRows();
     }
   },
-  mounted() {
+ async mounted() {
     // Genera las filas al cargar el componente
     this.generateRows();
     document.title = "Productos";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    this.changeFavicon('/img/spiderman.ico');
+    
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+
+      this.productos = await solicitudes.fetchRegistros(`/productos-empresa/${this.id_usuario}`);
+
+    } catch (error) {
+      console.log(error); //modal error pendiente
+    }// Usar la ruta correcta
   }
 };
 </script>
@@ -558,13 +544,17 @@ export default {
   margin-bottom: 8px;
 }
 
-.form-group input {
+.form-group input, textarea {
   width: 95%;
   height: 25%;
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   justify-content: center;
+}
+
+#textArea {
+  min-height: 80px;
 }
 
 .stock-group {
