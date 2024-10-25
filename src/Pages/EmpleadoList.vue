@@ -53,7 +53,7 @@
             <td>{{ getRol(empleado.id_rol) }}</td>
 
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(index)"><i
+              <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(empleado)"><i
                   class="bi bi-pencil-fill"></i></button>
               <button id="btnEliminar" class="btn btn-danger" @click="deleteUsuariol(index)"><b><i
                     class="bi bi-x-lg"></i></b></button>
@@ -151,11 +151,11 @@
 import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
-//import { useToast } from "vue-toastification"; // Importación para el popup
+import { useToast } from "vue-toastification"; // Importación para el popup
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
-//import validarCamposService from '../../services/validarCampos.js';
+import validarCamposService from '../../services/validarCampos.js';
 
 export default {
   components: {
@@ -221,19 +221,19 @@ export default {
     filteredEmpleados() {
       // Filtra los empleados basados en el texto de búsqueda
       return this.empleados
-      .filter(empleado => empleado.sucursales == this.searchSucursal || this.searchSucursal === 'default' )
+        .filter(empleado => empleado.sucursales == this.searchSucursal || this.searchSucursal === 'default')
         .filter(empleado =>
           empleado.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           empleado.apellido.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           empleado.nombre_usuario.toLowerCase().includes(this.searchQuery.toLowerCase())
         );
-        
+
     },
 
     paginatedEmpleados() {
       // Si itemsPerPage es vacío, mostramos todos los registros, de lo contrario aplicamos la paginación
 
-      if (this.itemsPerPage === "" || this.itemsPerPage === null ) {
+      if (this.itemsPerPage === "" || this.itemsPerPage === null) {
         return this.filteredEmpleados;
       } else {
         return this.filteredEmpleados.slice(0, parseInt(this.itemsPerPage));
@@ -242,20 +242,20 @@ export default {
     },
   },
   methods: {
-    /* validarEmpty(formulario) {
-       const campos = Object.values(formulario);
-       return campos.every(campo => {
-         // Verifica si el campo es un string y no está vacío
-         if (typeof campo === 'string') {
-           return campo.trim() !== '';
-         }
-         // Verifica si el campo es un valor de selección (select)
-         if (typeof campo === 'number' || typeof campo === 'string') {
-           return campo !== '' && campo !== null; // Cambia '' por el valor que consideres como "no seleccionado"
-         }
-         return campo !== null && campo !== undefined; // Asegúrate de que no sea null o undefined
-       });
-     }, */
+    validarEmpty(formulario) {
+      const campos = Object.values(formulario);
+      return campos.every(campo => {
+        // Verifica si el campo es un string y no está vacío
+        if (typeof campo === 'string') {
+          return campo.trim() !== '';
+        }
+        // Verifica si el campo es un valor de selección (select)
+        if (typeof campo === 'number' || typeof campo === 'string') {
+          return campo !== '' && campo !== null; // Cambia '' por el valor que consideres como "no seleccionado"
+        }
+        return campo !== null && campo !== undefined; // Asegúrate de que no sea null o undefined
+      });
+    },
 
     openModal() {
       this.isModalOpen = true;
@@ -289,49 +289,61 @@ export default {
     },
 
     async guardarUsuario() {
-     // const toast = useToast();
+      const toast = useToast();
       let response;
       let parametros;
 
-      // const email = this.usuarioForm.correo;
-      // const password1 = this.usuarioForm.password;
-      // const password2 = this.usuarioForm.confirmPassword;
-      // const telefono = this.usuarioForm.telefono;
+      const email = this.usuarioForm.correo;
+      const password1 = this.usuarioForm.password;
+      const password2 = this.usuarioForm.confirmPassword;
+      const telefono = this.usuarioForm.telefono;
 
       // // Validaciones
-      // if (!validarCamposService.validarEmpty(this.usuarioForm)) {
-      //   console.log('Rellene todos los campos');
-      //   toast.warning('Rellene todos los campos');
-      //   return;
-      // }
+      if (!validarCamposService.validarEmpty(this.usuarioForm)) {
+        console.log('Rellene todos los campos');
+        toast.warning('Rellene todos los campos', {
+          timeout: 5000
+        });
+        return;
+      }
 
-      // if (!validarCamposService.validarEmail(email)) {
-      //   console.log('El correo no es válido o no pertenece a un dominio aceptado');
-      //   toast.warning('El correo no es válido o no pertenece a un dominio aceptado');
-      //   return;
-      // }
+      if (!validarCamposService.validarEmail(email)) {
+        console.log('El correo no es válido o no pertenece a un dominio aceptado');
+        toast.warning('El correo no es válido o no pertenece a un dominio aceptado', {
+          timeout: 5000
+        });
+        return;
+      }
 
-      // if (!validarCamposService.validarPasswordSegura(password1)) {
-      //   console.log('La contraseña no cumple con los requisitos de seguridad');
-      //   toast.error('La contraseña no cumple con los requisitos de seguridad');
-      //   return;
-      // }
+      if (!validarCamposService.validarPasswordSegura(password1)) {
+        console.log('La contraseña no cumple con los requisitos de seguridad');
+        toast.error('La contraseña no cumple con los requisitos de seguridad', {
+          timeout: 5000
+        });
+        return;
+      }
 
-      // if (!validarCamposService.validarPass(password1, password2)) {
-      //   console.log('Las contraseñas no coinciden');
-      //   toast.error('Las contraseñas no coinciden');
-      //   return;
-      // }
+      if (!validarCamposService.validarPass(password1, password2)) {
+        console.log('Las contraseñas no coinciden');
+        toast.error('Las contraseñas no coinciden', {
+          timeout: 5000
+        });
+        return;
+      }
 
-      // if (!validarCamposService.validarTelefono(telefono)) {
-      //   console.log('El teléfono no es válido');
-      //   toast.error('El teléfono no es válido');
-      //   return;
-      // }
+      if (!validarCamposService.validarTelefono(telefono)) {
+        console.log('El teléfono no es válido');
+        toast.error('El teléfono no es válido', {
+          timeout: 5000
+        });
+        return;
+      }
 
-      // // Si todas las validaciones pasan, procede a guardar el usuario
-      // console.log('Usuario válido, procesando guardado...');
-      // toast.success('Usuario válido, procesando guardado...');
+      // Si todas las validaciones pasan, procede a guardar el usuario
+      console.log('Usuario válido, procesando guardado...');
+      toast.success('Usuario válido, procesando guardado...', {
+        timeout: 5000
+      });
 
       if (this.isEditing) {
         try {
@@ -361,7 +373,7 @@ export default {
           );
 
           if (response.length > 0) {
-          
+
             this.empleados.push(response[0]);
 
           } else {
@@ -398,10 +410,9 @@ export default {
       }
     },
 
-    editEmpleado(index) {
-      this.usuarioForm = { ...this.empleados[index] };
+    editEmpleado(empleado) {
+      this.usuarioForm = { ...empleado }; // Asigna directamente el objeto empleado
       this.isEditing = true;
-      this.editIndex = index;
       this.openModal();
     },
     deleteEmpleado(index) {
@@ -410,25 +421,6 @@ export default {
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     },
-
-    // validarCampos(formulario) {
-    //   const toast = useToast();
-
-    //   if (!validarCamposService.validarPass(this.usuarioForm.password, this.usuarioForm.confirmPassword)) {
-    //     toast.error('Las contraseñas no coinciden');
-    //     return false;
-    //   }
-
-    //   for (const atributo in formulario) {
-    //     if (!validarCamposService.validarEmpty(formulario[atributo]) && atributo != 'id_usuario') {
-    //       alert(atributo);
-    //       return false;
-    //     }
-    //   }
-
-    //   return true;
-
-    // },
 
     limpiarForm(formulario) {
       const formLimpio = {
