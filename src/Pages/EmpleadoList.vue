@@ -94,7 +94,7 @@
 
             <div class="form-group">
               <label for="rol">Selecciona rol:</label>
-              <select class="form-select" id="rol" name="rol" v-model="usuarioForm.rol">
+              <select class="form-select" id="rol" name="rol" v-model="usuarioForm.rol" required>
                 <option value="" disabled selected>Selecciona un rol</option>
                 <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option>
               </select>
@@ -118,7 +118,7 @@
             </div>
             <div class="form-group">
               <label>Telefono:</label>
-              <input v-model="usuarioForm.telefono" type="text" />
+              <input v-model="usuarioForm.telefono" type="text" required />
             </div>
             <div class="form-group">
               <label>Direccion:</label>
@@ -127,7 +127,7 @@
 
             <div class="form-group">
               <label for="sucursal">Selecciona sucursal:</label>
-              <select class="form-select" id="sucursal" name="sucursal" v-model="usuarioForm.sucursal">
+              <select class="form-select" id="sucursal" name="sucursal" v-model="usuarioForm.sucursal" required>
                 <option value="" disabled selected>Selecciona una sucursal</option>
                 <option v-for="(sucursal, index) in sucursales" :key="index" :value="sucursal.id_sucursal">{{
                   sucursal.nombre_administrativo }}</option>
@@ -137,7 +137,8 @@
           </div>
         </div>
 
-        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario">
+        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario"
+          type="submit">
         </btnGuardarModal>
         <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
       </div>
@@ -242,20 +243,6 @@ export default {
     },
   },
   methods: {
-    validarEmpty(formulario) {
-      const campos = Object.values(formulario);
-      return campos.every(campo => {
-        // Verifica si el campo es un string y no está vacío
-        if (typeof campo === 'string') {
-          return campo.trim() !== '';
-        }
-        // Verifica si el campo es un valor de selección (select)
-        if (typeof campo === 'number' || typeof campo === 'string') {
-          return campo !== '' && campo !== null; // Cambia '' por el valor que consideres como "no seleccionado"
-        }
-        return campo !== null && campo !== undefined; // Asegúrate de que no sea null o undefined
-      });
-    },
 
     openModal() {
       this.isModalOpen = true;
@@ -288,6 +275,48 @@ export default {
       return rol ? rol.cargo : 'Desconocido';
     },
 
+    notificarCampoVacio(campo) {
+      const toast = useToast(); // Inicializa el toast aquí
+      const mensajes = {
+        nombre: 'El campo "Nombre" está vacío.',
+        apellido: 'El campo "Apellido" está vacío.',
+        nombre_usuario: 'El campo "Nombre de Usuario" está vacío.',
+        correo: 'El campo "Correo" está vacío.',
+        telefono: 'El campo "Teléfono" está vacío.',
+        direccion: 'El campo "Dirección" está vacío.',
+        sucursal: 'El campo "Sucursal" está vacío.',
+        password: 'El campo "Contraseña" está vacío.',
+        confirmPassword: 'El campo "Confirmar Contraseña" está vacío.',
+        rol: 'El campo "Rol" está vacío.',
+      };
+      const mensaje = mensajes[campo] || 'Un campo está vacío.';
+      toast.error(mensaje, { timeout: 5000 }); // Usa el toast aquí
+    },
+
+    // Método para validar que los campos no estén vacíos
+    validarEmpty() {
+      const campos = {
+        nombre: this.usuarioForm.nombre,
+        apellido: this.usuarioForm.apellido,
+        nombre_usuario: this.usuarioForm.nombre_usuario,
+        correo: this.usuarioForm.correo,
+        telefono: this.usuarioForm.telefono,
+        direccion: this.usuarioForm.direccion,
+        sucursal: this.usuarioForm.sucursal,
+        password: this.usuarioForm.password,
+        confirmPassword: this.usuarioForm.confirmPassword,
+        rol: this.usuarioForm.rol,
+      };
+
+      for (const [key, value] of Object.entries(campos)) {
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          this.notificarCampoVacio(key);
+          return true; // Retorna true si hay un campo vacío
+        }
+      }
+      return false; // Todos los campos están llenos
+    },
+
     async guardarUsuario() {
       const toast = useToast();
       let response;
@@ -299,12 +328,16 @@ export default {
       const telefono = this.usuarioForm.telefono;
 
       // // Validaciones
-      if (!validarCamposService.validarEmpty(this.usuarioForm)) {
-        console.log('Rellene todos los campos');
-        toast.warning('Rellene todos los campos', {
-          timeout: 5000
-        });
-        return;
+      /*     if (!validarCamposService.validarEmpty(this.usuarioForm)) {
+             console.log('Rellene todos los campos');
+             toast.warning('Rellene todos los campos', {
+               timeout: 5000
+             });
+             return;
+           }*/
+
+      if (this.validarEmpty()) {
+        return; // Si hay un campo vacío, no continuar con el guardado
       }
 
       if (!validarCamposService.validarEmail(email)) {
