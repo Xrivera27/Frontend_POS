@@ -27,8 +27,24 @@
           </button>
         </div>
       </form>
+
+      <form v-else @submit.prevent="recoverPassword">
+        <div class="form-group">
+          <input type="email" v-model="recoveryEmail" placeholder="Ingresa tu correo electrónico" required />
+        </div>
+        <div class="form-group button-container">
+          <button type="submit" class="submit-btn">
+            <i class="bi bi-envelope-fill"></i>
+          </button>
+        </div>
+        <p><a href="#" @click.prevent="togglePasswordRecovery">Volver al login</a></p>
+      </form>
+
+      
     </div>
   </div>
+
+  
 </template>
 
 <script>
@@ -81,6 +97,31 @@ export default {
         this.isLoading = false;
         toast.error('Error de red o servidor.'); // Popup para errores generales
         console.error('Error:', error);
+      }
+    },
+
+    async recoverPassword() {
+      try {
+        this.isLoading = true;
+
+        const response = await fetch('http://localhost:3000/api/recuperar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: this.recoveryEmail })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert(data.message); // Muestra el mensaje de éxito
+          this.isRecoveringPassword = false; // Volver a la vista de login
+        } else {
+          alert(data.message); // Muestra el mensaje de error
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        this.isLoading = false;
       }
     },
 
