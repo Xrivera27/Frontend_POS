@@ -1,4 +1,5 @@
 <template>
+  <LoadingSpinner :isLoading="isLoading" />
   <div class="encabezado">
     <h1>Usuarios</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
@@ -153,6 +154,7 @@ import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 import { useToast } from "vue-toastification"; // Importación para el popup
+import LoadingSpinner from '@/components/LoadingSpinnerList.vue';
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -163,10 +165,11 @@ export default {
     ProfileButton,
     btnGuardarModal,
     btnCerrarModal,
-
+    LoadingSpinner
   },
   data() {
     return {
+      isLoading: false,
       showTooltip: false,
       searchQuery: '',
       searchSucursal: 'default',
@@ -199,24 +202,7 @@ export default {
   async mounted() {
     document.title = "Usuarios";
     this.changeFavicon('/img/spiderman.ico');
-    // Usar la ruta correcta
-
-    try {
-      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
-
-      this.sucursales = await solicitudes.fetchRegistros(
-        `/sucursales/empresa/${this.id_usuario}`
-      );
-
-      this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
-      console.log(this.empleados);
-
-      this.roles = await solicitudes.fetchRegistros('/roles');
-
-
-    } catch (error) {
-      console.log(error); //modal error pendiente
-    }
+    this.loadEmpleados(); // Llama a la función para cargar empleados al montar el componente
   },
   computed: {
     filteredEmpleados() {
@@ -243,6 +229,18 @@ export default {
     },
   },
   methods: {
+    async loadEmpleados() {
+      this.isLoading = true; // Comienza a cargar
+      try {
+        const id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+        this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${id_usuario}`);
+        console.log(this.empleados);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.isLoading = false; // Termina la carga
+      }
+    },
 
     openModal() {
       this.isModalOpen = true;
