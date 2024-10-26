@@ -40,11 +40,11 @@
         <p><a href="#" @click.prevent="togglePasswordRecovery">Volver al login</a></p>
       </form>
 
-      
+
     </div>
   </div>
 
-  
+
 </template>
 
 <script>
@@ -90,13 +90,17 @@ export default {
           this.isLoading = false;
           this.$router.push('/home'); // Redirecciona al home
         } else {
-          this.isLoading = false;
-          toast.error(data.message); // Muestra el mensaje de error en un popup
+          this.isLoading = false;// Muestra el mensaje de error en un popup
+          toast.error(data.message, {
+            timeout: 5000
+          });
         }
       } catch (error) {
         this.isLoading = false;
-        toast.error('Error de red o servidor.'); // Popup para errores generales
-        console.error('Error:', error);
+        console.error('Error:', error);// Popup para errores generales
+        toast.error('Error de red o servidor.', {
+          timeout: 5000
+        });
       }
     },
 

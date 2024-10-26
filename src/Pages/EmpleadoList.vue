@@ -1,4 +1,5 @@
 <template>
+  <LoadingSpinner :isLoading="isLoading" />
   <div class="encabezado">
     <h1>Usuarios</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
@@ -53,9 +54,9 @@
             <td>{{ getRol(empleado.id_rol) }}</td>
 
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(index)"><i
+              <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(empleado)"><i
                   class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteUsuariol(index)"><b><i
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteUsuariol(empleado)"><b><i
                     class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
@@ -94,7 +95,7 @@
 
             <div class="form-group">
               <label for="rol">Selecciona rol:</label>
-              <select class="form-select" id="rol" name="rol" v-model="usuarioForm.rol">
+              <select class="form-select" id="rol" name="rol" v-model="usuarioForm.rol" required>
                 <option value="" disabled selected>Selecciona un rol</option>
                 <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option>
               </select>
@@ -118,7 +119,7 @@
             </div>
             <div class="form-group">
               <label>Telefono:</label>
-              <input v-model="usuarioForm.telefono" type="text" />
+              <input v-model="usuarioForm.telefono" type="text" required />
             </div>
             <div class="form-group">
               <label>Direccion:</label>
@@ -127,7 +128,7 @@
 
             <div class="form-group">
               <label for="sucursal">Selecciona sucursal:</label>
-              <select class="form-select" id="sucursal" name="sucursal" v-model="usuarioForm.sucursal">
+              <select class="form-select" id="sucursal" name="sucursal" v-model="usuarioForm.sucursal" required>
                 <option value="" disabled selected>Selecciona una sucursal</option>
                 <option v-for="(sucursal, index) in sucursales" :key="index" :value="sucursal.id_sucursal">{{
                   sucursal.nombre_administrativo }}</option>
@@ -137,7 +138,8 @@
           </div>
         </div>
 
-        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario">
+        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario"
+          type="submit">
         </btnGuardarModal>
         <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
       </div>
@@ -151,21 +153,23 @@
 import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
-//import { useToast } from "vue-toastification"; // Importación para el popup
+import { useToast } from "vue-toastification"; // Importación para el popup
+import LoadingSpinner from '@/components/LoadingSpinnerList.vue';
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
-//import validarCamposService from '../../services/validarCampos.js';
+import validarCamposService from '../../services/validarCampos.js';
 
 export default {
   components: {
     ProfileButton,
     btnGuardarModal,
     btnCerrarModal,
-
+    LoadingSpinner
   },
   data() {
     return {
+      isLoading: false,
       showTooltip: false,
       searchQuery: '',
       searchSucursal: 'default',
@@ -198,42 +202,25 @@ export default {
   async mounted() {
     document.title = "Usuarios";
     this.changeFavicon('/img/spiderman.ico');
-    // Usar la ruta correcta
-
-    try {
-      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
-
-      this.sucursales = await solicitudes.fetchRegistros(
-        `/sucursales/empresa/${this.id_usuario}`
-      );
-
-      this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
-      console.log(this.empleados);
-
-      this.roles = await solicitudes.fetchRegistros('/roles');
-
-
-    } catch (error) {
-      console.log(error); //modal error pendiente
-    }
+    this.loadEmpleados(); // Llama a la función para cargar empleados al montar el componente
   },
   computed: {
     filteredEmpleados() {
       // Filtra los empleados basados en el texto de búsqueda
       return this.empleados
-      .filter(empleado => empleado.sucursales == this.searchSucursal || this.searchSucursal === 'default' )
+        .filter(empleado => empleado.sucursales == this.searchSucursal || this.searchSucursal === 'default')
         .filter(empleado =>
           empleado.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           empleado.apellido.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           empleado.nombre_usuario.toLowerCase().includes(this.searchQuery.toLowerCase())
         );
-        
+
     },
 
     paginatedEmpleados() {
       // Si itemsPerPage es vacío, mostramos todos los registros, de lo contrario aplicamos la paginación
 
-      if (this.itemsPerPage === "" || this.itemsPerPage === null ) {
+      if (this.itemsPerPage === "" || this.itemsPerPage === null) {
         return this.filteredEmpleados;
       } else {
         return this.filteredEmpleados.slice(0, parseInt(this.itemsPerPage));
@@ -242,20 +229,18 @@ export default {
     },
   },
   methods: {
-    /* validarEmpty(formulario) {
-       const campos = Object.values(formulario);
-       return campos.every(campo => {
-         // Verifica si el campo es un string y no está vacío
-         if (typeof campo === 'string') {
-           return campo.trim() !== '';
-         }
-         // Verifica si el campo es un valor de selección (select)
-         if (typeof campo === 'number' || typeof campo === 'string') {
-           return campo !== '' && campo !== null; // Cambia '' por el valor que consideres como "no seleccionado"
-         }
-         return campo !== null && campo !== undefined; // Asegúrate de que no sea null o undefined
-       });
-     }, */
+    async loadEmpleados() {
+      this.isLoading = true; // Comienza a cargar
+      try {
+        const id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+        this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${id_usuario}`);
+        console.log(this.empleados);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.isLoading = false; // Termina la carga
+      }
+    },
 
     openModal() {
       this.isModalOpen = true;
@@ -288,50 +273,108 @@ export default {
       return rol ? rol.cargo : 'Desconocido';
     },
 
+    notificarCampoVacio(campo) {
+      const toast = useToast(); // Inicializa el toast aquí
+      const mensajes = {
+        nombre: 'El campo "Nombre" está vacío.',
+        apellido: 'El campo "Apellido" está vacío.',
+        nombre_usuario: 'El campo "Nombre de Usuario" está vacío.',
+        correo: 'El campo "Correo" está vacío.',
+        telefono: 'El campo "Teléfono" está vacío.',
+        direccion: 'El campo "Dirección" está vacío.',
+        sucursal: 'El campo "Sucursal" está vacío.',
+        password: 'El campo "Contraseña" está vacío.',
+        confirmPassword: 'El campo "Confirmar Contraseña" está vacío.',
+        rol: 'El campo "Rol" está vacío.',
+      };
+      const mensaje = mensajes[campo] || 'Un campo está vacío.';
+      toast.error(mensaje, { timeout: 5000 }); // Usa el toast aquí
+    },
+
+    // Método para validar que los campos no estén vacíos
+    validarEmpty() {
+      const campos = {
+        nombre: this.usuarioForm.nombre,
+        apellido: this.usuarioForm.apellido,
+        nombre_usuario: this.usuarioForm.nombre_usuario,
+        correo: this.usuarioForm.correo,
+        telefono: this.usuarioForm.telefono,
+        direccion: this.usuarioForm.direccion,
+        sucursal: this.usuarioForm.sucursal,
+        password: this.usuarioForm.password,
+        confirmPassword: this.usuarioForm.confirmPassword,
+        rol: this.usuarioForm.rol,
+      };
+
+      for (const [key, value] of Object.entries(campos)) {
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          this.notificarCampoVacio(key);
+          return true; // Retorna true si hay un campo vacío
+        }
+      }
+      return false; // Todos los campos están llenos
+    },
+
     async guardarUsuario() {
-     // const toast = useToast();
+      const toast = useToast();
       let response;
       let parametros;
 
-      // const email = this.usuarioForm.correo;
-      // const password1 = this.usuarioForm.password;
-      // const password2 = this.usuarioForm.confirmPassword;
-      // const telefono = this.usuarioForm.telefono;
+      const email = this.usuarioForm.correo;
+      const password1 = this.usuarioForm.password;
+      const password2 = this.usuarioForm.confirmPassword;
+      const telefono = this.usuarioForm.telefono;
 
       // // Validaciones
-      // if (!validarCamposService.validarEmpty(this.usuarioForm)) {
-      //   console.log('Rellene todos los campos');
-      //   toast.warning('Rellene todos los campos');
-      //   return;
-      // }
+      /*     if (!validarCamposService.validarEmpty(this.usuarioForm)) {
+             console.log('Rellene todos los campos');
+             toast.warning('Rellene todos los campos', {
+               timeout: 5000
+             });
+             return;
+           }*/
 
-      // if (!validarCamposService.validarEmail(email)) {
-      //   console.log('El correo no es válido o no pertenece a un dominio aceptado');
-      //   toast.warning('El correo no es válido o no pertenece a un dominio aceptado');
-      //   return;
-      // }
+      if (this.validarEmpty()) {
+        return; // Si hay un campo vacío, no continuar con el guardado
+      }
 
-      // if (!validarCamposService.validarPasswordSegura(password1)) {
-      //   console.log('La contraseña no cumple con los requisitos de seguridad');
-      //   toast.error('La contraseña no cumple con los requisitos de seguridad');
-      //   return;
-      // }
+      if (!validarCamposService.validarEmail(email)) {
+        console.log('El correo no es válido o no pertenece a un dominio aceptado');
+        toast.warning('El correo no es válido o no pertenece a un dominio aceptado', {
+          timeout: 5000
+        });
+        return;
+      }
 
-      // if (!validarCamposService.validarPass(password1, password2)) {
-      //   console.log('Las contraseñas no coinciden');
-      //   toast.error('Las contraseñas no coinciden');
-      //   return;
-      // }
+      if (!validarCamposService.validarPasswordSegura(password1)) {
+        console.log('La contraseña no cumple con los requisitos de seguridad');
+        toast.error('La contraseña no cumple con los requisitos de seguridad', {
+          timeout: 5000
+        });
+        return;
+      }
 
-      // if (!validarCamposService.validarTelefono(telefono)) {
-      //   console.log('El teléfono no es válido');
-      //   toast.error('El teléfono no es válido');
-      //   return;
-      // }
+      if (!validarCamposService.validarPass(password1, password2)) {
+        console.log('Las contraseñas no coinciden');
+        toast.error('Las contraseñas no coinciden', {
+          timeout: 5000
+        });
+        return;
+      }
 
-      // // Si todas las validaciones pasan, procede a guardar el usuario
-      // console.log('Usuario válido, procesando guardado...');
-      // toast.success('Usuario válido, procesando guardado...');
+      if (!validarCamposService.validarTelefono(telefono)) {
+        console.log('El teléfono no es válido');
+        toast.error('El teléfono no es válido', {
+          timeout: 5000
+        });
+        return;
+      }
+
+      // Si todas las validaciones pasan, procede a guardar el usuario
+      console.log('Usuario válido, procesando guardado...');
+      toast.success('Usuario válido, procesando guardado...', {
+        timeout: 5000
+      });
 
       if (this.isEditing) {
         try {
@@ -361,7 +404,7 @@ export default {
           );
 
           if (response.length > 0) {
-          
+
             this.empleados.push(response[0]);
 
           } else {
@@ -375,14 +418,14 @@ export default {
       this.closeModal();
     },
 
-    async deleteUsuariol(index) {
+    async deleteUsuariol(empleado) {
       let response;
 
       const datosActualizados = {
         estado: false,
       };
 
-      const parametros = `/usuario/desactivar/${this.empleados[index].id_usuario}`;
+      const parametros = `/usuario/desactivar/${empleado.id_usuario}`; // Usa el id del empleado que se pasa
 
       try {
         response = await solicitudes.desactivarRegistro(
@@ -391,17 +434,20 @@ export default {
         );
 
         if (response == true) {
-          this.empleados.splice(index, 1);
+          // Encuentra el índice del empleado en el array original y lo elimina
+          const index = this.empleados.findIndex(e => e.id_usuario === empleado.id_usuario);
+          if (index !== -1) {
+            this.empleados.splice(index, 1);
+          }
         }
       } catch (error) {
         alert(new Error(response));
       }
     },
 
-    editEmpleado(index) {
-      this.usuarioForm = { ...this.empleados[index] };
+    editEmpleado(empleado) {
+      this.usuarioForm = { ...empleado }; // Asigna directamente el objeto empleado
       this.isEditing = true;
-      this.editIndex = index;
       this.openModal();
     },
     deleteEmpleado(index) {
@@ -410,25 +456,6 @@ export default {
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     },
-
-    // validarCampos(formulario) {
-    //   const toast = useToast();
-
-    //   if (!validarCamposService.validarPass(this.usuarioForm.password, this.usuarioForm.confirmPassword)) {
-    //     toast.error('Las contraseñas no coinciden');
-    //     return false;
-    //   }
-
-    //   for (const atributo in formulario) {
-    //     if (!validarCamposService.validarEmpty(formulario[atributo]) && atributo != 'id_usuario') {
-    //       alert(atributo);
-    //       return false;
-    //     }
-    //   }
-
-    //   return true;
-
-    // },
 
     limpiarForm(formulario) {
       const formLimpio = {

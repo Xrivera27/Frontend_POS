@@ -36,7 +36,7 @@ export default {
 
   // Valida que el teléfono tenga 8 dígitos y sea numérico
   validarTelefono(telefono) {
-    const phonePattern = /^\d{8}$/;
+    const phonePattern = /^(?:\d{8}|\d{4}-\d{4})$/;
     return phonePattern.test(telefono);
   },
 
