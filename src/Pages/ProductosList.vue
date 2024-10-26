@@ -48,6 +48,7 @@
           <tr>
             <th>#</th>
             <th>Codigo</th>
+            <th>Nombre</th>
             <th>Descripcion</th>
             <th>Stock</th>
             <th>Precio Unitario</th>
@@ -59,7 +60,8 @@
         <tbody>
           <tr v-for="(producto, index) in paginatedProductos" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ producto.codigo }}</td>
+            <td>{{ producto.codigo_producto }}</td>
+            <td>{{ producto.nombre }}</td>
             <td>{{ producto.descripcion }}</td>
             <td>{{ producto.stock_actual }}</td>
             <td>{{ producto.precio_unitario }}</td>
@@ -155,6 +157,8 @@
 </template>
 
 <script>
+
+//compontentes
 import ProfileButton from '../components/ProfileButton.vue';
 import ExportButton from '../components/ExportButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
@@ -162,10 +166,17 @@ import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
+
+//apis
 import { getUnidadMedidaEmpresas } from'../../services/unidadMedidaSolicitud.js';
 import { getProveedoresEmpresa } from'../../services/proveedoresSolicitud.js';
 
+//solicitudes a api
+import { postProducto } from'../../services/productosSolicitudes.js';
+
+//recursos
 const { impuestos } = require('../resources/impuestos.js');
+import validarCamposService from '../../services/validarCampos.js';
 
 export default {
   components: {
@@ -187,13 +198,12 @@ export default {
       productoForm: {
        codigo_producto: '',
        nombre: '',
+       descripcion: '',
        unidad_medida: 'default',
        impuesto: impuestos[0]?.id || null,
        proveedor: 'default',
-       stock_min: '',
-       stock_max: '',
-       precio_unitario: '',
-       precio_mayorista: '',
+       precio_unitario: 0,
+       precio_mayorista: 0,
 
       },
       productos: [
@@ -201,7 +211,7 @@ export default {
       ],
       columns: [
         { header: '#', dataKey: 'index' },
-        { header: 'Código', dataKey: 'codigo' },
+        { header: 'Código', dataKey: 'codigo_producto' },
         { header: 'Descripción', dataKey: 'descripcion' },
         { header: 'Categoría', dataKey: 'categoria' },
         { header: 'Stock', dataKey: 'stock' },
@@ -216,7 +226,7 @@ export default {
   computed: {
     filteredProductos() {
       return this.productos.filter(producto =>
-        producto.codigo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        producto.codigo_producto.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         producto.descripcion.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         producto.categoria.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
@@ -242,13 +252,13 @@ export default {
     clearForm() {
       this.productoForm = {
         codigo_producto: '',
-        nombre: '',
-        descripcion: '',
-       unidad_medida: '',
-       impuesto: '',
-       proveedor: '',
-       precio_unitario: '',
-       precio_mayorista: '',
+       nombre: '',
+       descripcion: '',
+       unidad_medida: 'default',
+       impuesto: impuestos[0]?.id || null,
+       proveedor: 'default',
+       precio_unitario: 0,
+       precio_mayorista: 0,
       };
       this.isEditing = false;
       this.editIndex = null;
@@ -264,11 +274,27 @@ export default {
     },
 
     async guardarProducto() {
+      if (!validarCamposService.validarSiNumero(this.productoForm.precio_unitario) || 
+      !validarCamposService.validarSiNumero(this.productoForm.precio_mayorista)){
+        alert('Campo no es un numero.');
+        return;
+      }
       
       if (this.isEditing) {
         this.productos[this.editIndex] = { ...this.productoForm };
       } else {
-        this.productos.push({ ...this.productoForm });
+
+        this.productoForm.id_usuario = this.id_usuario;
+
+        
+        try {
+          const nuevoRegistro = await postProducto(this.productoForm);
+          this.productos.push(nuevoRegistro[0]);
+        } catch (error) {
+          alert(error);
+        }
+        
+
       }
       this.closeModal();
     },
@@ -285,7 +311,7 @@ export default {
       // Genera las filas basadas en los productos paginados
       this.rows = this.paginatedProductos.map((producto, index) => ({
         index: index + 1,
-        codigo: producto.codigo,
+        codigo_producto: producto.codigo_producto,
         descripcion: producto.descripcion,
         categoria: producto.categoria,
         stock: producto.stock,
@@ -319,7 +345,8 @@ export default {
     try {
       this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
 
-      this.productos = await solicitudes.fetchRegistros(`/productos-empresa/${this.id_usuario}`);
+      this.productos = await solicitudes.fetchRegistros(`/productos/${this.id_usuario}`);
+      console.log(this.productos);
 
     } catch (error) {
       console.log(error); //modal error pendiente

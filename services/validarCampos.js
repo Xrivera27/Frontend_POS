@@ -39,4 +39,9 @@ export default {
     const phonePattern = /^\d{8}$/;
     return phonePattern.test(telefono);
   },
+
+  validarSiNumero(campo) {
+    // Verifica si el campo coincide con la expresión regular de un número
+    return /^[+-]?\d+(\.\d+)?$/.test(campo);
+  }
 };
