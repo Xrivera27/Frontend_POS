@@ -102,11 +102,13 @@
           
 
           <div class="form-group">
-            <label for="rol">Impuesto:</label>
-            <select class="form-select" id="impuesto" name="impuesto" v-model="productoForm.impuesto">
-              <!-- <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option> -->
-            </select>
-          </div>
+  <label for="impuesto">Impuesto:</label>
+  <select class="form-select" id="impuesto" name="impuesto" v-model="productoForm.impuesto">
+    <option v-for="(impuesto, index) in cargarImpuestos()" :key="index" :value="impuesto.id">
+      {{ impuesto.nombre }}
+    </option>
+  </select>
+</div>
 
         </div>
         <div class="contenedor contenedor-derecho">
@@ -121,18 +123,24 @@
           </div>
 
           <div class="form-group">
-            <label for="rol">Proveedor:</label>
-            <select class="form-select" id="proveedor" name="proveedor" v-model="productoForm.proveedor">
-              <!-- <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option> -->
-            </select>
-          </div>
+  <label for="impuesto">Proveedor:</label>
+  <select class="form-select" id="proveedor" name="mediproveedorda" v-model="productoForm.proveedor">
+    <option value="default" disabled>Selecciona un proveedor</option>
+    <option v-for="(proveedor, index) in proveedoresMostrar" :key="index" :value="proveedor.id">
+      {{ proveedor.nombre }}
+    </option>
+  </select>
+</div>
 
           <div class="form-group">
-            <label for="rol">Unidad de medida:</label>
-            <select class="form-select" id="medida" name="medida" v-model="productoForm.unidad_medida">
-              <!-- <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option> -->
-            </select>
-          </div>
+  <label for="impuesto">Unidad de medida:</label>
+  <select class="form-select" id="medida" name="medida" v-model="productoForm.unidad_medida">
+    <option value="default" disabled>Selecciona una unidad de medida</option>
+    <option v-for="(unidad, index) in unidadesMostrar" :key="index" :value="unidad.id_medida">
+      {{ unidad.medida }}
+    </option>
+  </select>
+</div>
 
         </div>
       </div>
@@ -154,6 +162,10 @@ import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
+import { getUnidadMedidaEmpresas } from'../../services/unidadMedidaSolicitud.js';
+import { getProveedoresEmpresa } from'../../services/proveedoresSolicitud.js';
+
+const { impuestos } = require('../resources/impuestos.js');
 
 export default {
   components: {
@@ -170,12 +182,14 @@ export default {
       editIndex: null,
       itemsPerPage: "",
       id_usuario: '',
+      unidadesMostrar: [],
+      proveedoresMostrar: [],
       productoForm: {
        codigo_producto: '',
        nombre: '',
-       unidad_medida: '',
-       impuesto: '',
-       proveedor: '',
+       unidad_medida: 'default',
+       impuesto: impuestos[0]?.id || null,
+       proveedor: 'default',
        stock_min: '',
        stock_max: '',
        precio_unitario: '',
@@ -216,8 +230,10 @@ export default {
     }
   },
   methods: {
-    openModal() {
+   async openModal() {
       this.isModalOpen = true;
+      await this.cargarUnidadMedidaProveedores();
+
     },
     closeModal() {
       this.isModalOpen = false;
@@ -237,7 +253,18 @@ export default {
       this.isEditing = false;
       this.editIndex = null;
     },
-    guardarProducto() {
+
+    cargarImpuestos(){
+      return impuestos;
+    },
+
+    async cargarUnidadMedidaProveedores(){
+      this.unidadesMostrar = await getUnidadMedidaEmpresas(this.id_usuario);
+      this.proveedoresMostrar = await getProveedoresEmpresa(this.id_usuario);
+    },
+
+    async guardarProducto() {
+      
       if (this.isEditing) {
         this.productos[this.editIndex] = { ...this.productoForm };
       } else {
