@@ -1,66 +1,60 @@
 <template>
-    <div class="configuracion-usuario">
-      <div class="encabezado">
-        <h1>Configuración</h1>
-        <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-      </div>
-      <hr />
-  
-      <div class="config-wrapper">
-  
-        <div class="company-config">
-          <form autocomplete="off" class="formulario form-company-SAR">
-            <fieldset :disabled="busisnessSarEditing">
-              <div class="contenedor-titulo">
-                <h2 class="titulo-form">Configuración SAR</h2>
-              </div>
-  
-              <div class="contenedor-principal">
-                <div class="contenedor-interno contenedor-izquierdo">
-                  <label for="categoria">Numero CAI:</label>
-                  <input type="text" id="numero_cai" name="numero_cai" required />
-  
-                  <!-- Porcentaje de descuento -->
-                  <label for="rango_inical">Rango Inicial:</label>
-                  <input type="number" id="rango_inical" name="rango_inical" required />
-  
-                  <label for="rango_inical">Rango Final:</label>
-                  <input type="number" id="rango_final" name="rango_final" required />
-                </div>
-                <!-- Categoria ID -->
-                <div class="contenedor-interno contenedor-derecho">
-                  <label for="fecha_autorizacion">Fecha de autorización:</label>
-                  <input type="date" id="fecha_autorizacion" name="fecha_autorizacion" required />
-  
-                  <!-- Fecha final -->
-                  <label for="fecha_vencimiento">Fecha de vencimiento:</label>
-                  <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required />
-  
-                  <!-- Enviar el formulario -->
-                </div>
-              </div>
-            </fieldset>
-  
-            <div class="botones-container">
-              <button class="btn editar" @click="isEditing(4)" :disabled="!busisnessSarEditing">Editar</button>
-              <button class="btn guardar" :disabled="busisnessSarEditing">Guardar</button>
+  <div class="configuracion-usuario">
+    <div class="encabezado">
+      <h1>Configuración</h1>
+      <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
+    </div>
+    <hr />
 
-              <router-link to = "/config-company" >
+    <div class="config-wrapper">
+      <div class="company-config">
+        <form @submit.prevent="guardarConfiguracionSAR" autocomplete="off" class="formulario form-company-SAR">
+          <fieldset :disabled="busisnessSarEditing">
+            <div class="contenedor-titulo">
+              <h2 class="titulo-form">Configuración SAR</h2>
+            </div>
+
+            <div class="contenedor-principal">
+              <div class="contenedor-interno contenedor-izquierdo">
+                <label for="numero_CAI">Numero CAI:</label>
+                <input v-model="configuracionSAR.numero_CAI" type="text" id="numero_CAI" required />
+
+                <label for="rango_inicial">Rango Inicial:</label>
+                <input v-model="configuracionSAR.rango_inicial" type="number" id="rango_inicial" required />
+
+                <label for="rango_final">Rango Final:</label>
+                <input v-model="configuracionSAR.rango_final" type="number" id="rango_final" required />
+              </div>
+              <div class="contenedor-interno contenedor-derecho">
+                <label for="fecha_autorizacion">Fecha de autorización:</label>
+                <input v-model="configuracionSAR.fecha_autorizacion" type="date" id="fecha_autorizacion" required />
+
+                <label for="fecha_vencimiento">Fecha de vencimiento:</label>
+                <input v-model="configuracionSAR.fecha_vencimiento" type="date" id="fecha_vencimiento" required />
+
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="botones-container">
+            <button class="btn editar" @click="isEditing(4)" :disabled="!busisnessSarEditing">Editar</button>
+            <button class="btn guardar" type="submit" :disabled="busisnessSarEditing"  @click.prevent="updatesar">Guardar</button>
+
+            <router-link to="/config-company">
               <button type="button" class="btn company">Config Empresa</button>
             </router-link>
-            </div>
-  
-  
-            <!-- Fecha de inicio -->
-          </form>
-        </div>
-  
+          </div>
+        </form>
       </div>
     </div>
-  </template>
-  
+  </div>
+</template>
+
+
   <script>
   import ProfileButton from '../components/ProfileButton.vue';
+import axios from 'axios';
+
   
   export default {
     components: {
@@ -68,44 +62,73 @@
   
     },
     data() {
-      return {
-        switchForm: 'user',
-        userBoton: true,
-        companyBoton: false,
-        showUser: true,
-        showCompany: false,
-        userActive: true,
-        usuarioEditing: true,
-        usuarioAvancedEditing: true,
-        businessEditing: true,
-        busisnessSarEditing: true,
-        userForm: [
-          {
-            nombreUsuario: '',
-            telefono: '',
-            direccion: '',
-            contrasena_actual: '',
-            contrasena_nueva: '',
-            contrasena_confirm: '',
-          }
-        ],
-        userFormAdvanced: [
-          {
-            nombre: '',
-            apellido: '',
-            correo: '',
-          }
-        ],
-        companyForm: [
-          {
-            nombre: '',
-            apellido: '',
-            correo: '',
-          }
-        ],
-      };
-    },
+    return {
+      busisnessSarEditing: true,
+      configuracionSAR: {
+        numero_CAI: '',
+        rango_inicial: '',
+        rango_final: '',
+        fecha_autorizacion: '',
+        fecha_vencimiento: '',
+      },
+    };
+  },
+
+
     methods: {
+
+      async getConfiguracionSAR() {
+  try {
+    const token = localStorage.getItem('auth');
+    const response = await axios.get('http://localhost:3000/api/sar', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const sarData = response.data.datosSAR; // Asegúrate de que este es el nombre correcto de la respuesta
+
+    // Asigna los datos a configuracionSAR
+    this.configuracionSAR.numero_CAI = sarData.numero_CAI || '';
+    this.configuracionSAR.rango_inicial = sarData.rango_inicial || '';
+    this.configuracionSAR.rango_final = sarData.rango_final || '';
+    this.configuracionSAR.fecha_autorizacion = sarData.fecha_autorizacion || '';
+    this.configuracionSAR.fecha_vencimiento = sarData.fecha_vencimiento || '';
+  } catch (error) {
+    console.error('Error al obtener la configuración SAR:', error);
+    alert('No se pudo obtener la configuración SAR.');
+  }
+},
+
+async updatesar() {
+      try {
+        const token = localStorage.getItem('auth');
+
+        const updatedData = {
+          numero_CAI:  this.configuracionSAR.numero_CAI,
+          rango_inicial:  this.configuracionSAR.rango_inicial,
+          rango_final:  this.configuracionSAR.rango_final,
+          fecha_autorizacion:  this.configuracionSAR.fecha_autorizacion,
+          fecha_vencimiento : this.configuracionSAR.fecha_vencimiento
+        };
+
+        const response = await axios.put('http://localhost:3000/api/updsar', updatedData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.status === 200) {
+          alert('Datos Sar actualizada exitosamente');
+          window.location.reload(); // Recargar la página después de guardar
+        }
+      } catch (error) {
+        console.error('Error al actualizar los datos de la empresa:', error);
+        alert('Hubo un problema al guardar los datos.');
+      }
+    },
+
   
       pushEsc(event) {
         if (event.key === "Esc" || event.key === "Escape") {
@@ -164,6 +187,8 @@
     },
   
     mounted() {
+
+      this.getConfiguracionSAR();
       // Añade el manejador de eventos cuando el componente se monta
       window.addEventListener("keydown", this.pushEsc);
       document.title = "Configuración";
