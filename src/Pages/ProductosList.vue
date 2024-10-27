@@ -315,11 +315,10 @@ export default {
         this.productoForm.unidad_medida  = infoExtra.id_unidad_medida;
         this.productoForm.precio_mayorista  = infoExtra.precio_mayorista;
         this.productoForm.proveedor  = infoExtra.id_proveedor;
-        alert(this.productoForm.proveedor);
 
         this.isEditing = true;
-      this.editIndex = index;
-      this.openModal();
+        this.editIndex = index;
+        this.openModal();
 
       } catch (error) {
         alert(error);
@@ -378,7 +377,6 @@ export default {
       this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
 
       this.productos = await solicitudes.fetchRegistros(`/productos/${this.id_usuario}`);
-      console.log(this.productos);
 
     } catch (error) {
       console.log(error); //modal error pendiente
