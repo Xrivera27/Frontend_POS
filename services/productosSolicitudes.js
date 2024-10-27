@@ -3,7 +3,7 @@ import solicitudes from './solicitudes.js';
 export const postProducto = async (datos) => {
     const parametros = '/productos/crear';
     try {
-        console.log(`datos: ${datos}`)
+
         const response = await solicitudes.postRegistro(parametros, datos);
 
     console.log(`Response: ${response}`);
@@ -19,26 +19,26 @@ export const postProducto = async (datos) => {
         throw error; // Opcional: vuelve a lanzar el error para manejarlo en otro lugar
     }
 }
-// const datosPrueba = {
-//     codigo_producto: "ABCdsd1ss283",                   
-//     nombre: "Nombre del Producto",           
-//     descripcion: "Descripción del producto",
-//     precio_unitario: 100.00,                 //
-//     precio_mayorista: 80.00,                 // 
-//     proveedor: 1,                  
-//     unidad_medida: 1,                       
-//     impuesto: "IMPUESTO_ISV_15",             
-//     id_usuario: 8
-// };
 
-// productoForm: {
-//     codigo_producto: '',
-//     nombre: '',
-//     descripcion: '',
-//     unidad_medida: 'default',
-//     impuesto: impuestos[0]?.id || null,
-//     proveedor: 'default',
-//     precio_unitario: 0,
-//     precio_mayorista: 0,
+// const { codigo_producto, nombre, descripcion, precio_unitario, precio_mayorista, proveedor, unidad_medida, impuesto, id_usuario } = req.body;
+//     const id_producto = req.params.id_producto;
 
-//    },
+export const patchProducto = async (datos, id_producto) => {
+    console.log(datos);
+    const parametros = `/productos/actualizar/${id_producto}`;
+    try {
+
+        const response = await solicitudes.patchRegistro(parametros, datos);
+        console.log(response);
+        if (response && response == true) {
+
+            return response; // Retorna el registro creado o la respuesta completa
+        } else {
+            throw new Error('No se hizo el patch');
+        }
+
+    } catch (error) {
+        console.error('Error en patchProducto:', error); // Registra el error para depuración
+        throw error; // Opcional: vuelve a lanzar el error para manejarlo en otro lugar
+    }
+}

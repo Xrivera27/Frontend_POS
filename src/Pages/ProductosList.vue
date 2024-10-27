@@ -172,7 +172,7 @@ import { getUnidadMedidaEmpresas } from'../../services/unidadMedidaSolicitud.js'
 import { getProveedoresEmpresa } from'../../services/proveedoresSolicitud.js';
 
 //solicitudes a api
-import { postProducto } from'../../services/productosSolicitudes.js';
+import { postProducto, patchProducto } from'../../services/productosSolicitudes.js';
 
 //recursos
 const { impuestos } = require('../resources/impuestos.js');
@@ -279,22 +279,26 @@ export default {
         alert('Campo no es un numero.');
         return;
       }
+      this.productoForm.id_usuario = this.id_usuario;
       
       if (this.isEditing) {
-        this.productos[this.editIndex] = { ...this.productoForm };
+
+        try {
+          const nuevoRegistro = await patchProducto(this.productoForm, this.productos[this.editIndex].id_producto);
+          if (nuevoRegistro == true) Object.assign(this.productos[this.editIndex], this.productoForm);
+        } catch (error) {
+          alert(error);
+        }
+
       } else {
 
-        this.productoForm.id_usuario = this.id_usuario;
-
-        
         try {
           const nuevoRegistro = await postProducto(this.productoForm);
           this.productos.push(nuevoRegistro[0]);
         } catch (error) {
           alert(error);
         }
-        
-
+      
       }
       this.closeModal();
     },
