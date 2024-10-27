@@ -284,8 +284,16 @@ export default {
       if (this.isEditing) {
 
         try {
+
+          if (this.productoForm.codigo_producto === this.productos[this.editIndex].codigo_producto) this.productoForm.codigo_producto = '';
+
           const nuevoRegistro = await patchProducto(this.productoForm, this.productos[this.editIndex].id_producto);
-          if (nuevoRegistro == true) Object.assign(this.productos[this.editIndex], this.productoForm);
+          if (nuevoRegistro == true) {
+            this.productoForm.codigo_producto = this.productos[this.editIndex].codigo_producto;
+            Object.assign(this.productos[this.editIndex], this.productoForm);
+
+          
+          }
         } catch (error) {
           alert(error);
         }
