@@ -172,7 +172,7 @@ import { getUnidadMedidaEmpresas } from'../../services/unidadMedidaSolicitud.js'
 import { getProveedoresEmpresa } from'../../services/proveedoresSolicitud.js';
 
 //solicitudes a api
-import { postProducto, patchProducto } from'../../services/productosSolicitudes.js';
+import { postProducto, patchProducto, desactivarProducto } from'../../services/productosSolicitudes.js';
 
 //recursos
 const { impuestos } = require('../resources/impuestos.js');
@@ -308,8 +308,18 @@ export default {
       this.editIndex = index;
       this.openModal();
     },
-    deleteProducto(index) {
-      this.productos.splice(index, 1);
+    async deleteProducto(index) {
+      try {
+        const registroEliminado = await desactivarProducto(this.productos[index].id_producto);
+
+        if (registroEliminado == true) this.productos.splice(index, 1);
+
+        else {alert('Error al eliminar producto');}
+        
+      } catch (error) {
+        console.error(error);
+      }
+      
     },
     generateRows() {
       // Genera las filas basadas en los productos paginados

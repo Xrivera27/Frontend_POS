@@ -42,3 +42,24 @@ export const patchProducto = async (datos, id_producto) => {
         throw error; // Opcional: vuelve a lanzar el error para manejarlo en otro lugar
     }
 }
+
+export const desactivarProducto = async (id_producto) => {
+    const datos = {
+        estado: false
+    };
+    const parametros = `/productos/desactivar/${id_producto}`;
+    try {
+        const response = await solicitudes.desactivarRegistro(parametros, datos);
+        console.log(response);
+        if (response && response == true) {
+
+            return response; // Retorna el registro creado o la respuesta completa
+        } else {
+            throw new Error('No se hizo el patch');
+        }
+
+    } catch (error) {
+        console.error('Error en Producto:', error); // Registra el error para depuración
+        throw error; // Opcional: vuelve a lanzar el error para manejarlo en otro lugar
+    }
+}
