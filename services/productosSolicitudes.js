@@ -1,5 +1,25 @@
 import solicitudes from './solicitudes.js';
 
+export const getInfoExtra = async (id_producto) => {
+    const parametros = `/productos/info-extra/${id_producto}`;
+    try {
+
+        const response = await solicitudes.fetchRegistros(parametros);
+
+        if (response && Object.keys(response).length > 0) {
+
+            return response; // Retorna el registro creado o la respuesta completa
+        } else {
+            throw new Error('No se hizo el get');
+        }
+
+    } catch (error) {
+        console.error('Error en get registro:', error); // Registra el error para depuración
+        throw error; // Opcional: vuelve a lanzar el error para manejarlo en otro lugar
+    }
+}
+
+
 export const postProducto = async (datos) => {
     const parametros = '/productos/crear';
     try {

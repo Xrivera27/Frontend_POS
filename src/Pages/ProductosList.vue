@@ -49,10 +49,8 @@
             <th>#</th>
             <th>Codigo</th>
             <th>Nombre</th>
-            <th>Descripcion</th>
             <th>Stock</th>
             <th>Precio Unitario</th>
-            <th>Precio Mayorista</th>
             <th>Promocion Activa</th>
             <th>Acciones</th>
           </tr>
@@ -62,10 +60,8 @@
             <td>{{ index + 1 }}</td>
             <td>{{ producto.codigo_producto }}</td>
             <td>{{ producto.nombre }}</td>
-            <td>{{ producto.descripcion }}</td>
             <td>{{ producto.stock_actual }}</td>
             <td>{{ producto.precio_unitario }}</td>
-            <td>{{ producto.precio_mayorista }}</td>
             <td>Inactivo</td>
             <td>
               <button id="btnEditar" class="btn btn-warning" @click="editProducto(index)">
@@ -172,7 +168,7 @@ import { getUnidadMedidaEmpresas } from'../../services/unidadMedidaSolicitud.js'
 import { getProveedoresEmpresa } from'../../services/proveedoresSolicitud.js';
 
 //solicitudes a api
-import { postProducto, patchProducto, desactivarProducto } from'../../services/productosSolicitudes.js';
+import { getInfoExtra, postProducto, patchProducto, desactivarProducto } from'../../services/productosSolicitudes.js';
 
 //recursos
 const { impuestos } = require('../resources/impuestos.js');
@@ -310,11 +306,25 @@ export default {
       }
       this.closeModal();
     },
-    editProducto(index) {
+    async editProducto(index) {
       this.productoForm = { ...this.productos[index] };
-      this.isEditing = true;
+
+      try {
+        const infoExtra = await getInfoExtra(this.productos[index].id_producto);
+        this.productoForm.impuesto  = infoExtra.impuesto;
+        this.productoForm.unidad_medida  = infoExtra.id_unidad_medida;
+        this.productoForm.precio_mayorista  = infoExtra.precio_mayorista;
+        this.productoForm.proveedor  = infoExtra.id_proveedor;
+        alert(this.productoForm.proveedor);
+
+        this.isEditing = true;
       this.editIndex = index;
       this.openModal();
+
+      } catch (error) {
+        alert(error);
+      }
+      
     },
     async deleteProducto(index) {
       try {
