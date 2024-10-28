@@ -40,6 +40,15 @@
       <div class="search-bar">
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar producto..." />
       </div>
+      <div class="registros">
+        <span>
+          <select class="custom-select select-sucursal" v-model="searchSucursal">
+            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
+              sucursal.nombre_administrativo }}</option>
+            <option value="default">Todas</option>
+          </select>
+        </span>
+      </div>
     </div>
     <!-- Tabla exportable -->
     <div class="table-container" v-pdf-export ref="table">
@@ -169,6 +178,8 @@ import { getProveedoresEmpresa } from'../../services/proveedoresSolicitud.js';
 
 //solicitudes a api
 import { getInfoExtra, postProducto, patchProducto, desactivarProducto } from'../../services/productosSolicitudes.js';
+import { getSucursalesbyEmmpresaSumm } from'../../services/sucursalesSolicitudes.js';
+
 
 //recursos
 const { impuestos } = require('../resources/impuestos.js');
@@ -184,6 +195,7 @@ export default {
   data() {
     return {
       searchQuery: '',
+      searchSucursal: 'default',
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
@@ -202,9 +214,8 @@ export default {
        precio_mayorista: 0,
 
       },
-      productos: [
-       
-      ],
+      productos: [],
+      sucursales: [],
       columns: [
         { header: '#', dataKey: 'index' },
         { header: 'Código', dataKey: 'codigo_producto' },
@@ -375,6 +386,8 @@ export default {
     
     try {
       this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+
+      this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
 
       this.productos = await solicitudes.fetchRegistros(`/productos/${this.id_usuario}`);
 
@@ -665,8 +678,12 @@ button {
   padding: 5px;
   background-color: #fff;
   cursor: pointer;
-  width: 80px;
+  width: 30%;
   /* Ajusta el ancho a 120px o el valor que prefieras */
+}
+
+.select-sucursal{
+min-width: 200px;
 }
 
 .custom-select:focus {

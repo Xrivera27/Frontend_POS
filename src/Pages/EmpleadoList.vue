@@ -203,6 +203,23 @@ export default {
     document.title = "Usuarios";
     this.changeFavicon('/img/spiderman.ico');
     this.loadEmpleados(); // Llama a la función para cargar empleados al montar el componente
+
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+
+      this.sucursales = await solicitudes.fetchRegistros(
+        `/sucursales/empresa/${this.id_usuario}`
+      );
+
+      this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
+
+      this.roles = await solicitudes.fetchRegistros('/roles');
+
+
+    } catch (error) {
+      console.log(error); //modal error pendiente
+    }
+
   },
   computed: {
     filteredEmpleados() {
