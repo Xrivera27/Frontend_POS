@@ -42,10 +42,12 @@
       </div>
       <div class="registros">
         <span>
-          <select class="custom-select select-sucursal" v-model="searchSucursal">
-            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
-              sucursal.nombre_administrativo }}</option>
+          <select class="custom-select select-sucursal" v-model="searchSucursal" @change="mostrarRegistros(searchSucursal)" >
             <option value="default">Todas</option>
+            <option v-for="(sucursal, index) in this.sucursales" 
+            :key="index" :value="sucursal.id_sucursal">{{
+              sucursal.nombre_administrativo }}</option>
+            
           </select>
         </span>
       </div>
@@ -177,7 +179,7 @@ import { getUnidadMedidaEmpresas } from'../../services/unidadMedidaSolicitud.js'
 import { getProveedoresEmpresa } from'../../services/proveedoresSolicitud.js';
 
 //solicitudes a api
-import { getInfoExtra, postProducto, patchProducto, desactivarProducto } from'../../services/productosSolicitudes.js';
+import { getInfoExtra, getProductoSucursal, postProducto, patchProducto, desactivarProducto } from'../../services/productosSolicitudes.js';
 import { getSucursalesbyEmmpresaSumm } from'../../services/sucursalesSolicitudes.js';
 
 
@@ -247,6 +249,21 @@ export default {
     }
   },
   methods: {
+
+    async mostrarRegistros(valor){
+      if (valor === 'default'){
+        this.productos = await solicitudes.fetchRegistros(`/productos/${this.id_usuario}`);
+      }
+      else {
+        try {
+          this.productos = await getProductoSucursal(valor);
+        } catch (error) {
+          console.log(error);
+        }
+
+      }
+    },
+
    async openModal() {
       this.isModalOpen = true;
       await this.cargarUnidadMedidaProveedores();
