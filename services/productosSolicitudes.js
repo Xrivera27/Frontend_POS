@@ -1,7 +1,7 @@
 import solicitudes from './solicitudes.js';
 
-export const getProductosEmpresa = async (id_producto) => {
-    const parametros = `/productos/${id_producto}`;
+export const getProductosEmpresa = async (id_usuario) => {
+    const parametros = `/productos/${id_usuario}`;
     try {
         const response = await solicitudes.fetchRegistros(parametros);
 

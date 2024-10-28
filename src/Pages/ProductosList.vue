@@ -179,7 +179,7 @@ import { getUnidadMedidaEmpresas } from'../../services/unidadMedidaSolicitud.js'
 import { getProveedoresEmpresa } from'../../services/proveedoresSolicitud.js';
 
 //solicitudes a api
-import { getInfoExtra, getProductoSucursal, postProducto, patchProducto, desactivarProducto } from'../../services/productosSolicitudes.js';
+import { getInfoExtra, getProductoSucursal, postProducto, patchProducto, desactivarProducto, getProductosEmpresa } from'../../services/productosSolicitudes.js';
 import { getSucursalesbyEmmpresaSumm } from'../../services/sucursalesSolicitudes.js';
 
 
@@ -252,7 +252,7 @@ export default {
 
     async mostrarRegistros(valor){
       if (valor === 'default'){
-        this.productos = await solicitudes.fetchRegistros(`/productos/${this.id_usuario}`);
+        this.productos = await getProductosEmpresa(this.id_usuario);
       }
       else {
         try {
@@ -406,7 +406,7 @@ export default {
 
       this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
 
-      this.productos = await solicitudes.fetchRegistros(`/productos/${this.id_usuario}`);
+      this.mostrarRegistros(this.searchSucursal);
 
     } catch (error) {
       console.log(error); //modal error pendiente
