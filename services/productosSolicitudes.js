@@ -73,9 +73,6 @@ export const postProducto = async (datos) => {
     }
 }
 
-// const { codigo_producto, nombre, descripcion, precio_unitario, precio_mayorista, proveedor, unidad_medida, impuesto, id_usuario } = req.body;
-//     const id_producto = req.params.id_producto;
-
 export const patchProducto = async (datos, id_producto) => {
     console.log(datos);
     const parametros = `/productos/actualizar/${id_producto}`;

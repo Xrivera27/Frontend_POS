@@ -3,6 +3,7 @@ import ClientesList from "../Pages/ClientesList.vue";
 import ProveedoresList from "../Pages/ProveedoresList.vue";
 import EmpleadoList from "@/Pages/EmpleadoList.vue";
 import CategoriasList from "@/Pages/CategoriasList.vue";
+import unidadMedidaList from "@/Pages/unidadMedidaList.vue";
 import ProductosList from "@/Pages/ProductosList.vue";
 import LoginList from "@/Pages/LoginList.vue";
 import RegistroList from "@/Pages/RegistroList.vue";
@@ -85,6 +86,12 @@ const routes = [
     path: "/categorias",
     name: "Categorias",
     component: CategoriasList,
+    meta: { requiresAuth: true, role: [1, 4] },
+  },
+  {
+    path: "/unidad-medida",
+    name: "Unidad-Medida",
+    component: unidadMedidaList,
     meta: { requiresAuth: true, role: [1, 4] },
   },
   {

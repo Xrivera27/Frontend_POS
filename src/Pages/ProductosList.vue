@@ -150,16 +150,12 @@
     </option>
   </select>
 </div>
-
         </div>
       </div>
-      
       <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Producto' " @click="guardarProducto"></btnGuardarModal>
       <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
     </div>
   </div>
-
-
   </div>
 </template>
 

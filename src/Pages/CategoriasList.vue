@@ -14,6 +14,10 @@
         <button class="button-promocion">Promociones</button>
       </RouterLink>
 
+      <RouterLink to="unidad-medida">
+        <button class="button-unidad-medida">U. Medida</button>
+      </RouterLink>
+
       <div class="registros">
         <span>Mostrar
           <select v-model="itemsPerPage" class="custom-select">
@@ -158,10 +162,6 @@ export default {
       this.categoriaForm = { ...this.categorias[index] };
       this.editIndex = index;
     },
-    // deleteCategoria(index) {
-    //   // Implementa la lógica para eliminar una categoría
-    //   this.categorias.splice(index, 1);
-    // },
     async deleteCategoria(index) {
       let response;
 
@@ -283,6 +283,15 @@ export default {
 .button-promocion {
   background-color: #4cafaf;
   color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.button-unidad-medida {
+  background-color: #4caf4c;
+  color: #000;
   padding: 10px 20px;
   border: none;
   cursor: pointer;
