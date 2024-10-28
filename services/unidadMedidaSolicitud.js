@@ -7,7 +7,7 @@ export const getUnidadMedidaEmpresas = async (id_usuario) => {
         if( unidadMedida.length > 0 ){
             for (const  unidad  of unidadMedida){
               unidad.totalProductos = await getUnidadProducto(unidad.id_medida);
-              console.log(unidad);
+
             }
         }
 
@@ -23,10 +23,23 @@ export const getUnidadMedidaEmpresas = async (id_usuario) => {
 export const getUnidadProducto = async (id_unidad) => {
     try {
         const totalUnidad = await solicitudes.fetchRegistros(`/unidad-medida/totalp-unidad/${id_unidad}`);
-        console.log(`total de unidad ${totalUnidad.total}`);
+
         return totalUnidad.total;
     } catch (error) {
         console.error('Error al obtener la unidad de medida:', error);
+
+        throw new Error('No se pudo obtener la unidad de medida para el usuario especificado.');
+    
+    }
+}
+
+export const getProductosUnidad = async (id_unidad) => {
+    try {
+        const productos = await solicitudes.fetchRegistros(`/unidad-medida/productos-unidad/${id_unidad}`);
+      //  console.log(productos);
+        return productos;
+    } catch (error) {
+        console.error('Error al obtener los productos de la unidad:', error);
 
         throw new Error('No se pudo obtener la unidad de medida para el usuario especificado.');
     
