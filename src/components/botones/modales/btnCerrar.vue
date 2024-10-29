@@ -1,5 +1,5 @@
 <template>
-  <button id="btnCerrar" class="btn">
+  <button id="btnCerrar" class="btn btn-cerrar">
     {{ texto }}
   </button>
 
@@ -23,5 +23,10 @@ export default {
   margin: 4px;
   border: none;
   cursor: pointer;
+}
+
+.btn-cerrar{
+  background-color: rgb(129, 129, 129);
+  color: white;
 }
 </style>

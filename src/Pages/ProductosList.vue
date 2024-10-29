@@ -153,9 +153,43 @@
         </div>
       </div>
       <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Producto' " @click="guardarProducto"></btnGuardarModal>
-      <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
+      <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal>
+      <button class="btn" @click="openModalCategoria" >Agregar categorias</button> 
     </div>
   </div>
+
+<!-- modal para mostrar categorias -->
+
+<div v-if="isModalCategoriaOpen" class="modal">
+            <div class="modal-content modal-content-categoria">
+              <div class="categoria-encabezado">
+                <h3>Selecciona categorias del producto</h3>
+                <div class="search-bar form-group">
+                  <input class="busqueda" type="text" v-model="searchCategoria" placeholder="Buscar categoria..." />
+                </div>
+              </div>
+
+              <div class="categoria-contenedor">
+                <form class="form-form-categoria">
+
+                  <label class="label-categoria" v-for="(categoria, index) in filteredCategorias" :key="index"
+                    :class="{ 'primer-label': (index + 1) % 2 == 0 }"><input type="checkbox"
+                      name="{{ categoria.nombre }}" id="{{ categoria.nombre }}">{{ categoria.nombre }}
+                    <br v-if="(index + 1) % 2 == 0" class="br-label">
+                  </label>
+                </form>
+              </div>
+              <div class="categoria-botones">
+
+                <btnGuardarModal @click="closeModalCategoria">Guardar</btnGuardarModal>
+      <btnCerrarModal :texto = "'Cerrar'" @click="closeModalCategoria" ></btnCerrarModal> 
+              </div>
+
+            </div>
+
+          </div>
+
+
   </div>
 </template>
 
@@ -193,8 +227,10 @@ export default {
   data() {
     return {
       searchQuery: '',
+      searchCategoria: '',
       searchSucursal: 'default',
       isModalOpen: false,
+      isModalCategoriaOpen: false,
       isEditing: false,
       editIndex: null,
       itemsPerPage: "",
@@ -214,6 +250,38 @@ export default {
       },
       productos: [],
       sucursales: [],
+      categorias: [
+        { nombre: 'Videojuegos' },
+        { nombre: 'Electrónica' },
+        { nombre: 'Ropa' },
+        { nombre: 'Calzado' },
+        { nombre: 'Juguetes' },
+        { nombre: 'Libros' },
+        { nombre: 'Muebles' },
+        { nombre: 'Hogar y Cocina' },
+        { nombre: 'Herramientas' },
+        { nombre: 'Deportes' },
+        { nombre: 'Accesorios' },
+        { nombre: 'Instrumentos Musicales' },
+        { nombre: 'Salud y Belleza' },
+        { nombre: 'Jardinería' },
+        { nombre: 'Automóviles' },
+        { nombre: 'Mascotas' },
+        { nombre: 'Fotografía' },
+        { nombre: 'Alimentos y Bebidas' },
+        { nombre: 'Papelería' },
+        { nombre: 'Relojes' },
+        { nombre: 'Teléfonos Móviles' },
+        { nombre: 'Bicicletas' },
+        { nombre: 'Equipos de Camping' },
+        { nombre: 'Arte y Manualidades' },
+        { nombre: 'Viajes' },
+        { nombre: 'Películas' },
+        { nombre: 'Cómics' },
+        { nombre: 'Coleccionables' },
+        { nombre: 'Joyería' },
+        { nombre: 'Vinos y Licores' }
+      ],
       columns: [
         { header: '#', dataKey: 'index' },
         { header: 'Código', dataKey: 'codigo_producto' },
@@ -234,6 +302,11 @@ export default {
         producto.codigo_producto.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         producto.descripcion.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         producto.categoria.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    },
+    filteredCategorias() {
+      return this.categorias.filter(categoria =>
+        categoria.nombre.toLowerCase().includes(this.searchCategoria.toLowerCase())
       );
     },
     paginatedProductos() {
@@ -269,6 +342,15 @@ export default {
       this.isModalOpen = false;
       this.clearForm();
     },
+
+    openModalCategoria(){
+      this.isModalCategoriaOpen = true;
+    },
+
+    closeModalCategoria(){
+      this.isModalCategoriaOpen = false;
+    },
+
     clearForm() {
       this.productoForm = {
         codigo_producto: '',
@@ -641,6 +723,56 @@ export default {
   border-radius: 4px;
   max-width: 500px;
   width: 100%;
+}
+
+.modal-content-categoria {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 30%;
+  height: 72%;
+  min-height: 500px;
+  min-width: 300px;
+}
+
+.categoria-encabezado {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.categoria-contenedor{
+  width: 100%;
+}
+.form-form-categoria {
+  padding: 20px;
+  padding-top: 0;
+  max-height: 240px;
+  overflow-y: scroll;
+}
+
+.primer-label {
+  margin-left: 10px;
+}
+
+.label-categoria {
+  display: inline-block;
+  margin-right: 20px;
+  margin-bottom: 10px;
+}
+
+.br-label {
+  margin-bottom: 10px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .form-group {
