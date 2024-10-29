@@ -78,17 +78,23 @@
           <textarea v-model="categoriaForm.descripcion" class="descriptionForm" required rows="4"></textarea>
         </div>
 
-        <button id="AddCategoriaModal" class="btn btn-primary" @click="guardarCategoria">
-          {{ isEditing ? 'Guardar Cambios' : 'Agregar Categoría' }}
-        </button>
-        <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button>
+        <div class="contenedor-botones" >
+          <btnGuardarModal
+          :texto="isEditing ? 'Guardar Cambios' : 'Agregar Categoría'"
+          @click="guardarCategoria"
+        ></btnGuardarModal>
+        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+//componentes
 import ProfileButton from '../components/ProfileButton.vue';
+import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
+import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -97,6 +103,8 @@ export default {
   components:
   {
     ProfileButton,
+    btnGuardarModal,
+    btnCerrarModal,
   },
   data() {
     return {
