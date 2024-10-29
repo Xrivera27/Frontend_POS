@@ -70,14 +70,14 @@
           <input v-model="unidadForm.medida" type="text" required>
         </div>
         <div class="contenedor-botones" >
-
-        </div>
-
-        <btnGuardarModal
+          <btnGuardarModal
           :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'"
           @click="guardarUnidad"
         ></btnGuardarModal>
         <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+        </div>
+
+       
 
       </div>
     </div>
@@ -104,8 +104,10 @@
         </table>
 </div>
 
+<div class="contenedor-botones" >
         <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
-        <!-- <button id="BtnCerrar" class="btn btn-secondary" @click="closeModal">Cerrar</button> -->
+        </div>
+
       </div>
     </div>
 
