@@ -173,23 +173,27 @@
                 <form class="form-form-categoria">
 
                   <label class="label-categoria" v-for="(categoria, index) in filteredCategorias" :key="index"
-                    :class="{ 'primer-label': (index + 1) % 2 == 0 }"><input type="checkbox"
-                      name="{{ categoria.nombre }}" id="{{ categoria.nombre }}">{{ categoria.nombre }}
-                    <br v-if="(index + 1) % 2 == 0" class="br-label">
+                    :class="{ 'primer-label': (index + 1) % 2 == 0 }">
+                    <input 
+                      type="checkbox" 
+                      v-model="categoriasSeleccionadas"
+                      :value="categoria.nombre_categoria"
+                      :name="categoria.nombre_categoria" 
+                      :id="categoria.nombre_categoria">
+                      {{ categoria.nombre_categoria }}
+                      <br v-if="(index + 1) % 2 == 0" class="br-label">
                   </label>
                 </form>
               </div>
               <div class="categoria-botones">
 
-                <btnGuardarModal @click="closeModalCategoria">Guardar</btnGuardarModal>
+                <btnGuardarModal @click="guardarCategorias">Guardar</btnGuardarModal>
       <btnCerrarModal :texto = "'Cerrar'" @click="closeModalCategoria" ></btnCerrarModal> 
               </div>
 
             </div>
 
           </div>
-
-
   </div>
 </template>
 
@@ -211,6 +215,7 @@ import { getProveedoresEmpresa } from'../../services/proveedoresSolicitud.js';
 //solicitudes a api
 import { getInfoExtra, getProductoSucursal, postProducto, patchProducto, desactivarProducto, getProductosEmpresa } from'../../services/productosSolicitudes.js';
 import { getSucursalesbyEmmpresaSumm } from'../../services/sucursalesSolicitudes.js';
+import { getCategoriaProductosEmpresa } from'../../services/categoriaSolicitudes.js';
 
 
 //recursos
@@ -250,37 +255,39 @@ export default {
       },
       productos: [],
       sucursales: [],
+     // categorias: [],
+      categoriasSeleccionadas: [],
       categorias: [
-        { nombre: 'Videojuegos' },
-        { nombre: 'Electrónica' },
-        { nombre: 'Ropa' },
-        { nombre: 'Calzado' },
-        { nombre: 'Juguetes' },
-        { nombre: 'Libros' },
-        { nombre: 'Muebles' },
-        { nombre: 'Hogar y Cocina' },
-        { nombre: 'Herramientas' },
-        { nombre: 'Deportes' },
-        { nombre: 'Accesorios' },
-        { nombre: 'Instrumentos Musicales' },
-        { nombre: 'Salud y Belleza' },
-        { nombre: 'Jardinería' },
-        { nombre: 'Automóviles' },
-        { nombre: 'Mascotas' },
-        { nombre: 'Fotografía' },
-        { nombre: 'Alimentos y Bebidas' },
-        { nombre: 'Papelería' },
-        { nombre: 'Relojes' },
-        { nombre: 'Teléfonos Móviles' },
-        { nombre: 'Bicicletas' },
-        { nombre: 'Equipos de Camping' },
-        { nombre: 'Arte y Manualidades' },
-        { nombre: 'Viajes' },
-        { nombre: 'Películas' },
-        { nombre: 'Cómics' },
-        { nombre: 'Coleccionables' },
-        { nombre: 'Joyería' },
-        { nombre: 'Vinos y Licores' }
+        // { nombre: 'Videojuegos' },
+        // { nombre: 'Electrónica' },
+        // { nombre: 'Ropa' },
+        // { nombre: 'Calzado' },
+        // { nombre: 'Juguetes' },
+        // { nombre: 'Libros' },
+        // { nombre: 'Muebles' },
+        // { nombre: 'Hogar y Cocina' },
+        // { nombre: 'Herramientas' },
+        // { nombre: 'Deportes' },
+        // { nombre: 'Accesorios' },
+        // { nombre: 'Instrumentos Musicales' },
+        // { nombre: 'Salud y Belleza' },
+        // { nombre: 'Jardinería' },
+        // { nombre: 'Automóviles' },
+        // { nombre: 'Mascotas' },
+        // { nombre: 'Fotografía' },
+        // { nombre: 'Alimentos y Bebidas' },
+        // { nombre: 'Papelería' },
+        // { nombre: 'Relojes' },
+        // { nombre: 'Teléfonos Móviles' },
+        // { nombre: 'Bicicletas' },
+        // { nombre: 'Equipos de Camping' },
+        // { nombre: 'Arte y Manualidades' },
+        // { nombre: 'Viajes' },
+        // { nombre: 'Películas' },
+        // { nombre: 'Cómics' },
+        // { nombre: 'Coleccionables' },
+        // { nombre: 'Joyería' },
+        // { nombre: 'Vinos y Licores' }
       ],
       columns: [
         { header: '#', dataKey: 'index' },
@@ -306,7 +313,7 @@ export default {
     },
     filteredCategorias() {
       return this.categorias.filter(categoria =>
-        categoria.nombre.toLowerCase().includes(this.searchCategoria.toLowerCase())
+        categoria.nombre_categoria.toLowerCase().includes(this.searchCategoria.toLowerCase())
       );
     },
     paginatedProductos() {
@@ -343,8 +350,13 @@ export default {
       this.clearForm();
     },
 
-    openModalCategoria(){
+   async openModalCategoria(){
+    this.categorias = await getCategoriaProductosEmpresa(this.id_usuario);
       this.isModalCategoriaOpen = true;
+    },
+
+    guardarCategorias(){
+      console.log(this.categoriasSeleccionadas);
     },
 
     closeModalCategoria(){
