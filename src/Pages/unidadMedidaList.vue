@@ -8,7 +8,7 @@
   <div class="categorias-wrapper">
     <div class="opciones">
       <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-        Categoría</button>
+        Unidad</button>
 
       <RouterLink to="categorias">
         <button class="button-categorias">Categorias</button>
