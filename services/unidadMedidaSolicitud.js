@@ -106,3 +106,15 @@ export const desactivarProducto = async (id_producto) => {
         throw error; // Opcional: vuelve a lanzar el error para manejarlo en otro lugar
     }
 }
+
+export const eliminarUnidad = async (id_unidad) => {
+    const parametros = `/unidad-medida/eliminarunidad/${id_unidad}`;
+    try {
+        const response = await solicitudes.deleteRegistro(parametros);
+        return response;
+    } catch (error) {
+        console.error("Error al eliminar unidad:", error);
+        return { success: false, message: error.message };
+    }
+};
+

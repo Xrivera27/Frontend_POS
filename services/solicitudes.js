@@ -97,8 +97,6 @@
             body: JSON.stringify(datosNuevos)
           });
           
-
-
           if (!respuesta.ok){
             throw new Error(`No se pudo crear: ${respuesta.statusText}`);
           }
@@ -113,6 +111,23 @@
           
         } catch (error) {
           throw new Error(`Ocurrio un error: ${error.message}`);
+        }
+      },
+      async deleteRegistro(parametros){
+        const url = `${homeUrl}${parametros}`;
+        try {
+          const response = await fetch(url, { method: 'DELETE'});
+
+          if (response.ok){
+            return true;
+          }
+          else {
+            throw new Error('No se elimino el registro ' + response.status);
+          }
+
+        } catch (error) {
+          console.log(error);
+          return error;
         }
       }
   }
