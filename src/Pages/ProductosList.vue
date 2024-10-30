@@ -327,7 +327,6 @@ export default {
 
     guardarCategorias(){
       this.productoForm.categorias = this.categoriasSeleccionadas;
-      console.log(this.productoForm.categorias);
       this.closeModalCategoria();
     },
 
@@ -405,6 +404,7 @@ export default {
         this.productoForm.unidad_medida  = infoExtra.id_unidad_medida;
         this.productoForm.precio_mayorista  = infoExtra.precio_mayorista;
         this.productoForm.proveedor  = infoExtra.id_proveedor;
+        this.categoriasSeleccionadas = infoExtra.categorias;
 
         this.isEditing = true;
         this.editIndex = index;
