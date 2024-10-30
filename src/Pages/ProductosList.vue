@@ -175,9 +175,9 @@
                   <label class="label-categoria" v-for="(categoria, index) in filteredCategorias" :key="index"
                     :class="{ 'primer-label': (index + 1) % 2 == 0 }">
                     <input 
-                      type="checkbox" 
+                      type="checkbox"
                       v-model="categoriasSeleccionadas"
-                      :value="categoria.nombre_categoria"
+                      :value="categoria.id_categoria"
                       :name="categoria.nombre_categoria" 
                       :id="categoria.nombre_categoria">
                       {{ categoria.nombre_categoria }}
@@ -251,44 +251,14 @@ export default {
        proveedor: 'default',
        precio_unitario: 0,
        precio_mayorista: 0,
+       categorias: []
 
       },
       productos: [],
       sucursales: [],
      // categorias: [],
       categoriasSeleccionadas: [],
-      categorias: [
-        // { nombre: 'Videojuegos' },
-        // { nombre: 'Electrónica' },
-        // { nombre: 'Ropa' },
-        // { nombre: 'Calzado' },
-        // { nombre: 'Juguetes' },
-        // { nombre: 'Libros' },
-        // { nombre: 'Muebles' },
-        // { nombre: 'Hogar y Cocina' },
-        // { nombre: 'Herramientas' },
-        // { nombre: 'Deportes' },
-        // { nombre: 'Accesorios' },
-        // { nombre: 'Instrumentos Musicales' },
-        // { nombre: 'Salud y Belleza' },
-        // { nombre: 'Jardinería' },
-        // { nombre: 'Automóviles' },
-        // { nombre: 'Mascotas' },
-        // { nombre: 'Fotografía' },
-        // { nombre: 'Alimentos y Bebidas' },
-        // { nombre: 'Papelería' },
-        // { nombre: 'Relojes' },
-        // { nombre: 'Teléfonos Móviles' },
-        // { nombre: 'Bicicletas' },
-        // { nombre: 'Equipos de Camping' },
-        // { nombre: 'Arte y Manualidades' },
-        // { nombre: 'Viajes' },
-        // { nombre: 'Películas' },
-        // { nombre: 'Cómics' },
-        // { nombre: 'Coleccionables' },
-        // { nombre: 'Joyería' },
-        // { nombre: 'Vinos y Licores' }
-      ],
+      categorias: [],
       columns: [
         { header: '#', dataKey: 'index' },
         { header: 'Código', dataKey: 'codigo_producto' },
@@ -356,7 +326,9 @@ export default {
     },
 
     guardarCategorias(){
-      console.log(this.categoriasSeleccionadas);
+      this.productoForm.categorias = this.categoriasSeleccionadas;
+      console.log(this.productoForm.categorias);
+      this.closeModalCategoria();
     },
 
     closeModalCategoria(){
