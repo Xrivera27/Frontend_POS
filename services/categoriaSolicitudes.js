@@ -13,3 +13,16 @@ export const getCategoriaProductosEmpresa = async (id_usuario) => {
     
     }
 }
+
+export const deleteCategoria = async (id_categoria) => {
+    try {
+        const registroEliminado = await solicitudes.deleteRegistro(`/categoria-producto/eliminar-categoria/${id_categoria}`);
+
+        if (registroEliminado === true){
+            return true;
+        }
+        throw 'Algo salio mal'
+    } catch (error) {
+        return error;
+    }
+}

@@ -43,6 +43,7 @@
             <th>#</th>
             <th>Nombre</th>
             <th>Descripción</th>
+            <th>Productos Usados</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -51,6 +52,7 @@
             <td>{{ index + 1 }}</td>
             <td>{{ categoria.nombre_categoria }}</td>
             <td>{{ categoria.descripcion }}</td>
+            <td>{{ categoria.totalProd }}</td>
             <td>
               <button id="btnEditar" class="btn btn-warning" @click="editCategoria(index)"><i
                   class="bi bi-pencil-fill"></i></button>
@@ -98,6 +100,8 @@ import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
+
+const { deleteCategoria } = require('../../services/categoriaSolicitudes');
 
 export default {
   components:
@@ -171,41 +175,19 @@ export default {
       this.editIndex = index;
     },
     async deleteCategoria(index) {
-      let response;
-
-      const datosActualizados = {
-        estado: false,
-      };
-
-      const parametros = `/categoria-producto/desactivar-categoria/${this.categorias[index].id_categoria}`;
-
       try {
-        response = await solicitudes.desactivarRegistro(
-          parametros,
-          datosActualizados
-        );
+        if (this.categorias[index].totalProd > 0){
+          alert('Aun hay productos asignados a esta categoria');
+        }
+       const response = await deleteCategoria(this.categorias[index].id_categoria);
 
         if (response == true) {
           this.categorias.splice(index, 1);
         }
       } catch (error) {
-        alert(new Error(response));
+        alert(new Error(error));
       }
     },
-
-    // guardarCategoria() {
-    //   if (this.isEditing) {
-    //     // Actualiza una categoría existente
-    //     const index = this.categorias.findIndex(c => c.nombre_categoria === this.categoriaForm.nombre_categoria);
-    //     if (index !== -1) {
-    //       this.$set(this.categorias, index, this.categoriaForm);
-    //     }
-    //   } else {
-    //     // Agrega una nueva categoría
-    //     this.categorias.push(this.categoriaForm);
-    //   }
-    //   this.closeModal();
-    // },
     
     async guardarCategoria() {
       let response;
