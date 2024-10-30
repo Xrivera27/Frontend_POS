@@ -7,8 +7,7 @@
 
   <div class="clientes-wrapper">
     <div class="opciones">
-      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-        Clientes</button>
+      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar Clientes</button>
 
       <ExportButton :columns="columns" :rows="rows" fileName="Clientes.pdf" class="export-button" />
 
@@ -25,7 +24,6 @@
         </span>
       </div>
 
-      <!-- Barra de búsqueda -->
       <div class="search-bar">
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
       </div>
@@ -37,52 +35,46 @@
           <tr>
             <th>#</th>
             <th>Nombre</th>
-            <th>DNI / RTN</th>
+            <th>Correo</th>
+            <th>Dirección</th>
             <th>Teléfono</th>
-            <th>Total Compras</th>
-            <th>Última Compra</th>
+            <th>RTN</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(cliente, index) in paginatedClientes" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ cliente.nombre }}</td>
-            <td>{{ cliente.documentoId }}</td>
+            <td>{{ cliente.nombre_completo }}</td>
+            <td>{{ cliente.correo }}</td>
+            <td>{{ cliente.direccion }}</td>
             <td>{{ cliente.telefono }}</td>
-            <td>{{ cliente.totalCompras }}</td>
-            <td>{{ cliente.ultimaCompra }}</td>
+            <td>{{ cliente.rtn }}</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editCliente(index)"><i
-                  class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(index)"><b><i
-                    class="bi bi-x-lg"></i></b></button>
+              <button id="btnEditar" class="btn btn-warning" @click="editCliente(index)">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(index)">
+                <i class="bi bi-x-lg"></i>
+              </button>
             </td>
           </tr>
-
         </tbody>
       </table>
     </div>
 
-    <!-- Modal para agregar o editar clientes -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
         <h2 class="h2-modal-content">{{ isEditing ? 'Editar Cliente' : 'Agregar Cliente' }}</h2>
 
         <div class="form-group">
           <label>Nombre:</label>
-          <input v-model="clienteForm.nombre" type="text" required>
+          <input v-model="clienteForm.nombre_completo" type="text" required>
         </div>
 
         <div class="form-group">
-          <label>DNI / RTN:</label>
-          <input v-model="clienteForm.documentoId" type="text" required>
-        </div>
-
-
-        <div id="form-tel" class="form-group">
-          <label>Teléfono:</label>
-          <input v-model="clienteForm.telefono" type="text" required>
+          <label>Correo:</label>
+          <input v-model="clienteForm.correo" type="email" required>
         </div>
 
         <div class="form-group">
@@ -90,9 +82,18 @@
           <input v-model="clienteForm.direccion" type="text" required>
         </div>
 
-        <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Cliente'" @click="guardarCliente"></btnGuardarModal>
-        <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
+        <div id="form-tel" class="form-group">
+          <label>Teléfono:</label>
+          <input v-model="clienteForm.telefono" type="text" required>
+        </div>
 
+        <div class="form-group">
+          <label>RTN:</label>
+          <input v-model="clienteForm.rtn" type="text" required>
+        </div>
+
+        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Cliente'" @click="guardarCliente"></btnGuardarModal>
+        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
       </div>
     </div>
   </div>
@@ -104,6 +105,8 @@ import ExportButton from '../components/ExportButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
+import solicitudes from "../../services/solicitudes";
+
 export default {
   components: {
     ProfileButton,
@@ -113,109 +116,131 @@ export default {
   },
   data() {
     return {
-      searchQuery: '', // Almacena el texto de búsqueda
-      itemsPerPage: "", // Valor por defecto para mostrar todos los registros
+      searchQuery: '',
+      itemsPerPage: "",
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
+      id_usuario: 0,
       clienteForm: {
-        nombre: '',
-        documentoId: '',
-        telefono: '',
+        id: null,
+        nombre_completo: '',
+        correo: '',
         direccion: '',
-        totalCompras: 0,
-        ultimaCompra: new Date().toISOString().split('T')[0] // Fecha actual
+        telefono: '',
+        rtn: ''
       },
-      clientes: [
-        {
-          nombre: 'Juan Villegas',
-          documentoId: '8161123',
-          telefono: '555 57 67',
-          direccion: 'calle 27 # 40 - 36',
-          totalCompras: 35,
-          ultimaCompra: '2017-12-11'
-        },
-        {
-          nombre: 'María Gómez',
-          documentoId: '1234567',
-          telefono: '555 12 34',
-          direccion: 'avenida 5 # 20 - 15',
-          totalCompras: 20,
-          ultimaCompra: '2020-05-15'
-        },
-        // Resto de clientes...
-      ],
-      // Define tus columnas para la exportación a PDF
-      columns: [
-        { header: '#', dataKey: 'index' },
-        { header: 'Nombre', dataKey: 'nombre' },
-        { header: 'DNI / RTN', dataKey: 'documentoId' },
-        { header: 'Teléfono', dataKey: 'telefono' },
-        { header: 'Total Compras', dataKey: 'totalCompras' },
-        { header: 'Última Compra', dataKey: 'ultimaCompra' }
-      ],
-      rows: [] // Inicialmente vacío, se llena después
+      clientes: []
     };
   },
-
+  async mounted() {
+    document.title = "Clientes";
+    this.changeFavicon('/img/spiderman.ico');
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+      await this.cargarClientes();
+    } catch (error) {
+      console.log(error);
+    }
+  },
   computed: {
     filteredClientes() {
-      // Filtra los clientes basados en el texto de búsqueda
       return this.clientes.filter(cliente =>
-        cliente.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        cliente.documentoId.includes(this.searchQuery)
+        cliente.nombre_completo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        cliente.telefono.includes(this.searchQuery)
       );
     },
     paginatedClientes() {
       return this.itemsPerPage === "" || this.itemsPerPage === null
         ? this.filteredClientes
-        : this.filteredClientes.slice(0, this.itemsPerPage);
+        : this.filteredClientes.slice(0, parseInt(this.itemsPerPage));
     }
   },
   methods: {
+    async cargarClientes() {
+      try {
+        const response = await solicitudes.fetchRegistros(`/clientes/${this.id_usuario}`);
+        this.clientes = response.map(cliente => ({
+          id: cliente.id, // Asegúrate de que cada cliente tenga un ID único
+          nombre_completo: cliente.nombre_completo,
+          correo: cliente.correo,
+          direccion: cliente.direccion,
+          telefono: cliente.telefono,
+          rtn: cliente.rtn
+        }));
+      } catch (error) {
+        console.log(error);
+      }
+    },
     openModal() {
       this.isModalOpen = true;
     },
     closeModal() {
       this.isModalOpen = false;
-      this.isEditing = false;
-      this.clienteForm = {
-        nombre: '',
-        documentoId: '',
-        telefono: '',
-        direccion: '',
-        totalCompras: 0,
-        ultimaCompra: new Date().toISOString().split('T')[0]
-      };
+      this.clearForm();
     },
-    guardarCliente() {
+    clearForm() {
+      this.clienteForm = {
+        id: null,
+        nombre_completo: '',
+        correo: '',
+        direccion: '',
+        telefono: '',
+        rtn: ''
+      };
+      this.isEditing = false;
+      this.editIndex = null;
+    },
+    async guardarCliente() {
+      this.clienteForm.id_usuario = this.id_usuario;
+      let response;
+      let parametros;
+
       if (this.isEditing) {
-        Object.assign(this.clientes[this.editIndex], this.clienteForm);
+        try {
+          parametros = `/clientes/actualizar-cliente/${this.clienteForm.id}`;
+          response = await solicitudes.patchRegistro(parametros, this.clienteForm);
+          if (response === true) {
+            Object.assign(this.clientes[this.editIndex], this.clienteForm);
+          } else {
+            alert(response);
+          }
+        } catch (error) {
+          alert(error);
+        }
       } else {
-        this.clientes.push({ ...this.clienteForm });
+        parametros = `/clientes/crear-cliente/${this.id_usuario}`;
+        try {
+          response = await solicitudes.postRegistro(parametros, this.clienteForm);
+          if (response.length > 0) {
+            this.clientes.push(response[0]);
+          } else {
+            throw new Error('Error al crear el cliente.');
+          }
+        } catch (error) {
+          console.log(error);
+        }
       }
       this.closeModal();
     },
     editCliente(index) {
-      this.isModalOpen = true;
+      this.clienteForm = { ...this.clientes[index] };
       this.isEditing = true;
       this.editIndex = index;
-      this.clienteForm = { ...this.clientes[index] };
+      this.openModal();
     },
-    deleteCliente(index) {
-      this.clientes.splice(index, 1);
-    },
-    generateRows() {
-      // Genera las filas basadas en los clientes paginados
-      this.rows = this.paginatedClientes.map((cliente, index) => ({
-        index: index + 1,
-        nombre: cliente.nombre,
-        documentoId: cliente.documentoId,
-        telefono: cliente.telefono,
-        totalCompras: cliente.totalCompras,
-        ultimaCompra: cliente.ultimaCompra
-      }));
-      console.log('Filas generadas:', this.rows);
+    async deleteCliente(index) {
+      const cliente = this.clientes[index];
+      try {
+        const response = await solicitudes.deleteRegistro(`/clientes/eliminar-cliente/${cliente.id}`);
+        if (response === true) {
+          this.clientes.splice(index, 1);
+        } else {
+          alert('Error al eliminar el cliente.');
+        }
+      } catch (error) {
+        console.log(error);
+      }
     },
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
@@ -224,21 +249,10 @@ export default {
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
     }
-  },
-  watch: {
-    // Cuando cambie la paginación o el filtro, actualiza las filas
-    paginatedClientes() {
-      this.generateRows();
-    }
-  },
-  mounted() {
-    // Genera las filas al cargar el componente
-    this.generateRows();
-    document.title = "Clientes";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
   }
 };
 </script>
+
 
 
 <style scoped>
