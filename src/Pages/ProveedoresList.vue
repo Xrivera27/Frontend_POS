@@ -187,7 +187,6 @@ export default {
             this.proveedorForm
           );
           
-
           if (response == true) {
 
             Object.assign(this.proveedores[this.editIndex], this.proveedorForm);
