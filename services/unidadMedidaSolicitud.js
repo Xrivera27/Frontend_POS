@@ -52,9 +52,9 @@ export const postUnidad = async (datos) => {
 
         const response = await solicitudes.postRegistro(parametros, datos);
 
-    console.log(`Response: ${response}`);
+
         if (response && Object.keys(response).length > 0) {
-            console.log(response);
+
             return response; // Retorna el registro creado o la respuesta completa
         } else {
             throw new Error('No se hizo el post');

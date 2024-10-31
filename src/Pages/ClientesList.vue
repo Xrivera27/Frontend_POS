@@ -106,6 +106,7 @@ import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
 import solicitudes from "../../services/solicitudes";
+const { getClientesbyEmpresa, postCliente, patchCliente, desactivarCliente } = require('../../services/clienteSolicitudes.js');
 
 export default {
   components: {
@@ -138,7 +139,10 @@ export default {
     this.changeFavicon('/img/spiderman.ico');
     try {
       this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
-      await this.cargarClientes();
+      
+      this.clientes = await getClientesbyEmpresa(this.id_usuario);
+
+
     } catch (error) {
       console.log(error);
     }
@@ -157,21 +161,6 @@ export default {
     }
   },
   methods: {
-    async cargarClientes() {
-      try {
-        const response = await solicitudes.fetchRegistros(`/clientes/${this.id_usuario}`);
-        this.clientes = response.map(cliente => ({
-          id: cliente.id, // Asegúrate de que cada cliente tenga un ID único
-          nombre_completo: cliente.nombre_completo,
-          correo: cliente.correo,
-          direccion: cliente.direccion,
-          telefono: cliente.telefono,
-          rtn: cliente.rtn
-        }));
-      } catch (error) {
-        console.log(error);
-      }
-    },
     openModal() {
       this.isModalOpen = true;
     },
@@ -194,26 +183,22 @@ export default {
     async guardarCliente() {
       this.clienteForm.id_usuario = this.id_usuario;
       let response;
-      let parametros;
 
       if (this.isEditing) {
-        try {
-          parametros = `/clientes/actualizar-cliente/${this.clienteForm.id}`;
-          response = await solicitudes.patchRegistro(parametros, this.clienteForm);
-          if (response === true) {
-            Object.assign(this.clientes[this.editIndex], this.clienteForm);
-          } else {
-            alert(response);
-          }
-        } catch (error) {
-          alert(error);
-        }
+        const nuevoRegistro = await patchCliente(this.clienteForm, this.clientes[this.editIndex].id_cliente);
+if (nuevoRegistro == true) {
+
+  Object.assign(this.clientes[this.editIndex], this.clienteForm);
+
+}
       } else {
-        parametros = `/clientes/crear-cliente/${this.id_usuario}`;
+       
         try {
-          response = await solicitudes.postRegistro(parametros, this.clienteForm);
+          response = await postCliente(this.clienteForm, this.id_usuario);
           if (response.length > 0) {
+
             this.clientes.push(response[0]);
+
           } else {
             throw new Error('Error al crear el cliente.');
           }
@@ -230,17 +215,18 @@ export default {
       this.openModal();
     },
     async deleteCliente(index) {
-      const cliente = this.clientes[index];
-      try {
-        const response = await solicitudes.deleteRegistro(`/clientes/eliminar-cliente/${cliente.id}`);
-        if (response === true) {
-          this.clientes.splice(index, 1);
-        } else {
-          alert('Error al eliminar el cliente.');
-        }
-      } catch (error) {
-        console.log(error);
+     try {
+      const response = await desactivarCliente(this.clientes[index].id_cliente);
+      console.log(response);
+      if (response === true){
+        this.clientes.splice(index, 1);
       }
+      else {
+        throw response;
+      }
+     } catch (error) {
+      alert(error.message);
+     }
     },
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
@@ -484,6 +470,11 @@ export default {
   margin: 4px;
   border: none;
   cursor: pointer;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
 }
 
 .rol {
