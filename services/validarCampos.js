@@ -15,6 +15,10 @@ export default {
 
   // Valida que dos contraseñas coincidan
   validarPass(password1, password2) {
+    if ( password1 !== password2 ){
+      this.notificaciones('diferent-password');
+    }
+    
     return password1 === password2;
   },
 
@@ -22,6 +26,10 @@ export default {
   validarEmail(email) {
     const emailPattern =
       /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|hotmail\.com)$/;
+
+      if ( !emailPattern.test(email) ){
+        this.notificaciones('invalid-email');
+      }
     return emailPattern.test(email);
   },
 
@@ -29,28 +37,50 @@ export default {
   validarPasswordSegura(password) {
     const passwordPattern =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+
+      if ( !passwordPattern.test(password) ){
+        this.notificaciones('invalid-password');
+      }
+
     return passwordPattern.test(password);
   },
 
   // Valida que el teléfono tenga 8 dígitos y sea numérico
   validarTelefono(telefono) {
     const phonePattern = /^(?:\d{8}|\d{4}-\d{4})$/;
+    if ( !phonePattern.test(telefono) ){
+      this.notificaciones('invalid-phone');
+    }
     return phonePattern.test(telefono);
   },
 
   validarSiNumero(campo) {
-    // Verifica si el campo coincide con la expresión regular de un número
     return /^[+-]?\d+(\.\d+)?$/.test(campo);
   },
 
-  notificaciones(tipo, campo) {
+  notificaciones(tipo, campo = '') {
     const toast = useToast();
     let mensaje;
 
     switch (tipo){
       case 'empty-campo': 
       mensaje = 'El campo ' + campo + ' esta vacio.' ;
-      
+      break;
+
+      case 'invalid-password': 
+      mensaje = 'La contraseña no cumple con los requisitos de seguridad';
+      break;
+
+      case 'diferent-password': 
+      mensaje = 'Las contraseñas no coinciden';
+      break;
+
+      case 'invalid-phone': 
+      mensaje = 'El teléfono no es válido';
+      break;
+
+      case 'invalid-email': 
+      mensaje = 'El correo no es válido';
       break;
 
       default: mensaje = 'Error al enviar formulario';

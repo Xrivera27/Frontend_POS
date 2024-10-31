@@ -313,30 +313,43 @@ export default {
       toast.error(mensaje, { timeout: 5000 }); // Usa el toast aquí
     },
 
-    // Método para validar que los campos no estén vacíos
-    validarEmpty() {
+    validarCampos(form){
       const campos = {
-        nombre: this.usuarioForm.nombre,
-        apellido: this.usuarioForm.apellido,
-        nombre_usuario: this.usuarioForm.nombre_usuario,
-        correo: this.usuarioForm.correo,
-        telefono: this.usuarioForm.telefono,
-        direccion: this.usuarioForm.direccion,
-        sucursal: this.usuarioForm.sucursal,
-        password: this.usuarioForm.password,
-        confirmPassword: this.usuarioForm.confirmPassword,
-        rol: this.usuarioForm.rol,
+        nombre: form.nombre,
+        apellido: form.apellido,
+        nombre_usuario: form.nombre_usuario,
+        correo: form.correo,
+        telefono: form.telefono,
+        direccion: form.direccion,
+        sucursal: form.sucursal,
+        password: form.password,
+        confirmPassword: form.confirmPassword,
+        rol: form.rol,
       };
 
-      for (const [key, value] of Object.entries(campos)) {
-        if (!value || (typeof value === 'string' && value.trim() === '')) {
-          this.notificarCampoVacio(key);
-          return true; // Retorna true si hay un campo vacío
-        }
+      if ( !validarCamposService.validarEmpty(campos) ){
+        return false;
       }
-      return false; // Todos los campos están llenos
-    },
 
+      if (!validarCamposService.validarPass(campos.password, campos.confirmPassword)) {
+        return false;
+      }
+
+      if (!validarCamposService.validarTelefono(campos.telefono)) {
+        return false;
+      }
+
+      if (!validarCamposService.validarPasswordSegura(campos.password)) {
+        return false;
+      }
+
+      if (!validarCamposService.validarEmail(campos.correo)) {
+        return false;
+      }
+
+      return true;
+    },
+   
     editarPassword(){
       this.isPassEdit = true;
     },
@@ -346,62 +359,8 @@ export default {
       let response;
       let parametros;
 
-      const email = this.usuarioForm.correo;
-      const password1 = this.usuarioForm.password;
-      const password2 = this.usuarioForm.confirmPassword;
-      const telefono = this.usuarioForm.telefono;
-
-      // if (this.validarEmpty()) {
-      //   return; // Si hay un campo vacío, no continuar con el guardado
-      // }
-
-      const campos = {
-        nombre: this.usuarioForm.nombre,
-        apellido: this.usuarioForm.apellido,
-        nombre_usuario: this.usuarioForm.nombre_usuario,
-        correo: this.usuarioForm.correo,
-        telefono: this.usuarioForm.telefono,
-        direccion: this.usuarioForm.direccion,
-        sucursal: this.usuarioForm.sucursal,
-        password: this.usuarioForm.password,
-        confirmPassword: this.usuarioForm.confirmPassword,
-        rol: this.usuarioForm.rol,
-      };
-
-      if ( !validarCamposService.validarEmpty(campos) ){
+      if (!this.validarCampos(this.usuarioForm)){
         return ;
-      }
-
-      if (!validarCamposService.validarEmail(email)) {
-        console.log('El correo no es válido o no pertenece a un dominio aceptado');
-        toast.warning('El correo no es válido o no pertenece a un dominio aceptado', {
-          timeout: 5000
-        });
-        return;
-      }
-
-      if (!validarCamposService.validarPasswordSegura(password1)) {
-        console.log('La contraseña no cumple con los requisitos de seguridad');
-        toast.error('La contraseña no cumple con los requisitos de seguridad', {
-          timeout: 5000
-        });
-        return;
-      }
-
-      if (!validarCamposService.validarPass(password1, password2)) {
-        console.log('Las contraseñas no coinciden');
-        toast.error('Las contraseñas no coinciden', {
-          timeout: 5000
-        });
-        return;
-      }
-
-      if (!validarCamposService.validarTelefono(telefono)) {
-        console.log('El teléfono no es válido');
-        toast.error('El teléfono no es válido', {
-          timeout: 5000
-        });
-        return;
       }
 
       // Si todas las validaciones pasan, procede a guardar el usuario
