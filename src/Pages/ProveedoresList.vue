@@ -48,9 +48,9 @@
             <td>{{ proveedor.correo }}</td>
             <td>{{ proveedor.direccion }}</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editProveedor(index)"><i
+              <button id="btnEditar" class="btn btn-warning" @click="editProveedor(proveedor)"><i
                   class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteProveedor(index)"><b><i
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteProveedor(proveedor)"><b><i
                     class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
@@ -217,14 +217,14 @@ export default {
       }
       this.closeModal();
     },
-    editProveedor(index) {
-      this.proveedorForm = { ...this.proveedores[index] };
+    editProveedor(proveedor) {
+      this.proveedorForm = { ...proveedor };
       
       this.isEditing = true;
-      this.editIndex = index;
+      this.editIndex= this.proveedores.findIndex(item => item.id === proveedor.id);
       this.openModal();
     },
-    async deleteProveedor(index) {
+    async deleteProveedor(proveedor) {
       let response;
 
       const datosActualizados = {
@@ -232,7 +232,7 @@ export default {
         id_usuario: this.id_usuario
       };
 
-      const parametros = `/proveedores/desactivar-proveedor/${this.proveedores[index].id}`;
+      const parametros = `/proveedores/desactivar-proveedor/${proveedor.id}`;
 
       try {
         response = await solicitudes.desactivarRegistro(
@@ -241,7 +241,7 @@ export default {
         );
 
         if (response == true) {
-          this.proveedores.splice(index, 1);
+          this.proveedores = this.proveedores.filter(item => item.id !== proveedor.id);
         }
       } catch (error) {
         console.log(new Error(response));

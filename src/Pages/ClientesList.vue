@@ -51,10 +51,10 @@
             <td>{{ cliente.telefono }}</td>
             <td>{{ cliente.rtn }}</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editCliente(index)">
+              <button id="btnEditar" class="btn btn-warning" @click="editCliente(cliente)">
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(index)">
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(cliente)">
                 <i class="bi bi-x-lg"></i>
               </button>
             </td>
@@ -208,18 +208,18 @@ if (nuevoRegistro == true) {
       }
       this.closeModal();
     },
-    editCliente(index) {
-      this.clienteForm = { ...this.clientes[index] };
+    editCliente(cliente) {
+      this.clienteForm = { ...cliente };
       this.isEditing = true;
-      this.editIndex = index;
+      this.editIndex= this.clientes.findIndex(item => item.id_cliente === cliente.id_cliente);
       this.openModal();
     },
-    async deleteCliente(index) {
+    async deleteCliente(cliente) {
      try {
-      const response = await desactivarCliente(this.clientes[index].id_cliente);
+      const response = await desactivarCliente(cliente.id_cliente);
       console.log(response);
       if (response === true){
-        this.clientes.splice(index, 1);
+        this.clientes = this.clientes.filter(item => item.id_cliente !== cliente.id_cliente);
       }
       else {
         throw response;

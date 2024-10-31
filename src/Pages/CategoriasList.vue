@@ -54,9 +54,9 @@
             <td>{{ categoria.descripcion }}</td>
             <td>{{ categoria.totalProd }}</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editCategoria(index)"><i
+              <button id="btnEditar" class="btn btn-warning" @click="editCategoria(categoria)"><i
                   class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteCategoria(index)"><b><i
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteCategoria(categoria)"><b><i
                     class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
@@ -167,22 +167,22 @@ export default {
       // Cierra el modal
       this.isModalOpen = false;
     },
-    editCategoria(index) {
+    editCategoria(categoria) {
       // Implementa la lógica para editar una categoría
       this.isModalOpen = true;
       this.isEditing = true;
-      this.categoriaForm = { ...this.categorias[index] };
-      this.editIndex = index;
+      this.categoriaForm = { ...categoria };
+      this.editIndex= this.categorias.findIndex(item => item.id_categoria === categoria.id_categoria);
     },
-    async deleteCategoria(index) {
+    async deleteCategoria(categoria) {
       try {
-        if (this.categorias[index].totalProd > 0){
+        if (categoria.totalProd > 0){
           alert('Aun hay productos asignados a esta categoria');
         }
-       const response = await deleteCategoria(this.categorias[index].id_categoria);
+       const response = await deleteCategoria(categoria.id_categoria);
 
         if (response == true) {
-          this.categorias.splice(index, 1);
+          this.categorias = this.categorias.filter(item => item.id_categoria !== categoria.id_categoria);
         }
       } catch (error) {
         alert(new Error(error));

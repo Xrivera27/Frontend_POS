@@ -54,7 +54,7 @@
             <td>{{ getRol(empleado.id_rol) }}</td>
 
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(empleado, index)"><i
+              <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(empleado)"><i
                   class="bi bi-pencil-fill"></i></button>
               <button id="btnEliminar" class="btn btn-danger" @click="deleteUsuariol(empleado)"><b><i
                     class="bi bi-x-lg"></i></b></button>
@@ -415,8 +415,8 @@ export default {
       }
     },
 
-    editEmpleado(empleado, index) {
-      this.editIndex = index;
+    editEmpleado(empleado) {
+      this.editIndex= this.empleados.findIndex(item => item.id_usuario === empleado.id_usuario);
       this.usuarioForm = { ...empleado };
       this.usuarioForm.sucursal = empleado.sucursales;
       this.usuarioForm.rol = empleado.id_rol;

@@ -68,14 +68,14 @@
               <button
                 id="btnEditar"
                 class="btn btn-warning"
-                @click="editSucursal(index, sucursal)"
+                @click="editSucursal(sucursal)"
               >
                 <i class="bi bi-pencil-fill"></i>
               </button>
               <button
                 id="btnEliminar"
                 class="btn btn-danger"
-                @click="deleteSucursal(index, sucursal)"
+                @click="deleteSucursal(sucursal)"
               >
                 <b><i class="bi bi-x-lg"></i></b>
               </button>
@@ -244,13 +244,13 @@ export default {
       }
       this.closeModal();
     },
-    editSucursal(index, sucursal) {
+    editSucursal(sucursal) {
       this.isModalOpen = true;
       this.isEditing = true;
-      this.editIndex = index;
+      this.editIndex= this.sucursales.findIndex(item => item.id_sucursal === sucursal.id_sucursal);
       this.sucursalForm = { ...sucursal };
     },
-    async deleteSucursal(index, sucursal) {
+    async deleteSucursal(sucursal) {
       let response;
 
       const datosActualizados = {
