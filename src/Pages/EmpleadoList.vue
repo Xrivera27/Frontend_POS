@@ -351,8 +351,25 @@ export default {
       const password2 = this.usuarioForm.confirmPassword;
       const telefono = this.usuarioForm.telefono;
 
-      if (this.validarEmpty()) {
-        return; // Si hay un campo vacío, no continuar con el guardado
+      // if (this.validarEmpty()) {
+      //   return; // Si hay un campo vacío, no continuar con el guardado
+      // }
+
+      const campos = {
+        nombre: this.usuarioForm.nombre,
+        apellido: this.usuarioForm.apellido,
+        nombre_usuario: this.usuarioForm.nombre_usuario,
+        correo: this.usuarioForm.correo,
+        telefono: this.usuarioForm.telefono,
+        direccion: this.usuarioForm.direccion,
+        sucursal: this.usuarioForm.sucursal,
+        password: this.usuarioForm.password,
+        confirmPassword: this.usuarioForm.confirmPassword,
+        rol: this.usuarioForm.rol,
+      };
+
+      if ( !validarCamposService.validarEmpty(campos) ){
+        return ;
       }
 
       if (!validarCamposService.validarEmail(email)) {

@@ -1,18 +1,16 @@
+import { useToast } from "vue-toastification"; // Importación para el popup
+
 export default {
   // Valida que un campo no esté vacío
   validarEmpty(form) {
-    const campos = Object.values(form);
-    return campos.every((campo) => {
-      // Verifica si el campo es un string y no está vacío
-      if (typeof campo === "string") {
-        return campo.trim() !== "";
+    for ( const [key, value] of Object.entries(form) ){
+      if ( value === '' || value === undefined || !value ){
+        this.notificaciones('empty-campo', key);
+        return false;
       }
-      // Verifica si el campo es un valor de selección (select)
-      if (typeof campo === "number" || typeof campo === "string") {
-        return campo !== "" && campo !== null; // Cambia '' por el valor que consideres como "no seleccionado"
-      }
-      return campo !== null && campo !== undefined; // Asegúrate de que no sea null o undefined
-    });
+      return true;
+
+    }
   },
 
   // Valida que dos contraseñas coincidan
@@ -43,5 +41,22 @@ export default {
   validarSiNumero(campo) {
     // Verifica si el campo coincide con la expresión regular de un número
     return /^[+-]?\d+(\.\d+)?$/.test(campo);
-  }
+  },
+
+  notificaciones(tipo, campo) {
+    const toast = useToast();
+    let mensaje;
+
+    switch (tipo){
+      case 'empty-campo': 
+      mensaje = 'El campo ' + campo + ' esta vacio.' ;
+      
+      break;
+
+      default: mensaje = 'Error al enviar formulario';
+    }
+    toast.error(mensaje, { timeout: 5000 });
+    
+  },
+
 };
