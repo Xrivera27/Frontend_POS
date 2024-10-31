@@ -54,7 +54,7 @@
             <td>{{ getRol(empleado.id_rol) }}</td>
 
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(empleado)"><i
+              <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(empleado, index)"><i
                   class="bi bi-pencil-fill"></i></button>
               <button id="btnEliminar" class="btn btn-danger" @click="deleteUsuariol(empleado)"><b><i
                     class="bi bi-x-lg"></i></b></button>
@@ -144,8 +144,6 @@
         <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         <button class="btn editar-password" :disabled="!isEditing" @click="editarPassword" >Editar Contraseña</button>
         </div>
-
-
       </div>
     </div>
 
@@ -157,7 +155,7 @@
 import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
-import { useToast } from "vue-toastification"; // Importación para el popup
+
 import LoadingSpinner from '@/components/LoadingSpinnerList.vue';
 
 // importando solicitudes
@@ -295,24 +293,6 @@ export default {
       return rol ? rol.cargo : 'Desconocido';
     },
 
-    notificarCampoVacio(campo) {
-      const toast = useToast(); // Inicializa el toast aquí
-      const mensajes = {
-        nombre: 'El campo "Nombre" está vacío.',
-        apellido: 'El campo "Apellido" está vacío.',
-        nombre_usuario: 'El campo "Nombre de Usuario" está vacío.',
-        correo: 'El campo "Correo" está vacío.',
-        telefono: 'El campo "Teléfono" está vacío.',
-        direccion: 'El campo "Dirección" está vacío.',
-        sucursal: 'El campo "Sucursal" está vacío.',
-        password: 'El campo "Contraseña" está vacío.',
-        confirmPassword: 'El campo "Confirmar Contraseña" está vacío.',
-        rol: 'El campo "Rol" está vacío.',
-      };
-      const mensaje = mensajes[campo] || 'Un campo está vacío.';
-      toast.error(mensaje, { timeout: 5000 }); // Usa el toast aquí
-    },
-
     validarCampos(form){
       const campos = {
         nombre: form.nombre,
@@ -331,17 +311,19 @@ export default {
         return false;
       }
 
-      if (!validarCamposService.validarPass(campos.password, campos.confirmPassword)) {
+      if (this.isPassEdit){
+        if (!validarCamposService.validarPass(campos.password, campos.confirmPassword)) {
         return false;
       }
-
+      if (!validarCamposService.validarPasswordSegura(campos.password)) {
+        return false;
+      }
+      }
       if (!validarCamposService.validarTelefono(campos.telefono)) {
         return false;
       }
 
-      if (!validarCamposService.validarPasswordSegura(campos.password)) {
-        return false;
-      }
+      
 
       if (!validarCamposService.validarEmail(campos.correo)) {
         return false;
@@ -355,7 +337,6 @@ export default {
     },
 
     async guardarUsuario() {
-      const toast = useToast();
       let response;
       let parametros;
 
@@ -363,11 +344,7 @@ export default {
         return ;
       }
 
-      // Si todas las validaciones pasan, procede a guardar el usuario
-      console.log('Usuario válido, procesando guardado...');
-      toast.success('Usuario válido, procesando guardado...', {
-        timeout: 5000
-      });
+      validarCamposService.formSuccess();
 
       if (this.isEditing) {
         try {
@@ -438,7 +415,8 @@ export default {
       }
     },
 
-    editEmpleado(empleado) {
+    editEmpleado(empleado, index) {
+      this.editIndex = index;
       this.usuarioForm = { ...empleado };
       this.usuarioForm.sucursal = empleado.sucursales;
       this.usuarioForm.rol = empleado.id_rol;

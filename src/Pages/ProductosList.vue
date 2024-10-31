@@ -75,10 +75,10 @@
             <td>{{ producto.precio_unitario }}</td>
             <td>Inactivo</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editProducto(index)">
+              <button id="btnEditar" class="btn btn-warning" @click="editProducto(producto, index)">
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteProducto(index)">
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteProducto(producto)">
                 <b><i class="bi bi-x-lg"></i></b>
               </button>
             </td>
@@ -277,8 +277,7 @@ export default {
     filteredProductos() {
       return this.productos.filter(producto =>
         producto.codigo_producto.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        producto.descripcion.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        producto.categoria.toLowerCase().includes(this.searchQuery.toLowerCase())
+        producto.descripcion.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
     filteredCategorias() {
@@ -371,13 +370,10 @@ export default {
         try {
 
           if (this.productoForm.codigo_producto === this.productos[this.editIndex].codigo_producto) this.productoForm.codigo_producto = '';
-
           const nuevoRegistro = await patchProducto(this.productoForm, this.productos[this.editIndex].id_producto);
           if (nuevoRegistro == true) {
             this.productoForm.codigo_producto = this.productos[this.editIndex].codigo_producto;
             Object.assign(this.productos[this.editIndex], this.productoForm);
-
-          
           }
         } catch (error) {
           alert(error);
@@ -395,11 +391,11 @@ export default {
       }
       this.closeModal();
     },
-    async editProducto(index) {
-      this.productoForm = { ...this.productos[index] };
+    async editProducto(producto, index) {
+      this.productoForm = { ...producto };
 
       try {
-        const infoExtra = await getInfoExtra(this.productos[index].id_producto);
+        const infoExtra = await getInfoExtra(producto.id_producto);
         this.productoForm.impuesto  = infoExtra.impuesto;
         this.productoForm.unidad_medida  = infoExtra.id_unidad_medida;
         this.productoForm.precio_mayorista  = infoExtra.precio_mayorista;
@@ -415,11 +411,11 @@ export default {
       }
       
     },
-    async deleteProducto(index) {
+    async deleteProducto(producto) {
       try {
-        const registroEliminado = await desactivarProducto(this.productos[index].id_producto);
+        const registroEliminado = await desactivarProducto(producto.id_producto);
 
-        if (registroEliminado == true) this.productos.splice(index, 1);
+        if (registroEliminado == true) this.productos = this.productos.filter(item => item.id_producto !== producto.id_producto);
 
         else {alert('Error al eliminar producto');}
         

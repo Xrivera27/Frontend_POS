@@ -50,9 +50,9 @@
               <button class="btn mostrar-producto" @click="mostrarModalProductos(unidad.id_medida)" >Mostrar Prod.</button>
             </td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editUnidad(index)"><i
+              <button id="btnEditar" class="btn btn-warning" @click="editUnidad(unidad)"><i
                   class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteUnidad(index)"><b><i
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteUnidad(unidad)"><b><i
                     class="bi bi-x-lg"></i></b></button>
             </td>
           </tr>
@@ -189,12 +189,12 @@ export default {
       this.isModalOpen = false;
       this.isModalProductosOpen = false;
     },
-    editUnidad(index) {
+    editUnidad(unidad) {
       // Implementa la lógica para editar una categoría
       this.isModalOpen = true;
       this.isEditing = true;
-      this.unidadForm = { ...this.unidadesMedida[index] };
-      this.editIndex = index;
+      this.unidadForm = { ...unidad };
+      this.editIndex= this.unidadesMedida.findIndex(item => item.id_medida === unidad.id_medida);
     },
 
     async mostrarModalProductos(id_medida){
@@ -207,22 +207,22 @@ export default {
       }
     },
 
-    async deleteUnidad(index) {
+    async deleteUnidad(unidad) {
 
-      if (this.unidadesMedida[index].totalProductos > 0){
+      if (unidad.totalProductos > 0){
         alert('No se puede eliminar por que hay productos usando esta unidad.');
         return;
       }
       
       try {
-        const response = await eliminarUnidad(this.unidadesMedida[index].id_medida);
+        const response = await eliminarUnidad(unidad.id_medida);
 
         if (response.success === false){
           throw response.message;
         }
 
         if (response === true){
-          this.unidadesMedida.splice(index, 1);
+          this.unidadesMedida = this.unidadesMedida.filter(item => item.id_medida !== unidad.id_medida);
         }
 
       } catch (error) {

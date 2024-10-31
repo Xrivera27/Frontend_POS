@@ -68,14 +68,14 @@
               <button
                 id="btnEditar"
                 class="btn btn-warning"
-                @click="editSucursal(index)"
+                @click="editSucursal(index, sucursal)"
               >
                 <i class="bi bi-pencil-fill"></i>
               </button>
               <button
                 id="btnEliminar"
                 class="btn btn-danger"
-                @click="deleteSucursal(index)"
+                @click="deleteSucursal(index, sucursal)"
               >
                 <b><i class="bi bi-x-lg"></i></b>
               </button>
@@ -244,20 +244,20 @@ export default {
       }
       this.closeModal();
     },
-    editSucursal(index) {
+    editSucursal(index, sucursal) {
       this.isModalOpen = true;
       this.isEditing = true;
       this.editIndex = index;
-      this.sucursalForm = { ...this.sucursales[index] };
+      this.sucursalForm = { ...sucursal };
     },
-    async deleteSucursal(index) {
+    async deleteSucursal(index, sucursal) {
       let response;
 
       const datosActualizados = {
         estado: false,
       };
 
-      const parametros = `/sucursales/desactivar-sucursal/${this.sucursales[index].id_sucursal}`;
+      const parametros = `/sucursales/desactivar-sucursal/${sucursal.id_sucursal}`;
 
       try {
         response = await solicitudes.desactivarRegistro(
@@ -266,7 +266,7 @@ export default {
         );
 
         if (response == true) {
-          this.sucursales.splice(index, 1);
+          this.sucursales = this.sucursales.filter(item => item.id_sucursal !== sucursal.id_sucursal);
         }
       } catch (error) {
         alert(new Error(response));

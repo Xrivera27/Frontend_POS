@@ -54,6 +54,10 @@ export default {
     return phonePattern.test(telefono);
   },
 
+  formSuccess(){
+    this.notificaciones('form-success');
+  },
+
   validarSiNumero(campo) {
     return /^[+-]?\d+(\.\d+)?$/.test(campo);
   },
@@ -83,9 +87,21 @@ export default {
       mensaje = 'El correo no es válido';
       break;
 
+      case 'form-success': 
+      mensaje = 'Usuario válido, procesando guardado...';
+      break;
+
       default: mensaje = 'Error al enviar formulario';
     }
-    toast.error(mensaje, { timeout: 5000 });
+
+    if (tipo === 'form-success'){
+      toast.success(mensaje, { timeout: 5000 });
+    }
+    else {
+      toast.error(mensaje, { timeout: 5000 });
+    }
+
+    
     
   },
 
