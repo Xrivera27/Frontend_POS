@@ -107,7 +107,7 @@
                 <span class="info-icon" @mouseover="showTooltip = true" @mouseleave="showTooltip = false">ℹ️</span>
                 Contraseña:
               </label>
-              <input v-model="usuarioForm.password" type="password" required />
+              <input v-model="usuarioForm.password" type="password" required :disabled="!isPassEdit"/>
               <div v-if="showTooltip" class="tooltip">
                 La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un
                 número y un símbolo.
@@ -115,7 +115,7 @@
             </div>
             <div class="form-group">
               <label>Confirmar contraseña:</label>
-              <input v-model="usuarioForm.confirmPassword" type="password" required />
+              <input v-model="usuarioForm.confirmPassword" type="password" required :disabled="!isPassEdit" />
             </div>
             <div class="form-group">
               <label>Telefono:</label>
@@ -137,11 +137,15 @@
 
           </div>
         </div>
-
-        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario"
+        <div>
+          <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario"
           type="submit">
         </btnGuardarModal>
         <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+        <button class="btn editar-password" :disabled="!isEditing" @click="editarPassword" >Editar Contraseña</button>
+        </div>
+
+
       </div>
     </div>
 
@@ -176,6 +180,7 @@ export default {
       id_usuario: 0, // Almacena el texto de búsqueda
       isModalOpen: false,
       isEditing: false,
+      isPassEdit: true,
       showPassword: false,
       editIndex: null,
       itemsPerPage: "",
@@ -332,6 +337,10 @@ export default {
       return false; // Todos los campos están llenos
     },
 
+    editarPassword(){
+      this.isPassEdit = true;
+    },
+
     async guardarUsuario() {
       const toast = useToast();
       let response;
@@ -341,15 +350,6 @@ export default {
       const password1 = this.usuarioForm.password;
       const password2 = this.usuarioForm.confirmPassword;
       const telefono = this.usuarioForm.telefono;
-
-      // // Validaciones
-      /*     if (!validarCamposService.validarEmpty(this.usuarioForm)) {
-             console.log('Rellene todos los campos');
-             toast.warning('Rellene todos los campos', {
-               timeout: 5000
-             });
-             return;
-           }*/
 
       if (this.validarEmpty()) {
         return; // Si hay un campo vacío, no continuar con el guardado
@@ -463,8 +463,11 @@ export default {
     },
 
     editEmpleado(empleado) {
-      this.usuarioForm = { ...empleado }; // Asigna directamente el objeto empleado
+      this.usuarioForm = { ...empleado };
+      this.usuarioForm.sucursal = empleado.sucursales;
+      this.usuarioForm.rol = empleado.id_rol;
       this.isEditing = true;
+      this.isPassEdit = false;
       this.openModal();
     },
     deleteEmpleado(index) {
