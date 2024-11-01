@@ -30,7 +30,7 @@
             <input v-model="usuarioForm.correo" type="text" required />
           </div>
 
-          
+
         </div>
         <div class="contenedor contenedor-derecho">
           <div class="form-group">
@@ -54,10 +54,13 @@
         </div>
       </div>
       <div class="form-group form-group-select">
-            <label for="sucursal">Selecciona sucursal:</label>
-            <select class="form-select" id="sucursal" name="sucursal">
-            </select>
-          </div>
+        <select class="form-select" id="sucursal" name="sucursal" v-model="usuarioForm.sucursal" required>
+          <option value="" disabled selected>Selecciona una sucursal</option>
+          <option v-for="(sucursal, index) in sucursales" :key="index" :value="sucursal.id_sucursal">
+            {{ sucursal.nombre_administrativo }}
+          </option>
+        </select>
+      </div>
       <button id="AddUsuarioModal" class="btn btn-primary" @click="guardarUsuario">
         {{ isEditing ? "Guardar Cambios" : "Agregar Usuario" }}
       </button>
@@ -175,7 +178,20 @@ export default {
 
     },
     editUsuario(index) {
-      this.usuarioForm = { ...this.usuarios[index] };
+      const usuario = this.usuarios[index];
+
+      this.usuarioForm = {
+        nombre: usuario.nombre,
+        apellido: usuario.apellido,
+        nombreUsuario: usuario.nombreUsuario,
+        correo: usuario.correo,
+        telefono: usuario.telefono,
+        direccion: usuario.direccion,
+        contra: '', // Dejar vacío para que el usuario ingrese una nueva contraseña si lo desea
+        confirmContra: '', // Dejar vacío para confirmar la nueva contraseña
+        sucursal: usuario.sucursal // Asegúrate de que esto coincida con el valor en el select
+      };
+
       this.isEditing = true;
       this.editIndex = index;
       this.openModal();
@@ -249,7 +265,7 @@ export default {
   margin-bottom: 8px;
 }
 
-.form-group-select{
+.form-group-select {
   min-width: 80%;
   display: flexbox;
   flex-direction: row;
@@ -294,7 +310,7 @@ export default {
   border-radius: 5px;
 }
 
-.btn-success{
+.btn-success {
   min-height: 80px;
   max-width: 90px;
 }

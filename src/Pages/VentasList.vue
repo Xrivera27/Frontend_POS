@@ -1,240 +1,144 @@
 <template>
-  <div class="encabezado">
-    <h1>Crear Ventas</h1>
-    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-  </div>
-  <hr>
-
   <div class="wrapper">
     <div class="main-container">
-      <form class="inputs-container" @submit.prevent="agregarProducto" autocomplete="off">
+      <div class="header-container">
+        <div class="tipo-cliente">
+          <label for="tipo-cliente">Tipo de cliente:</label>
+          <div class="input-button-container">
+            <!-- Input para mostrar el nombre del cliente -->
+            <input type="text" :value="clienteSeleccionado?.nombre || 'Consumidor final'" readonly
+              class="cliente-input">
+            <!-- Nuevo input para RTN -->
+            <input v-if="clienteSeleccionado" type="text" :value="clienteSeleccionado.rtn" readonly class="rtn-input">
+            <button @click="openModal">Buscar</button>
+            <ClienteModal :isVisible="isModalVisible" @close="closeModal" @modal-focused="handleModalFocus"
+              @client-selected="handleClientSelected" />
+          </div>
+        </div>
 
-        <div class="input-container input-superior">
+        <div class="tipo-descuento">
+          <label for="tipo-cliente">Descuentos:</label>
+          <select name="tipo-cliente" id="tipo-cliente" v-model="tipoCliente">
+            <option value="0">Ninguno</option>
+            <option value="1">Tercera edad</option>
+            <option value="2">Cuarta edad</option>
+            <option value="3">Excepción política</option>
+          </select>
+        </div>
+        <div class="informacion-1">
+          <label for="sucursal">Sucursal: LCB</label>
+          <br />
+          <label for="usuario">Usuario: User</label>
+        </div>
 
-          <div class="input-container">
-            <label for="codigo-producto" class="label-input">Codigo del producto:</label>
+        <div class="informacion-2">
+          <label for="numTicket">Ticket No: </label>
+          <span>{{ numTicket }}</span>
+          <br />
+          <label>Fecha: </label>
+          <span>{{ fecha }}</span>
+        </div>
+      </div>
+
+      <div class="column-container">
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="col-item">Item</th>
+                <th class="col-codigo">Código</th>
+                <th class="col-descripcion">Descripción</th>
+                <th class="col-cantidad">Cantidad</th>
+                <th class="col-precio">Precio</th>
+                <th class="col-importe">Importe</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(producto, index) in productosLista" :key="index">
+                <td class="col-item">{{ index + 1 }}</td>
+                <td class="col-codigo">{{ producto.codigo }}</td>
+                <td class="col-descripcion">{{ producto.nombre }}</td>
+                <td class="col-cantidad">{{ producto.cantidad }}</td>
+                <td class="col-precio">{{ producto.precioUnitario }}</td>
+                <td class="col-importe">{{ producto.precioUnitario * producto.cantidad }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="total-container">
+            <div class="cantidad-input">
+              <label for="cantidad">Cant:</label>
+              <input id="cantidad" type="number" v-model="totalCantidad" readonly />
+            </div>
+            <div class="total-input">
+              <label for="total">S/.:</label>
+              <input id="total" type="text" :value="calcularTotal" readonly />
+            </div>
+          </div>
+        </div>
+
+        <!-- Teclado numérico -->
+        <div class="numeric-keypad">
+          <div class="scanner-input">
             <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
-              :disabled="isEditing" placeholder="Ingresar codigo" required />
+              :disabled="isModalVisible" required />
           </div>
-
-          <div class="input-container">
-            <label class="label-input">Buscar por nombre: </label>
-            <input list="idDataList" class="campo" :disabled="isEditing" v-model="addName"
-              placeholder="Ingresar nombre" />
-            <datalist id="idDataList">
-              <option v-for="(producto, index) in productos" :key="index" :value="producto.codigo">
-                {{ producto.codigo }} : {{ producto.nombre }}
-              </option>
-            </datalist>
-          </div>
-
-        </div>
-
-        <div class="input-container-exterior">
-
-          <div class="input-container">
-            <label for="cantidad" class="label-input">Cantidad:</label>
-            <input name="cantidad" class="campo campo-cantidad" type="number" tabindex="2"
-              placeholder="Ingresar cantidad" ref="cantidadRef" v-model="addQuantity" />
-          </div>
-
-          <div class="input-container">
-            <label class="label-input">Descripción:</label>
-            <input type="text" class="campo" v-model="addDescription" :disabled="isEditing" placeholder="Descripción" />
-          </div>
-
-          <div class="input-container">
-            <button class="btn btn-success agregar-producto" type="submit">
-              <i class="bi bi-plus-circle-fill"> Añadir</i>
-            </button>
-          </div>
-
-          <div class="input-container">
-            <button id="delete-last-producto" type="button" class="btn" @click="deleteUltimo">
-              Cancelar ultimo
-            </button>
+          <div class="keypad">
+            <button @click="agregarNumero(1)">1</button>
+            <button @click="agregarNumero(2)">2</button>
+            <button @click="agregarNumero(3)">3</button>
+            <button @click="agregarNumero(4)">4</button>
+            <button @click="agregarNumero(5)">5</button>
+            <button @click="agregarNumero(6)">6</button>
+            <button @click="agregarNumero(7)">7</button>
+            <button @click="agregarNumero(8)">8</button>
+            <button @click="agregarNumero(9)">9</button>
+            <button @click="agregarNumero(0)">0</button>
+            <button @click="agregarNumero('.')">.</button>
+            <button @click="agregarNumero('*')">*</button>
+            <button class="borrar" @click="borrarUltimo">←</button>
+            <button class="limpiar" @click="limpiar">Limpiar</button>
+            <button class="enter" @click="procesarEnter">Enter</button>
           </div>
         </div>
-
-      </form>
-
-      <div class="table-container">
-        <table class="table">
-          <thead>
-            <th>No. Producto</th>
-            <th>Codigo</th>
-            <th>Nombre</th>
-            <th>Cantidad</th>
-            <th>Precio Unitario</th>
-            <th>Descuento</th>
-            <th style="width: 100px">Opciones</th>
-          </thead>
-          <tbody>
-            <tr v-for="(producto, index) in productosLista" :key="index" @click="editingTrue(index)">
-              <td>{{ index + 1 }}</td>
-              <td>{{ producto.codigo }}</td>
-              <td>{{ producto.nombre }}</td>
-              <td>{{ producto.cantidad }}</td>
-              <td>{{ producto.precioUnitario }}</td>
-              <td>{{ producto.descuento }}</td>
-              <td class="botones-accion">
-                <button id="btnDisminuir" class="btn btn-botones-accion" @click="disminuirCantidad(index)">
-                  <b><i class="bi bi-dash-circle-fill"></i></b>
-                </button>
-                <button id="btnAumentar" class="btn btn-botones-accion" @click="aumentarCantidad(index)">
-                  <b><i class="bi bi-plus-circle-fill"></i></b>
-                </button>
-                <button id="btnEliminar" class="btn btn-botones-accion" @click="deleteProducto(index)">
-                  <b><i class="bi bi-x-circle-fill"></i></b>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="end-container">
-      <div class="end-container-cancelar">
-        <p class="texto-tecla-boton texto-esc">Esc</p>
-        <button class="btn btn-end" id="cancelar-venta" @click="cancelarVenta">
-          Cancelar Venta
-        </button>
       </div>
 
-      <div class="end-container-cobro">
-        <div class="end-container-boton-cobro">
-          <p class="texto-tecla-boton texto-f12">F12</p>
-          <button class="btn btn-end" id="boton-cobrar" @click="payModalOpen">
-            Cobrar
-          </button>
-        </div>
-
-        <div class="end-container-cobro-p">
-          <p id="total">{{ calcularTotal }}</p>
-          <p id="moneda">Lempiras</p>
-        </div>
+      <div class="footer-container">
+        <button @click="buscarProducto">Buscar producto [F2]</button>
+        <button @click="openModal">Buscar cliente [F3]</button>
+        <button @click="consultarAnular">Consultar anular [F4]</button>
+        <button @click="eliminarItem">Eliminar item [F5]</button>
+        <button @click="limpiarPantalla">Limpiar pantalla [F6]</button>
+        <button @click="guardarVenta">Guardar venta [F8]</button>
+        <button @click="recVenta">Rec. Venta [F9]</button>
+        <button @click="descuentoGeneral">Dscto. Gen. [F10]</button>
+        <button @click="descuentoIndividual">Dscto. Ind. [F11]</button>
+        <button @click="registrarPago">Registrar Pago [F12]</button>
+        <button @click="nuevoCliente">Nuevo Cliente [ALT] + [C]</button>
+        <button @click="salir">Salir [ALT] + [S]</button>
       </div>
-    </div>
-
-    <div class="modal-overlay" v-if="payModal">
-      <div class="modal-content">
-        <h2>Resumen de Venta</h2>
-        <div class="div-modal-resumen">
-          <label for="subtotal">Subtotal:</label>
-          <input type="text" id="subtotal" v-model="subtotal" disabled />
-        </div>
-
-        <div class="div-modal-resumen">
-          <label for="discounts">Descuentos:</label>
-          <input type="text" id="discounts" v-model="discounts" disabled />
-        </div>
-
-        <div class="div-modal-resumen">
-          <label for="taxes">Impuestos:</label>
-          <input type="text" id="taxes" v-model="taxes" disabled />
-        </div>
-
-        <div class="div-modal-resumen">
-          <label for="total">Total:</label>
-          <input type="text" id="totalModal" v-model="total" disabled />
-        </div>
-
-        <div class="div-modal-resumen div-modal-resumen-rtn">
-          <label for="rtn">RTN:</label>
-          <input type="text" id="rtn" v-model="rtn" />
-          <AgregarCliente />
-        </div>
-
-        <div class="payment-methods">
-          <label>
-            <input type="radio" v-model="paymentMethod" @change="selectRadioButton('cash')" value="cash" />
-            Efectivo
-          </label>
-          <label>
-            <input type="radio" v-model="paymentMethod" @change="selectRadioButton('card')" value="card" />
-            Tarjeta
-          </label>
-          <!-- Añadir otros métodos si es necesario -->
-        </div>
-
-        <div v-if="paymentMethod === 'cash'">
-          <div class="div-modal-resumen">
-            <label for="pago">Monto Recibido:</label>
-            <input type="text" id="pago" v-model="pago" />
-          </div>
-        </div>
-
-        <div v-if="paymentMethod === 'card'">
-          <label for="cardNumber">Número de Tarjeta:</label>
-          <input type="text" id="cardNumber" v-model="cardNumber" />
-          <!-- Añadir otros campos si es necesario -->
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn boton-modal-confirmar-venta" @click="confirmPayment">Confirmar Pago</button>
-          <button class="btn boton-modal-cancelar-venta" @click="cancelPayment">Cancelar</button>
-        </div>
-      </div>
-    </div>
-    <div class="modal" v-if="confirmModal">
-      <div class="modal-overlay">
-        <div class="modal-content">
-          <h2>Pago Realizado.</h2>
-          <div class="modal-summary">
-            <p v-if="cambio != 0">Cambio: {{ cambio }}</p>
-          </div>
-          <button @click="confirmPaymentClose" class="btn close-btn">
-            Cerrar
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal-overlay" v-if="showConfirmModal">
-      <div class="modal-content">
-        <h2>Confirmación</h2>
-        <p>¿Estás seguro de que quieres cancelar la venta?</p>
-        <div class="modal-actions">
-          <button class="btn modalShowConfirm-Si" @click="confirmCancel">
-            Sí, cancelar
-          </button>
-          <button class="btn modalShowConfirm-no" @click="cancelCancel">
-            No, volver
-          </button>
-        </div>
-      </div>
+      <ClienteModal :isVisible="isModalVisible" @close="closeModal" @modal-focused="handleModalFocus" />
     </div>
   </div>
 </template>
 
 <script>
-import ProfileButton from "../components/ProfileButton.vue";
-import AgregarCliente from "@/components/AgregarCliente.vue";
+import axios from 'axios';
+import ClienteModal from '../components/modalesCrearVenta/ClienteModal.vue';
+import { useToast } from "vue-toastification"; // Importación para el popup
+
 export default {
   components: {
-    ProfileButton,
-    AgregarCliente,
+    ClienteModal,
   },
   data() {
     return {
+      numTicket: '000-001-01-00000001',
+      fecha: new Date().toLocaleDateString(),
       addQuery: "",
-      addQuantity: "",
-      addName: "",
-      addDescription: "",
-      payModal: false,
-      subtotal: "",
-      discounts: "",
-      taxes: "",
-      total: "",
-      rtn: "",
-      cambio: 0,
-      pago: "",
-      paymentMethod: "",
-      confirmModal: "",
-      showConfirmModal: false,
       isEditing: false,
-
+      isModalVisible: false,
+      isModalFocused: false,
+      clienteSeleccionado: null,
       productos: [
         {
           codigo: "1",
@@ -324,61 +228,123 @@ export default {
           precioUnitario: 22,
           descuento: 0,
         },
-        // Más clientes...
       ],
       productosLista: [],
     };
   },
 
-  watch: {
-    addQuery(newQuery) {
-      const productoPorCodigo = this.productos.find(producto => producto.codigo === newQuery);
-      if (productoPorCodigo) {
-        this.addName = productoPorCodigo.nombre;
-        this.addDescription = productoPorCodigo.descripcion; // Actualiza la descripción
-      } else {
-        this.addName = '';
-        this.addDescription = ''; // Limpia la descripción si no se encuentra
-      }
-    },
-    addName(newName) {
-      const productoPorNombre = this.productos.find(producto => producto.nombre === newName);
-      if (productoPorNombre) {
-        this.addQuery = productoPorNombre.codigo;
-        this.addDescription = productoPorNombre.descripcion; // Actualiza la descripción
-      } else {
-        this.addQuery = '';
-        this.addDescription = ''; // Limpia la descripción si no se encuentra
-      }
-    },
-    addDescription(newDescription) {
-      const productosCoincidentes = this.productos.filter(producto =>
-        producto.descripcion.toLowerCase().includes(newDescription.toLowerCase())
-      );
-
-      if (productosCoincidentes.length > 0) {
-        // Si hay coincidencias, toma el primero 
-        const productoPorDescripcion = productosCoincidentes[0];
-        this.addQuery = productoPorDescripcion.codigo; // Actualiza el código 
-        this.addName = productoPorDescripcion.nombre; // Actualiza el nombre 
-      } else {
-        this.addQuery = ''; // Limpia el campo de código si no se encuentra 
-        this.addName = ''; // Limpia el campo de nombre si no se encuentra 
-      }
-    },
-  },
-
   computed: {
     calcularTotal() {
-      let totalActual = 0;
-      this.productosLista.forEach(
-        (p) => (totalActual += p.precioUnitario * p.cantidad)
-      );
-      return totalActual;
+      return this.productosLista.reduce((total, p) => total + (p.precioUnitario * p.cantidad), 0);
     }
   },
 
   methods: {
+    salir() {
+      this.logout(); // Llama al método logout
+    },
+
+    async logout() {
+      try {
+        await axios.post('/api/logout', {}, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth')}`
+          }
+        });
+
+        localStorage.clear();
+        this.$router.push('/login');
+      } catch (error) {
+        console.error("Error al cerrar sesión", error);
+        localStorage.clear();
+        this.$router.push('/login');
+      }
+    },
+
+    handleClientSelected(client) {
+      this.clienteSeleccionado = client;
+      this.closeModal();
+    },
+
+    openModal() {
+      this.isModalVisible = true;
+    },
+    handleModalFocus() {
+      this.isModalFocused = true;
+    },
+
+    handleKeyPress(event) {
+      // Si el modal está enfocado o visible, no procesar eventos de teclado aquí
+      if (this.isModalVisible || this.isModalFocused) {
+        return;
+      }
+
+      const key = event.key;
+
+      // Solo previene el evento si no estamos en un input
+      if (!event.target.matches('input, textarea')) {
+        event.preventDefault();
+      }
+
+      // Si la tecla es un número o un punto, añade al input
+      if (!isNaN(key) || key === '.') {
+        this.agregarNumero(key);
+      } else if (key === "Backspace") {
+        this.borrarUltimo();
+      } else if (key === "Enter") {
+        this.procesarEnter();
+      }
+    },
+
+    closeModal() {
+      this.isModalVisible = false;
+      this.isModalFocused = false;
+    },
+
+    agregarNumero(num) {
+      this.addQuery += num.toString();
+    },
+
+    borrarUltimo() {
+      if (this.addQuery.length > 0) {
+        this.addQuery = this.addQuery.slice(0, -1);
+      }
+    },
+
+    limpiar() {
+      this.addQuery = "";
+    },
+
+    procesarEnter() {
+      this.agregarProducto();
+    },
+
+    agregarProducto() {
+      if (!this.addQuery) {
+        const toast = useToast();
+        toast.warning("Ingresa un código");
+        return;
+      }
+
+      const newProduct = this.productos.find((p) => p.codigo === this.addQuery);
+      if (!newProduct) {
+        const toast = useToast();
+        toast.warning("No existe el producto");
+        this.limpiar();
+        return;
+      }
+
+      const existingProduct = this.productosLista.find((p) => p.codigo === this.addQuery);
+      if (existingProduct) {
+        existingProduct.cantidad += 1;
+      } else {
+        newProduct.cantidad = 1;
+        this.productosLista.push({ ...newProduct });
+      }
+
+      this.limpiar()
+    },
+
     pushEsc(event) {
       if (event.key === "Esc" || event.key === "Escape") {
         if (this.isEditing) {
@@ -408,177 +374,10 @@ export default {
       }
     },
 
-    agregarProducto() {
-      if (!this.addQuery) {
-        alert("Ingresa codigo");
-        return;
-      }
-
-      if (this.addQuantity && isNaN(this.addQuantity)) {
-        alert("Ingresa un dato valido");
-        return;
-      }
-      if (!this.addQuantity) {
-        this.addQuantity = "1";
-      }
-      const newProduct = this.productos.find((p) => p.codigo === this.addQuery);
-      const exitProduct = this.productosLista.find(
-        (p) => p.codigo === this.addQuery
-      );
-
-      if (!this.isEditing) {
-
-        if (!newProduct) {
-          alert("No existe el producto");
-          this.reiniciarInputs();
-          this.$refs.codigoRef.focus();
-        } else {
-          if (exitProduct) {
-            exitProduct.cantidad += Number(this.addQuantity);
-          } else {
-            newProduct.cantidad = Number(this.addQuantity);
-            this.productosLista.push(newProduct);
-          }
-          this.reiniciarInputs();
-          this.$refs.codigoRef.focus();
-        }
-      }
-      else {
-        exitProduct.cantidad = Number(this.addQuantity);
-      }
-
+    handleInputChange(event) {
+      this.addQuery = event.target.value; // Actualiza addQuery con el valor del input
     },
 
-    actualizarCampos() {
-      // Si el campo de código está siendo editado
-      if (this.addQuery) {
-        const productoPorCodigo = this.productos.find(producto => producto.codigo === this.addQuery);
-        if (productoPorCodigo) {
-          this.addName = productoPorCodigo.nombre; // Actualiza el nombre
-          this.addDescription = productoPorCodigo.descripcion; // Actualiza la descripción
-        } else {
-          this.addName = ''; // Limpia el campo de nombre si no se encuentra
-          this.addDescription = ''; // Limpia la descripción si no se encuentra
-        }
-      }
-      // Si el campo de nombre está siendo editado
-      else if (this.addName) {
-        const productoPorNombre = this.productos.find(producto => producto.nombre === this.addName);
-        if (productoPorNombre) {
-          this.addQuery = productoPorNombre.codigo; // Actualiza el código
-          this.addDescription = productoPorNombre.descripcion; // Actualiza la descripción
-        } else {
-          this.addQuery = ''; // Limpia el campo de código si no se encuentra
-          this.addDescription = ''; // Limpia la descripción si no se encuentra
-        }
-      }
-      // Si el campo de descripción está siendo editado
-      else if (this.addDescription) {
-        const productosCoincidentes = this.productos.filter(producto =>
-          producto.descripcion.toLowerCase().includes(this.addDescription.toLowerCase())
-        );
-
-        if (productosCoincidentes.length > 0) {
-          // Si hay coincidencias, toma el primero
-          const productoPorDescripcion = productosCoincidentes[0];
-          this.addQuery = productoPorDescripcion.codigo; // Actualiza el código
-          this.addName = productoPorDescripcion.nombre; // Actualiza el nombre
-        } else {
-          this.addQuery = ''; // Limpia el campo de código si no se encuentra
-          this.addName = ''; // Limpia el campo de nombre si no se encuentra
-        }
-      }
-    },
-
-    editingTrue(index) {
-      if (this.productosLista[index]) {
-        this.addQuery = this.productosLista[index].codigo;
-        this.addQuantity = this.productosLista[index].cantidad;
-        this.addName = this.productosLista[index].nombre;
-        this.isEditing = true;
-      }
-
-    },
-
-    disminuirCantidad(index) {
-      if (this.productosLista[index].cantidad > 0) {
-        this.productosLista[index].cantidad -= 1;
-        if (this.productosLista[index].cantidad == 0) {
-          this.deleteProducto(index);
-        }
-      }
-    },
-    aumentarCantidad(index) {
-      this.productosLista[index].cantidad += 1;
-    },
-    deleteUltimo() {
-      if (this.productosLista) {
-        this.productosLista.pop();
-      }
-    },
-    deleteProducto(index) {
-      this.productosLista.splice(index, 1);
-    },
-
-    confirmCancel() {
-      this.productosLista = [];
-      this.showConfirmModal = false;
-      this.cambio = 0;
-    },
-    cancelCancel() {
-      this.showConfirmModal = false;
-    },
-    cancelarVenta() {
-      if (this.productosLista.length != 0) {
-        this.showConfirmModal = true;
-      }
-    },
-
-    reiniciarInputs() {
-      this.addQuery = "";
-      this.addQuantity = "";
-      this.addName = "";
-    },
-
-    payModalOpen() {
-      if (this.productosLista.length > 0) {
-        let numSubTotal = 0;
-        this.productosLista.forEach(
-          (p) => (numSubTotal += p.precioUnitario * p.cantidad)
-        );
-        this.subtotal = `${numSubTotal}`;
-        this.discounts = "00.00";
-        this.taxes = "00.00";
-        this.total = `${numSubTotal}`;
-        this.payModal = true;
-        this.paymentMethod = "";
-      }
-    },
-    cancelPayment() {
-      this.payModal = false;
-    },
-    selectRadioButton(opcion) {
-      if (opcion === "cash") {
-        this.paymentMethod = "cash";
-      } else {
-        this.paymentMethod = "card";
-      }
-    },
-    confirmPayment() {
-      if (
-        Number(this.pago) > Number(this.total) ||
-        this.paymentMethod === "card"
-      ) {
-        this.cambio = Number(this.pago) - Number(this.total);
-        this.confirmModal = true;
-        this.payModal = false;
-        this.productosLista = [];
-      }
-    },
-
-    confirmPaymentClose() {
-      this.confirmModal = false;
-    },
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
@@ -589,17 +388,12 @@ export default {
   },
 
   mounted() {
-    window.addEventListener("keydown", this.pushDelete);
-    window.addEventListener("keydown", this.pushEsc);
-    window.addEventListener("keydown", this.pushF12);
-    this.$refs.codigoRef.focus();
+    window.addEventListener("keydown", this.handleKeyPress);
     document.title = "Crear Ventas";
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
   },
   beforeUnmount() {
-    window.removeEventListener("keydown", this.pushDelete);
-    window.removeEventListener("keydown", this.pushEsc);
-    window.removeEventListener("keydown", this.pushF12);
+    window.removeEventListener("keydown", this.handleKeyPress);
   },
 };
 </script>
@@ -607,388 +401,224 @@ export default {
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
-/* Toda la pagina */
 * {
   font-family: "Montserrat", sans-serif;
 }
 
-.btn {
-  padding: 0.5em 1em;
-  border: none;
-  cursor: pointer;
-  border-radius: 10px;
-}
-
-/* Encabezado y campos de datos */
-.encabezado {
-
-  display: flex;
-  justify-content: space-between;
-
-}
-
-.rol {
-  color: #969696;
-  font-size: 14px;
-}
-
-.input-container label {
-  white-space: nowrap;
-}
-
-.input-container {
-  flex: 1 1 auto;
-  /* Permite que los elementos crezcan y se reduzcan */
-  margin-right: 5px;
-  /* Espacio entre elementos */
-}
-
 .wrapper {
-  padding: 16px;
-  padding-bottom: 0;
   display: flex;
-  height: 80%;
   flex-direction: column;
-  justify-content: space-between;
-}
-
-.input-container-exterior {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
+  padding: 20px;
+  z-index: 1;
 }
 
-.input-superior {
-  margin-bottom: 1%;
+.col-item {
+  width: 10%;
+}
+
+.col-codigo {
+  width: 20%;
+}
+
+.col-descripcion {
+  width: 40%;
+}
+
+.col-cantidad {
+  width: 10%;
+}
+
+.col-precio {
+  width: 10%;
+}
+
+.col-importe {
+  width: 10%;
+}
+
+.main-container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-}
-
-.label-input {
-  margin-right: 10px;
-}
-
-.campo {
-  padding: 0px 10px;
-  font-size: 14px;
-  min-height: 30px;
-  border-radius: 10px;
-  border-width: 0.5px;
-}
-
-.agregar-producto {
-  background-color: #46ce10;
-  width: 100px;
-  border: none;
-  color: white;
-  cursor: pointer;
-  margin-right: 15px;
-}
-
-.agregar-producto:hover {
-  background-color: #38a50d;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#delete-last-producto {
-  background-color: rgb(241, 222, 50);
-  border-radius: 10px;
-  color: black;
-  font-weight: bold;
-}
-
-#delete-last-producto:hover {
-  background-color: rgb(224, 206, 45);
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-
-
-/* Tabla */
-.table-container {
-  max-height: 43vh;
-  overflow-y: scroll;
   width: 100%;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  margin-top: 1%;
+  z-index: 1;
+  margin: 0;
+}
+
+.header-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  /* Alinea todos los elementos a la izquierda */
+  align-items: center;
+  text-align: center;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  gap: 250px;
+  /* Aumenta el espacio entre las columnas */
+}
+
+.tipo-descuento,
+.tipo-cliente {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.informacion-1 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 20px;
+}
+
+.informacion-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 20px;
+}
+
+.column-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+  align-items: stretch;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.table-container {
+  width: 100%;
+  flex-grow: 1;
+  overflow: auto;
 }
 
 .table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
 }
 
-.table th,
-.table td {
-  padding: 8px;
+th {
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
 }
 
-.table thead th {
-  background-color: #e7e4e4;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
+td {
+  padding: 10px;
+  text-align: left;
 }
 
-.table tbody td {
-  text-align: center;
-  border-top: 1px solid #ddd;
-}
-
-.table thead th:first-child {
-  border-top-left-radius: 10px;
-}
-
-.table thead th:last-child {
-  border-top-right-radius: 10px;
-}
-
-.table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: 10px;
-}
-
-.table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 10px;
-}
-
-#btnEditar {
-  font-size: 18px;
-  width: 50px;
-  height: 40px;
-  border-radius: 10px;
-}
-
-#btnEditar:hover {
-  background-color: #e8af06;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#btnEliminar:hover {
-  color: #b72433;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#btnAumentar:hover {
-  color: #46ce10;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#btnDisminuir:hover {
-  color: #13e4d9;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-
-/* Modales */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+.total-container {
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-
+  padding: 10px;
+  border-top: 1px solid #ccc;
 }
 
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
+.cantidad-input {
+  margin-right: 20px;
 }
 
-.btn-botones-accion {
-  background: transparent;
-  border: none;
-  padding: 0;
-  font-size: 22px;
-}
-
-
-
-.close-btn,
-.boton-modal-cancelar-venta {
-  background-color: #dc3545;
-  color: white;
-}
-
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#AddClienteModal {
-  background: #a38655;
-  border-radius: 15px;
-  font-size: 16px;
-}
-
-#BtnCerrar {
-  border-radius: 15px;
-  background-color: #ebebeb;
-  font-size: 16px;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 500px;
-  width: 100%;
+.numeric-keypad {
+  width: 20%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  padding: 10px;
+  border-left: 1px solid #ccc;
 }
 
-
-.payment-methods {
-  display: flex;
-}
-
-.payment-methods label {
-  display: block;
+.scanner-input {
   margin-bottom: 10px;
 }
 
-.modal-actions {
-  margin-top: 20px;
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-.modal-actions button {
-  margin-right: 10px;
+button {
+  width: 100%;
+  height: 40px;
+  font-size: 18px;
+  border: none;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  cursor: pointer;
 }
 
-.div-modal-resumen {
+button:hover {
+  background-color: #ccc;
+}
+
+.footer-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  /* Espacio entre los campos */
+  flex-wrap: wrap;
+  justify-content: space-around;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ccc;
+  z-index: 2;
 }
 
-.div-modal-resumen label {
-  width: 120px;
-  /* Ajusta el ancho del label según sea necesario */
-  margin-right: 10px;
-  /* Espacio entre el label y el input */
-}
-
-.div-modal-resumen input {
-  flex: 1;
-  /* El input ocupará el resto del espacio disponible */
-}
-
-.div-modal-resumen-rtn {
-  margin-left: 30px;
-}
-
-.modalShowConfirm-Si {
-  background-color: #dc3545;
-}
-
-.modalShowConfirm-no,
-.boton-modal-confirmar-venta {
-  background-color: #4caf50;
-}
-
-/* End container */
-.end-container-cobro-p {
-  margin-left: 5px;
-}
-
-#cancelar-venta {
-  background-color: #d30015;
-  color: black;
-}
-
-.texto-esc {
-  color: #d30015;
-}
-
-#cancelar-venta:hover {
-  background-color: #ad0314;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-.texto-tecla-boton {
-  display: inline-block;
-  transform: rotate(-90deg);
-}
-
-.btn-end {
-  min-height: 80px;
-  max-width: 90px;
-}
-
-.end-container-cancelar,
-.end-container-cobro {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.end-container {
-  padding-top: 1%;
-  display: flex;
-  flex-direction: row;
-  align-items: end;
-  justify-content: space-between;
-  border-top: solid rgb(75, 75, 75) 1px;
-}
-
-.end-container-cobro p {
-  text-align: center;
-  margin: 0;
-  color: #094688;
-}
-
-#total {
-  font-weight: bolder;
-  font-size: 40px;
-}
-
-#boton-cobrar {
-  background-color: #094688;
-  font-weight: bold;
-  color: white;
-}
-
-#boton-cobrar:hover {
-  background-color: #093c72;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#cancelar-venta {
-  height: 60%;
-  margin-right: 15px;
-  background-color: rgb(185, 10, 10);
-  font-weight: bold;
+.footer-container button {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
   font-size: 12px;
-  color: white;
+  background-color: #f0f0f0;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#cancelar-venta span {
-  font-size: 15px;
+.footer-container button:hover {
+  background-color: #ccc;
+}
+
+.input-button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.cliente-input,
+.rtn-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  width: 100%;
+}
+
+
+.tipo-cliente input {
+  flex-grow: 1;
+  /* Permite que el input ocupe el espacio disponible */
+}
+
+.rtn-input {
+  font-size: 0.9em;
+  color: #666;
+}
+
+button {
+  align-self: flex-end;
+  margin-top: 5px;
 }
 </style>
