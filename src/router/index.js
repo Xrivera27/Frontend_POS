@@ -10,7 +10,7 @@ import RegistroList from "@/Pages/RegistroList.vue";
 import VentasList from "@/Pages/VentasList.vue";
 import ComprasList from "@/Pages/ComprasList.vue";
 import HomeList from "@/Pages/HomeList.vue";
-
+import ReporteVentasList from "@/Pages/ReportesVentasList.vue";
 import AdministrarVentas from "@/Pages/AdministrarVentas.vue";
 import AdministrarCompras from "@/Pages/AdministrarCompras.vue";
 import SucursalesList from "@/Pages/SucursalesList.vue";
@@ -64,6 +64,15 @@ const routes = [
     component: ClientesList,
     meta: { requiresAuth: true, role: [1, 2, 4] },
   },
+
+  {
+    path: "/reporte",
+    name: "reporte",
+    component: ReporteVentasList,
+    meta: { requiresAuth: true, role: [1, 2, 4] },
+  },
+
+
   {
     path: "/sucursales",
     name: "Sucursales",

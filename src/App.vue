@@ -1,12 +1,15 @@
 <template>
   <div class="app-wrapper" :class="{ dark: isDarkMode }">
-    <AppSidebar v-if="!isLoginRoute && isAuthenticated" :isDarkMode="isDarkMode" :expanded="expanded"
-      :dropdowns="dropdowns" :has-permission="hasPermission" :is-active="isActive" @toggle-sidebar="toggleSidebar"
-      @open-dropdown="openDropdown" @close-dropdown="closeDropdown" @logout="logout" @toggle-dark-mode="toggleDarkMode"
+    <AppSidebar :class="{ 'hidden-sidebar': !showSidebar }" v-if="!isLoginRoute && isAuthenticated"
+      :isDarkMode="isDarkMode" :expanded="expanded" :dropdowns="dropdowns" :has-permission="hasPermission"
+      :is-active="isActive" @toggle-sidebar="toggleSidebar" @open-dropdown="openDropdown"
+      @close-dropdown="closeDropdown" @logout="logout" @toggle-dark-mode="toggleDarkMode"
       @expand-sidebar="expandSidebar" @collapse-sidebar="collapseSidebar" />
-    <main class="main-content" :class="{ expanded, dark: isDarkMode, login: isLoginRoute }">
+
+    <main class="main-content" :class="{ expanded, dark: isDarkMode, login: isLoginRoute, 'no-sidebar': !showSidebar }">
       <router-view />
     </main>
+
 
   </div>
 </template>
@@ -36,16 +39,20 @@ export default {
     },
     isAuthenticated() {
       return !!localStorage.getItem('auth');
+    },
+    showSidebar() {
+      const role = localStorage.getItem('role');
+      return role !== '3';
     }
   },
   methods: {
     hasPermission(section) {
       const role = localStorage.getItem('role');
       const permissions = {
-        1: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'config-avanced'],
-        2: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta'],
-        3: ['Home', 'Productos', 'Venta'],
-        4: ['Home', 'Usuario', 'sucursales', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced'],
+        1: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'config-avanced', 'reporte'],
+        2: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta', 'reporte'],
+        3: ['Home', 'Productos', 'Venta', 'reporte'],
+        4: ['Home', 'Usuario', 'sucursales', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced', 'reporte'],
 
       };
       return role && permissions[role]?.includes(section);
@@ -234,5 +241,13 @@ ul.nav {
 .nav-link.active {
   background-color: #d4d4d4;
   color: #79552f;
+}
+
+.hidden-sidebar {
+  display: none;
+}
+
+.main-content.no-sidebar {
+  margin-left: 0;
 }
 </style>

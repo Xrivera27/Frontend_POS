@@ -66,6 +66,11 @@ export default {
       recoveryEmail: '',
     };
   },
+  computed: {
+    role() {
+      return localStorage.getItem('role'); // Define role como una propiedad computada
+    }
+  },
   mounted() {
     document.title = "Login";
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
@@ -88,7 +93,12 @@ export default {
           localStorage.setItem('auth', data.token);
           localStorage.setItem('role', data.role); // Guarda el rol
           this.isLoading = false;
-          this.$router.push('/home'); // Redirecciona al home
+          const role = localStorage.getItem('role');
+          if (role === '3') {
+            this.$router.push('/ventas'); // Redirecciona al home
+          } else {
+            this.$router.push('/home');
+          }
         } else {
           this.isLoading = false;// Muestra el mensaje de error en un popup
           toast.error(data.message, {

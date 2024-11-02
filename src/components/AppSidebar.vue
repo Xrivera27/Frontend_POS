@@ -76,7 +76,7 @@
                 <ul :class="{ 'dropdown-menu': true, 'open': dropdowns.ventas }">
                     <li><router-link to="/administrar-ventas" class="nav-link">Administrar ventas</router-link></li>
                     <li><router-link to="/ventas" class="nav-link">Crear venta</router-link></li>
-                    <li><router-link to="/reporte-ventas" class="nav-link">Reporte de ventas</router-link></li>
+                    <li><router-link to="/reporte" class="nav-link">Reporte de ventas</router-link></li>
                 </ul>
             </li>
 
