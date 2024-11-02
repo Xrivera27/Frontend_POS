@@ -69,7 +69,7 @@
             <td>{{ index + 1 }}</td>
             <td>{{ producto.codigo_producto }}</td>
             <td>{{ producto.nombre }}</td>
-            <td>{{ producto.stock_actual }} <button class="edit-stock"><i class="bi bi-pencil-square"></i></button> </td>
+            <td>{{ producto.stock_actual }} <button class="edit-stock" @click="openModalStock" ><i class="bi bi-pencil-square"></i></button> </td>
             <td>{{ producto.precio_unitario }}</td>
             <td>Inactivo</td>
             <td>
@@ -219,8 +219,8 @@
 
         <div class="categoria-botones">
 
-          <btnGuardarModal @click="guardarCategorias">Guardar</btnGuardarModal>
-          <btnCerrarModal :texto="'Cerrar'" @click="closeModalCategoria"></btnCerrarModal>
+          <btnGuardarModal @click="guardarStock">Guardar</btnGuardarModal>
+          <btnCerrarModal :texto="'Cerrar'" @click="closeModalStock"></btnCerrarModal>
         </div>
 
       </div>
@@ -272,7 +272,7 @@ export default {
       searchSucursal: 'default',
       isModalOpen: false,
       isModalCategoriaOpen: false,
-      isModalStockOpen: true,
+      isModalStockOpen: false,
       isEditing: false,
       editIndex: null,
       itemsPerPage: "",
@@ -368,6 +368,20 @@ export default {
 
     closeModalCategoria() {
       this.isModalCategoriaOpen = false;
+    },
+
+    async openModalStock() {
+      
+      this.isModalStockOpen = true;
+    },
+
+    guardarStock() {
+      
+      this.closeModalStock();
+    },
+
+    closeModalStock() {
+      this.isModalStockOpen = false;
     },
 
     clearForm() {
