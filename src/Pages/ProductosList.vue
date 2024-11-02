@@ -69,7 +69,7 @@
             <td>{{ index + 1 }}</td>
             <td>{{ producto.codigo_producto }}</td>
             <td>{{ producto.nombre }}</td>
-            <td>{{ producto.stock_actual }}</td>
+            <td>{{ producto.stock_actual }} <button class="edit-stock"><i class="bi bi-pencil-square"></i></button> </td>
             <td>{{ producto.precio_unitario }}</td>
             <td>Inactivo</td>
             <td>
@@ -105,9 +105,6 @@
               <label>Descripcion:</label>
               <textarea id="textArea" v-model="productoForm.descripcion" type="text" required />
             </div>
-
-
-
             <div class="form-group">
               <label for="impuesto">Impuesto:</label>
               <select class="form-select" id="impuesto" name="impuesto" v-model="productoForm.impuesto">
@@ -189,6 +186,47 @@
       </div>
 
     </div>
+
+     <!-- modal para editar stocks min y max por sucursal -->
+
+     <div v-if="isModalStockOpen" class="modal">
+      <div class="modal-content modal-content-stock">
+        <div class="sotck-encabezado">
+          <h3>Edite stock min y max por sucursal</h3>
+          <div class="search-bar form-group">
+          </div>
+        </div>
+
+
+          <form class="form-form-stock">
+
+            <select class="custom-select select-sucursal-stock" v-model="searchSucursal">
+            <option value="default">Todas</option>
+            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
+              sucursal.nombre_administrativo }}</option>
+          </select>
+<div class="form-group-stock">
+  <label for="stock-min">Stock Min:</label>
+  <input type="text" class="input" placeholder="Ingrese stock minimo del producto "> 
+</div>
+
+<div class="form-group-stock">
+  <label for="stock-max">Stock Max:</label>
+  <input type="text" class="input" placeholder="Ingrese stock maximo del producto "> 
+</div>
+           
+          </form>
+
+        <div class="categoria-botones">
+
+          <btnGuardarModal @click="guardarCategorias">Guardar</btnGuardarModal>
+          <btnCerrarModal :texto="'Cerrar'" @click="closeModalCategoria"></btnCerrarModal>
+        </div>
+
+      </div>
+
+    </div>
+    
   </div>
 </template>
 
@@ -234,6 +272,7 @@ export default {
       searchSucursal: 'default',
       isModalOpen: false,
       isModalCategoriaOpen: false,
+      isModalStockOpen: true,
       isEditing: false,
       editIndex: null,
       itemsPerPage: "",
@@ -374,6 +413,7 @@ export default {
       if (!validarCamposService.validarSinLetras(campos.precio_mayorista, "precio por mayor")) {
         return false;
       }
+
 
       if (!validarCamposService.validarSinLetras(campos.precio_unitario, "precio por unidad")) {
         return false;
@@ -531,9 +571,20 @@ export default {
   margin-bottom: 16px;
 }
 
+.form-group-stock {
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+}
+
 .form-group label {
   display: flexbox;
   margin-bottom: 8px;
+}
+
+.form-group-stock label {
+  white-space: nowrap;
+  margin-right: 5px;
 }
 
 .form-group-select {
@@ -546,6 +597,15 @@ export default {
 .form-group input {
   width: 95%;
   height: 25%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  justify-content: center;
+}
+
+.form-group-stock input {
+  height: 25%;
+  width: 100%;
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -710,6 +770,15 @@ export default {
   margin-top: 0px;
 }
 
+.edit-stock{
+  padding: 5px;
+  border: none;
+  border-radius: 5px;
+  background-color: #163ef3;
+color: rgb(238, 238, 238);
+font-size: 15px;
+}
+
 .modal {
   position: fixed;
   top: 0;
@@ -742,6 +811,14 @@ export default {
   min-width: 300px;
 }
 
+.modal-content-stock{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 400px;
+}
+
 .categoria-encabezado {
   display: flex;
   flex-direction: column;
@@ -759,6 +836,12 @@ export default {
   padding-top: 0;
   max-height: 240px;
   overflow-y: scroll;
+}
+
+.form-form-stock{
+  margin: 10px;
+  height: 100%;
+  width: 100%;
 }
 
 .primer-label {
@@ -847,6 +930,10 @@ button {
 
 .custom-select option {
   font-size: 16px;
+}
+
+.select-sucursal-stock{
+  width: 100%;
 }
 
 .btn-export {
