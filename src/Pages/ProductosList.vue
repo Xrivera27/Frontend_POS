@@ -2,7 +2,7 @@
   <div class="encabezado">
     <h1>Productos</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-    
+
   </div>
   <hr>
 
@@ -14,27 +14,25 @@
         </button>
       </div>
 
-    <!-- Botón de exportación PDF -->
-    <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" class="export-button" />
+      <!-- Botón de exportación PDF -->
+      <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" class="export-button" />
 
-    <RouterLink
-    to="promociones-producto"
-    >
-    <button class="button-promocion" >Promociones</button>
-    </RouterLink>
-    
-    <div class="registros">
-      <span>Mostrar
-        <select v-model="itemsPerPage" class="custom-select">
-          <option value="">Todos</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-          <option value="25">25</option>
-        </select> registros
-      </span>
-    </div>
+      <RouterLink to="promociones-producto">
+        <button class="button-promocion">Promociones</button>
+      </RouterLink>
+
+      <div class="registros">
+        <span>Mostrar
+          <select v-model="itemsPerPage" class="custom-select">
+            <option value="">Todos</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+          </select> registros
+        </span>
+      </div>
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
@@ -42,12 +40,12 @@
       </div>
       <div class="registros">
         <span>
-          <select class="custom-select select-sucursal" v-model="searchSucursal" @change="mostrarRegistros(searchSucursal)" >
+          <select class="custom-select select-sucursal" v-model="searchSucursal"
+            @change="mostrarRegistros(searchSucursal)">
             <option value="default">Todas</option>
-            <option v-for="(sucursal, index) in this.sucursales" 
-            :key="index" :value="sucursal.id_sucursal">{{
+            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
               sucursal.nombre_administrativo }}</option>
-            
+
           </select>
         </span>
       </div>
@@ -87,113 +85,110 @@
       </table>
     </div>
 
-     <!-- Modal para agregar o editar productos -->
-     <div v-if="isModalOpen" class="modal">
-    <div id="modal-producto" class="modal-content">
-      <h2 class="h2-modal-content">
-        {{ isEditing ? "Editar Producto" : "Agregar Producto" }}
-      </h2>
-      <div class="form-group">
-            <label>Codigo unico del producto:</label>
-            <input v-model="productoForm.codigo_producto" type="text" required />
-          </div>
-      <div class="contenedor-principal">
-        <div class="contenedor contenedor-izquierdo">
-          <div class="form-group">
-            <label>Nombre Producto:</label>
-            <input v-model="productoForm.nombre" type="text" required />
-          </div>
-          <div class="form-group">
-            <label>Descripcion:</label>
-            <textarea id="textArea" v-model="productoForm.descripcion" type="text" required />
-          </div>
-
-          
-
-          <div class="form-group">
-  <label for="impuesto">Impuesto:</label>
-  <select class="form-select" id="impuesto" name="impuesto" v-model="productoForm.impuesto">
-    <option v-for="(impuesto, index) in cargarImpuestos()" :key="index" :value="impuesto.id">
-      {{ impuesto.nombre }}
-    </option>
-  </select>
-</div>
-
+    <!-- Modal para agregar o editar productos -->
+    <div v-if="isModalOpen" class="modal">
+      <div id="modal-producto" class="modal-content">
+        <h2 class="h2-modal-content">
+          {{ isEditing ? "Editar Producto" : "Agregar Producto" }}
+        </h2>
+        <div class="form-group">
+          <label>Codigo unico del producto:</label>
+          <input v-model="productoForm.codigo_producto" type="text" required />
         </div>
-        <div class="contenedor contenedor-derecho">
-          <div class="form-group">
-            <label>Precio por Unidad:</label>
-            <input v-model="productoForm.precio_unitario" type="text" required />
-          </div>
+        <div class="contenedor-principal">
+          <div class="contenedor contenedor-izquierdo">
+            <div class="form-group">
+              <label>Nombre Producto:</label>
+              <input v-model="productoForm.nombre" type="text" required />
+            </div>
+            <div class="form-group">
+              <label>Descripcion:</label>
+              <textarea id="textArea" v-model="productoForm.descripcion" type="text" required />
+            </div>
 
-          <div class="form-group">
-            <label>Precio por mayoreo:</label>
-            <input v-model="productoForm.precio_mayorista" type="text" required />
-          </div>
 
-          <div class="form-group">
-  <label for="impuesto">Proveedor:</label>
-  <select class="form-select" id="proveedor" name="mediproveedorda" v-model="productoForm.proveedor">
-    <option value="default" disabled>Selecciona un proveedor</option>
-    <option v-for="(proveedor, index) in proveedoresMostrar" :key="index" :value="proveedor.id">
-      {{ proveedor.nombre }}
-    </option>
-  </select>
-</div>
 
-          <div class="form-group">
-  <label for="impuesto">Unidad de medida:</label>
-  <select class="form-select" id="medida" name="medida" v-model="productoForm.unidad_medida">
-    <option value="default" disabled>Selecciona una unidad de medida</option>
-    <option v-for="(unidad, index) in unidadesMostrar" :key="index" :value="unidad.id_medida">
-      {{ unidad.medida }}
-    </option>
-  </select>
-</div>
-        </div>
-      </div>
-      <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Producto' " @click="guardarProducto"></btnGuardarModal>
-      <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal>
-      <button class="btn" @click="openModalCategoria" >Agregar categorias</button> 
-    </div>
-  </div>
-
-<!-- modal para mostrar categorias -->
-
-<div v-if="isModalCategoriaOpen" class="modal">
-            <div class="modal-content modal-content-categoria">
-              <div class="categoria-encabezado">
-                <h3>Selecciona categorias del producto</h3>
-                <div class="search-bar form-group">
-                  <input class="busqueda" type="text" v-model="searchCategoria" placeholder="Buscar categoria..." />
-                </div>
-              </div>
-
-              <div class="categoria-contenedor">
-                <form class="form-form-categoria">
-
-                  <label class="label-categoria" v-for="(categoria, index) in filteredCategorias" :key="index"
-                    :class="{ 'primer-label': (index + 1) % 2 == 0 }">
-                    <input 
-                      type="checkbox"
-                      v-model="categoriasSeleccionadas"
-                      :value="categoria.id_categoria"
-                      :name="categoria.nombre_categoria" 
-                      :id="categoria.nombre_categoria">
-                      {{ categoria.nombre_categoria }}
-                      <br v-if="(index + 1) % 2 == 0" class="br-label">
-                  </label>
-                </form>
-              </div>
-              <div class="categoria-botones">
-
-                <btnGuardarModal @click="guardarCategorias">Guardar</btnGuardarModal>
-      <btnCerrarModal :texto = "'Cerrar'" @click="closeModalCategoria" ></btnCerrarModal> 
-              </div>
-
+            <div class="form-group">
+              <label for="impuesto">Impuesto:</label>
+              <select class="form-select" id="impuesto" name="impuesto" v-model="productoForm.impuesto">
+                <option v-for="(impuesto, index) in cargarImpuestos()" :key="index" :value="impuesto.id">
+                  {{ impuesto.nombre }}
+                </option>
+              </select>
             </div>
 
           </div>
+          <div class="contenedor contenedor-derecho">
+            <div class="form-group">
+              <label>Precio por Unidad:</label>
+              <input v-model="productoForm.precio_unitario" type="text" required />
+            </div>
+
+            <div class="form-group">
+              <label>Precio por mayoreo:</label>
+              <input v-model="productoForm.precio_mayorista" type="text" required />
+            </div>
+
+            <div class="form-group">
+              <label for="impuesto" value="default">Proveedor:</label>
+              <select class="form-select" id="proveedor" name="mediproveedorda" v-model="productoForm.proveedor">
+                <option value="default" disabled>Selecciona un proveedor</option>
+                <option v-for="(proveedor, index) in proveedoresMostrar" :key="index" :value="proveedor.id">
+                  {{ proveedor.nombre }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="impuesto" value="default">Unidad de medida:</label>
+              <select class="form-select" id="medida" name="medida" v-model="productoForm.unidad_medida">
+                <option value="default" disabled>Selecciona una unidad de medida</option>
+                <option v-for="(unidad, index) in unidadesMostrar" :key="index" :value="unidad.id_medida">
+                  {{ unidad.medida }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Producto'" @click="guardarProducto">
+        </btnGuardarModal>
+        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+        <button class="btn" @click="openModalCategoria">Agregar categorias</button>
+      </div>
+    </div>
+
+    <!-- modal para mostrar categorias -->
+
+    <div v-if="isModalCategoriaOpen" class="modal">
+      <div class="modal-content modal-content-categoria">
+        <div class="categoria-encabezado">
+          <h3>Selecciona categorias del producto</h3>
+          <div class="search-bar form-group">
+            <input class="busqueda" type="text" v-model="searchCategoria" placeholder="Buscar categoria..." />
+          </div>
+        </div>
+
+        <div class="categoria-contenedor">
+          <form class="form-form-categoria">
+
+            <label class="label-categoria" v-for="(categoria, index) in filteredCategorias" :key="index"
+              :class="{ 'primer-label': (index + 1) % 2 == 0 }">
+              <input type="checkbox" v-model="categoriasSeleccionadas" :value="categoria.id_categoria"
+                :name="categoria.nombre_categoria" :id="categoria.nombre_categoria">
+              {{ categoria.nombre_categoria }}
+              <br v-if="(index + 1) % 2 == 0" class="br-label">
+            </label>
+          </form>
+        </div>
+        <div class="categoria-botones">
+
+          <btnGuardarModal @click="guardarCategorias">Guardar</btnGuardarModal>
+          <btnCerrarModal :texto="'Cerrar'" @click="closeModalCategoria"></btnCerrarModal>
+        </div>
+
+      </div>
+
+    </div>
   </div>
 </template>
 
@@ -205,22 +200,25 @@ import ExportButton from '../components/ExportButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
+import validarCamposService from '../../services/validarCampos.js';
+import { notificaciones } from '../../services/notificaciones.js';
+import { useToast } from "vue-toastification";
+
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
 
 //apis
-import { getUnidadMedidaEmpresas } from'../../services/unidadMedidaSolicitud.js';
-import { getProveedoresEmpresa } from'../../services/proveedoresSolicitud.js';
+import { getUnidadMedidaEmpresas } from '../../services/unidadMedidaSolicitud.js';
+import { getProveedoresEmpresa } from '../../services/proveedoresSolicitud.js';
 
 //solicitudes a api
-import { getInfoExtra, getProductoSucursal, postProducto, patchProducto, desactivarProducto, getProductosEmpresa } from'../../services/productosSolicitudes.js';
-import { getSucursalesbyEmmpresaSumm } from'../../services/sucursalesSolicitudes.js';
-import { getCategoriaProductosEmpresa } from'../../services/categoriaSolicitudes.js';
+import { getInfoExtra, getProductoSucursal, postProducto, patchProducto, desactivarProducto, getProductosEmpresa } from '../../services/productosSolicitudes.js';
+import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
+import { getCategoriaProductosEmpresa } from '../../services/categoriaSolicitudes.js';
 
 
 //recursos
 const { impuestos } = require('../resources/impuestos.js');
-import validarCamposService from '../../services/validarCampos.js';
 
 export default {
   components: {
@@ -243,20 +241,20 @@ export default {
       unidadesMostrar: [],
       proveedoresMostrar: [],
       productoForm: {
-       codigo_producto: '',
-       nombre: '',
-       descripcion: '',
-       unidad_medida: 'default',
-       impuesto: impuestos[0]?.id || null,
-       proveedor: 'default',
-       precio_unitario: 0,
-       precio_mayorista: 0,
-       categorias: []
+        codigo_producto: '',
+        nombre: '',
+        descripcion: '',
+        unidad_medida: 'default',
+        impuesto: impuestos[0]?.id || null,
+        proveedor: 'default',
+        precio_unitario: 0,
+        precio_mayorista: 0,
+        categorias: []
 
       },
       productos: [],
       sucursales: [],
-     // categorias: [],
+      // categorias: [],
       categoriasSeleccionadas: [],
       categorias: [],
       columns: [
@@ -295,8 +293,8 @@ export default {
   },
   methods: {
 
-    async mostrarRegistros(valor){
-      if (valor === 'default'){
+    async mostrarRegistros(valor) {
+      if (valor === 'default') {
         this.productos = await getProductosEmpresa(this.id_usuario);
       }
       else {
@@ -309,7 +307,7 @@ export default {
       }
     },
 
-   async openModal() {
+    async openModal() {
       this.isModalOpen = true;
       await this.cargarUnidadMedidaProveedores();
 
@@ -319,52 +317,79 @@ export default {
       this.clearForm();
     },
 
-   async openModalCategoria(){
-    this.categorias = await getCategoriaProductosEmpresa(this.id_usuario);
+    async openModalCategoria() {
+      this.categorias = await getCategoriaProductosEmpresa(this.id_usuario);
       this.isModalCategoriaOpen = true;
     },
 
-    guardarCategorias(){
+    guardarCategorias() {
       this.productoForm.categorias = this.categoriasSeleccionadas;
       this.closeModalCategoria();
     },
 
-    closeModalCategoria(){
+    closeModalCategoria() {
       this.isModalCategoriaOpen = false;
     },
 
     clearForm() {
       this.productoForm = {
         codigo_producto: '',
-       nombre: '',
-       descripcion: '',
-       unidad_medida: 'default',
-       impuesto: impuestos[0]?.id || null,
-       proveedor: 'default',
-       precio_unitario: 0,
-       precio_mayorista: 0,
+        nombre: '',
+        descripcion: '',
+        unidad_medida: 'default',
+        impuesto: impuestos[0]?.id || null,
+        proveedor: 'default',
+        precio_unitario: 0,
+        precio_mayorista: 0,
       };
       this.isEditing = false;
       this.editIndex = null;
     },
 
-    cargarImpuestos(){
+    cargarImpuestos() {
       return impuestos;
     },
 
-    async cargarUnidadMedidaProveedores(){
+    async cargarUnidadMedidaProveedores() {
       this.unidadesMostrar = await getUnidadMedidaEmpresas(this.id_usuario);
       this.proveedoresMostrar = await getProveedoresEmpresa(this.id_usuario);
     },
 
+    validarCampos(productoForm) {
+      const campos = {
+        codigo_producto: productoForm.codigo_producto,
+        nombre: productoForm.nombre,
+        descripcion: productoForm.descripcion,
+        impuesto: productoForm.impuesto,
+        unidad_medida: productoForm.unidad_medida,
+        proveedor: productoForm.proveedor,
+        precio_unitario: productoForm.precio_unitario,
+        precio_mayorista: productoForm.precio_mayorista,
+      };
+
+      if (!validarCamposService.validarEmpty(campos)) {
+        return false;
+      }
+
+      if (!validarCamposService.validarSinLetras(campos.precio_mayorista, "precio por mayor")) {
+        return false;
+      }
+
+      if (!validarCamposService.validarSinLetras(campos.precio_unitario, "precio por unidad")) {
+        return false;
+      }
+
+      return true;
+    },
+
     async guardarProducto() {
-      if (!validarCamposService.validarSiNumero(this.productoForm.precio_unitario) || 
-      !validarCamposService.validarSiNumero(this.productoForm.precio_mayorista)){
-        alert('Campo no es un numero.');
+      if (!this.validarCampos(this.productoForm)) {
         return;
       }
+      validarCamposService.formSuccess();
+
       this.productoForm.id_usuario = this.id_usuario;
-      
+
       if (this.isEditing) {
 
         try {
@@ -376,7 +401,7 @@ export default {
             Object.assign(this.productos[this.editIndex], this.productoForm);
           }
         } catch (error) {
-          alert(error);
+          notificaciones('error', error.message);
         }
 
       } else {
@@ -385,9 +410,9 @@ export default {
           const nuevoRegistro = await postProducto(this.productoForm);
           this.productos.push(nuevoRegistro[0]);
         } catch (error) {
-          alert(error);
+          notificaciones('error', error.message);
         }
-      
+
       }
       this.closeModal();
     },
@@ -396,10 +421,10 @@ export default {
 
       try {
         const infoExtra = await getInfoExtra(producto.id_producto);
-        this.productoForm.impuesto  = infoExtra.impuesto;
-        this.productoForm.unidad_medida  = infoExtra.id_unidad_medida;
-        this.productoForm.precio_mayorista  = infoExtra.precio_mayorista;
-        this.productoForm.proveedor  = infoExtra.id_proveedor;
+        this.productoForm.impuesto = infoExtra.impuesto;
+        this.productoForm.unidad_medida = infoExtra.id_unidad_medida;
+        this.productoForm.precio_mayorista = infoExtra.precio_mayorista;
+        this.productoForm.proveedor = infoExtra.id_proveedor;
         this.categoriasSeleccionadas = infoExtra.categorias;
 
         this.isEditing = true;
@@ -407,22 +432,23 @@ export default {
         this.openModal();
 
       } catch (error) {
-        alert(error);
+        notificaciones('error', error.message);
       }
-      
+
     },
     async deleteProducto(producto) {
+      const toast = useToast();
       try {
         const registroEliminado = await desactivarProducto(producto.id_producto);
 
         if (registroEliminado == true) this.productos = this.productos.filter(item => item.id_producto !== producto.id_producto);
 
-        else {alert('Error al eliminar producto');}
-        
+        else { toast.error('Error al eliminar producto'); }
+
       } catch (error) {
         console.error(error);
       }
-      
+
     },
     generateRows() {
       // Genera las filas basadas en los productos paginados
@@ -453,12 +479,12 @@ export default {
       this.generateRows();
     }
   },
- async mounted() {
+  async mounted() {
     // Genera las filas al cargar el componente
     this.generateRows();
     document.title = "Productos";
     this.changeFavicon('/img/spiderman.ico');
-    
+
     try {
       this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
 
@@ -510,7 +536,7 @@ export default {
   margin-bottom: 8px;
 }
 
-.form-group-select{
+.form-group-select {
   min-width: 80%;
   display: flexbox;
   flex-direction: row;
@@ -724,9 +750,10 @@ export default {
   width: 100%;
 }
 
-.categoria-contenedor{
+.categoria-contenedor {
   width: 100%;
 }
+
 .form-form-categoria {
   padding: 20px;
   padding-top: 0;
@@ -766,7 +793,8 @@ export default {
   margin-bottom: 8px;
 }
 
-.form-group input, textarea {
+.form-group input,
+textarea {
   width: 95%;
   height: 25%;
   padding: 0.5rem;
@@ -807,8 +835,8 @@ button {
   /* Ajusta el ancho a 120px o el valor que prefieras */
 }
 
-.select-sucursal{
-min-width: 200px;
+.select-sucursal {
+  min-width: 200px;
 }
 
 .custom-select:focus {

@@ -107,7 +107,7 @@
                 <span class="info-icon" @mouseover="showTooltip = true" @mouseleave="showTooltip = false">ℹ️</span>
                 Contraseña:
               </label>
-              <input v-model="usuarioForm.password" type="password" required :disabled="!isPassEdit"/>
+              <input v-model="usuarioForm.password" type="password" required :disabled="!isPassEdit" />
               <div v-if="showTooltip" class="tooltip">
                 La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un
                 número y un símbolo.
@@ -139,10 +139,10 @@
         </div>
         <div>
           <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario"
-          type="submit">
-        </btnGuardarModal>
-        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
-        <button class="btn editar-password" :disabled="!isEditing" @click="editarPassword" >Editar Contraseña</button>
+            type="submit">
+          </btnGuardarModal>
+          <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+          <button class="btn editar-password" :disabled="!isEditing" @click="editarPassword">Editar Contraseña</button>
         </div>
       </div>
     </div>
@@ -155,15 +155,8 @@
 import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
-
-
-
-// importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
-//importando validar campos
 import validarCamposService from '../../services/validarCampos.js';
-
-//importando notificaciones
 import { notificaciones } from '../../services/notificaciones.js';
 
 export default {
@@ -297,7 +290,7 @@ export default {
       return rol ? rol.cargo : 'Desconocido';
     },
 
-    validarCampos(form){
+    validarCampos(form) {
       const campos = {
         nombre: form.nombre,
         apellido: form.apellido,
@@ -311,23 +304,21 @@ export default {
         rol: form.rol,
       };
 
-      if ( !validarCamposService.validarEmpty(campos) ){
+      if (!validarCamposService.validarEmpty(campos)) {
         return false;
       }
 
-      if (this.isPassEdit){
+      if (this.isPassEdit) {
         if (!validarCamposService.validarPass(campos.password, campos.confirmPassword)) {
-        return false;
-      }
-      if (!validarCamposService.validarPasswordSegura(campos.password)) {
-        return false;
-      }
+          return false;
+        }
+        if (!validarCamposService.validarPasswordSegura(campos.password)) {
+          return false;
+        }
       }
       if (!validarCamposService.validarTelefono(campos.telefono)) {
         return false;
       }
-
-      
 
       if (!validarCamposService.validarEmail(campos.correo)) {
         return false;
@@ -335,8 +326,8 @@ export default {
 
       return true;
     },
-   
-    editarPassword(){
+
+    editarPassword() {
       this.isPassEdit = true;
     },
 
@@ -344,8 +335,8 @@ export default {
       let response;
       let parametros;
 
-      if (!this.validarCampos(this.usuarioForm)){
-        return ;
+      if (!this.validarCampos(this.usuarioForm)) {
+        return;
       }
 
       validarCamposService.formSuccess();
@@ -363,7 +354,7 @@ export default {
           if (response == true) {
 
             Object.assign(this.empleados[this.editIndex], this.usuarioForm);
-          } else notificaciones('error',response);
+          } else notificaciones('error', response);
         } catch (error) {
           notificaciones('error', error.message);
         }
@@ -420,7 +411,7 @@ export default {
     },
 
     editEmpleado(empleado) {
-      this.editIndex= this.empleados.findIndex(item => item.id_usuario === empleado.id_usuario);
+      this.editIndex = this.empleados.findIndex(item => item.id_usuario === empleado.id_usuario);
       this.usuarioForm = { ...empleado };
       this.usuarioForm.sucursal = empleado.sucursales;
       this.usuarioForm.rol = empleado.id_rol;

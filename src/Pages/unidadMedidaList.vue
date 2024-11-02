@@ -46,8 +46,9 @@
           <tr v-for="(unidad, index) in paginatedUnidades" :key="index">
             <td>{{ index + 1 }}</td>
             <td>{{ unidad.medida }}</td>
-            <td class="totalProductos">{{  unidad.totalProductos  }}
-              <button class="btn mostrar-producto" @click="mostrarModalProductos(unidad.id_medida)" >Mostrar Prod.</button>
+            <td class="totalProductos">{{ unidad.totalProductos }}
+              <button class="btn mostrar-producto" @click="mostrarModalProductos(unidad.id_medida)">Mostrar
+                Prod.</button>
             </td>
             <td>
               <button id="btnEditar" class="btn btn-warning" @click="editUnidad(unidad)"><i
@@ -69,43 +70,41 @@
           <label>Nombre de unidad de inventario:</label>
           <input v-model="unidadForm.medida" type="text" required>
         </div>
-        <div class="contenedor-botones" >
-          <btnGuardarModal
-          :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'"
-          @click="guardarUnidad"
-        ></btnGuardarModal>
-        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+        <div class="contenedor-botones">
+          <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'" @click="guardarUnidad">
+          </btnGuardarModal>
+          <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
 
-       
+
 
       </div>
     </div>
 
 
-<!-- Modal para mostrar productos con esa id medida -->
+    <!-- Modal para mostrar productos con esa id medida -->
     <div v-if="isModalProductosOpen" class="modal">
       <div class="modal-content">
         <h2>Lista de productos</h2>
-<div class="table-container table-modal-container">
-  <table class="table table-modal">
-          <thead>
-            <tr>
-              <th>Codigo de producto</th>
-              <th>Nombre de producto</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="producto in mostrarProductosModal" :key="producto.codigo_producto">
-              <td>{{ producto.codigo_producto }}</td>
-              <td>{{ producto.nombre }}</td>
-            </tr>
-          </tbody>
-        </table>
-</div>
+        <div class="table-container table-modal-container">
+          <table class="table table-modal">
+            <thead>
+              <tr>
+                <th>Codigo de producto</th>
+                <th>Nombre de producto</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="producto in mostrarProductosModal" :key="producto.codigo_producto">
+                <td>{{ producto.codigo_producto }}</td>
+                <td>{{ producto.nombre }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-<div class="contenedor-botones" >
-        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+        <div class="contenedor-botones">
+          <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
 
       </div>
@@ -120,6 +119,9 @@
 import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
+import validarCamposService from '../../services/validarCampos.js';
+import { notificaciones } from '../../services/notificaciones.js';
+import { useToast } from "vue-toastification";
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -137,7 +139,7 @@ export default {
     return {
       searchQuery: '', // Almacena el texto de búsqueda
       itemsPerPage: "",
-      id_usuario:'', // Valor por defecto para mostrar todos los registros
+      id_usuario: '', // Valor por defecto para mostrar todos los registros
       unidadesMedida: [],
       mostrarProductos: [],
       isModalOpen: false,
@@ -164,7 +166,7 @@ export default {
     filteredUnidades() {
       // Filtra las categorías basados en el texto de búsqueda
       return this.unidadesMedida.filter(unidad =>
-      unidad.medida.toLowerCase().includes(this.searchQuery.toLowerCase())
+        unidad.medida.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
     paginatedUnidades() {
@@ -173,11 +175,23 @@ export default {
         ? this.filteredUnidades
         : this.filteredUnidades.slice(0, this.itemsPerPage);
     },
-    mostrarProductosModal(){
+    mostrarProductosModal() {
       return this.mostrarProductos;
     },
   },
   methods: {
+    validarCampos(unidadForm) {
+      const campos = {
+        Medida: unidadForm.medida,
+      };
+
+      if (!validarCamposService.validarEmpty(campos)) {
+        return false;
+      }
+
+      return true;
+    },
+
     openModal() {
       // Resetea el formulario y abre el modal
       this.isModalOpen = true;
@@ -194,10 +208,10 @@ export default {
       this.isModalOpen = true;
       this.isEditing = true;
       this.unidadForm = { ...unidad };
-      this.editIndex= this.unidadesMedida.findIndex(item => item.id_medida === unidad.id_medida);
+      this.editIndex = this.unidadesMedida.findIndex(item => item.id_medida === unidad.id_medida);
     },
 
-    async mostrarModalProductos(id_medida){
+    async mostrarModalProductos(id_medida) {
       try {
         this.mostrarProductos = await getProductosUnidad(id_medida);
         console.log(this.mostrarProductos);
@@ -208,53 +222,57 @@ export default {
     },
 
     async deleteUnidad(unidad) {
-
-      if (unidad.totalProductos > 0){
-        alert('No se puede eliminar por que hay productos usando esta unidad.');
+      const toast = useToast();
+      if (unidad.totalProductos > 0) {
+        toast.error('Productos existentes dentro de esta unidad');
         return;
       }
-      
+
       try {
         const response = await eliminarUnidad(unidad.id_medida);
 
-        if (response.success === false){
+        if (response.success === false) {
           throw response.message;
         }
 
-        if (response === true){
+        if (response === true) {
           this.unidadesMedida = this.unidadesMedida.filter(item => item.id_medida !== unidad.id_medida);
         }
 
       } catch (error) {
-        alert(`Ocurrio un error ${error}`)
+        notificaciones('error', error);
       }
-    
-    },
-    
-    async guardarUnidad() {
 
+    },
+
+    async guardarUnidad() {
+      if (!this.validarCampos(this.unidadForm)) {
+        return;
+      }
+
+      validarCamposService.formSuccess();
       this.unidadForm.id_usuario = this.id_usuario;
       if (this.isEditing) {
         try {
 
-const nuevoRegistro = await patchUnidad(this.unidadForm, this.unidadesMedida[this.editIndex].id_medida);
-if (nuevoRegistro == true) {
+          const nuevoRegistro = await patchUnidad(this.unidadForm, this.unidadesMedida[this.editIndex].id_medida);
+          if (nuevoRegistro == true) {
 
-  Object.assign(this.unidadesMedida[this.editIndex], this.unidadForm);
+            Object.assign(this.unidadesMedida[this.editIndex], this.unidadForm);
 
-}
-} catch (error) {
-alert(error);
-}
+          }
+        } catch (error) {
+          notificaciones('error', error.message);
+        }
       } else {
 
         try {
           const nuevoRegistro = await postUnidad(this.unidadForm);
           this.unidadesMedida.push(nuevoRegistro[0]);
         } catch (error) {
-          alert(error);
+          notificaciones('error', error.message);
         }
-      
+
       }
       this.closeModal();
     },
@@ -310,7 +328,7 @@ alert(error);
   cursor: pointer;
 }
 
-.mostrar-producto{
+.mostrar-producto {
   background-color: #2b8cf3;
 }
 
@@ -505,7 +523,8 @@ select,
   border: 1px solid #ddd;
   margin-top: 16px;
 }
-.table-modal-container{
+
+.table-modal-container {
   max-height: 400px;
   overflow-y: scroll;
 }

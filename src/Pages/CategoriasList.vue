@@ -80,12 +80,10 @@
           <textarea v-model="categoriaForm.descripcion" class="descriptionForm" required rows="4"></textarea>
         </div>
 
-        <div class="contenedor-botones" >
-          <btnGuardarModal
-          :texto="isEditing ? 'Guardar Cambios' : 'Agregar Categoría'"
-          @click="guardarCategoria"
-        ></btnGuardarModal>
-        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+        <div class="contenedor-botones">
+          <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Categoría'" @click="guardarCategoria">
+          </btnGuardarModal>
+          <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
       </div>
     </div>
@@ -97,6 +95,9 @@
 import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
+import validarCamposService from '../../services/validarCampos.js';
+import { notificaciones } from '../../services/notificaciones.js';
+import { useToast } from "vue-toastification";
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -114,7 +115,7 @@ export default {
     return {
       searchQuery: '', // Almacena el texto de búsqueda
       itemsPerPage: "",
-      id_usuario:'', // Valor por defecto para mostrar todos los registros
+      id_usuario: '', // Valor por defecto para mostrar todos los registros
       categorias: [
       ],
       isModalOpen: false, // Estado para controlar si el modal está abierto o cerrado
@@ -140,7 +141,7 @@ export default {
       console.log(error); //modal error pendiente
     }
 
-    
+
   },
   computed: {
     filteredCategorias() {
@@ -157,6 +158,19 @@ export default {
     }
   },
   methods: {
+    validarCampos(categoriaForm) {
+      const campos = {
+        Nombre: categoriaForm.nombre_categoria,
+        Descripcion: categoriaForm.descripcion,
+      };
+
+      if (!validarCamposService.validarEmpty(campos)) {
+        return false;
+      }
+
+      return true;
+    },
+
     openModal() {
       // Resetea el formulario y abre el modal
       this.isModalOpen = true;
@@ -172,45 +186,50 @@ export default {
       this.isModalOpen = true;
       this.isEditing = true;
       this.categoriaForm = { ...categoria };
-      this.editIndex= this.categorias.findIndex(item => item.id_categoria === categoria.id_categoria);
+      this.editIndex = this.categorias.findIndex(item => item.id_categoria === categoria.id_categoria);
     },
     async deleteCategoria(categoria) {
+      const toast = useToast();
       try {
-        if (categoria.totalProd > 0){
-          alert('Aun hay productos asignados a esta categoria');
+        if (categoria.totalProd > 0) {
+          toast.error('Productos existentes dentro de esta categoría');
         }
-       const response = await deleteCategoria(categoria.id_categoria);
+        const response = await deleteCategoria(categoria.id_categoria);
 
         if (response == true) {
           this.categorias = this.categorias.filter(item => item.id_categoria !== categoria.id_categoria);
         }
       } catch (error) {
-        alert(new Error(error));
+        notificaciones('error', new Error(error).message);
       }
     },
-    
+
     async guardarCategoria() {
+      if (!this.validarCampos(this.categoriaForm)) {
+        return;
+      }
+      validarCamposService.formSuccess();
+
       let response;
       let parametros;
       this.categoriaForm.id_usuario = this.id_usuario;
       if (this.isEditing) {
         try {
-          
-          parametros = `/categoria-producto/actualizar-categoria/${
-            this.categorias[this.editIndex].id_categoria
-          }`;
+
+          parametros = `/categoria-producto/actualizar-categoria/${this.categorias[this.editIndex].id_categoria
+            }`;
           response = await solicitudes.patchRegistro(
             parametros,
             this.categoriaForm
           );
-          
+
 
           if (response == true) {
 
             Object.assign(this.categorias[this.editIndex], this.categoriaForm);
-          } else alert(response);
+          } else notificaciones('error', response.message);
         } catch (error) {
-          alert(error);
+          notificaciones('error', error.message);
         }
       } else {
         parametros = `/categoria-producto/crear-categoria`;
@@ -221,14 +240,14 @@ export default {
           );
 
           if (response.length > 0) {
-           
-           this.categorias.push( response[0] );
- 
-           }  else {
+
+            this.categorias.push(response[0]);
+
+          } else {
             throw response;
           }
         } catch (error) {
-          alert(error);
+          notificaciones('error', error.message);
         }
       }
       this.closeModal();

@@ -83,8 +83,9 @@
           <input v-model="proveedorForm.direccion" type="text" required>
         </div>
 
-        <btnGuardarModal :texto = " isEditing ? 'Guardar Cambios' : 'Agregar Proveedor' " @click="guardarProveedor"></btnGuardarModal>
-        <btnCerrarModal :texto = "'Cerrar'" @click="closeModal" ></btnCerrarModal> 
+        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Proveedor'" @click="guardarProveedor">
+        </btnGuardarModal>
+        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
 
       </div>
     </div>
@@ -95,6 +96,8 @@
 import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
+import validarCamposService from '../../services/validarCampos.js';
+import { notificaciones } from '../../services/notificaciones.js';
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -121,20 +124,20 @@ export default {
       proveedores: []
     };
   },
- async mounted() {
+  async mounted() {
     document.title = "Proveedores";
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
     try {
       this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
-    
+
       this.proveedores = await solicitudes.fetchRegistros(
-          `/proveedores/${this.id_usuario}`
-        );
+        `/proveedores/${this.id_usuario}`
+      );
 
     } catch (error) {
       console.log(error); //modal error pendiente
     }
-  
+
   },
   computed: {
     filteredProveedores() {
@@ -154,6 +157,30 @@ export default {
     }
   },
   methods: {
+
+    validarCampos(proveedorForm) {
+      const campos = {
+        nombre: proveedorForm.nombre,
+        telefono: proveedorForm.telefono,
+        correo: proveedorForm.correo, // Cambiado a proveedorForm.correo
+        direccion: proveedorForm.direccion
+      };
+
+      if (!validarCamposService.validarEmpty(campos)) {
+        return false;
+      }
+
+      if (!validarCamposService.validarEmail(campos.correo)) {
+        return false;
+      }
+
+      if (!validarCamposService.validarTelefono(campos.telefono)) {
+        return false;
+      }
+
+      return true;
+    },
+
     openModal() {
       this.isModalOpen = true;
     },
@@ -165,34 +192,38 @@ export default {
       this.proveedorForm = {
         nombre: '',
         telefono: '',
-        email: '',
+        correo: '',
         direccion: '',
       };
       this.isEditing = false;
       this.editIndex = null;
     },
     async guardarProveedor() {
+      if (!this.validarCampos(this.proveedorForm)) {
+        return;
+      }
+      validarCamposService.formSuccess();
+
       this.proveedorForm.id_usuario = this.id_usuario;
       let response;
       let parametros;
       if (this.isEditing) {
         try {
           console.log(this.proveedorForm);
-          parametros = `/proveedores/actualizar-proveedor/${
-            this.proveedores[this.editIndex].id
-          }`;
+          parametros = `/proveedores/actualizar-proveedor/${this.proveedores[this.editIndex].id
+            }`;
           console.log(this.proveedores[this.editIndex].id);
           response = await solicitudes.patchRegistro(
             parametros,
             this.proveedorForm
           );
-          
+
           if (response == true) {
 
             Object.assign(this.proveedores[this.editIndex], this.proveedorForm);
-          } else alert(response);
+          } else notificaciones('error', response.message);
         } catch (error) {
-          alert(error);
+          notificaciones('error', error.message);
         }
       } else {
         parametros = `/proveedores/crear-proveedor/${this.id_usuario}`;
@@ -203,8 +234,8 @@ export default {
           );
 
           if (response.length > 0) {
-           
-          this.proveedores.push( response[0] );
+
+            this.proveedores.push(response[0]);
 
           } else {
             throw response;
@@ -218,9 +249,9 @@ export default {
     },
     editProveedor(proveedor) {
       this.proveedorForm = { ...proveedor };
-      
+
       this.isEditing = true;
-      this.editIndex= this.proveedores.findIndex(item => item.id === proveedor.id);
+      this.editIndex = this.proveedores.findIndex(item => item.id === proveedor.id);
       this.openModal();
     },
     async deleteProveedor(proveedor) {

@@ -7,23 +7,12 @@
 
   <div class="sucursales-wrapper">
     <div class="opciones">
-      <button
-        id="btnAdd"
-        class="btn btn-primary"
-        @click="openModal"
-        style="width: 200px; white-space: nowrap"
-      >
+      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap">
         Agregar sucursales
       </button>
-      <ExportButton
-        :columns="columns"
-        :rows="rows"
-        fileName="Sucursales.pdf"
-        class="export-button"
-      />
+      <ExportButton :columns="columns" :rows="rows" fileName="Sucursales.pdf" class="export-button" />
       <div class="registros">
-        <span
-          >Mostrar
+        <span>Mostrar
           <select v-model="itemsPerPage" class="custom-select">
             <option value="">Todos</option>
             <option value="5">5</option>
@@ -36,12 +25,7 @@
         </span>
       </div>
       <!-- Barra de búsqueda -->
-      <input
-        class="busqueda"
-        type="text"
-        v-model="searchQuery"
-        placeholder="Buscar sucursal..."
-      />
+      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar sucursal..." />
     </div>
 
     <div class="table-container">
@@ -65,18 +49,10 @@
             <td>{{ sucursal.direccion }}</td>
 
             <td>
-              <button
-                id="btnEditar"
-                class="btn btn-warning"
-                @click="editSucursal(sucursal)"
-              >
+              <button id="btnEditar" class="btn btn-warning" @click="editSucursal(sucursal)">
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button
-                id="btnEliminar"
-                class="btn btn-danger"
-                @click="deleteSucursal(sucursal)"
-              >
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteSucursal(sucursal)">
                 <b><i class="bi bi-x-lg"></i></b>
               </button>
             </td>
@@ -94,11 +70,7 @@
 
         <div class="form-group">
           <label>Nombre:</label>
-          <input
-            v-model="sucursalForm.nombre_administrativo"
-            type="text"
-            required
-          />
+          <input v-model="sucursalForm.nombre_administrativo" type="text" required />
         </div>
 
         <div class="form-group">
@@ -116,10 +88,8 @@
           <input v-model="sucursalForm.direccion" type="text" required />
         </div>
 
-        <btnGuardarModal
-          :texto="isEditing ? 'Guardar Cambios' : 'Agregar Sucursal'"
-          @click="guardarSucursal"
-        ></btnGuardarModal>
+        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Sucursal'" @click="guardarSucursal">
+        </btnGuardarModal>
         <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
       </div>
     </div>
@@ -131,6 +101,8 @@ import ProfileButton from "../components/ProfileButton.vue";
 import ExportButton from "../components/ExportButton.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
+import validarCamposService from '../../services/validarCampos.js';
+import { notificaciones } from '../../services/notificaciones.js';
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -151,6 +123,7 @@ export default {
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
+
       sucursalForm: {
         id_sucursal: 0,
         nombre_administrativo: "",
@@ -188,6 +161,29 @@ export default {
     },
   },
   methods: {
+    validarCampos(sucursalForm) {
+      const campos = {
+        Nombre: sucursalForm.nombre_administrativo,
+        Correo: sucursalForm.correo,
+        Telefono: sucursalForm.telefono,
+        Direccion: sucursalForm.direccion,
+      };
+
+      if (!validarCamposService.validarEmpty(campos)) {
+        return false;
+      }
+
+      if (!validarCamposService.validarEmail(campos.correo)) {
+        return false;
+      }
+
+      if (!validarCamposService.validarTelefono(campos.telefono)) {
+        return false;
+      }
+
+      return true;
+    },
+
     openModal() {
       this.isModalOpen = true;
     },
@@ -202,26 +198,30 @@ export default {
       };
     },
     async guardarSucursal() {
+      if (!this.validarCampos(this.sucursalForm)) {
+        return;
+      }
+      validarCamposService.formSuccess();
+
       let response;
       let parametros;
       if (this.isEditing) {
         try {
 
-          parametros = `/sucursales/actualizar-sucursal/${
-            this.sucursales[this.editIndex].id_sucursal
-          }`;
+          parametros = `/sucursales/actualizar-sucursal/${this.sucursales[this.editIndex].id_sucursal
+            }`;
           response = await solicitudes.patchRegistro(
             parametros,
             this.sucursalForm
           );
-          
+
 
           if (response == true) {
 
             Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
-          } else alert(response);
+          } else notificaciones('error', response.message);
         } catch (error) {
-          alert(error);
+          notificaciones('error', error.message);
         }
       } else {
         parametros = `/sucursales/crear-sucursal/${this.id_usuario}`;
@@ -232,14 +232,14 @@ export default {
           );
 
           if (response.length > 0) {
-           
-           this.sucursales.push( response[0] );
- 
-           }  else {
+
+            this.sucursales.push(response[0]);
+
+          } else {
             throw response;
           }
         } catch (error) {
-          alert(error);
+          notificaciones('error', error.message);
         }
       }
       this.closeModal();
@@ -247,7 +247,7 @@ export default {
     editSucursal(sucursal) {
       this.isModalOpen = true;
       this.isEditing = true;
-      this.editIndex= this.sucursales.findIndex(item => item.id_sucursal === sucursal.id_sucursal);
+      this.editIndex = this.sucursales.findIndex(item => item.id_sucursal === sucursal.id_sucursal);
       this.sucursalForm = { ...sucursal };
     },
     async deleteSucursal(sucursal) {
@@ -269,7 +269,7 @@ export default {
           this.sucursales = this.sucursales.filter(item => item.id_sucursal !== sucursal.id_sucursal);
         }
       } catch (error) {
-        alert(new Error(response));
+        notificaciones('error', new Error(response).message);
       }
     },
     generateRows() {

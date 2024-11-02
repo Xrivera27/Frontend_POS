@@ -7,7 +7,8 @@
 
   <div class="clientes-wrapper">
     <div class="opciones">
-      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar Clientes</button>
+      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+        Clientes</button>
 
       <ExportButton :columns="columns" :rows="rows" fileName="Clientes.pdf" class="export-button" />
 
@@ -92,7 +93,8 @@
           <input v-model="clienteForm.rtn" type="text" required>
         </div>
 
-        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Cliente'" @click="guardarCliente"></btnGuardarModal>
+        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Cliente'" @click="guardarCliente">
+        </btnGuardarModal>
         <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
       </div>
     </div>
@@ -104,8 +106,9 @@ import ProfileButton from '../components/ProfileButton.vue';
 import ExportButton from '../components/ExportButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
-
 import solicitudes from "../../services/solicitudes";
+import validarCamposService from '../../services/validarCampos.js';
+import { notificaciones } from '../../services/notificaciones.js';
 const { getClientesbyEmpresa, postCliente, patchCliente, desactivarCliente } = require('../../services/clienteSolicitudes.js');
 
 export default {
@@ -139,7 +142,7 @@ export default {
     this.changeFavicon('/img/spiderman.ico');
     try {
       this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
-      
+
       this.clientes = await getClientesbyEmpresa(this.id_usuario);
 
 
@@ -161,6 +164,34 @@ export default {
     }
   },
   methods: {
+    validarCampos(clienteForm) {
+      const campos = {
+        Nombre: clienteForm.nombre_completo,
+        Correo: clienteForm.correo,
+        Direccion: clienteForm.direccion,
+        Telefono: clienteForm.telefono,
+        RTN: clienteForm.rtn
+      };
+
+      if (!validarCamposService.validarEmpty(campos)) {
+        return false;
+      }
+
+      if (!validarCamposService.validarEmail(campos.Correo)) {
+        return false;
+      }
+
+      if (!validarCamposService.validarTelefono(campos.Telefono)) {
+        return false;
+      }
+
+      if (!validarCamposService.validarRTN(campos.RTN)) {
+        return false;
+      }
+
+      return true;
+    },
+
     openModal() {
       this.isModalOpen = true;
     },
@@ -181,18 +212,23 @@ export default {
       this.editIndex = null;
     },
     async guardarCliente() {
+      if (!this.validarCampos(this.clienteForm)) {
+        return;
+      }
+      validarCamposService.formSuccess();
+
       this.clienteForm.id_usuario = this.id_usuario;
       let response;
 
       if (this.isEditing) {
         const nuevoRegistro = await patchCliente(this.clienteForm, this.clientes[this.editIndex].id_cliente);
-if (nuevoRegistro == true) {
+        if (nuevoRegistro == true) {
 
-  Object.assign(this.clientes[this.editIndex], this.clienteForm);
+          Object.assign(this.clientes[this.editIndex], this.clienteForm);
 
-}
+        }
       } else {
-       
+
         try {
           response = await postCliente(this.clienteForm, this.id_usuario);
           if (response.length > 0) {
@@ -211,22 +247,22 @@ if (nuevoRegistro == true) {
     editCliente(cliente) {
       this.clienteForm = { ...cliente };
       this.isEditing = true;
-      this.editIndex= this.clientes.findIndex(item => item.id_cliente === cliente.id_cliente);
+      this.editIndex = this.clientes.findIndex(item => item.id_cliente === cliente.id_cliente);
       this.openModal();
     },
     async deleteCliente(cliente) {
-     try {
-      const response = await desactivarCliente(cliente.id_cliente);
-      console.log(response);
-      if (response === true){
-        this.clientes = this.clientes.filter(item => item.id_cliente !== cliente.id_cliente);
+      try {
+        const response = await desactivarCliente(cliente.id_cliente);
+        console.log(response);
+        if (response === true) {
+          this.clientes = this.clientes.filter(item => item.id_cliente !== cliente.id_cliente);
+        }
+        else {
+          throw response;
+        }
+      } catch (error) {
+        notificaciones('error', error.message);
       }
-      else {
-        throw response;
-      }
-     } catch (error) {
-      alert(error.message);
-     }
     },
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
