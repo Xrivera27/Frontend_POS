@@ -1,5 +1,5 @@
 <template>
-  <LoadingSpinner :isLoading="isLoading" />
+
   <div class="encabezado">
     <h1>Usuarios</h1>
     <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
@@ -156,18 +156,22 @@ import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
-import LoadingSpinner from '@/components/LoadingSpinnerList.vue';
+
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
+//importando validar campos
 import validarCamposService from '../../services/validarCampos.js';
+
+//importando notificaciones
+import { notificaciones } from '../../services/notificaciones.js';
 
 export default {
   components: {
     ProfileButton,
     btnGuardarModal,
     btnCerrarModal,
-    LoadingSpinner
+
   },
   data() {
     return {
@@ -220,7 +224,7 @@ export default {
 
 
     } catch (error) {
-      console.log(error); //modal error pendiente
+      notificaciones('error', error.message); //modal error pendiente
     }
 
   },
@@ -254,9 +258,9 @@ export default {
       try {
         const id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
         this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${id_usuario}`);
-        console.log(this.empleados);
+
       } catch (error) {
-        console.error(error);
+        notificaciones('error', error.message);
       } finally {
         this.isLoading = false; // Termina la carga
       }
@@ -359,9 +363,9 @@ export default {
           if (response == true) {
 
             Object.assign(this.empleados[this.editIndex], this.usuarioForm);
-          } else alert(response);
+          } else notificaciones('error',response);
         } catch (error) {
-          alert(error);
+          notificaciones('error', error.message);
         }
 
       } else {
@@ -381,7 +385,7 @@ export default {
             throw response;
           }
         } catch (error) {
-          alert(error);
+          notificaciones('error', error.message);
         }
 
       }
@@ -411,7 +415,7 @@ export default {
           }
         }
       } catch (error) {
-        alert(new Error(response));
+        notificaciones('error', error.message);
       }
     },
 
