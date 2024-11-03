@@ -425,17 +425,20 @@ this.searchSucursalStock = this.sucursales[0].id_sucursal;
 
 
     async guardarStock(sucursal) {
-      const datosStock = {
-        stock_min: this.inputStockMin,
-        stock_max: this.inputStockMax
-      };
-
       if (!validarCamposService.validarSiNumero(this.inputStockMin) || !validarCamposService.validarSiNumero(this.inputStockMax)){
         notificaciones('error', 'Datos invalidos: Un campo no es numero');
         return;
       }
 
-      if (this.inputStockMax <= this.inputStockMin){
+      const stock_min = Number( this.inputStockMin);
+      const stock_max = Number( this.inputStockMax);
+      
+      const datosStock = {
+        stock_min: stock_min,
+        stock_max: stock_max
+      };
+
+      if (stock_max <= stock_min){
         notificaciones('error', 'Datos invalidos: Stock minimo no puede ser mayor o igual a stock maximo');
         return;
       }
