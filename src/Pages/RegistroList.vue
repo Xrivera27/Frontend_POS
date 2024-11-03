@@ -28,6 +28,21 @@
           <input id="telefono" v-model="form.telefono_principal" type="tel" placeholder="Teléfono" required />
         </div>
 
+         <!-- Encargado -->
+         <div class="form-group">
+          <input id="encargado" v-model="form.encargado" type="text" placeholder="Nombre" required />
+        </div>
+
+          <!-- Encargado -->
+          <div class="form-group">
+          <input id="apellido" v-model="form.encargado" type="text" placeholder="Apellido" required />
+        </div>
+
+          <!-- Direccion -->
+          <div class="form-group">
+          <input id="direccion" v-model="form.direccion" type="text" placeholder="Direccion" required />
+        </div>
+
         <!-- SAR -->
         <div class="form-options">
           <label class="checkbox-container">
@@ -54,7 +69,7 @@ import { reactive, ref, onMounted } from 'vue';
 
 const form = reactive({
   nombre: '',
-  created_at: '2023-10-26',
+  created_at: '',
   id_categoria: '', // Aquí se almacenará el ID de la categoría seleccionada
   correo_principal: '',
   telefono_principal: '',
