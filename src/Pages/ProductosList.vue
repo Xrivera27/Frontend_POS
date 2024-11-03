@@ -40,7 +40,7 @@
       </div>
       <div class="registros">
         <span>
-          <select class="custom-select select-sucursal" v-model="searchSucursal"
+          <select class="custom-select select-sucursal" v-model="searchSucursal" v-show="(sucursales.length > 1)"
             @change="mostrarRegistros(searchSucursal)">
             <option value="default">Todas</option>
             <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
@@ -69,7 +69,7 @@
             <td>{{ index + 1 }}</td>
             <td>{{ producto.codigo_producto }}</td>
             <td>{{ producto.nombre }}</td>
-            <td>{{ producto.stock_actual }} <button class="edit-stock" @click="openModalStock" ><i class="bi bi-pencil-square"></i></button> </td>
+            <td>{{ producto.stock_actual }} <button class="edit-stock" @click="openModalStock(producto)" ><i class="bi bi-pencil-square"></i></button> </td>
             <td>{{ producto.precio_unitario }}</td>
             <td>Inactivo</td>
             <td>
@@ -196,30 +196,36 @@
           <div class="search-bar form-group">
           </div>
         </div>
-
-
           <form class="form-form-stock">
 
-            <select class="custom-select select-sucursal-stock" v-model="searchSucursal">
-            <option value="default">Todas</option>
+            <select class="custom-select select-sucursal-stock" @change="mostrarStockbySucursal(searchSucursalStock)"
+            v-model="searchSucursalStock" v-show="(sucursales.length > 1)" >
             <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
               sucursal.nombre_administrativo }}</option>
           </select>
+          <div class="form-group-stock">
+  <label for="stock-min">Codigo Producto:</label>
+  <label class="label-stock-info" >{{ codigoProductoStock }}</label>
+</div>
+          <div class="form-group-stock">
+  <label for="stock-min">Nombre Producto:</label>
+  <label class="label-stock-info"> {{ nombreProductoStock }}</label>
+</div>
 <div class="form-group-stock">
   <label for="stock-min">Stock Min:</label>
-  <input type="text" class="input" placeholder="Ingrese stock minimo del producto "> 
+  <input type="text" class="input" placeholder="Ingrese stock minimo del producto " v-model="inputStockMin"> 
 </div>
 
 <div class="form-group-stock">
   <label for="stock-max">Stock Max:</label>
-  <input type="text" class="input" placeholder="Ingrese stock maximo del producto "> 
+  <input type="text" class="input" placeholder="Ingrese stock maximo del producto" v-model="inputStockMax" > 
 </div>
            
           </form>
 
         <div class="categoria-botones">
 
-          <btnGuardarModal @click="guardarStock">Guardar</btnGuardarModal>
+          <btnGuardarModal @click="guardarStock(searchSucursalStock)">Guardar</btnGuardarModal>
           <btnCerrarModal :texto="'Cerrar'" @click="closeModalStock"></btnCerrarModal>
         </div>
 
@@ -250,7 +256,7 @@ import { getUnidadMedidaEmpresas } from '../../services/unidadMedidaSolicitud.js
 import { getProveedoresEmpresa } from '../../services/proveedoresSolicitud.js';
 
 //solicitudes a api
-import { getInfoExtra, getProductoSucursal, postProducto, patchProducto, desactivarProducto, getProductosEmpresa } from '../../services/productosSolicitudes.js';
+import { getInfoExtra, getProductoSucursal, postProducto, patchProducto, desactivarProducto, getProductosEmpresa, getStockMinMax, PostStockMinMax } from '../../services/productosSolicitudes.js';
 import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
 import { getCategoriaProductosEmpresa } from '../../services/categoriaSolicitudes.js';
 
@@ -270,11 +276,15 @@ export default {
       searchQuery: '',
       searchCategoria: '',
       searchSucursal: 'default',
+      searchSucursalStock: '',
       isModalOpen: false,
       isModalCategoriaOpen: false,
       isModalStockOpen: false,
       isEditing: false,
       editIndex: null,
+      inputStockMax: 0,
+      inputStockMin: 0,
+      idProductoStock: '',
       itemsPerPage: "",
       id_usuario: '',
       unidadesMostrar: [],
@@ -330,9 +340,19 @@ export default {
       }
     }
   },
+
+  codigoProductoStock: '',
+  nombreProductoStock: '',
+
   methods: {
 
     async mostrarRegistros(valor) {
+
+      if (this.sucursales.length === 1 ){
+        valor = this.sucursales[0].id_sucursal;
+        this.searchSucursal = this.sucursales[0].id_sucursal;
+      }
+
       if (valor === 'default') {
         this.productos = await getProductosEmpresa(this.id_usuario);
       }
@@ -370,12 +390,66 @@ export default {
       this.isModalCategoriaOpen = false;
     },
 
-    async openModalStock() {
-      
-      this.isModalStockOpen = true;
+    async mostrarStockbySucursal(id_sucursal){
+      try {
+        const response = await getStockMinMax(this.idProductoStock, id_sucursal);
+        if (response.error) {
+            console.error('Error al obtener stock:', response.error); 
+            return;
+        }
+        this.inputStockMin = response.stock_min || 0; 
+        this.inputStockMax = response.stock_max || 0; 
+
+    } catch (error) {
+        console.error('Error al abrir el modal de stock:', error);
+        
+    }
     },
 
-    guardarStock() {
+    async openModalStock(producto) {
+    this.codigoProductoStock = producto.codigo_producto;
+    this.nombreProductoStock = producto.nombre;
+    this.idProductoStock = producto.id_producto;
+
+    if ( this.searchSucursal === 'default'){
+this.searchSucursalStock = this.sucursales[0].id_sucursal;
+    }
+
+    else{ 
+      this.searchSucursalStock = this.searchSucursal;
+    }
+    await this.mostrarStockbySucursal(this.searchSucursalStock);
+
+    this.isModalStockOpen = true;
+},
+
+
+    async guardarStock(sucursal) {
+      const datosStock = {
+        stock_min: this.inputStockMin,
+        stock_max: this.inputStockMax
+      };
+
+      if (!validarCamposService.validarSiNumero(this.inputStockMin) || !validarCamposService.validarSiNumero(this.inputStockMax)){
+        notificaciones('error', 'Datos invalidos: Un campo no es numero');
+        return;
+      }
+
+      if (this.inputStockMax <= this.inputStockMin){
+        notificaciones('error', 'Datos invalidos: Stock minimo no puede ser mayor o igual a stock maximo');
+        return;
+      }
+
+      try {
+        const response = await PostStockMinMax(this.idProductoStock, sucursal, datosStock);
+        if (response instanceof Error){
+          console.log('Entro aqui');
+            throw response;
+          }
+          notificaciones('success');
+        } catch (error) {
+          notificaciones('error', error);
+        }
       
       this.closeModalStock();
     },
@@ -543,6 +617,7 @@ export default {
       this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
 
       this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
+      
 
       this.mostrarRegistros(this.searchSucursal);
 
@@ -589,6 +664,10 @@ export default {
   margin: 10px 0;
   display: flex;
   align-items: center;
+}
+
+.label-stock-info{
+  font-weight: bolder;
 }
 
 .form-group label {

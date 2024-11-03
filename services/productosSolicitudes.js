@@ -52,6 +52,41 @@ export const getProductoSucursal = async (id_sucursal) => {
     }
 }
 
+export const getStockMinMax = async (id_producto, id_sucursal) => {
+    const parametros = `/inventario/${id_producto}/${id_sucursal}`;
+
+    try {
+        const response = await solicitudes.fetchRegistros(parametros);
+
+        return response;
+
+    } catch (error) {
+        console.error('Error al obtener stock mínimo y máximo:', error);
+        
+        return { error: 'No se pudo obtener el stock. Inténtalo de nuevo más tarde.' };
+    }
+}
+
+export const PostStockMinMax = async (id_producto, id_sucursal, stocks) => {
+    const parametros = `/inventario/actualizar/${id_producto}/${id_sucursal}`;
+
+    try {
+        const response = await solicitudes.postRegistro(parametros, stocks);
+        
+        if (response instanceof Error) {
+            throw new Error('No se hizo el post'); // Retorna el registro creado o la respuesta completa
+        } 
+
+        return true;
+
+    } catch (error) {
+        console.error('Error al actualizar pstock:', error);
+        
+        return error;
+    }
+}
+
+
 
 export const postProducto = async (datos) => {
     const parametros = '/productos/crear';
@@ -59,7 +94,6 @@ export const postProducto = async (datos) => {
 
         const response = await solicitudes.postRegistro(parametros, datos);
 
-    console.log(`Response: ${response}`);
         if (response && Object.keys(response).length > 0) {
             console.log(response);
             return response; // Retorna el registro creado o la respuesta completa
