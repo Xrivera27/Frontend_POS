@@ -205,7 +205,7 @@ export default {
     this.loadEmpleados(); // Llama a la función para cargar empleados al montar el componente
 
     try {
-      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
 
       this.sucursales = await solicitudes.fetchRegistros(
         `/sucursales/empresa/${this.id_usuario}`
@@ -249,7 +249,7 @@ export default {
     async loadEmpleados() {
       this.isLoading = true; // Comienza a cargar
       try {
-        const id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+        const id_usuario = await solicitudes.solicitarUsuarioToken();
         this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${id_usuario}`);
 
       } catch (error) {

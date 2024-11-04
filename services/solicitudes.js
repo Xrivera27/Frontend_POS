@@ -1,3 +1,4 @@
+import axios from 'axios';
   const homeUrl = 'http://localhost:3000/api';
  // const nextUrl = '/sesion-user';
 
@@ -19,6 +20,28 @@
             console.error('Error al obtener usuario:', error); // Manejo de errores
             throw error;
         }
+    },
+
+    async solicitarUsuarioToken(){
+      try {
+        const token = localStorage.getItem('auth'); // Usa 'auth' para obtener el token
+        const url = `${homeUrl}/usuarios`;
+    
+        const response = await axios.get(url, { // Cambia a '/usuarios'
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+    
+        const userData = response.data;
+    
+        const id_usuario = userData.id_usuario;
+
+        return id_usuario;
+      } catch (error) {
+        console.error('Error al obtener los datos del usuario:', error);
+        alert('No se pudo obtener la información del usuario.'); // Mensaje para el usuario
+      }
     },
 
     async fetchRegistros(parametros) {

@@ -153,8 +153,8 @@ export default {
     document.title = "Presentaciones";
     this.changeFavicon('/img/spiderman.ico');
     try {
-      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
-      console.log(`Id de usuario ${this.id_usuario}`);
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      
 
       this.unidadesMedida = await getUnidadMedidaEmpresas(this.id_usuario);
 
