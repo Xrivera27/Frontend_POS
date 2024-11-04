@@ -141,7 +141,7 @@ export default {
     document.title = "Clientes";
     this.changeFavicon('/img/spiderman.ico');
     try {
-      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
 
       this.clientes = await getClientesbyEmpresa(this.id_usuario);
 

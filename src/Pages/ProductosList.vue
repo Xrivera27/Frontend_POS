@@ -617,7 +617,7 @@ this.searchSucursalStock = this.sucursales[0].id_sucursal;
     this.changeFavicon('/img/spiderman.ico');
 
     try {
-      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
 
       this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
       

@@ -130,8 +130,8 @@ export default {
 
 
     try {
-      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
-      console.log(`Id de usuario ${this.id_usuario}`);
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      
 
       this.categorias = await solicitudes.fetchRegistros(
         `/categoria-producto/${this.id_usuario}`

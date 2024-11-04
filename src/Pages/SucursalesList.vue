@@ -161,6 +161,7 @@ export default {
     },
   },
   methods: {
+  
     validarCampos(sucursalForm) {
       const campos = {
         Nombre: sucursalForm.nombre_administrativo,
@@ -305,19 +306,19 @@ export default {
     this.generateRows();
     document.title = "Sucursales";
     this.changeFavicon("/img/spiderman.ico"); // Usar la ruta correcta
+    
+    this.id_usuario = await solicitudes.solicitarUsuarioToken();
+    console.log(this.id_usuario);
 
     // this.fetchUsuario();
-    try {
-      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+    
+     // this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
       try {
         this.sucursales = await solicitudes.fetchRegistros(
           `/sucursales/empresa/${this.id_usuario}`
         );
 
-      } catch (error) {
-        console.log(error); //modal error
-        throw error;
-      }
+      
     } catch (error) {
       console.log(error); //modal error pendiente
     }

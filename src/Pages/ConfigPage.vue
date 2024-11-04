@@ -126,6 +126,7 @@ export default {
         Authorization: `Bearer ${token}`
       }
     });
+    console.log(response.data);
 
     const userData = response.data;
     this.userForm.nombre_usuario = userData.nombre_usuario || '';

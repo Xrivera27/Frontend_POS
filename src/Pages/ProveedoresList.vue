@@ -128,7 +128,7 @@ export default {
     document.title = "Proveedores";
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
     try {
-      this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
 
       this.proveedores = await solicitudes.fetchRegistros(
         `/proveedores/${this.id_usuario}`
