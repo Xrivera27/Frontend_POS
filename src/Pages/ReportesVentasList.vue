@@ -6,11 +6,11 @@
       <div class="input-group">
         <div class="input-field">
           <label>Fecha Inicio</label>
-          <input type="date" v-model="fechaInicio" placeholder="Click para ver el calendario" />
+          <input type="date" class="fechas" v-model="fechaInicio" placeholder="Click para ver el calendario" />
         </div>
         <div class="input-field">
           <label>Fecha Fin</label>
-          <input type="date" v-model="fechaFin" placeholder="Click para ver el calendario" />
+          <input type="date" class="fechas" v-model="fechaFin" placeholder="Click para ver el calendario" />
         </div>
         <div class="input-field">
           <label>Clientes</label>
@@ -158,11 +158,12 @@
   
   <style scoped>
   .report-container {
-    background-color: #111;
-    color: #fff;
+    background-color: #f5f5f5;
+    color: #000;
     padding: 20px;
     border-radius: 8px;
-    max-width: 800px;
+    max-width: 90rem;
+    max-height: auto;
     margin: auto;
   }
   
@@ -180,12 +181,16 @@
   .input-field {
     flex: 1 1 45%;
   }
+
+  .fechas {
+    max-width: 98%;  
+  }
   
   label {
     display: block;
     font-weight: bold;
     margin-bottom: 5px;
-    color: #bbb;
+    color: #000;
   }
   
   input[type="date"],
@@ -194,14 +199,15 @@
     padding: 8px;
     border: 1px solid #444;
     border-radius: 4px;
-    background-color: #222;
-    color: #fff;
+    background-color: #f5f5f5;
+    color: #000;
   }
   
   .button-group {
     display: flex;
     gap: 10px;
     margin-top: 20px;
+    margin-bottom: 10px;
   }
   
   .btn {
@@ -214,17 +220,17 @@
   
   .pdf-btn {
     background-color: #007bff;
-    color: #fff;
+    color: #000;
   }
   
   .excel-btn {
     background-color: #28a745;
-    color: #fff;
+    color: #000;
   }
   
   .generate-btn {
     background-color: #007bff;
-    color: #fff;
+    color: #000;
   }
   
   .table-header {
@@ -236,21 +242,22 @@
   table {
     width: 100%;
     border-collapse: collapse;
+    border: 1px solid #000;
     margin-top: 10px;
   }
   
   thead th {
     text-align: left;
     padding: 8px;
-    background-color: #222;
-    color: #fff;
+    background-color: #f5f5f5;
+    color: #000;
     font-weight: bold;
   }
   
   tbody td {
     padding: 8px;
     border-top: 1px solid #333;
-    color: #fff;
+    color: #000;
   }
   
   .totals {
@@ -263,7 +270,7 @@
   .totals div {
     margin: 5px 0;
     flex: 1 1 45%;
-    color: #fff;
+    color: #000;
   }
   </style>
   
