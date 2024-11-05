@@ -611,55 +611,6 @@ export default {
   align-items: center;
 }
 
-.tipo-cliente {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.input-button-container {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  align-items: stretch;
-  width: 100%;
-}
-
-.inputs-container {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  flex-grow: 1;
-}
-
-.cliente-input,
-.rtn-input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f5f5f5;
-  width: 100%;
-  height: 35px;
-}
-
-.search-button {
-  width: 45px;
-  align-self: stretch;
-  padding: 0;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-}
-
-.search-button:hover {
-  background-color: #e0e0e0;
-}
-
 .informacion-1 {
   display: flex;
   flex-direction: column;
@@ -814,5 +765,77 @@ button:hover {
 button {
   align-self: flex-end;
   margin-top: 5px;
+}
+
+.tipo-cliente {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.inputs-container {
+  display: flex;
+  flex-direction: row;
+  /* Cambiado a row para inputs lado a lado */
+  gap: 5px;
+  width: 100%;
+}
+
+.cliente-input,
+.rtn-input {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  height: 30px;
+  font-size: 14px;
+}
+
+.cliente-input {
+  flex: 2;
+  /* Toma 2 partes del espacio disponible */
+}
+
+.rtn-input {
+  flex: 1;
+  /* Toma 1 parte del espacio disponible */
+}
+
+/* Para cuando solo hay un input */
+.cliente-input.single {
+  flex: 1;
+  width: 100%;
+}
+
+.search-button {
+  height: 30px;
+  width: 100%;
+  padding: 0 8px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  font-size: 14px;
+}
+
+.search-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* Ajustar el espaciado en el header si es necesario */
+.header-container {
+  gap: 150px;
+  /* Reducido de 250px a 150px */
 }
 </style>
