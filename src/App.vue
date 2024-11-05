@@ -1,16 +1,14 @@
 <template>
   <div class="app-wrapper" :class="{ dark: isDarkMode }">
-    <AppSidebar :class="{ 'hidden-sidebar': !showSidebar }" v-if="!isLoginRoute && isAuthenticated"
-      :isDarkMode="isDarkMode" :expanded="expanded" :dropdowns="dropdowns" :has-permission="hasPermission"
-      :is-active="isActive" @toggle-sidebar="toggleSidebar" @open-dropdown="openDropdown"
-      @close-dropdown="closeDropdown" @logout="logout" @toggle-dark-mode="toggleDarkMode"
+    <AppSidebar v-if="!isLoginRoute && isAuthenticated && hasSidebarPermission"
+      :class="{ 'hidden-sidebar': !showSidebar }" :isDarkMode="isDarkMode" :expanded="expanded" :dropdowns="dropdowns"
+      :has-permission="hasPermission" :is-active="isActive" @toggle-sidebar="toggleSidebar"
+      @open-dropdown="openDropdown" @close-dropdown="closeDropdown" @logout="logout" @toggle-dark-mode="toggleDarkMode"
       @expand-sidebar="expandSidebar" @collapse-sidebar="collapseSidebar" />
 
     <main class="main-content" :class="{ expanded, dark: isDarkMode, login: isLoginRoute, 'no-sidebar': !showSidebar }">
       <router-view />
     </main>
-
-
   </div>
 </template>
 
@@ -43,6 +41,17 @@ export default {
     showSidebar() {
       const role = localStorage.getItem('role');
       return role !== '3';
+    },
+    hasSidebarPermission() {
+      // Aquí puedes definir la lógica para verificar si el usuario tiene permiso para ver el sidebar
+      const role = localStorage.getItem('role');
+      const permissions = {
+        1: true, // Ejemplo: rol 1 tiene permiso
+        2: true, // Ejemplo: rol 2 tiene permiso
+        3: false, // Ejemplo: rol 3 no tiene permiso
+        4: true, // Ejemplo: rol 4 tiene permiso
+      };
+      return permissions[role] || false; // Devuelve true si tiene permiso, de lo contrario false
     }
   },
   methods: {
@@ -53,7 +62,6 @@ export default {
         2: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta', 'reporte'],
         3: ['Home', 'Productos', 'Venta', 'reporte'],
         4: ['Home', 'Usuario', 'sucursales', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced', 'reporte'],
-
       };
       return role && permissions[role]?.includes(section);
     },
@@ -89,38 +97,31 @@ export default {
       if (
         this.$refs.ventasDropdown &&
         !this.$refs.ventasDropdown.contains(event.target) &&
-        !this.$refs.sidebar.contains(event.target)
+        !this.$refs.ventasButton.contains(event.target)
       ) {
         this.dropdowns.ventas = false;
       }
+
       if (
         this.$refs.comprasDropdown &&
         !this.$refs.comprasDropdown.contains(event.target) &&
-        !this.$refs.sidebar.contains(event.target)
+        !this.$refs.comprasButton.contains(event.target)
       ) {
         this.dropdowns.compras = false;
       }
     },
-
-    openDropdown(menu) {
-      this.dropdowns[menu] = true;
+    openDropdown(dropdown) {
+      this.dropdowns[dropdown] = true;
     },
-    closeDropdown(menu) {
-      this.dropdowns[menu] = false;
+    closeDropdown(dropdown) {
+      this.dropdowns[dropdown] = false;
     },
-
-    async expandSidebar() {
+    expandSidebar() {
       this.expanded = true;
     },
-    async collapseSidebar() {
+    collapseSidebar() {
       this.expanded = false;
-    },
-  },
-  mounted() {
-    document.addEventListener('click', this.handleClickOutside);
-  },
-  beforeUnmount() {
-    document.removeEventListener("click", this.handleClickOutside);
+    }
   }
 };
 </script>
@@ -134,7 +135,14 @@ export default {
 
 .app-wrapper {
   display: flex;
-  min-height: 100vh;
+  flex-direction: row;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+
+  &.dark {
+    background-color: #333;
+  }
 }
 
 .app-wrapper {

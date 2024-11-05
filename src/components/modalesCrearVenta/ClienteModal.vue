@@ -1,57 +1,58 @@
 <template>
-    <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
-        <div class="modal-content">
+    <Teleport to="body">
+        <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
+            <div class="modal-content">
+                <div class="header-container" tabindex="-1">
+                    <h2 class="modal-title">Clientes</h2>
+                    <input type="text" v-model="searchQuery" placeholder="Búsqueda por nombre" @input="filterClients"
+                        class="search-input" />
+                </div>
+                <div class="form-container">
+                    <div class="form-group">
+                        <label>Nombre:</label>
+                        <input type="text" v-model="newClient.nombre" />
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección:</label>
+                        <input type="text" v-model="newClient.direccion" />
+                    </div>
+                    <div class="form-group">
+                        <label>RTN:</label>
+                        <input type="text" v-model="newClient.rtn" />
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono:</label>
+                        <input type="text" v-model="newClient.telefono" />
+                    </div>
+                </div>
 
-            <div class="header-container">
-                <h2 class="modal-title">Clientes</h2>
-                <input type="text" v-model="searchQuery" placeholder="Búsqueda por nombre" @input="filterClients"
-                    class="search-input" />
-            </div>
-            <div class="form-container">
-                <div class="form-group">
-                    <label>Nombre:</label>
-                    <input type="text" v-model="newClient.nombre" />
-                </div>
-                <div class="form-group">
-                    <label>Dirección:</label>
-                    <input type="text" v-model="newClient.direccion" />
-                </div>
-                <div class="form-group">
-                    <label>RTN:</label>
-                    <input type="text" v-model="newClient.rtn" />
-                </div>
-                <div class="form-group">
-                    <label>Teléfono:</label>
-                    <input type="text" v-model="newClient.telefono" />
-                </div>
-            </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Dirección</th>
+                            <th>RTN</th>
+                            <th>Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="client in filteredClients" :key="client.rtn" @dblclick="selectClient(client)"
+                            class="client-row">
+                            <td>{{ client.nombre }}</td>
+                            <td>{{ client.direccion }}</td>
+                            <td>{{ client.rtn }}</td>
+                            <td>{{ client.telefono }}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Dirección</th>
-                        <th>RTN</th>
-                        <th>Teléfono</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="client in filteredClients" :key="client.rtn" @dblclick="selectClient(client)"
-                        class="client-row">
-                        <td>{{ client.nombre }}</td>
-                        <td>{{ client.direccion }}</td>
-                        <td>{{ client.rtn }}</td>
-                        <td>{{ client.telefono }}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="button-container">
-                <button @click="addClient">Nuevo</button>
-                <button @click="closeModal">Salir</button>
+                <div class="button-container">
+                    <button @click="addClient">Nuevo</button>
+                    <button @click="closeModal">Salir</button>
+                </div>
             </div>
         </div>
-    </div>
+    </Teleport>
 </template>
 
 <script>
@@ -63,7 +64,6 @@ export default {
             clients: [
                 { nombre: 'Juan Pérez', direccion: 'Calle 123', rtn: '123456789', telefono: '555-1234' },
                 { nombre: 'María López', direccion: 'Avenida 456', rtn: '987654321', telefono: '555-5678' },
-                // Agrega más clientes aquí
             ],
             filteredClients: [],
             newClient: {
@@ -95,21 +95,16 @@ export default {
                 alert('Por favor, completa todos los campos.');
                 return;
             }
-
-            // Agrega el nuevo cliente a la lista y resetea el formulario
             this.clients.push({ ...this.newClient });
             this.newClient = { nombre: '', direccion: '', rtn: '', telefono: '' };
-            this.filterClients(); // Actualiza la lista filtrada
+            this.filterClients();
         },
     },
     mounted() {
-        this.filteredClients = this.clients; // Inicializa la lista de clientes filtrados
-        document.body.appendChild(this.$el);
+        this.filteredClients = this.clients; // Solo inicializamos los clientes filtrados
     },
-
 };
 </script>
-
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");

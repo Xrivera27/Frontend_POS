@@ -1,134 +1,136 @@
-<template>
-  <div class="wrapper">
-    <div class="main-container">
-      <div class="header-container">
-        <div class="tipo-cliente">
-          <label for="tipo-cliente">Tipo de cliente:</label>
-          <div class="input-button-container">
-            <!-- Input para mostrar el nombre del cliente -->
-            <input type="text" :value="clienteSeleccionado?.nombre || 'Consumidor final'" readonly
-              class="cliente-input">
-            <!-- Nuevo input para RTN -->
-            <input v-if="clienteSeleccionado" type="text" :value="clienteSeleccionado.rtn" readonly class="rtn-input">
-            <button @click="openModal">Buscar</button>
-            <ClienteModal :isVisible="isModalVisible" @close="closeModal" @modal-focused="handleModalFocus"
-              @client-selected="handleClientSelected" />
-          </div>
-        </div>
-
-        <div class="tipo-descuento">
-          <label for="tipo-cliente">Descuentos:</label>
-          <select name="tipo-cliente" id="tipo-cliente" v-model="tipoCliente">
-            <option value="0">Ninguno</option>
-            <option value="1">Tercera edad</option>
-            <option value="2">Cuarta edad</option>
-            <option value="3">Excepción política</option>
-          </select>
-        </div>
-        <div class="informacion-1">
-          <label for="sucursal">Sucursal: LCB</label>
-          <br />
-          <label for="usuario">Usuario: User</label>
-        </div>
-
-        <div class="informacion-2">
-          <label for="numTicket">Ticket No: </label>
-          <span>{{ numTicket }}</span>
-          <br />
-          <label>Fecha: </label>
-          <span>{{ fecha }}</span>
-        </div>
-      </div>
-
-      <div class="column-container">
-        <div class="table-container">
-          <table class="table">
-            <thead>
-              <tr>
-                <th class="col-item">Item</th>
-                <th class="col-codigo">Código</th>
-                <th class="col-descripcion">Descripción</th>
-                <th class="col-cantidad">Cantidad</th>
-                <th class="col-precio">Precio</th>
-                <th class="col-importe">Importe</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(producto, index) in productosLista" :key="index">
-                <td class="col-item">{{ index + 1 }}</td>
-                <td class="col-codigo">{{ producto.codigo }}</td>
-                <td class="col-descripcion">{{ producto.nombre }}</td>
-                <td class="col-cantidad">{{ producto.cantidad }}</td>
-                <td class="col-precio">{{ producto.precioUnitario }}</td>
-                <td class="col-importe">{{ producto.precioUnitario * producto.cantidad }}</td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="total-container">
-            <div class="cantidad-input">
-              <label for="cantidad">Cant:</label>
-              <input id="cantidad" type="number" v-model="totalCantidad" readonly />
-            </div>
-            <div class="total-input">
-              <label for="total">S/.:</label>
-              <input id="total" type="text" :value="calcularTotal" readonly />
+  <template>
+    <div class="wrapper">
+      <div class="main-container">
+        <div class="header-container">
+          <div class="tipo-cliente">
+            <label for="tipo-cliente">Tipo de cliente:</label>
+            <div class="input-button-container">
+              <!-- Input para mostrar el nombre del cliente -->
+              <input type="text" :value="clienteSeleccionado?.nombre || 'Consumidor final'" readonly
+                class="cliente-input">
+              <!-- Nuevo input para RTN -->
+              <input v-if="clienteSeleccionado" type="text" :value="clienteSeleccionado.rtn" readonly class="rtn-input">
+              <button @click="openModal">Buscar</button>
+              <ClienteModal :isVisible="isModalVisible" @close="closeModal" @client-selected="handleClientSelected" />
             </div>
           </div>
-        </div>
 
-        <!-- Teclado numérico -->
-        <div class="numeric-keypad">
-          <div class="scanner-input">
-            <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
-              :disabled="isModalVisible" required />
+          <div class="tipo-descuento">
+            <label for="tipo-cliente">Descuentos:</label>
+            <select name="tipo-cliente" id="tipo-cliente" v-model="tipoCliente">
+              <option value="0">Ninguno</option>
+              <option value="1">Tercera edad</option>
+              <option value="2">Cuarta edad</option>
+              <option value="3">Excepción política</option>
+            </select>
           </div>
-          <div class="keypad">
-            <button @click="agregarNumero(1)">1</button>
-            <button @click="agregarNumero(2)">2</button>
-            <button @click="agregarNumero(3)">3</button>
-            <button @click="agregarNumero(4)">4</button>
-            <button @click="agregarNumero(5)">5</button>
-            <button @click="agregarNumero(6)">6</button>
-            <button @click="agregarNumero(7)">7</button>
-            <button @click="agregarNumero(8)">8</button>
-            <button @click="agregarNumero(9)">9</button>
-            <button @click="agregarNumero(0)">0</button>
-            <button @click="agregarNumero('.')">.</button>
-            <button @click="agregarNumero('*')">*</button>
-            <button class="borrar" @click="borrarUltimo">←</button>
-            <button class="limpiar" @click="limpiar">Limpiar</button>
-            <button class="enter" @click="procesarEnter">Enter</button>
+          <div class="informacion-1">
+            <label for="sucursal">Sucursal: LCB</label>
+            <br />
+            <label for="usuario">Usuario: User</label>
+          </div>
+
+          <div class="informacion-2">
+            <label for="numTicket">Ticket No: </label>
+            <span>{{ numTicket }}</span>
+            <br />
+            <label>Fecha: </label>
+            <span>{{ fecha }}</span>
           </div>
         </div>
-      </div>
 
-      <div class="footer-container">
-        <button @click="buscarProducto">Buscar producto [F2]</button>
-        <button @click="openModal">Buscar cliente [F3]</button>
-        <button @click="consultarAnular">Consultar anular [F4]</button>
-        <button @click="eliminarItem">Eliminar item [F5]</button>
-        <button @click="limpiarPantalla">Limpiar pantalla [F6]</button>
-        <button @click="guardarVenta">Guardar venta [F8]</button>
-        <button @click="recVenta">Rec. Venta [F9]</button>
-        <button @click="descuentoGeneral">Dscto. Gen. [F10]</button>
-        <button @click="descuentoIndividual">Dscto. Ind. [F11]</button>
-        <button @click="registrarPago">Registrar Pago [F12]</button>
-        <button @click="nuevoCliente">Nuevo Cliente [ALT] + [C]</button>
-        <button @click="salir">Salir [ALT] + [S]</button>
+        <div class="column-container">
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="col-item">Item</th>
+                  <th class="col-codigo">Código</th>
+                  <th class="col-descripcion">Descripción</th>
+                  <th class="col-cantidad">Cantidad</th>
+                  <th class="col-precio">Precio</th>
+                  <th class="col-importe">Importe</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(producto, index) in productosLista" :key="index">
+                  <td class="col-item">{{ index + 1 }}</td>
+                  <td class="col-codigo">{{ producto.codigo }}</td>
+                  <td class="col-descripcion">{{ producto.nombre }}</td>
+                  <td class="col-cantidad">{{ producto.cantidad }}</td>
+                  <td class="col-precio">{{ producto.precioUnitario }}</td>
+                  <td class="col-importe">{{ producto.precioUnitario * producto.cantidad }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="total-container">
+              <div class="cantidad-input">
+                <label for="cantidad">Cant:</label>
+                <input id="cantidad" type="number" v-model="totalCantidad" readonly />
+              </div>
+              <div class="total-input">
+                <label for="total">S/.:</label>
+                <input id="total" type="text" :value="calcularTotal" readonly />
+              </div>
+            </div>
+          </div>
+
+          <!-- Teclado numérico -->
+          <div class="numeric-keypad">
+            <div class="scanner-input">
+              <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
+                :disabled="isModalVisible" required />
+            </div>
+            <div class="keypad">
+              <button @click="agregarNumero(1)">1</button>
+              <button @click="agregarNumero(2)">2</button>
+              <button @click="agregarNumero(3)">3</button>
+              <button @click="agregarNumero(4)">4</button>
+              <button @click="agregarNumero(5)">5</button>
+              <button @click="agregarNumero(6)">6</button>
+              <button @click="agregarNumero(7)">7</button>
+              <button @click="agregarNumero(8)">8</button>
+              <button @click="agregarNumero(9)">9</button>
+              <button @click="agregarNumero(0)">0</button>
+              <button @click="agregarNumero('.')">.</button>
+              <button @click="agregarNumero('*')">*</button>
+              <button class="borrar" @click="borrarUltimo">←</button>
+              <button class="limpiar" @click="limpiar">Limpiar</button>
+              <button class="enter" @click="procesarEnter">Enter</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-container">
+          <button @click="buscarProducto">Buscar producto [F2]</button>
+          <button @click="openModal">Buscar cliente [F3]</button>
+          <button @click="consultarAnular">Consultar anular [F4]</button>
+          <button @click="eliminarItem">Eliminar item [F5]</button>
+          <button @click="limpiarPantalla">Limpiar pantalla [F6]</button>
+          <button @click="guardarVenta">Guardar venta [F8]</button>
+          <button @click="recVenta">Rec. Venta [F9]</button>
+          <button @click="descuentoGeneral">Dscto. Gen. [F10]</button>
+          <button @click="descuentoIndividual">Dscto. Ind. [F11]</button>
+          <button @click="openPagoModal">Registrar Pago [F12]</button>
+          <RegistrarPagoModal :isVisible="isPagoModalVisible" @close="closePagoModal"
+            @modal-focused="handleModalFocus" />
+          <button @click="nuevoCliente">Nuevo Cliente [ALT] + [C]</button>
+          <button @click="salir">Salir [ALT] + [S]</button>
+        </div>
       </div>
-      <ClienteModal :isVisible="isModalVisible" @close="closeModal" @modal-focused="handleModalFocus" />
     </div>
-  </div>
-</template>
+  </template>
 
 <script>
 import axios from 'axios';
 import ClienteModal from '../components/modalesCrearVenta/ClienteModal.vue';
+import RegistrarPagoModal from '../components/modalesCrearVenta/RegistrarPagoModal.vue';
 import { useToast } from "vue-toastification"; // Importación para el popup
 
 export default {
   components: {
     ClienteModal,
+    RegistrarPagoModal
   },
   data() {
     return {
@@ -137,7 +139,8 @@ export default {
       addQuery: "",
       isEditing: false,
       isModalVisible: false,
-      isModalFocused: false,
+      isPagoModalVisible: false,
+      isAnyModalOpen: false,
       clienteSeleccionado: null,
       productos: [
         {
@@ -233,6 +236,28 @@ export default {
     };
   },
 
+  watch: {
+    // Observadores para mantener sincronizado el estado de los modales
+    isModalVisible(newVal) {
+      this.isAnyModalOpen = newVal;
+      if (newVal) {
+        this.isPagoModalVisible = false;
+        this.pauseMainKeyboardEvents();
+      } else {
+        this.resumeMainKeyboardEvents();
+      }
+    },
+    isPagoModalVisible(newVal) {
+      this.isAnyModalOpen = newVal;
+      if (newVal) {
+        this.isModalVisible = false;
+        this.pauseMainKeyboardEvents();
+      } else {
+        this.resumeMainKeyboardEvents();
+      }
+    }
+  },
+
   computed: {
     calcularTotal() {
       return this.productosLista.reduce((total, p) => total + (p.precioUnitario * p.cantidad), 0);
@@ -240,8 +265,8 @@ export default {
   },
 
   methods: {
-    salir() {
-      this.logout(); // Llama al método logout
+    async salir() {
+      this.logout();
     },
 
     async logout() {
@@ -267,38 +292,84 @@ export default {
     },
 
     openModal() {
+      // const toast = useToast();
+      // toast.info("Modal abierto");
       this.isModalVisible = true;
+      this.$nextTick(() => {
+        const modalElement = document.querySelector('.modal-content');
+        if (modalElement) {
+          modalElement.focus();
+        }
+      });
     },
-    handleModalFocus() {
-      this.isModalFocused = true;
+
+    closeModal() {
+      // const toast = useToast();
+      // toast.info("Modal cerrado");
+      this.isModalVisible = false;
+      this.$nextTick(() => {
+        this.$refs.codigoRef?.focus();
+      });
+    },
+
+    openPagoModal() {
+      this.isPagoModalVisible = true;
+      this.$nextTick(() => {
+        const pagoModalElement = document.querySelector('.modal-content');
+        if (pagoModalElement) {
+          pagoModalElement.focus();
+        }
+      });
+      // const toast = useToast();
+      // toast.info("Modal abierto");
+    },
+
+    closePagoModal() {
+      // const toast = useToast();
+      // toast.info("Modal cerrado");
+      this.isPagoModalVisible = false;
+      this.$nextTick(() => {
+        this.$refs.codigoRef?.focus();
+      });
+    },
+
+    pauseMainKeyboardEvents() {
+      window.removeEventListener("keydown", this.handleKeyPress);
+    },
+
+    resumeMainKeyboardEvents() {
+      if (!this.isAnyModalOpen) {
+        window.addEventListener("keydown", this.handleKeyPress);
+      }
     },
 
     handleKeyPress(event) {
-      // Si el modal está enfocado o visible, no procesar eventos de teclado aquí
-      if (this.isModalVisible || this.isModalFocused) {
+      if (this.isAnyModalOpen) {
         return;
       }
 
       const key = event.key;
 
-      // Solo previene el evento si no estamos en un input
-      if (!event.target.matches('input, textarea')) {
+      // Cancela la acción predeterminada si se presiona una tecla específica
+      if (key === "F3" || key === "F12" || key === "F4" || key === "F5" || key === "F6" || key === "F8" || key === "F9" || key === "F10" || key === "F11") {
         event.preventDefault();
       }
 
-      // Si la tecla es un número o un punto, añade al input
+      // const toast = useToast();
+
       if (!isNaN(key) || key === '.') {
         this.agregarNumero(key);
       } else if (key === "Backspace") {
         this.borrarUltimo();
       } else if (key === "Enter") {
         this.procesarEnter();
+      } else if (event.altKey && key === "s") {
+        this.logout();
+      } else if (key === "F3") {
+        this.openModal();
+      } else if (key === "F12") {
+        this.openPagoModal();
       }
-    },
-
-    closeModal() {
-      this.isModalVisible = false;
-      this.isModalFocused = false;
     },
 
     agregarNumero(num) {
@@ -342,7 +413,7 @@ export default {
         this.productosLista.push({ ...newProduct });
       }
 
-      this.limpiar()
+      this.limpiar();
     },
 
     pushEsc(event) {
@@ -367,15 +438,8 @@ export default {
       }
     },
 
-    pushF12(event) {
-      if (event.key === "F12") {
-        event.preventDefault();
-        this.payModalOpen();
-      }
-    },
-
     handleInputChange(event) {
-      this.addQuery = event.target.value; // Actualiza addQuery con el valor del input
+      this.addQuery = event.target.value;
     },
 
     changeFavicon(iconPath) {
@@ -384,14 +448,23 @@ export default {
       link.rel = 'icon';
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
+    },
+
+    toggleEditingMode() {
+      this.isEditing = !this.isEditing;
+    },
+
+    showInfo() {
+      console.log("Información o estadísticas mostradas.");
     }
   },
 
   mounted() {
     window.addEventListener("keydown", this.handleKeyPress);
     document.title = "Crear Ventas";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    this.changeFavicon('/img/spiderman.ico');
   },
+
   beforeUnmount() {
     window.removeEventListener("keydown", this.handleKeyPress);
   },
@@ -404,6 +477,58 @@ export default {
 * {
   font-family: "Montserrat", sans-serif;
 }
+
+.modal {
+  display: none;
+  /* Cambia a 'block' cuando se muestre el modal */
+  position: fixed;
+  /* Fijo para que esté en la misma posición al hacer scroll */
+  z-index: 1000;
+  /* Asegúrate de que esté sobre otros elementos */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  /* Agregar scroll si el contenido es más grande que la ventana */
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Fondo oscuro con transparencia */
+}
+
+.modal-content {
+  background-color: #fff;
+  /* Fondo blanco para el contenido del modal */
+  margin: 15% auto;
+  /* Margen para centrar el contenido */
+  padding: 20px;
+  /* Espaciado interno */
+  border: 1px solid #888;
+  /* Borde alrededor del contenido */
+  width: 80%;
+  /* Ancho del modal */
+}
+
+.close {
+  color: #aaa;
+  /* Color para el botón de cerrar */
+  float: right;
+  /* Alinear a la derecha */
+  font-size: 28px;
+  /* Tamaño del texto */
+  font-weight: bold;
+  /* Negrita */
+}
+
+.close:hover,
+.close:focus {
+  color: red;
+  /* Cambiar color al pasar el ratón */
+  text-decoration: none;
+  /* Sin subrayado */
+  cursor: pointer;
+  /* Cambia el cursor */
+}
+
 
 .wrapper {
   display: flex;
@@ -457,6 +582,18 @@ export default {
   border-bottom: 1px solid #ccc;
   gap: 250px;
   /* Aumenta el espacio entre las columnas */
+}
+
+/* En VentasList.vue */
+.header-container,
+.column-container,
+.table-container,
+.numeric-keypad {
+  z-index: 1;
+}
+
+.footer-container {
+  z-index: 2;
 }
 
 .tipo-descuento,
