@@ -1,125 +1,133 @@
-  <template>
-    <div class="wrapper">
-      <div class="main-container">
-        <div class="header-container">
-          <div class="tipo-cliente">
-            <label for="tipo-cliente">Tipo de cliente:</label>
-            <div class="input-button-container">
-              <!-- Input para mostrar el nombre del cliente -->
-              <input type="text" :value="clienteSeleccionado?.nombre || 'Consumidor final'" readonly
-                class="cliente-input">
-              <!-- Nuevo input para RTN -->
-              <input v-if="clienteSeleccionado" type="text" :value="clienteSeleccionado.rtn" readonly class="rtn-input">
-              <button @click="openModal">Buscar</button>
-              <ClienteModal :isVisible="isModalVisible" @close="closeModal" @client-selected="handleClientSelected" />
+<template>
+  <div class="wrapper">
+    <div class="main-container">
+      <div class="header-container">
+        <!-- Aquí estaba el error, había un div y template anidados innecesariamente -->
+        <div class="tipo-cliente">
+          <label for="tipo-cliente">Tipo de cliente:</label>
+          <div class="input-button-container">
+            <div class="inputs-container">
+              <!-- Si no hay cliente seleccionado, muestra solo "Consumidor final" -->
+              <template v-if="!clienteSeleccionado">
+                <input type="text" value="Consumidor final" readonly class="cliente-input single">
+              </template>
+              <!-- Si hay cliente seleccionado, muestra nombre y RTN -->
+              <template v-else>
+                <input type="text" :value="clienteSeleccionado.nombre" readonly class="cliente-input">
+                <input type="text" :value="clienteSeleccionado.rtn" readonly class="rtn-input">
+              </template>
             </div>
-          </div>
-
-          <div class="tipo-descuento">
-            <label for="tipo-cliente">Descuentos:</label>
-            <select name="tipo-cliente" id="tipo-cliente" v-model="tipoCliente">
-              <option value="0">Ninguno</option>
-              <option value="1">Tercera edad</option>
-              <option value="2">Cuarta edad</option>
-              <option value="3">Excepción política</option>
-            </select>
-          </div>
-          <div class="informacion-1">
-            <label for="sucursal">Sucursal: LCB</label>
-            <br />
-            <label for="usuario">Usuario: User</label>
-          </div>
-
-          <div class="informacion-2">
-            <label for="numTicket">Ticket No: </label>
-            <span>{{ numTicket }}</span>
-            <br />
-            <label>Fecha: </label>
-            <span>{{ fecha }}</span>
+            <button class="search-button" @click="openModal">
+              Buscar
+            </button>
+            <ClienteModal :isVisible="isModalVisible" @close="closeModal" @client-selected="handleClientSelected" />
           </div>
         </div>
 
-        <div class="column-container">
-          <div class="table-container">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th class="col-item">Item</th>
-                  <th class="col-codigo">Código</th>
-                  <th class="col-descripcion">Descripción</th>
-                  <th class="col-cantidad">Cantidad</th>
-                  <th class="col-precio">Precio</th>
-                  <th class="col-importe">Importe</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(producto, index) in productosLista" :key="index">
-                  <td class="col-item">{{ index + 1 }}</td>
-                  <td class="col-codigo">{{ producto.codigo }}</td>
-                  <td class="col-descripcion">{{ producto.nombre }}</td>
-                  <td class="col-cantidad">{{ producto.cantidad }}</td>
-                  <td class="col-precio">{{ producto.precioUnitario }}</td>
-                  <td class="col-importe">{{ producto.precioUnitario * producto.cantidad }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="total-container">
-              <div class="cantidad-input">
-                <label for="cantidad">Cant:</label>
-                <input id="cantidad" type="number" v-model="totalCantidad" readonly />
-              </div>
-              <div class="total-input">
-                <label for="total">S/.:</label>
-                <input id="total" type="text" :value="calcularTotal" readonly />
-              </div>
-            </div>
-          </div>
-
-          <!-- Teclado numérico -->
-          <div class="numeric-keypad">
-            <div class="scanner-input">
-              <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
-                :disabled="isModalVisible" required />
-            </div>
-            <div class="keypad">
-              <button @click="agregarNumero(1)">1</button>
-              <button @click="agregarNumero(2)">2</button>
-              <button @click="agregarNumero(3)">3</button>
-              <button @click="agregarNumero(4)">4</button>
-              <button @click="agregarNumero(5)">5</button>
-              <button @click="agregarNumero(6)">6</button>
-              <button @click="agregarNumero(7)">7</button>
-              <button @click="agregarNumero(8)">8</button>
-              <button @click="agregarNumero(9)">9</button>
-              <button @click="agregarNumero(0)">0</button>
-              <button @click="agregarNumero('.')">.</button>
-              <button @click="agregarNumero('*')">*</button>
-              <button class="borrar" @click="borrarUltimo">←</button>
-              <button class="limpiar" @click="limpiar">Limpiar</button>
-              <button class="enter" @click="procesarEnter">Enter</button>
-            </div>
-          </div>
+        <div class="tipo-descuento">
+          <label for="tipo-cliente">Descuentos:</label>
+          <select name="tipo-cliente" id="tipo-cliente" v-model="tipoCliente">
+            <option value="0">Ninguno</option>
+            <option value="1">Tercera edad</option>
+            <option value="2">Cuarta edad</option>
+            <option value="3">Excepción política</option>
+          </select>
+        </div>
+        <div class="informacion-1">
+          <label for="sucursal">Sucursal: LCB</label>
+          <br />
+          <label for="usuario">Usuario: User</label>
         </div>
 
-        <div class="footer-container">
-          <button @click="buscarProducto">Buscar producto [F2]</button>
-          <button @click="openModal">Buscar cliente [F3]</button>
-          <button @click="consultarAnular">Consultar anular [F4]</button>
-          <button @click="eliminarItem">Eliminar item [F5]</button>
-          <button @click="limpiarPantalla">Limpiar pantalla [F6]</button>
-          <button @click="guardarVenta">Guardar venta [F8]</button>
-          <button @click="recVenta">Rec. Venta [F9]</button>
-          <button @click="descuentoGeneral">Dscto. Gen. [F10]</button>
-          <button @click="descuentoIndividual">Dscto. Ind. [F11]</button>
-          <button @click="openPagoModal">Registrar Pago [F12]</button>
-          <RegistrarPagoModal :isVisible="isPagoModalVisible" @close="closePagoModal"
-            @modal-focused="handleModalFocus" />
-          <button @click="nuevoCliente">Nuevo Cliente [ALT] + [C]</button>
-          <button @click="salir">Salir [ALT] + [S]</button>
+        <div class="informacion-2">
+          <label for="numTicket">Ticket No: </label>
+          <span>{{ numTicket }}</span>
+          <br />
+          <label>Fecha: </label>
+          <span>{{ fecha }}</span>
         </div>
       </div>
+
+      <div class="column-container">
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="col-item">Item</th>
+                <th class="col-codigo">Código</th>
+                <th class="col-descripcion">Descripción</th>
+                <th class="col-cantidad">Cantidad</th>
+                <th class="col-precio">Precio</th>
+                <th class="col-importe">Importe</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(producto, index) in productosLista" :key="index">
+                <td class="col-item">{{ index + 1 }}</td>
+                <td class="col-codigo">{{ producto.codigo }}</td>
+                <td class="col-descripcion">{{ producto.nombre }}</td>
+                <td class="col-cantidad">{{ producto.cantidad }}</td>
+                <td class="col-precio">{{ producto.precioUnitario }}</td>
+                <td class="col-importe">{{ producto.precioUnitario * producto.cantidad }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="total-container">
+            <div class="cantidad-input">
+              <label for="cantidad">Cant:</label>
+              <input id="cantidad" type="number" v-model="totalCantidad" readonly />
+            </div>
+            <div class="total-input">
+              <label for="total">S/.:</label>
+              <input id="total" type="text" :value="calcularTotal" readonly />
+            </div>
+          </div>
+        </div>
+
+        <!-- Teclado numérico -->
+        <div class="numeric-keypad">
+          <div class="scanner-input">
+            <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
+              :disabled="isModalVisible" required />
+          </div>
+          <div class="keypad">
+            <button @click="agregarNumero(1)">1</button>
+            <button @click="agregarNumero(2)">2</button>
+            <button @click="agregarNumero(3)">3</button>
+            <button @click="agregarNumero(4)">4</button>
+            <button @click="agregarNumero(5)">5</button>
+            <button @click="agregarNumero(6)">6</button>
+            <button @click="agregarNumero(7)">7</button>
+            <button @click="agregarNumero(8)">8</button>
+            <button @click="agregarNumero(9)">9</button>
+            <button @click="agregarNumero(0)">0</button>
+            <button @click="agregarNumero('.')">.</button>
+            <button @click="agregarNumero('*')">*</button>
+            <button class="borrar" @click="borrarUltimo">←</button>
+            <button class="limpiar" @click="limpiar">Limpiar</button>
+            <button class="enter" @click="procesarEnter">Enter</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-container">
+        <button @click="buscarProducto">Buscar producto [F2]</button>
+        <button @click="openModal">Buscar cliente [F3]</button>
+        <button @click="consultarAnular">Consultar anular [F4]</button>
+        <button @click="eliminarItem">Eliminar item [F5]</button>
+        <button @click="limpiarPantalla">Limpiar pantalla [F6]</button>
+        <button @click="guardarVenta">Guardar venta [F8]</button>
+        <button @click="recVenta">Rec. Venta [F9]</button>
+        <button @click="descuentoGeneral">Dscto. Gen. [F10]</button>
+        <button @click="descuentoIndividual">Dscto. Ind. [F11]</button>
+        <button @click="openPagoModal">Registrar Pago [F12]</button>
+        <RegistrarPagoModal :isVisible="isPagoModalVisible" @close="closePagoModal" @modal-focused="handleModalFocus" />
+        <button @click="nuevoCliente">Nuevo Cliente [ALT] + [C]</button>
+        <button @click="salir">Salir [ALT] + [S]</button>
+      </div>
     </div>
-  </template>
+  </div>
+</template>
 
 <script>
 import axios from 'axios';
@@ -601,6 +609,55 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.tipo-cliente {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-button-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.inputs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-grow: 1;
+}
+
+.cliente-input,
+.rtn-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  width: 100%;
+  height: 35px;
+}
+
+.search-button {
+  width: 45px;
+  align-self: stretch;
+  padding: 0;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.search-button:hover {
+  background-color: #e0e0e0;
 }
 
 .informacion-1 {
