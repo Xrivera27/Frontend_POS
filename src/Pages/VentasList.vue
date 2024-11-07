@@ -4,7 +4,7 @@
       <div class="header-container">
         <!-- Aquí estaba el error, había un div y template anidados innecesariamente -->
         <div class="tipo-cliente">
-          <label for="tipo-cliente">Tipo de cliente:</label>
+          <label for="tipo-cliente">Cliente:</label>
           <div class="input-button-container">
             <div class="inputs-container">
               <!-- Si no hay cliente seleccionado, muestra solo "Consumidor final" -->
@@ -24,15 +24,6 @@
           </div>
         </div>
 
-        <div class="tipo-descuento">
-          <label for="tipo-cliente">Descuentos:</label>
-          <select name="tipo-cliente" id="tipo-cliente" v-model="tipoCliente">
-            <option value="0">Ninguno</option>
-            <option value="1">Tercera edad</option>
-            <option value="2">Cuarta edad</option>
-            <option value="3">Excepción política</option>
-          </select>
-        </div>
         <div class="informacion-1">
           <label for="sucursal">Sucursal: LCB</label>
           <br />
@@ -40,38 +31,48 @@
         </div>
 
         <div class="informacion-2">
-          <label for="numTicket">Ticket No: </label>
-          <span>{{ numTicket }}</span>
+          <label for="numTicket">Ticket No: <span>{{ numTicket }}</span></label>
           <br />
-          <label>Fecha: </label>
-          <span>{{ fecha }}</span>
+          <label>Fecha: <span>{{ fecha }}</span></label>
         </div>
       </div>
 
       <div class="column-container">
         <div class="table-container">
-          <table class="table">
-            <thead>
-              <tr>
-                <th class="col-item">Item</th>
-                <th class="col-codigo">Código</th>
-                <th class="col-descripcion">Descripción</th>
-                <th class="col-cantidad">Cantidad</th>
-                <th class="col-precio">Precio</th>
-                <th class="col-importe">Importe</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(producto, index) in productosLista" :key="index">
-                <td class="col-item">{{ index + 1 }}</td>
-                <td class="col-codigo">{{ producto.codigo }}</td>
-                <td class="col-descripcion">{{ producto.nombre }}</td>
-                <td class="col-cantidad">{{ producto.cantidad }}</td>
-                <td class="col-precio">{{ producto.precioUnitario }}</td>
-                <td class="col-importe">{{ producto.precioUnitario * producto.cantidad }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-wrapper">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="col-item">Item</th>
+                  <th class="col-codigo">Código</th>
+                  <th class="col-descripcion">Descripción</th>
+                  <th class="col-cantidad">Cantidad</th>
+                  <th class="col-precio">Precio</th>
+                  <th class="col-importe">Importe</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Productos reales -->
+                <tr v-for="(producto, index) in productosLista" :key="index">
+                  <td class="col-item">{{ index + 1 }}</td>
+                  <td class="col-codigo">{{ producto.codigo }}</td>
+                  <td class="col-descripcion">{{ producto.nombre }}</td>
+                  <td class="col-cantidad">{{ producto.cantidad }}</td>
+                  <td class="col-precio">{{ producto.precioUnitario }}</td>
+                  <td class="col-importe">{{ producto.precioUnitario * producto.cantidad }}</td>
+                </tr>
+                <!-- Filas vacías para llenar el espacio -->
+                <tr v-for="n in remainingRows" :key="`empty-${n}`" class="empty-row">
+                  <td class="col-item">&nbsp;</td>
+                  <td class="col-codigo">&nbsp;</td>
+                  <td class="col-descripcion">&nbsp;</td>
+                  <td class="col-cantidad">&nbsp;</td>
+                  <td class="col-precio">&nbsp;</td>
+                  <td class="col-importe">&nbsp;</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <div class="total-container">
             <div class="cantidad-input">
               <label for="cantidad">Cant:</label>
@@ -142,6 +143,7 @@ export default {
   },
   data() {
     return {
+      minRows: 15,
       numTicket: '000-001-01-00000001',
       fecha: new Date().toLocaleDateString(),
       addQuery: "",
@@ -270,6 +272,10 @@ export default {
     calcularTotal() {
       return this.productosLista.reduce((total, p) => total + (p.precioUnitario * p.cantidad), 0);
     }
+  },
+
+  remainingRows() {
+    return Math.max(0, this.minRows - this.productosLista.length);
   },
 
   methods: {
@@ -486,88 +492,13 @@ export default {
   font-family: "Montserrat", sans-serif;
 }
 
-.modal {
-  display: none;
-  /* Cambia a 'block' cuando se muestre el modal */
-  position: fixed;
-  /* Fijo para que esté en la misma posición al hacer scroll */
-  z-index: 1000;
-  /* Asegúrate de que esté sobre otros elementos */
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  /* Agregar scroll si el contenido es más grande que la ventana */
-  background-color: rgba(0, 0, 0, 0.5);
-  /* Fondo oscuro con transparencia */
-}
-
-.modal-content {
-  background-color: #fff;
-  /* Fondo blanco para el contenido del modal */
-  margin: 15% auto;
-  /* Margen para centrar el contenido */
-  padding: 20px;
-  /* Espaciado interno */
-  border: 1px solid #888;
-  /* Borde alrededor del contenido */
-  width: 80%;
-  /* Ancho del modal */
-}
-
-.close {
-  color: #aaa;
-  /* Color para el botón de cerrar */
-  float: right;
-  /* Alinear a la derecha */
-  font-size: 28px;
-  /* Tamaño del texto */
-  font-weight: bold;
-  /* Negrita */
-}
-
-.close:hover,
-.close:focus {
-  color: red;
-  /* Cambiar color al pasar el ratón */
-  text-decoration: none;
-  /* Sin subrayado */
-  cursor: pointer;
-  /* Cambia el cursor */
-}
-
-
+/* Layout Principal */
 .wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
   z-index: 1;
-}
-
-.col-item {
-  width: 10%;
-}
-
-.col-codigo {
-  width: 20%;
-}
-
-.col-descripcion {
-  width: 40%;
-}
-
-.col-cantidad {
-  width: 10%;
-}
-
-.col-precio {
-  width: 10%;
-}
-
-.col-importe {
-  width: 10%;
 }
 
 .main-container {
@@ -579,194 +510,20 @@ export default {
   margin: 0;
 }
 
+/* Header */
 .header-container {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  /* Alinea todos los elementos a la izquierda */
   align-items: center;
   text-align: center;
   padding: 10px;
   border-bottom: 1px solid #ccc;
-  gap: 250px;
-  /* Aumenta el espacio entre las columnas */
-}
-
-/* En VentasList.vue */
-.header-container,
-.column-container,
-.table-container,
-.numeric-keypad {
+  gap: 150px;
   z-index: 1;
 }
 
-.footer-container {
-  z-index: 2;
-}
-
-.tipo-descuento,
-.tipo-cliente {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.informacion-1 {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-left: 20px;
-}
-
-.informacion-2 {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-left: 20px;
-}
-
-.column-container {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  justify-content: space-between;
-  align-items: stretch;
-  padding: 10px;
-  z-index: 1000;
-}
-
-.table-container {
-  width: 100%;
-  flex-grow: 1;
-  overflow: auto;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  background-color: #f0f0f0;
-  border-bottom: 1px solid #ccc;
-  padding: 10px;
-  text-align: left;
-}
-
-td {
-  padding: 10px;
-  text-align: left;
-}
-
-.total-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-}
-
-.cantidad-input {
-  margin-right: 20px;
-}
-
-.numeric-keypad {
-  width: 20%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-  border-left: 1px solid #ccc;
-}
-
-.scanner-input {
-  margin-bottom: 10px;
-}
-
-.keypad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-button {
-  width: 100%;
-  height: 40px;
-  font-size: 18px;
-  border: none;
-  border-radius: 5px;
-  background-color: #f0f0f0;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #ccc;
-}
-
-.footer-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  padding: 10px;
-  background-color: #f0f0f0;
-  border-top: 1px solid #ccc;
-  z-index: 2;
-}
-
-.footer-container button {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  font-size: 12px;
-  background-color: #f0f0f0;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.footer-container button:hover {
-  background-color: #ccc;
-}
-
-.input-button-container {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  width: 100%;
-}
-
-.cliente-input,
-.rtn-input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f5f5f5;
-  width: 100%;
-}
-
-
-.tipo-cliente input {
-  flex-grow: 1;
-  /* Permite que el input ocupe el espacio disponible */
-}
-
-.rtn-input {
-  font-size: 0.9em;
-  color: #666;
-}
-
-button {
-  align-self: flex-end;
-  margin-top: 5px;
-}
-
+/* Cliente Input Section */
 .tipo-cliente {
   display: flex;
   flex-direction: column;
@@ -783,7 +540,6 @@ button {
 .inputs-container {
   display: flex;
   flex-direction: row;
-  /* Cambiado a row para inputs lado a lado */
   gap: 5px;
   width: 100%;
 }
@@ -800,15 +556,14 @@ button {
 
 .cliente-input {
   flex: 2;
-  /* Toma 2 partes del espacio disponible */
 }
 
 .rtn-input {
   flex: 1;
-  /* Toma 1 parte del espacio disponible */
+  font-size: 0.9em;
+  color: #666;
 }
 
-/* Para cuando solo hay un input */
 .cliente-input.single {
   flex: 1;
   width: 100%;
@@ -833,9 +588,220 @@ button {
   background-color: #e0e0e0;
 }
 
-/* Ajustar el espaciado en el header si es necesario */
-.header-container {
-  gap: 150px;
-  /* Reducido de 250px a 150px */
+/* Información Section */
+.informacion-1,
+.informacion-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 20px;
+}
+
+/* Column Container y Tabla */
+.column-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: calc(100vh - 250px);
+  margin-bottom: 10px;
+  z-index: 1;
+}
+
+.table-container {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Updated table styles for fixed header */
+.table-wrapper {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  /* Prevent wrapper scroll */
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+/* Fixed header styles */
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: white;
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table thead tr {
+  width: 100%;
+}
+
+.table tbody {
+  display: block;
+  overflow-y: scroll;
+  /* Cambiado de auto a scroll para forzar la barra */
+  width: 100%;
+  /* Altura fija para garantizar el scroll */
+  height: 400px;
+  /* Puedes ajustar este valor según necesites */
+  max-height: calc(100vh - 350px);
+  /* Altura máxima relativa a la ventana */
+}
+
+.table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Columnas de la tabla */
+.col-item {
+  width: 10%;
+}
+
+.col-codigo {
+  width: 20%;
+}
+
+.col-descripcion {
+  width: 40%;
+}
+
+.col-cantidad {
+  width: 10%;
+}
+
+.col-precio {
+  width: 10%;
+}
+
+.col-importe {
+  width: 10%;
+}
+
+/* Estilos de la tabla */
+th {
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+  font-weight: 600;
+}
+
+
+td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.empty-row td {
+  border-bottom: none;
+  height: 41px;
+  /* Match the height of regular rows */
+}
+
+.table tbody tr:not(.empty-row):hover {
+  background-color: #f8f9fa;
+}
+
+/* Updated Total Container styles */
+.total-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
+.cantidad-input,
+.total-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cantidad-input input,
+.total-input input {
+  width: 120px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Teclado Numérico */
+.numeric-keypad {
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border-left: 1px solid #ccc;
+  z-index: 1;
+}
+
+.scanner-input {
+  margin-bottom: 10px;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* Botones Generales */
+button {
+  width: 100%;
+  height: 40px;
+  font-size: 18px;
+  border: none;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+button:hover {
+  background-color: #ccc;
+}
+
+/* Footer */
+.footer-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  padding: 5px;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ccc;
+  z-index: 2;
+}
+
+.footer-container button {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

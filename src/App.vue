@@ -147,7 +147,6 @@ export default {
 
 .app-wrapper {
   padding-right: 0;
-  /* Elimina el padding del lado derecho */
 }
 
 #aside-line {
