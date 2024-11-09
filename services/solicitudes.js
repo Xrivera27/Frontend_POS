@@ -85,6 +85,29 @@ import axios from 'axios';
         }
       },
 
+      async patchRegistroProducto(parametros, datosActualizados){
+        try {
+
+            const url = `${homeUrl}${parametros}`;
+          const respuesta = await fetch(`${url}`,
+          {
+            method: 'PATCH',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datosActualizados)
+          });
+      
+          if (!respuesta.ok){
+            throw new Error(`No se pudo actualizar: ${respuesta.statusText}`);
+          }
+      
+          else return respuesta.json();
+        } catch (error) {
+          throw new Error(`Ocurrio un error: ${error}`);
+        }
+      },
+
       async desactivarRegistro(parametros, datosActualizados){
         try {
             const url = `${homeUrl}${parametros}`;

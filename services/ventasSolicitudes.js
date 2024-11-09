@@ -36,14 +36,10 @@ export const agregarProducto = async (cantidad, codigo, id_usuario) => {
     const parametros = `/ventas/buscar-producto/${id_usuario}`;
     try {
 
-        const response = await solicitudes.patchRegistro(parametros, datos);
+        const response = await solicitudes.patchRegistroProducto(parametros, datos);
         console.log(response);
-        if (response && response == true) {
 
             return response; 
-        } else {
-            throw new Error('No se hizo el patch');
-        }
 
     } catch (error) {
         console.error('Error en patchProducto:', error); 

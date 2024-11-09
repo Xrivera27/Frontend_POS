@@ -142,7 +142,7 @@ import { useToast } from "vue-toastification";
 import { notificaciones } from '../../services/notificaciones.js';
 
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, getProductos, agregarProducto } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, getProductos } from '../../services/ventasSolicitudes.js';
 
 export default {
   components: {
@@ -195,7 +195,7 @@ export default {
 
   computed: {
     calcularTotal() {
-      return this.productosLista.reduce((total, p) => total + (p.precioUnitario * p.cantidad), 0);
+      return this.productosLista.reduce((total, p) => total + (p.precioImpuesto * p.cantidad), 0);
     }
   },
 
@@ -369,7 +369,7 @@ export default {
       this.agregarProducto();
     },
 
-   async agregarProducto() {
+    agregarProducto() {
       if (!this.addQuery) {
         const toast = useToast();
         toast.warning("Ingresa un código");
@@ -388,9 +388,8 @@ export default {
       if (existingProduct) {
         existingProduct.cantidad += 1;
       } else {
-        let aggProducto = await agregarProducto(1, this.addQuery, this.id_usuario );
-        aggProducto.cantidad = 1;
-        this.productosLista.push({ ...aggProducto });
+        newProduct.cantidad = 1;
+        this.productosLista.push({ ...newProduct });
       }
 
       this.limpiar();
