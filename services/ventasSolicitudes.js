@@ -26,7 +26,7 @@ export const getProductos = async (id_usuario) => {
     }
 }
 
-export const agregarProducto = async (cantidad, codigo, id_usuario) => {
+export const agregarProductoCodigo = async (cantidad, codigo, id_usuario) => {
 
     const datos = {
         codigo: codigo,

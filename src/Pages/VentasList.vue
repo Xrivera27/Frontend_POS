@@ -142,7 +142,7 @@ import { useToast } from "vue-toastification";
 import { notificaciones } from '../../services/notificaciones.js';
 
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, getProductos } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, getProductos, agregarProductoCodigo } from '../../services/ventasSolicitudes.js';
 
 export default {
   components: {
@@ -369,31 +369,52 @@ export default {
       this.agregarProducto();
     },
 
-    agregarProducto() {
-      if (!this.addQuery) {
+   async agregarProducto() {
+    let nuevaCantidad;
+    let reducirInventario;
+    const codigoValidar = this.addQuery;
+      if (!codigoValidar) {
         const toast = useToast();
         toast.warning("Ingresa un código");
         return;
       }
 
-      const newProduct = this.productos.find((p) => p.codigo_producto === this.addQuery);
+      try {
+        this.limpiar();
+      const newProduct = this.productos.find((p) => p.codigo_producto === codigoValidar);
       if (!newProduct) {
         const toast = useToast();
         toast.warning("No existe el producto");
-        this.limpiar();
+
         return;
       }
 
-      const existingProduct = this.productosLista.find((p) => p.codigo_producto === this.addQuery);
+      const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
       if (existingProduct) {
         existingProduct.cantidad += 1;
+        nuevaCantidad = 1;
+
+         reducirInventario = await agregarProductoCodigo(nuevaCantidad, existingProduct.codigo_producto, this.id_usuario);
+         
       } else {
         newProduct.cantidad = 1;
+        nuevaCantidad = 1;
         this.productosLista.push({ ...newProduct });
+
+         reducirInventario = await agregarProductoCodigo(nuevaCantidad, newProduct.codigo_producto, this.id_usuario);
+      }
+      console.log(reducirInventario);
+
+      
+      } catch (error) {
+        console.log(error);
+        notificaciones('error', error.message);
       }
 
-      this.limpiar();
+      
     },
+
+    
 
     pushEsc(event) {
       if (event.key === "Esc" || event.key === "Escape") {
