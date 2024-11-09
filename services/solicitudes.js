@@ -49,7 +49,6 @@ import axios from 'axios';
             const url = `${homeUrl}${parametros}`;
             const response = await fetch(url);
             
-            
             if (!response.ok) {
                 throw new Error(`Error: ${response.status}`);
             }

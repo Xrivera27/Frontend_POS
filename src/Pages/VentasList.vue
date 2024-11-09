@@ -25,15 +25,15 @@
         </div>
 
         <div class="informacion-1">
-          <label for="sucursal">Sucursal: LCB</label>
+          <label for="sucursal">Sucursal: {{  info.nombreSucursal  }}</label>
           <br />
-          <label for="usuario">Usuario: User</label>
+          <label for="usuario">Usuario: {{  info.nombre_usuario  }}</label>
         </div>
 
         <div class="informacion-2">
           <label for="numTicket">Ticket No: <span>{{ numTicket }}</span></label>
           <br />
-          <label>Fecha: <span>{{ fecha }}</span></label>
+          <label>Fecha: <span>{{ info.fecha }}</span></label>
         </div>
       </div>
 
@@ -56,11 +56,11 @@
                 <tr v-for="(producto, index) in productosLista" :key="index" @dblclick="handleRowDoubleClick(producto)"
                   :class="{ 'selected': selectedItem === producto }">
                   <td class="col-item">{{ index + 1 }}</td>
-                  <td class="col-codigo">{{ producto.codigo }}</td>
+                  <td class="col-codigo">{{ producto.codigo_producto }}</td>
                   <td class="col-descripcion">{{ producto.nombre }}</td>
                   <td class="col-cantidad">{{ producto.cantidad }}</td>
-                  <td class="col-precio">{{ producto.precioUnitario }}</td>
-                  <td class="col-importe">{{ producto.precioUnitario * producto.cantidad }}</td>
+                  <td class="col-precio">{{ producto.precioImpuesto }}</td>
+                  <td class="col-importe">{{ producto.precioImpuesto * producto.cantidad }}</td>
                 </tr>
                 <!-- Filas vacías para llenar el espacio -->
                 <tr v-for="n in remainingRows" :key="`empty-${n}`" class="empty-row">
@@ -138,7 +138,11 @@ import axios from 'axios';
 import ClienteModal from '../components/modalesCrearVenta/ClienteModal.vue';
 import RegistrarPagoModal from '../components/modalesCrearVenta/RegistrarPagoModal.vue';
 import EliminarItemsModal from '../components/modalesCrearVenta/EliminarItemsModal.vue';
-import { useToast } from "vue-toastification"; // Importación para el popup
+import { useToast } from "vue-toastification";
+import { notificaciones } from '../../services/notificaciones.js';
+
+import solicitudes from "../../services/solicitudes.js";
+import { getInfoBasic, getProductos, agregarProducto } from '../../services/ventasSolicitudes.js';
 
 export default {
   components: {
@@ -152,6 +156,8 @@ export default {
       numTicket: '000-001-01-00000001',
       fecha: new Date().toLocaleDateString(),
       addQuery: "",
+      id_usuario: 0,
+      info: '',
       isEditing: false,
       isModalVisible: false,
       isPagoModalVisible: false,
@@ -160,96 +166,7 @@ export default {
       selectedItem: null,
       isEliminarModalVisible: false,
       isModalFocused: false,
-      productos: [
-        {
-          codigo: "1",
-          nombre: "Leche",
-          descripcion: "Leche entera de 1 litro",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          precioUnitario: 25,
-          descuento: 0,
-        },
-        {
-          codigo: "2",
-          nombre: "Pan",
-          descripcion: "Pan fresco",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          precioUnitario: 15,
-          descuento: 0,
-        },
-        {
-          codigo: "3",
-          nombre: "Arroz",
-          descripcion: "Arroz libra",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          precioUnitario: 12,
-          descuento: 0,
-        },
-        {
-          codigo: "4",
-          nombre: "Aceite",
-          descripcion: "Bolsita de aceita",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          precioUnitario: 30,
-          descuento: 0,
-        },
-        {
-          codigo: "5",
-          nombre: "Huevos",
-          descripcion: "Carton de 12",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          precioUnitario: 18,
-          descuento: 0,
-        },
-        {
-          codigo: "6",
-          nombre: "Azúcar",
-          descripcion: "Bolsa de 4 lbs",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          precioUnitario: 10,
-          descuento: 0,
-        },
-        {
-          codigo: "7",
-          nombre: "Sal",
-          descripcion: "Bolsa pequeña",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          precioUnitario: 5,
-          descuento: 0,
-        },
-        {
-          codigo: "8",
-          nombre: "Café",
-          descripcion: "Bolsa de 1 lb",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          precioUnitario: 50,
-          descuento: 0,
-        },
-        {
-          codigo: "9",
-          nombre: "Harina",
-          descripcion: "Bolsa de 5 lbs",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          precioUnitario: 20,
-          descuento: 0,
-        },
-        {
-          codigo: "10",
-          nombre: "Pasta",
-          descripcion: "Bolsa de 1 lb",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          precioUnitario: 14,
-          descuento: 0,
-        },
-        {
-          codigo: "11",
-          nombre: "Mantequilla",
-          descripcion: "Mantequilla leyde de 1 lb",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          precioUnitario: 22,
-          descuento: 0,
-        },
-      ],
+      productos: [],
       productosLista: [],
     };
   },
@@ -452,14 +369,14 @@ export default {
       this.agregarProducto();
     },
 
-    agregarProducto() {
+   async agregarProducto() {
       if (!this.addQuery) {
         const toast = useToast();
         toast.warning("Ingresa un código");
         return;
       }
 
-      const newProduct = this.productos.find((p) => p.codigo === this.addQuery);
+      const newProduct = this.productos.find((p) => p.codigo_producto === this.addQuery);
       if (!newProduct) {
         const toast = useToast();
         toast.warning("No existe el producto");
@@ -467,12 +384,13 @@ export default {
         return;
       }
 
-      const existingProduct = this.productosLista.find((p) => p.codigo === this.addQuery);
+      const existingProduct = this.productosLista.find((p) => p.codigo_producto === this.addQuery);
       if (existingProduct) {
         existingProduct.cantidad += 1;
       } else {
-        newProduct.cantidad = 1;
-        this.productosLista.push({ ...newProduct });
+        let aggProducto = await agregarProducto(1, this.addQuery, this.id_usuario );
+        aggProducto.cantidad = 1;
+        this.productosLista.push({ ...aggProducto });
       }
 
       this.limpiar();
@@ -521,10 +439,19 @@ export default {
     }
   },
 
-  mounted() {
+ async mounted() {
     window.addEventListener("keydown", this.handleKeyPress);
     document.title = "Crear Ventas";
     this.changeFavicon('/img/spiderman.ico');
+
+    try {
+    this.id_usuario = await solicitudes.solicitarUsuarioToken();
+    this.info = await getInfoBasic(this.id_usuario);
+    this.productos = await getProductos(this.id_usuario);
+    } catch (error) {
+      notificaciones('error', error.message);
+    }
+
   },
 
   beforeUnmount() {
