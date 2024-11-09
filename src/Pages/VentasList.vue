@@ -53,7 +53,8 @@
               </thead>
               <tbody>
                 <!-- Productos reales -->
-                <tr v-for="(producto, index) in productosLista" :key="index">
+                <tr v-for="(producto, index) in productosLista" :key="index" @dblclick="handleRowDoubleClick(producto)"
+                  :class="{ 'selected': selectedItem === producto }">
                   <td class="col-item">{{ index + 1 }}</td>
                   <td class="col-codigo">{{ producto.codigo }}</td>
                   <td class="col-descripcion">{{ producto.nombre }}</td>
@@ -79,8 +80,8 @@
               <input id="cantidad" type="number" v-model="totalCantidad" readonly />
             </div>
             <div class="total-input">
-              <label for="total">S/.:</label>
-              <input id="total" type="text" :value="calcularTotal" readonly />
+              <label for="total">S/:</label>
+              <label class="subTotal" id="total">{{ calcularTotal }}</label>
             </div>
           </div>
         </div>
@@ -89,7 +90,7 @@
         <div class="numeric-keypad">
           <div class="scanner-input">
             <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
-              :disabled="isModalVisible" required />
+              :disabled="isModalFocused || isModalVisible" required />
           </div>
           <div class="keypad">
             <button @click="agregarNumero(1)">1</button>
@@ -116,6 +117,8 @@
         <button @click="openModal">Buscar cliente [F3]</button>
         <button @click="consultarAnular">Consultar anular [F4]</button>
         <button @click="eliminarItem">Eliminar item [F5]</button>
+        <EliminarItemsModal :isVisible="isEliminarModalVisible" :item="selectedItem" @close="closeEliminarModal"
+          @confirm-delete="handleItemDelete" @modal-focused="handleModalFocus" />
         <button @click="limpiarPantalla">Limpiar pantalla [F6]</button>
         <button @click="guardarVenta">Guardar venta [F8]</button>
         <button @click="recVenta">Rec. Venta [F9]</button>
@@ -134,12 +137,14 @@
 import axios from 'axios';
 import ClienteModal from '../components/modalesCrearVenta/ClienteModal.vue';
 import RegistrarPagoModal from '../components/modalesCrearVenta/RegistrarPagoModal.vue';
+import EliminarItemsModal from '../components/modalesCrearVenta/EliminarItemsModal.vue';
 import { useToast } from "vue-toastification"; // Importación para el popup
 
 export default {
   components: {
     ClienteModal,
-    RegistrarPagoModal
+    RegistrarPagoModal,
+    EliminarItemsModal
   },
   data() {
     return {
@@ -152,6 +157,9 @@ export default {
       isPagoModalVisible: false,
       isAnyModalOpen: false,
       clienteSeleccionado: null,
+      selectedItem: null,
+      isEliminarModalVisible: false,
+      isModalFocused: false,
       productos: [
         {
           codigo: "1",
@@ -283,6 +291,37 @@ export default {
       this.logout();
     },
 
+    handleModalFocus(isFocused) {
+      this.isModalFocused = isFocused;
+    },
+
+    handleRowDoubleClick(item) {
+      this.selectedItem = item;
+    },
+
+    eliminarItem() {
+      if (!this.selectedItem) {
+        const toast = useToast();
+        toast.warning("Seleccione un item para eliminar");
+        return;
+      }
+      this.isEliminarModalVisible = true;
+    },
+
+    handleItemDelete(item) {
+      const index = this.productosLista.findIndex(p => p === item);
+      if (index !== -1) {
+        this.productosLista.splice(index, 1);
+        this.selectedItem = null;
+        const toast = useToast();
+        toast.success("Item eliminado correctamente");
+      }
+    },
+
+    closeEliminarModal() {
+      this.isEliminarModalVisible = false;
+    },
+
     async logout() {
       try {
         await axios.post('/api/logout', {}, {
@@ -358,7 +397,7 @@ export default {
     },
 
     handleKeyPress(event) {
-      if (this.isAnyModalOpen) {
+      if (this.isAnyModalOpen || this.isModalFocused) {
         return;
       }
 
@@ -372,17 +411,26 @@ export default {
       // const toast = useToast();
 
       if (!isNaN(key) || key === '.') {
+        event.preventDefault();
         this.agregarNumero(key);
       } else if (key === "Backspace") {
+        event.preventDefault();
         this.borrarUltimo();
       } else if (key === "Enter") {
+        event.preventDefault();
         this.procesarEnter();
       } else if (event.altKey && key === "s") {
+        event.preventDefault();
         this.logout();
       } else if (key === "F3") {
+        event.preventDefault();
         this.openModal();
       } else if (key === "F12") {
+        event.preventDefault();
         this.openPagoModal();
+      } else if (key === "F5") {
+        event.preventDefault();
+        this.eliminarItem();
       }
     },
 
@@ -735,8 +783,7 @@ td {
   gap: 10px;
 }
 
-.cantidad-input input,
-.total-input input {
+.cantidad-input input {
   width: 120px;
   padding: 5px;
   border: 1px solid #ccc;
@@ -803,5 +850,20 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.subTotal {
+  font-size: 250%;
+  font-weight: bold;
+  margin-top: 0%;
+  margin-bottom: 0%;
+}
+
+.selected {
+  background-color: #63b4ff !important;
+}
+
+.table tbody tr.selected:hover {
+  background-color: #d1e8ff !important;
 }
 </style>
