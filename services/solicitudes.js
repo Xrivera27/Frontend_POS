@@ -150,7 +150,7 @@ import axios from 'axios';
           else {
             
             const nuevoRegistro = await respuesta.json();
-            console.log(nuevoRegistro);
+            // console.log(nuevoRegistro);
             return nuevoRegistro;
           }
           

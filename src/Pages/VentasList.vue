@@ -125,7 +125,12 @@
         <button @click="descuentoGeneral">Dscto. Gen. [F10]</button>
         <button @click="descuentoIndividual">Dscto. Ind. [F11]</button>
         <button @click="openPagoModal">Registrar Pago [F12]</button>
-        <RegistrarPagoModal :isVisible="isPagoModalVisible" @close="closePagoModal" @modal-focused="handleModalFocus" />
+        <RegistrarPagoModal 
+        :isVisible="isPagoModalVisible" 
+        :factura="factura" 
+        @close="closePagoModal"
+         @confirm-payment="realizarPago"
+        @modal-focused="handleModalFocus" />
         <button @click="nuevoCliente">Nuevo Cliente [ALT] + [C]</button>
         <button @click="salir">Salir [ALT] + [S]</button>
       </div>
@@ -143,7 +148,7 @@ import { notificaciones } from '../../services/notificaciones.js';
 
 
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, getProductos, agregarProductoCodigo } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, getProductos, agregarProductoCodigo, postVenta, pagar } from '../../services/ventasSolicitudes.js';
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 
 export default {
@@ -172,6 +177,8 @@ export default {
       productos: [],
       productosLista: [],
       clientes: [],
+      venta: [],
+      factura: [],
      
     };
   },
@@ -289,7 +296,28 @@ export default {
       });
     },
 
-    openPagoModal() {
+    async realizarPago(datosPago){
+      try {
+        const pagando = await pagar(datosPago.monto, this.venta.id_venta, this.id_usuario);
+        if(!pagando){
+          throw 'No se realizo el pago';
+        }
+        this.limpiarPagado();
+      } catch (error) {
+        notificaciones('error', error.message);
+      }
+    },
+
+   async openPagoModal() {
+
+    try {
+      this.venta = await postVenta(
+        this.productosLista, 
+        this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0, 
+        this.id_usuario);
+
+        this.factura = this.venta.factura;
+      
       this.isPagoModalVisible = true;
       this.$nextTick(() => {
         const pagoModalElement = document.querySelector('.modal-content');
@@ -297,13 +325,16 @@ export default {
           pagoModalElement.focus();
         }
       });
+    } catch (error) {
+      notificaciones('error', error.message);
+    }
+
+      
       // const toast = useToast();
       // toast.info("Modal abierto");
     },
 
     closePagoModal() {
-      // const toast = useToast();
-      // toast.info("Modal cerrado");
       this.isPagoModalVisible = false;
       this.$nextTick(() => {
         this.$refs.codigoRef?.focus();
@@ -370,6 +401,11 @@ export default {
 
     limpiar() {
       this.addQuery = "";
+    },
+
+    limpiarPagado(){
+      this.addQuery = "";
+      this.productosLista = [];
     },
 
     procesarEnter() {

@@ -13,19 +13,19 @@
                     <div class="resumen-grid">
                         <div class="resumen-item">
                             <span>Subtotal:</span>
-                            <span>L. {{ formatPrice(subtotal) }}</span>
+                            <span>L. {{ mostrarSubtotal }}</span>
                         </div>
                         <div class="resumen-item">
-                            <span>ISV (15%):</span>
-                            <span>L. {{ formatPrice(isv) }}</span>
+                            <span>Impuesto:</span>
+                            <span>L. {{ impuesto }}</span>
                         </div>
                         <div class="resumen-item">
                             <span>Descuento:</span>
-                            <span>L. {{ formatPrice(descuento) }}</span>
+                            <span>L. 0</span>
                         </div>
                         <div class="resumen-item total">
                             <span>Total:</span>
-                            <span>L. {{ formatPrice(total) }}</span>
+                            <span>L. {{ total }}</span>
                         </div>
                     </div>
                 </div>
@@ -129,9 +129,9 @@ export default {
             type: Boolean,
             required: true
         },
-        subtotalVenta: {
-            type: Number,
-            default: 0
+        factura: {
+            type: Object,
+            default: () => ({})
         }
     },
     data() {
@@ -157,7 +157,13 @@ export default {
     },
     computed: {
         total() {
-            return this.subtotal + this.isv - this.descuento;
+            return this.factura.total;
+        },
+        mostrarSubtotal(){
+            return this.factura.sub_total
+        },
+        impuesto(){
+            return this.factura.total_ISV; 
         },
         isPagoValido() {
             if (this.metodoPago === 'Efectivo') {
