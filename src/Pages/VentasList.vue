@@ -148,7 +148,7 @@ import { notificaciones } from '../../services/notificaciones.js';
 
 
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, getProductos, agregarProductoCodigo, postVenta, pagar } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, getProductos, agregarProductoCodigo, postVenta,eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 
 export default {
@@ -238,14 +238,23 @@ export default {
       this.isEliminarModalVisible = true;
     },
 
-    handleItemDelete(item) {
+   async handleItemDelete(item) {
+    try {
       const index = this.productosLista.findIndex(p => p === item);
       if (index !== -1) {
-        this.productosLista.splice(index, 1);
+        
+        const eliminando = await eliminarProductoVenta(this.productosLista[index].id_producto, this.id_usuario);
+        if(!eliminando){
+          throw 'Ocurrio un error al eliminar Item';
+        }        this.productosLista.splice(index, 1);
         this.selectedItem = null;
         const toast = useToast();
         toast.success("Item eliminado correctamente");
       }
+    } catch (error) {
+      notificaciones('error', error.message);
+    }
+      
     },
 
     closeEliminarModal() {
@@ -406,6 +415,9 @@ export default {
     limpiarPagado(){
       this.addQuery = "";
       this.productosLista = [];
+      this.venta = [];
+      this.factura = [];
+      this.clienteSeleccionado = null;
     },
 
     procesarEnter() {

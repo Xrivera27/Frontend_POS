@@ -11,11 +11,11 @@
                 <div class="modal-body">
                     <p>¿Está seguro que desea eliminar el siguiente item?</p>
                     <div class="item-details">
-                        <p><strong>Código:</strong> {{ item.codigo }}</p>
+                        <p><strong>Código:</strong> {{ item.codigo_producto }}</p>
                         <p><strong>Descripción:</strong> {{ item.nombre }}</p>
                         <p><strong>Cantidad:</strong> {{ item.cantidad }}</p>
-                        <p><strong>Precio Unitario:</strong> {{ item.precioUnitario }}</p>
-                        <p><strong>Importe:</strong> {{ item.precioUnitario * item.cantidad }}</p>
+                        <p><strong>Precio Unitario:</strong> {{ item.precioImpuesto }}</p>
+                        <p><strong>Importe:</strong> {{ item.precioImpuesto * item.cantidad }}</p>
                     </div>
                 </div>
                 <div class="modal-footer">
