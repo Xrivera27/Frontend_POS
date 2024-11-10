@@ -1,10 +1,11 @@
 <template>
     <Teleport to="body">
         <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
+           
             <div class="modal-content">
                 <div class="header-container" tabindex="-1">
                     <h2 class="modal-title">Clientes</h2>
-                    <input type="text" v-model="searchQuery" placeholder="Búsqueda por nombre" @input="filterClients"
+                    <input type="text" v-model="searchQuery" placeholder="Búsqueda por nombre"
                         class="search-input" />
                 </div>
                 <div class="form-container">
@@ -36,9 +37,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="client in filteredClients" :key="client.rtn" @dblclick="selectClient(client)"
+                        <tr v-for="client in filterClients" :key="client.rtn" @dblclick="selectClient(client)"
                             class="client-row">
-                            <td>{{ client.nombre }}</td>
+                            <td>{{ client.nombre_completo }}</td>
                             <td>{{ client.direccion }}</td>
                             <td>{{ client.rtn }}</td>
                             <td>{{ client.telefono }}</td>
@@ -57,14 +58,22 @@
 
 <script>
 export default {
-    props: ['isVisible'],
+    props: {
+        isVisible: {
+            type: Boolean,
+            required: true
+        },
+
+        clientes: {
+            type: Array,
+            required: true
+        }
+
+
+    },
     data() {
         return {
             searchQuery: '',
-            clients: [
-                { nombre: 'Juan Pérez', direccion: 'Calle 123', rtn: '123456789', telefono: '555-1234' },
-                { nombre: 'María López', direccion: 'Avenida 456', rtn: '987654321', telefono: '555-5678' },
-            ],
             filteredClients: [],
             newClient: {
                 nombre: '',
@@ -74,18 +83,33 @@ export default {
             },
         };
     },
+    computed: {
+        filterClients() {
+            if(this.searchQuery === ''){
+               return  this.clientes;
+            }
+            else{
+               return this.clientes.filter(client =>
+                client.nombre_completo.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+            }
+            
+        },
+    },
     methods: {
         onFocus() {
             this.$emit('modal-focused');
         },
+
+        returnClientes(clientes){
+            return clientes;
+        },
+
         closeModal() {
+            console.log(this.clientes);
             this.$emit('close');
         },
-        filterClients() {
-            this.filteredClients = this.clients.filter(client =>
-                client.nombre.toLowerCase().includes(this.searchQuery.toLowerCase())
-            );
-        },
+        
         selectClient(client) {
             this.$emit('client-selected', client);
         },
@@ -97,12 +121,13 @@ export default {
             }
             this.clients.push({ ...this.newClient });
             this.newClient = { nombre: '', direccion: '', rtn: '', telefono: '' };
-            this.filterClients();
         },
     },
-    mounted() {
-        this.filteredClients = this.clients; // Solo inicializamos los clientes filtrados
-    },
+
+    // mounted() {
+    //     this.filteredClients = this.clients;
+        
+    // },
 };
 </script>
 

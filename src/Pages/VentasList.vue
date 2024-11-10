@@ -13,14 +13,14 @@
               </template>
               <!-- Si hay cliente seleccionado, muestra nombre y RTN -->
               <template v-else>
-                <input type="text" :value="clienteSeleccionado.nombre" readonly class="cliente-input">
+                <input type="text" :value="clienteSeleccionado.nombre_completo" readonly class="cliente-input">
                 <input type="text" :value="clienteSeleccionado.rtn" readonly class="rtn-input">
               </template>
             </div>
             <button class="search-button" @click="openModal">
               Buscar
             </button>
-            <ClienteModal :isVisible="isModalVisible" @close="closeModal" @client-selected="handleClientSelected" />
+            <ClienteModal :isVisible="isModalVisible" :clientes="clientes" @close="closeModal" @client-selected="handleClientSelected" />
           </div>
         </div>
 
@@ -141,8 +141,10 @@ import EliminarItemsModal from '../components/modalesCrearVenta/EliminarItemsMod
 import { useToast } from "vue-toastification";
 import { notificaciones } from '../../services/notificaciones.js';
 
+
 import solicitudes from "../../services/solicitudes.js";
 import { getInfoBasic, getProductos, agregarProductoCodigo } from '../../services/ventasSolicitudes.js';
+const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 
 export default {
   components: {
@@ -157,6 +159,7 @@ export default {
       fecha: new Date().toLocaleDateString(),
       addQuery: "",
       id_usuario: 0,
+      prueba: 'prueba',
       info: '',
       isEditing: false,
       isModalVisible: false,
@@ -168,6 +171,8 @@ export default {
       isModalFocused: false,
       productos: [],
       productosLista: [],
+      clientes: [],
+     
     };
   },
 
@@ -196,7 +201,8 @@ export default {
   computed: {
     calcularTotal() {
       return this.productosLista.reduce((total, p) => total + (p.precioImpuesto * p.cantidad), 0);
-    }
+    },
+    
   },
 
   remainingRows() {
@@ -261,9 +267,10 @@ export default {
       this.closeModal();
     },
 
-    openModal() {
+   async openModal() {
       // const toast = useToast();
       // toast.info("Modal abierto");
+      this.clientes = await getClientesbyEmpresa(this.id_usuario);
       this.isModalVisible = true;
       this.$nextTick(() => {
         const modalElement = document.querySelector('.modal-content');
