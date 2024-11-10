@@ -47,6 +47,25 @@ export const agregarProductoCodigo = async (cantidad, codigo, id_usuario) => {
     }
 }
 
+export const borrarProductoVenta = async (id_usuario, id_producto) => {
+
+    const datos = {
+        id_producto: id_producto
+    }
+
+    const parametros = `/ventas/eliminar-producto/${id_usuario}`;
+    try {
+
+        const response = await solicitudes.patchRegistroProducto(parametros, datos);
+
+            return response; 
+
+    } catch (error) {
+        console.error('Error en patchProducto:', error); 
+        throw error;
+    }
+}
+
 
 
 

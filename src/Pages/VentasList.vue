@@ -404,7 +404,6 @@ export default {
          reducirInventario = await agregarProductoCodigo(nuevaCantidad, newProduct.codigo_producto, this.id_usuario);
       }
       console.log(reducirInventario);
-
       
       } catch (error) {
         console.log(error);
