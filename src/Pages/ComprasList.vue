@@ -665,12 +665,19 @@ export default {
 }
 
 .table-container {
-  max-height: 40vh;
-  overflow-y: scroll;
   width: 100%;
   border-radius: 10px;
   border: 1px solid #ddd;
   margin-top: 16px;
+  height: 480px;
+  overflow-y: auto;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: white;
 }
 
 .table {

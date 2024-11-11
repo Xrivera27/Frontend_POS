@@ -154,7 +154,7 @@ export default {
     this.changeFavicon('/img/spiderman.ico');
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
-      
+
 
       this.unidadesMedida = await getUnidadMedidaEmpresas(this.id_usuario);
 
@@ -517,11 +517,18 @@ select,
 /* Tabla */
 .table-container {
   width: 100%;
-  height: 100%;
   border-radius: 10px;
-  overflow: hidden;
   border: 1px solid #ddd;
   margin-top: 16px;
+  height: 480px;
+  overflow-y: auto;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: white;
 }
 
 .table-modal-container {

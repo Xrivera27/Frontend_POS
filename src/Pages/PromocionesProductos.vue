@@ -612,9 +612,17 @@ input {
 .table-container {
   width: 100%;
   border-radius: 10px;
-  overflow: hidden;
   border: 1px solid #ddd;
   margin-top: 16px;
+  height: 480px;
+  overflow-y: auto;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: white;
 }
 
 .registrar-producto,
