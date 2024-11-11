@@ -140,10 +140,6 @@
               <input v-model="productoForm.cantidad_activar_mayorista" type="text" required />
             </div>
             
-            
-
-            
-
             <div class="form-group">
               <label for="impuesto" value="default">Unidad de medida:</label>
               <select class="form-select" id="medida" name="medida" v-model="productoForm.unidad_medida">
@@ -480,6 +476,7 @@ this.searchSucursalStock = this.sucursales[0].id_sucursal;
         proveedor: 'default',
         precio_unitario: 0,
         precio_mayorista: 0,
+        cantidad_activar_mayorista: 0
       };
       this.isEditing = false;
       this.editIndex = null;
@@ -504,6 +501,7 @@ this.searchSucursalStock = this.sucursales[0].id_sucursal;
         proveedor: productoForm.proveedor,
         precio_unitario: productoForm.precio_unitario,
         precio_mayorista: productoForm.precio_mayorista,
+        cantidad_activar_mayorista: productoForm.cantidad_activar_mayorista
       };
 
       if (!validarCamposService.validarEmpty(campos)) {
@@ -516,6 +514,10 @@ this.searchSucursalStock = this.sucursales[0].id_sucursal;
 
 
       if (!validarCamposService.validarSinLetras(campos.precio_unitario, "precio por unidad")) {
+        return false;
+      }
+
+      if (!validarCamposService.validarSinLetras(campos.cantidad_activar_mayorista, "cantidad activar mayorista")) {
         return false;
       }
 
