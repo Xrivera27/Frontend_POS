@@ -22,24 +22,33 @@
                     <table>
                         <thead>
                             <tr>
-                                <th class="col-codigo">Código</th>
-                                <th class="col-nombre">Nombre</th>
-                                <th class="col-descripcion">Descripción</th>
-                                <th class="col-categoria">Categoría</th>
-                                <th class="col-proveedor">Proveedor</th>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Categoría</th>
+                                <th>Proveedor</th>
+                                <th>Precio</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="product in filteredProducts" :key="product.codigo"
+                            <tr v-for="product in filteredProducts" :key="product.codigo_producto"
                                 @dblclick="selectProduct(product)" class="product-row">
-                                <td>{{ product.codigo }}</td>
+                                <td>{{ product.codigo_producto }}</td>
                                 <td>{{ product.nombre }}</td>
                                 <td>{{ product.descripcion }}</td>
                                 <td>{{ product.categoria }}</td>
                                 <td>{{ product.proveedor }}</td>
+                                <td class="text-right">{{ formatPrice(product.precio_unitario) }}</td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <div class="button-container">
+                    <button @click="closeModal">Buscar</button>
+                    <button @click="closeModal">Consultar</button>
+                    <button @click="limpiarBusqueda">Limpiar</button>
+                    <button class="nuevo-btn">Nuevo</button>
                 </div>
             </div>
         </div>
@@ -50,7 +59,7 @@
 export default {
     props: {
         isVisible: Boolean,
-        productos: {  // Añadir esta prop
+        productos: {
             type: Array,
             default: () => []
         }
@@ -58,26 +67,13 @@ export default {
     data() {
         return {
             searchQuery: '',
-            currentFilter: 'codigo',
+            currentFilter: 'codigo_producto',
             searchFilters: [
-                { value: 'codigo', label: 'Código' },
+                { value: 'codigo_producto', label: 'Código' },
                 { value: 'nombre', label: 'Nombre' },
-                { value: 'descripcion', label: 'Descripción' },
-                { value: 'proveedor', label: 'Marca' }
+                //{ value: 'descripcion', label: 'Descripción' },
+                //{ value: 'proveedor', label: 'Proveedor' }
             ],
-            products: [
-                { codigo: 'P001', nombre: 'Producto 1', descripcion: 'Descripción del producto 1', categoria: 'Categoría A', proveedor: 'Proveedor X' },
-                { codigo: 'P002', nombre: 'Producto 2', descripcion: 'Descripción del producto 2', categoria: 'Categoría B', proveedor: 'Proveedor Y' },
-                { codigo: 'P003', nombre: 'Producto 3', descripcion: 'Descripción del producto 3', categoria: 'Categoría A', proveedor: 'Proveedor Z' },
-                { codigo: 'P004', nombre: 'Producto 4', descripcion: 'Descripción del producto 4', categoria: 'Categoría C', proveedor: 'Proveedor X' },
-                { codigo: 'P005', nombre: 'Producto 5', descripcion: 'Descripción del producto 5', categoria: 'Categoría B', proveedor: 'Proveedor Y' },
-                { codigo: 'P006', nombre: 'Producto 6', descripcion: 'Descripción del producto 6', categoria: 'Categoría C', proveedor: 'Proveedor Z' },
-                { codigo: 'P007', nombre: 'Producto 7', descripcion: 'Descripción del producto 7', categoria: 'Categoría A', proveedor: 'Proveedor X' },
-                { codigo: 'P008', nombre: 'Producto 8', descripcion: 'Descripción del producto 8', categoria: 'Categoría B', proveedor: 'Proveedor Y' },
-                { codigo: 'P009', nombre: 'Producto 9', descripcion: 'Descripción del producto 9', categoria: 'Categoría C', proveedor: 'Proveedor Z' },
-                { codigo: 'P010', nombre: 'Producto 10', descripcion: 'Descripción del producto 10', categoria: 'Categoría A', proveedor: 'Proveedor X' }
-            ]
-            ,
             filteredProducts: []
         };
     },
@@ -92,25 +88,60 @@ export default {
         },
         filterProducts() {
             if (!this.searchQuery) {
-                this.filteredProducts = this.products;
+                this.filteredProducts = [...this.productos];
                 return;
             }
 
             const query = this.searchQuery.toLowerCase();
-            this.filteredProducts = this.products.filter(product =>
-                product[this.currentFilter].toString().toLowerCase().includes(query)
-            );
+            this.filteredProducts = this.productos.filter(product => {
+                const searchValue = String(product[this.currentFilter] || '').toLowerCase();
+                return searchValue.includes(query);
+            });
         },
         selectProduct(product) {
-            this.$emit('product-selected', product);
+            this.$emit('product-selected', {
+                codigo_producto: product.codigo_producto,
+                nombre: product.nombre,
+                descripcion: product.descripcion,
+                // categoria: product.categoria,
+                // proveedor: product.proveedor,
+                precio: product.precio_unitario,
+                precioImpuesto: product.precioImpuesto,
+                id_producto: product.id_producto,
+                cantidad: 1
+            });
             this.closeModal();
         },
         closeModal() {
+            this.searchQuery = '';
             this.$emit('close');
+        },
+        limpiarBusqueda() {
+            this.searchQuery = '';
+            this.filterProducts();
+        },
+        formatPrice(price) {
+            return price ? Number(price).toFixed(2) : '0.00';
+        }
+    },
+    watch: {
+        productos: {
+            immediate: true,
+            handler(newProducts) {
+                console.log('Productos recibidos:', newProducts); // Para debugging
+                this.filteredProducts = [...newProducts];
+            }
+        },
+        isVisible(newValue) {
+            if (newValue) {
+                this.searchQuery = '';
+                this.filterProducts();
+            }
         }
     },
     mounted() {
-        this.filteredProducts = this.products;
+        console.log('Productos iniciales:', this.productos); // Para debugging
+        this.filteredProducts = [...this.productos];
     }
 };
 </script>
@@ -121,7 +152,6 @@ export default {
 * {
     font-family: "Montserrat", sans-serif;
 }
-
 
 .modal-overlay {
     position: fixed;
@@ -140,68 +170,36 @@ export default {
     background: white;
     padding: 20px;
     border-radius: 5px;
-    width: 800px;
-    max-width: 90%;
+    width: 90%;
+    max-width: 1200px;
     max-height: 90vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    z-index: 1001;
+    gap: 15px;
 }
 
-/* Estilos específicos para los botones en un grupo */
-.button-container {
+.search-container {
+    margin-bottom: 15px;
+}
+
+.button-group {
     display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-    gap: 10px;
+    gap: 8px;
+    margin-bottom: 10px;
 }
 
-/* Ajustes específicos para la tabla de productos */
-.table-container {
-    max-height: 400px;
-    overflow-y: auto;
-    margin-top: 10px;
-    border: 1px solid #ddd;
-}
-
-/* Ajustar el estilo del scrollbar para la tabla */
-.table-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-/* Estilos específicos para las filas de productos */
-.product-row:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.product-row:hover {
-    background-color: #f0f0f0;
-    cursor: pointer;
-}
-
-/* Estilo para los botones de filtro */
 .filter-button {
-    background-color: #f5f5f5;
+    padding: 8px 16px;
     border: 1px solid #ddd;
-    padding: 6px 12px;
     border-radius: 4px;
+    background-color: #e9ecef;
     cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s ease;
+    font-size: 13px;
 }
 
 .filter-button:hover {
-    background-color: #e0e0e0;
+    background-color: #dee2e6;
 }
 
 .filter-button.active {
@@ -210,85 +208,127 @@ export default {
     border-color: #4CAF50;
 }
 
-/* Ajustes para el input de búsqueda */
 .search-input {
     width: 100%;
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 13px;
-    margin: 10px 0;
+    font-size: 14px;
 }
 
-/* Ajuste de tamaños de texto para la tabla */
-table th {
-    font-size: 12px;
-    font-weight: 600;
-    padding: 8px;
-    background-color: #f5f5f5;
-    border-bottom: 2px solid #ddd;
-}
-
-table td {
-    font-size: 11px;
-    padding: 6px 8px;
-    border-bottom: 1px solid #eee;
-}
-
-/* Estilo para el header del modal */
-.header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     margin-bottom: 15px;
 }
 
-.modal-title {
-    font-size: 18px;
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    padding: 12px 8px;
+    text-align: left;
     font-weight: 600;
-    margin: 0;
+    font-size: 13px;
+    border-bottom: 2px solid #dee2e6;
 }
 
-/* Contenedor de botones de filtro */
-.filter-buttons {
+td {
+    padding: 8px;
+    font-size: 13px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.product-row:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.button-container {
     display: flex;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: 10px;
+    justify-content: flex-start;
+    padding: 10px 0;
 }
 
-.col-codigo {
+.button-container button {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #e9ecef;
+    cursor: pointer;
+    font-size: 13px;
+    min-width: 100px;
+}
+
+.button-container .nuevo-btn {
+    margin-left: auto;
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+/* Ajustes para el ancho de las columnas */
+th:nth-child(1),
+td:nth-child(1) {
+    width: 12%;
+}
+
+/* Código */
+th:nth-child(2),
+td:nth-child(2) {
+    width: 20%;
+}
+
+/* Nombre */
+th:nth-child(3),
+td:nth-child(3) {
+    width: 28%;
+}
+
+/* Descripción */
+th:nth-child(4),
+td:nth-child(4) {
+    width: 15%;
+}
+
+/* Categoría */
+th:nth-child(5),
+td:nth-child(5) {
+    width: 15%;
+}
+
+/* Proveedor */
+th:nth-child(6),
+td:nth-child(6) {
     width: 10%;
 }
 
-.col-nombre {
-    width: 10%;
-}
+/* Precio */
 
-.col-descripcion {
-    width: 60%;
-}
-
-.col-categoria {
-    width: 10%;
-}
-
-.col-proveedor {
-    width: 10%;
-}
-
-/* Ajustes de responsive */
 @media (max-width: 768px) {
     .modal-content {
         width: 95%;
         margin: 10px;
     }
 
-    .filter-buttons {
+    .button-group {
         flex-wrap: wrap;
     }
 
     .filter-button {
-        flex: 1 1 calc(33.333% - 8px);
+        flex: 1 1 calc(50% - 4px);
     }
 }
 </style>
