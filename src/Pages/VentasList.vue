@@ -31,7 +31,11 @@
         </div>
 
         <div class="informacion-2">
-          <label for="numTicket">Ticket No: <span>{{ numTicket }}</span></label>
+          <label for="numTicket" :class="sucursalActivaFactura ? 'facturando' : 'no-facturando'">
+  {{ sucursalActivaFactura ? 'Sucursal facturando' : 'Datos SAR Sucursal desactualizados' }}
+</label>
+
+
           <br />
           <label>Fecha: <span>{{ info.fecha }}</span></label>
         </div>
@@ -150,6 +154,7 @@ import { notificaciones } from '../../services/notificaciones.js';
 import solicitudes from "../../services/solicitudes.js";
 import { getInfoBasic, getProductos, agregarProductoCodigo, postVenta,eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
+const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
 
 export default {
   components: {
@@ -179,6 +184,7 @@ export default {
       clientes: [],
       venta: [],
       factura: [],
+      usaSAR: false,
      
     };
   },
@@ -208,6 +214,10 @@ export default {
   computed: {
     calcularTotal() {
       return this.productosLista.reduce((total, p) => total + (p.precioImpuesto * p.cantidad), 0);
+    },
+
+    sucursalActivaFactura(){
+      return this.usaSAR;
     },
     
   },
@@ -519,7 +529,9 @@ export default {
     this.changeFavicon('/img/spiderman.ico');
 
     try {
+      
     this.id_usuario = await solicitudes.solicitarUsuarioToken();
+    this.usaSAR = await sucursalSar(this.id_usuario);
     this.info = await getInfoBasic(this.id_usuario);
     this.productos = await getProductos(this.id_usuario);
     } catch (error) {
@@ -549,6 +561,19 @@ export default {
   padding: 20px;
   z-index: 1;
 }
+
+/* Estilo cuando la sucursal está facturando */
+.facturando {
+  color: #006400; /* Verde oscuro */
+  font-weight: bold; /* Texto en negrita */
+}
+
+/* Estilo cuando la sucursal no está facturando o los datos SAR están desactualizados */
+.no-facturando {
+  color: #8B0000; /* Rojo oscuro */
+  font-weight: bold; /* Texto en negrita */
+}
+
 
 .main-container {
   display: flex;

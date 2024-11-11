@@ -62,6 +62,19 @@ import axios from 'axios';
         }
     },
 
+    async fetchEstadoRegistros(parametros) {
+      try {
+          const url = `${homeUrl}${parametros}`;
+          const response = await fetch(url);
+          
+          return response;
+  
+      } catch (error) {
+          console.error('Error al obtener registros:', error);
+          throw error; // Manejo de errores
+      }
+  },
+
     async patchRegistro(parametros, datosActualizados){
         try {
 
