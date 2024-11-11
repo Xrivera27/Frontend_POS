@@ -95,12 +95,13 @@
           <label>Codigo unico del producto:</label>
           <input v-model="productoForm.codigo_producto" type="text" required />
         </div>
-        <div class="contenedor-principal">
-          <div class="contenedor contenedor-izquierdo">
-            <div class="form-group">
+        <div class="form-group">
               <label>Nombre Producto:</label>
               <input v-model="productoForm.nombre" type="text" required />
             </div>
+        <div class="contenedor-principal">
+          <div class="contenedor contenedor-izquierdo">
+            
             <div class="form-group">
               <label>Descripcion:</label>
               <textarea id="textArea" v-model="productoForm.descripcion" type="text" required />
@@ -110,6 +111,15 @@
               <select class="form-select" id="impuesto" name="impuesto" v-model="productoForm.impuesto">
                 <option v-for="(impuesto, index) in cargarImpuestos()" :key="index" :value="impuesto.id">
                   {{ impuesto.nombre }}
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="impuesto" value="default">Proveedor:</label>
+              <select class="form-select" id="proveedor" name="mediproveedorda" v-model="productoForm.proveedor">
+                <option value="default" disabled>Selecciona un proveedor</option>
+                <option v-for="(proveedor, index) in proveedoresMostrar" :key="index" :value="proveedor.id">
+                  {{ proveedor.nombre }}
                 </option>
               </select>
             </div>
@@ -125,16 +135,14 @@
               <label>Precio por mayoreo:</label>
               <input v-model="productoForm.precio_mayorista" type="text" required />
             </div>
-
             <div class="form-group">
-              <label for="impuesto" value="default">Proveedor:</label>
-              <select class="form-select" id="proveedor" name="mediproveedorda" v-model="productoForm.proveedor">
-                <option value="default" disabled>Selecciona un proveedor</option>
-                <option v-for="(proveedor, index) in proveedoresMostrar" :key="index" :value="proveedor.id">
-                  {{ proveedor.nombre }}
-                </option>
-              </select>
+              <label>Cantidad activar mayoreo:</label>
+              <input v-model="productoForm.cantidad_activar_mayorista" type="text" required />
             </div>
+            
+            
+
+            
 
             <div class="form-group">
               <label for="impuesto" value="default">Unidad de medida:</label>
@@ -298,6 +306,7 @@ export default {
         proveedor: 'default',
         precio_unitario: 0,
         precio_mayorista: 0,
+        cantidad_activar_mayorista: 0,
         categorias: []
 
       },
