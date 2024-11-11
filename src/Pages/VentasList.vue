@@ -263,7 +263,6 @@ export default {
       } else {
         this.productosLista.push({
           ...product,
-          cantidad: 1
         });
       }
 

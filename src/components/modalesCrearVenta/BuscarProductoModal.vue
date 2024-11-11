@@ -16,6 +16,8 @@
                     <input type="text" v-model="searchQuery"
                         :placeholder="`Buscar por ${getFilterLabel(currentFilter)}...`" @input="filterProducts"
                         class="search-input" />
+                    <input type="number" v-model="cantidad" placeholder="Cantidad" class="search-input"
+                        @input="validateQuantity">
                 </div>
 
                 <div class="table-container">
@@ -25,8 +27,6 @@
                                 <th>Código</th>
                                 <th>Nombre</th>
                                 <th>Descripción</th>
-                                <th>Categoría</th>
-                                <th>Proveedor</th>
                                 <th>Precio</th>
                             </tr>
                         </thead>
@@ -36,19 +36,10 @@
                                 <td>{{ product.codigo_producto }}</td>
                                 <td>{{ product.nombre }}</td>
                                 <td>{{ product.descripcion }}</td>
-                                <td>{{ product.categoria }}</td>
-                                <td>{{ product.proveedor }}</td>
-                                <td class="text-right">{{ formatPrice(product.precio_unitario) }}</td>
+                                <td>{{ formatPrice(product.precio_unitario) }}</td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-
-                <div class="button-container">
-                    <button @click="closeModal">Buscar</button>
-                    <button @click="closeModal">Consultar</button>
-                    <button @click="limpiarBusqueda">Limpiar</button>
-                    <button class="nuevo-btn">Nuevo</button>
                 </div>
             </div>
         </div>
@@ -98,22 +89,31 @@ export default {
                 return searchValue.includes(query);
             });
         },
+        validateQuantity(event) {
+            const value = event.target.value;
+            // Solo permitir números
+            if (!/^\d*$/.test(value)) {
+                event.target.value = value.replace(/[^\d]/g, '');
+            }
+            this.cantidad = event.target.value ? Number(event.target.value) : 1; // Asegurarse de que la cantidad sea al menos 1
+        },
         selectProduct(product) {
+            console.log(product.precio_unitario);
             this.$emit('product-selected', {
                 codigo_producto: product.codigo_producto,
                 nombre: product.nombre,
                 descripcion: product.descripcion,
-                // categoria: product.categoria,
-                // proveedor: product.proveedor,
-                precio: product.precio_unitario,
+                precio_unitario: product.precio_unitario,
                 precioImpuesto: product.precioImpuesto,
                 id_producto: product.id_producto,
-                cantidad: 1
+                cantidad: this.cantidad // Usar cantidad ingresada o 1 si no hay cantidad
             });
             this.closeModal();
         },
         closeModal() {
             this.searchQuery = '';
+            console.log(this.cantidad);
+            this.cantidad = '';
             this.$emit('close');
         },
         limpiarBusqueda() {
@@ -139,10 +139,6 @@ export default {
             }
         }
     },
-    mounted() {
-        console.log('Productos iniciales:', this.productos); // Para debugging
-        this.filteredProducts = [...this.productos];
-    }
 };
 </script>
 
@@ -177,6 +173,7 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    max-height: 80%;
 }
 
 .search-container {
@@ -209,11 +206,12 @@ export default {
 }
 
 .search-input {
-    width: 100%;
+    width: 25%;
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+    margin-right: 15px;
 }
 
 .table-container {
@@ -251,34 +249,6 @@ td {
     cursor: pointer;
 }
 
-.text-right {
-    text-align: right;
-}
-
-.button-container {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-start;
-    padding: 10px 0;
-}
-
-.button-container button {
-    padding: 8px 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #e9ecef;
-    cursor: pointer;
-    font-size: 13px;
-    min-width: 100px;
-}
-
-.button-container .nuevo-btn {
-    margin-left: auto;
-    background-color: #4CAF50;
-    color: white;
-    border-color: #4CAF50;
-}
-
 /* Ajustes para el ancho de las columnas */
 th:nth-child(1),
 td:nth-child(1) {
@@ -303,17 +273,6 @@ td:nth-child(4) {
     width: 15%;
 }
 
-/* Categoría */
-th:nth-child(5),
-td:nth-child(5) {
-    width: 15%;
-}
-
-/* Proveedor */
-th:nth-child(6),
-td:nth-child(6) {
-    width: 10%;
-}
 
 /* Precio */
 
