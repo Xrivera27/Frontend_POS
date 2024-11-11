@@ -106,7 +106,7 @@ export default {
                 precio_unitario: product.precio_unitario,
                 precioImpuesto: product.precioImpuesto,
                 id_producto: product.id_producto,
-                cantidad: this.cantidad // Usar cantidad ingresada o 1 si no hay cantidad
+                cantidad: this.cantidad || 1// Usar cantidad ingresada o 1 si no hay cantidad
             });
             this.closeModal();
         },
