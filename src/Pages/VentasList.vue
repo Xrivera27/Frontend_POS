@@ -96,10 +96,9 @@
 
         <!-- Teclado numérico -->
         <div class="numeric-keypad">
-          <div class="scanner-input">
-            <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
-              :disabled="isModalFocused || isModalVisible" required />
-          </div>
+          <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
+            :disabled="isModalFocused || isModalVisible" required />
+
           <div class="keypad">
             <button @click="agregarNumero(1)">1</button>
             <button @click="agregarNumero(2)">2</button>
@@ -703,6 +702,21 @@ export default {
   width: 100%;
 }
 
+.campo {
+  height: 40px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 15px;
+  text-align: center;
+  width: 100%;
+}
+
 .search-button {
   height: 30px;
   width: 100%;
@@ -747,6 +761,7 @@ export default {
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow-y: auto;
 }
 
 /* Updated table styles for fixed header */
@@ -756,7 +771,6 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
   /* Prevent wrapper scroll */
 }
 
@@ -783,13 +797,12 @@ export default {
 
 .table tbody {
   display: block;
-  overflow-y: scroll;
+  overflow-y: auto;
   /* Cambiado de auto a scroll para forzar la barra */
   width: 100%;
   /* Altura fija para garantizar el scroll */
-  height: 400px;
+  height: 340px;
   /* Puedes ajustar este valor según necesites */
-  max-height: calc(100vh - 350px);
   /* Altura máxima relativa a la ventana */
 }
 
@@ -885,10 +898,6 @@ td {
   padding: 10px;
   border-left: 1px solid #ccc;
   z-index: 1;
-}
-
-.scanner-input {
-  margin-bottom: 10px;
 }
 
 .keypad {
