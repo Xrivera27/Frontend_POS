@@ -14,38 +14,43 @@
       <div class="contenedor-principal">
         <div class="contenedor-interno contenedor-izquierdo">
           <label for="producto">Producto:</label>
-          <input type="text" id="input-codigo-producto" name="producto" v-model="promForm.producto" required />
+          <input 
+            type="text" 
+            id="input-codigo-producto" 
+            name="producto" 
+            v-model="promForm.producto" 
+            list="productos-list"
+            @change="handleProductoSelect(promForm)"
+            required 
+          />
+          <datalist id="productos-list">
+            <option v-for="producto in productos" :key="producto.id_producto" :value="producto.nombre">
+              {{ producto.nombre }}
+            </option>
+          </datalist>
 
-          <!-- Nombre de la promoción -->
           <label for="nombre_promocion">Nombre de la promoción:</label>
-          <input type="text" id="nombre_promocion" v-model="promForm.nombre_promocion" name="nombre_promocion"
+          <input type="text" id="nombre_promocion" v-model="promForm.promocion_nombre" name="nombre_promocion"
             required />
 
-          <!-- Porcentaje de descuento -->
           <label for="porcentaje_descuento">Porcentaje de descuento:</label>
           <input type="number" id="porcentaje_descuento" name="porcentaje_descuento"
             v-model="promForm.porcentaje_descuento" min="0" max="100" step="0.01" required />
         </div>
-        <!-- Producto ID -->
         <div class="contenedor-interno contenedor-derecho">
           <label for="fecha_inicio">Fecha de inicio:</label>
           <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promForm.fecha_inicio" required />
 
-          <!-- Fecha final -->
           <label for="fecha_final">Fecha final:</label>
           <input type="date" id="fecha_final" name="fecha_final" v-model="promForm.fecha_final" required />
-
-          <!-- Enviar el formulario -->
         </div>
       </div>
       <div class="contenedor-boton">
-        <button type="submit" class="btn registrar-producto" @click="activarForm">
+        <button type="submit" class="btn registrar-producto">
           Registrar promoción
         </button>
         <button type="button" class="btn cerrar" @click="activarForm">Cancelar</button>
       </div>
-
-      <!-- Fecha de inicio -->
     </form>
 
     <div class="tabla-busqueda" v-if="!activeForm">
@@ -70,25 +75,25 @@
           <tbody>
             <tr v-for="(p, index) in filterPromociones" :key="index">
               <td>{{ index + 1 }}</td>
-              <td>{{ p.producto }}</td>
-              <td>{{ p.nombre_promocion }}</td>
+              <td>{{ p.producto?.nombre || p.producto }}</td>
+              <td>{{ p.promocion_nombre }}</td>
               <td>{{ p.porcentaje_descuento }}</td>
               <td>{{ p.fecha_inicio }}</td>
               <td>{{ p.fecha_final }}</td>
-              <td>{{ p.estado }}</td>
+              <td>{{ p.estado ? 'Activo' : 'Inactivo' }}</td>
               <td class="td-botones">
                 <button id="btnEditar" class="btn btn-warning" @click="editarPromocion(index)">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <button v-if="p.estado === 'active'" id="btnDesactivar" class="btn btn-danger"
+                <button v-if="p.estado" id="btnDesactivar" class="btn btn-success"
                   @click="desactivarProm(index)">
                   <b><i class="bi bi-check"></i></b>
                 </button>
-                <button v-if="p.estado === 'inactive'" id="btnActivar" class="btn btn-danger"
+                <button v-if="!p.estado" id="btnActivar" class="btn btn-secondary"
                   @click="activarProm(index)">
                   <b><i class="bi bi-x"></i></b>
                 </button>
-                <button id="btnEliminar" class="btn btn-danger" @click="eliminarProm(index)">
+                <button id="btnEliminar" class="btn btn-danger" @click="confirmDelete(index)">
                   <b><i class="bi bi-trash-fill"></i></b>
                 </button>
               </td>
@@ -104,28 +109,35 @@
           <div class="contenedor-principal">
             <div class="contenedor-interno contenedor-izquierdo">
               <label for="producto">Producto:</label>
-              <input type="text" id="input-codigo-producto" name="producto" v-model="promFormModal.producto" required />
+              <input 
+                type="text" 
+                id="input-codigo-producto-modal" 
+                name="producto" 
+                v-model="promFormModal.producto" 
+                list="productos-list-modal"
+                @change="handleProductoSelect(promFormModal)"
+                required 
+              />
+              <datalist id="productos-list-modal">
+                <option v-for="producto in productos" :key="producto.id_producto" :value="producto.nombre">
+                  {{ producto.nombre }}
+                </option>
+              </datalist>
 
-              <!-- Nombre de la promoción -->
               <label for="nombre_promocion">Nombre de la promoción:</label>
-              <input type="text" id="nombre_promocion" v-model="promFormModal.nombre_promocion" name="nombre_promocion"
+              <input type="text" id="nombre_promocion" v-model="promFormModal.promocion_nombre" name="nombre_promocion"
                 required />
 
-              <!-- Porcentaje de descuento -->
               <label for="porcentaje_descuento">Porcentaje de descuento:</label>
               <input type="number" id="porcentaje_descuento" name="porcentaje_descuento"
                 v-model="promFormModal.porcentaje_descuento" min="0" max="100" step="0.01" required />
             </div>
-            <!-- Producto ID -->
             <div class="contenedor-interno contenedor-derecho">
               <label for="fecha_inicio">Fecha de inicio:</label>
               <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promFormModal.fecha_inicio" required />
 
-              <!-- Fecha final -->
               <label for="fecha_final">Fecha final:</label>
               <input type="date" id="fecha_final" name="fecha_final" v-model="promFormModal.fecha_final" required />
-
-              <!-- Enviar el formulario -->
             </div>
           </div>
           <div class="contenedor-boton">
@@ -136,32 +148,32 @@
               Cancelar
             </button>
           </div>
-
-          <!-- Fecha de inicio -->
         </form>
       </div>
     </div>
+
     <div class="modal" v-if="showConfirmModal">
       <div class="modal-content">
         <h2>Confirmación</h2>
         <p>¿Estás seguro de que quieres eliminar esta promoción?</p>
         <div class="modal-actions">
-          <button class="btn modalShowConfirm-Si" @click="confirmCancel">
+          <button class="btn modalShowConfirm-Si" @click="eliminarProm(editIndex)">
             Sí, borrar
           </button>
-          <button class="btn modalShowConfirm-no" @click="cancelCancel">
+          <button class="btn modalShowConfirm-no" @click="cancelDelete">
             No, regresar
           </button>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
+
+
 <script>
 import ProfileButton from "../components/ProfileButton.vue";
-//import ExportButton from '../components/ExportButton.vue';
+import solicitudes from "../../services/soli";
 
 export default {
   components: {
@@ -175,180 +187,282 @@ export default {
       editIndex: null,
       isShowModal: false,
       showConfirmModal: false,
+      isLoading: false,
+      error: null,
+      productos: [],
 
       promForm: {
+        producto_id: "",
         producto: "",
-        nombre_promocion: "",
+        promocion_nombre: "",
         porcentaje_descuento: "",
         fecha_inicio: "",
         fecha_final: "",
-        estado: "active",
+        estado: true,
       },
 
       promFormModal: {
+        producto_id: "",
         producto: "",
-        nombre_promocion: "",
+        promocion_nombre: "",
         porcentaje_descuento: "",
         fecha_inicio: "",
         fecha_final: "",
-        estado: "active",
+        estado: true,
       },
 
-      promociones: [
-        {
-          producto: "Camiseta Básica",
-          nombre_promocion: "Descuento de Verano",
-          porcentaje_descuento: 15,
-          fecha_inicio: "2024-06-01",
-          fecha_final: "2024-06-30",
-          estado: "active",
-        },
-        {
-          producto: "Pantalones Jean",
-          nombre_promocion: "Ofertas de Primavera",
-          porcentaje_descuento: 10,
-          fecha_inicio: "2024-03-15",
-          fecha_final: "2024-04-15",
-          estado: "inactive",
-        },
-        {
-          producto: "Zapatillas Deportivas",
-          nombre_promocion: "Descuento de Fin de Año",
-          porcentaje_descuento: 20,
-          fecha_inicio: "2024-12-01",
-          fecha_final: "2024-12-31",
-          estado: "active",
-        },
-        {
-          producto: "Chaqueta de Cuero",
-          nombre_promocion: "Promoción de Otoño",
-          porcentaje_descuento: 25,
-          fecha_inicio: "2024-09-01",
-          fecha_final: "2024-10-15",
-          estado: "inactive",
-        },
-        {
-          producto: "Gafas de Sol",
-          nombre_promocion: "Descuento de Black Friday",
-          porcentaje_descuento: 30,
-          fecha_inicio: "2024-11-25",
-          fecha_final: "2024-11-29",
-          estado: "active",
-        },
-        {
-          producto: "Reloj de Pulsera",
-          nombre_promocion: "Ofertas de Navidad",
-          porcentaje_descuento: 20,
-          fecha_inicio: "2024-12-15",
-          fecha_final: "2024-12-25",
-          estado: "inactive",
-        },
-        {
-          producto: "Bolso de Mano",
-          nombre_promocion: "Descuento de Año Nuevo",
-          porcentaje_descuento: 15,
-          fecha_inicio: "2024-12-26",
-          fecha_final: "2025-01-10",
-          estado: "active",
-        },
-        {
-          producto: "Camisa de Lino",
-          nombre_promocion: "Promoción de Rebajas",
-          porcentaje_descuento: 10,
-          fecha_inicio: "2024-01-10",
-          fecha_final: "2024-02-10",
-          estado: "inactive",
-        },
-        {
-          producto: "Pantalones Cortos",
-          nombre_promocion: "Descuento de Primavera",
-          porcentaje_descuento: 20,
-          fecha_inicio: "2024-03-01",
-          fecha_final: "2024-03-31",
-          estado: "active",
-        },
-        {
-          producto: "Bufanda de Lana",
-          nombre_promocion: "Ofertas de Verano",
-          porcentaje_descuento: 18,
-          fecha_inicio: "2024-07-01",
-          fecha_final: "2024-08-15",
-          estado: "inactive",
-        },
-      ],
+      promociones: [],
     };
   },
-  mounted() {
+
+  async mounted() {
     document.title = "Promociones Productos";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    this.changeFavicon('/img/spiderman.ico');
+    await Promise.all([
+      this.cargarPromociones(),
+      this.cargarProductos()
+    ]);
   },
+
   computed: {
     filterPromociones() {
       return this.promociones.filter(
         (promocion) =>
-          promocion.nombre_promocion
-            .toLowerCase()
-            .includes(this.searchQuery.toLowerCase()) ||
-          promocion.producto
-            .toLowerCase()
-            .includes(this.searchQuery.toLowerCase())
+          promocion.promocion_nombre?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          (promocion.producto?.nombre || promocion.producto)?.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
   },
+
   methods: {
-    activarForm() {
-
-      if (this.activeForm) { this.activeForm = false; }
-      else { this.activeForm = true; }
-
+    async cargarProductos() {
+      try {
+        const productosResponse = await solicitudes.fetchRegistros('/promocionesP/productos/empresa');
+        this.productos = productosResponse;
+        console.log('Productos cargados:', this.productos);
+      } catch (error) {
+        console.error('Error al cargar productos:', error);
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Error al cargar los productos',
+          tipo: 'error'
+        });
+        if (error.message.includes('No hay token')) {
+          this.$router.push('/login');
+        }
+      }
     },
+
+    handleProductoSelect(form) {
+      const productoSeleccionado = this.productos.find(
+        p => p.nombre === form.producto
+      );
+      if (productoSeleccionado) {
+        form.producto_id = productoSeleccionado.id_producto;
+      } else {
+        form.producto_id = "";
+      }
+    },
+
+    async cargarPromociones() {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        const promocionesResponse = await solicitudes.fetchRegistros('/promocionesP/empresa');
+        this.promociones = promocionesResponse;
+        console.log('Promociones cargadas:', this.promociones);
+      } catch (error) {
+        console.error('Error al cargar promociones:', error);
+        this.error = 'Error al cargar las promociones. Por favor, intente más tarde.';
+        if (error.message.includes('No hay token')) {
+          this.$router.push('/login');
+        }
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    activarForm() {
+      this.activeForm = !this.activeForm;
+      if (this.activeForm) {
+        this.clearForm();
+      }
+    },
+
     clearForm() {
       this.promForm = {
+        producto_id: "",
         producto: "",
-        nombre_promocion: "",
+        promocion_nombre: "",
         porcentaje_descuento: "",
         fecha_inicio: "",
         fecha_final: "",
+        estado: true,
       };
       this.isEditing = false;
       this.editIndex = null;
     },
 
-    agregarPromocion() {
-      if (!this.isEditing) {
-        this.promForm.estado = 'active';
-        this.promociones.push(this.promForm);
-      } else {
-        this.promociones[this.editIndex] = { ...this.promFormModal };
+    async agregarPromocion() {
+      try {
+        if (!this.validarFormulario()) {
+          return;
+        }
+
+        if (!this.isEditing) {
+          const response = await solicitudes.postRegistro(
+            '/promocionesP/crear-promocion',
+            this.promForm
+          );
+
+          if (response.length > 0) {
+            await this.cargarPromociones();
+            this.$emit('mostrar-notificacion', {
+              mensaje: 'Promoción creada exitosamente',
+              tipo: 'success'
+            });
+          }
+        } else {
+          const promocion = this.promociones[this.editIndex];
+          const response = await solicitudes.patchRegistro(
+            `/promocionesP/actualizar-promocion/${promocion.id_promocion}`,
+            this.promFormModal
+          );
+
+          if (response) {
+            await this.cargarPromociones();
+            this.$emit('mostrar-notificacion', {
+              mensaje: 'Promoción actualizada exitosamente',
+              tipo: 'success'
+            });
+          }
+        }
+
+        this.clearForm();
         this.isShowModal = false;
+        this.activeForm = false;
+      } catch (error) {
+        console.error('Error en agregarPromocion:', error);
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Error al procesar la promoción',
+          tipo: 'error'
+        });
       }
-      this.clearForm();
-      this.isShowModal = false;
+    },
+
+    validarFormulario() {
+      const form = this.isEditing ? this.promFormModal : this.promForm;
+      if (!form.producto_id || !form.promocion_nombre || 
+          !form.porcentaje_descuento || !form.fecha_inicio || 
+          !form.fecha_final) {
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Todos los campos son obligatorios',
+          tipo: 'error'
+        });
+        return false;
+      }
+      
+      if (form.porcentaje_descuento < 0 || form.porcentaje_descuento > 100) {
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'El porcentaje de descuento debe estar entre 0 y 100',
+          tipo: 'error'
+        });
+        return false;
+      }
+
+      const fechaInicio = new Date(form.fecha_inicio);
+      const fechaFinal = new Date(form.fecha_final);
+      if (fechaInicio > fechaFinal) {
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'La fecha final debe ser posterior a la fecha inicial',
+          tipo: 'error'
+        });
+        return false;
+      }
+
+      return true;
     },
 
     editarPromocion(index) {
+      const promocion = this.promociones[index];
       this.promFormModal = {
-        ...this.promociones[index],
+        ...promocion,
+        producto: promocion.producto?.nombre || promocion.producto,
       };
       this.editIndex = index;
       this.isEditing = true;
       this.showModal();
     },
 
-    desactivarProm(index) {
-      if (this.promociones[index].estado === 'active') {
-        this.promociones[index].estado = 'inactive';
-      }
-    },
-    activarProm(index) {
-      if (this.promociones[index].estado === 'inactive') {
-        this.promociones[index].estado = 'active';
+    async desactivarProm(index) {
+      try {
+        const promocion = this.promociones[index];
+        const response = await solicitudes.patchRegistro(
+          `/promocionesP/desactivar-promocion/${promocion.id_promocion}`,
+          { estado: false }
+        );
+
+        if (response) {
+          await this.cargarPromociones();
+          this.$emit('mostrar-notificacion', {
+            mensaje: 'Promoción desactivada exitosamente',
+            tipo: 'success'
+          });
+        }
+      } catch (error) {
+        console.error('Error al desactivar promoción:', error);
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Error al desactivar la promoción',
+          tipo: 'error'
+        });
       }
     },
 
-    eliminarProm(index) {
-      this.editIndex = index;
-      this.showConfirmModal = true;
+    async activarProm(index) {
+      try {
+        const promocion = this.promociones[index];
+        const response = await solicitudes.patchRegistro(
+          `/promocionesP/desactivar-promocion/${promocion.id_promocion}`,
+          { estado: true }
+        );
+
+        if (response) {
+          await this.cargarPromociones();
+          this.$emit('mostrar-notificacion', {
+            mensaje: 'Promoción activada exitosamente',
+            tipo: 'success'
+          });
+        }
+      } catch (error) {
+        console.error('Error al activar promoción:', error);
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Error al activar la promoción',
+          tipo: 'error'
+        });
+      }
+    },
+
+    async eliminarProm(index) {
+      try {
+        const promocion = this.promociones[index];
+        const response = await solicitudes.deleteRegistro(
+          `/promocionesP/eliminar-promocion/${promocion.id_promocion}`
+        );
+
+        if (response === true) {
+          await this.cargarPromociones();
+          this.$emit('mostrar-notificacion', {
+            mensaje: 'Promoción eliminada exitosamente',
+            tipo: 'success'
+          });
+          this.showConfirmModal = false;
+        }
+      } catch (error) {
+        console.error('Error al eliminar promoción:', error);
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Error al eliminar la promoción',
+          tipo: 'error'
+        });
+      }
     },
 
     showModal() {
@@ -357,14 +471,22 @@ export default {
 
     closeModal() {
       this.isShowModal = false;
+      if (this.isEditing) {
+        this.isEditing = false;
+        this.editIndex = null;
+      }
     },
-    confirmCancel() {
-      this.promociones.splice(this.editIndex, 1);
+
+    confirmDelete(index) {
+      this.editIndex = index;
+      this.showConfirmModal = true;
+    },
+
+    cancelDelete() {
       this.showConfirmModal = false;
+      this.editIndex = null;
     },
-    cancelCancel() {
-      this.showConfirmModal = false;
-    },
+
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
@@ -375,6 +497,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
@@ -396,8 +519,6 @@ form {
   min-height: 200px;
   position: relative;
 }
-
-
 
 .titulo-form {
   position: absolute;
@@ -431,8 +552,8 @@ input {
 .contenedor-principal input {
   width: 95%;
   height: 25%;
-
   justify-content: center;
+  margin-bottom: 4%;
 }
 
 .btn-warning {
@@ -440,15 +561,14 @@ input {
   color: black;
 }
 
-
-
 #btnDesactivar {
-  background-color: #7e7e7e;
+  background-color: #198754;  /* Verde para activo */
   color: white;
 }
 
-.contenedor-principal input {
-  margin-bottom: 4%;
+#btnActivar {
+  color: white;
+  background-color: #6c757d;  /* Gris para inactivo */
 }
 
 .table th,
@@ -516,23 +636,12 @@ input {
   cursor: pointer;
 }
 
-#btnActivar {
-  color: white;
-  background-color: rgb(141, 141, 141);
-}
-
 #opciones {
   width: 160px;
 }
 
-#btnDesactivar {
-
-  background-color: rgb(24, 233, 24);
-  color: white;
-}
-
 #btnEliminar {
-  background-color: rgb(235, 23, 23);
+  background-color: #dc3545;  /* Rojo para eliminar */
   color: white;
 }
 
@@ -601,5 +710,40 @@ input {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.modalShowConfirm-Si {
+  background-color: #dc3545;  /* Rojo para confirmar eliminación */
+  color: white;
+}
+
+.modalShowConfirm-no {
+  background-color: #6c757d;  /* Gris para cancelar */
+  color: white;
+}
+
+.busqueda {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 200px;
+}
+
+/* Estilos para los botones del modal */
+.modal-content .btn {
+  min-width: 100px;
+}
+
+/* Ajustes para el formulario en el modal */
+.modal-content form {
+  width: 100%;
+  margin: 0;
+  padding: 20px;
 }
 </style>
