@@ -138,7 +138,7 @@ export default {
   flex-direction: row;
   height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  overflow: auto;
 
   &.dark {
     background-color: #333;

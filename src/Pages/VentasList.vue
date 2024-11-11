@@ -7,33 +7,37 @@
           <label for="tipo-cliente">Cliente:</label>
           <div class="input-button-container">
             <div class="inputs-container">
-              <!-- Si no hay cliente seleccionado, muestra solo "Consumidor final" -->
               <template v-if="!clienteSeleccionado">
                 <input type="text" value="Consumidor final" readonly class="cliente-input single">
               </template>
-              <!-- Si hay cliente seleccionado, muestra nombre y RTN -->
               <template v-else>
                 <input type="text" :value="clienteSeleccionado.nombre_completo" readonly class="cliente-input">
                 <input type="text" :value="clienteSeleccionado.rtn" readonly class="rtn-input">
               </template>
             </div>
-            <button class="search-button" @click="openModal">
-              Buscar
-            </button>
-            <ClienteModal :isVisible="isModalVisible" :clientes="clientes" @close="closeModal" @client-selected="handleClientSelected" />
+            <div class="buttons-header">
+              <button class="search-button" @click="openModal">
+                Buscar
+              </button>
+              <ClienteModal :isVisible="isModalVisible" :clientes="clientes" @close="closeModal"
+                @client-selected="handleClientSelected" />
+              <!-- Botón para volver a "Consumidor final" -->
+              <button v-if="clienteSeleccionado" class="search-button" @click="setConsumidorFinal">Consumidor
+                final</button>
+            </div>
           </div>
         </div>
 
         <div class="informacion-1">
-          <label for="sucursal">Sucursal: {{  info.nombreSucursal  }}</label>
+          <label for="sucursal">Sucursal: {{ info.nombreSucursal }}</label>
           <br />
-          <label for="usuario">Usuario: {{  info.nombre_usuario  }}</label>
+          <label for="usuario">Usuario: {{ info.nombre_usuario }}</label>
         </div>
 
         <div class="informacion-2">
           <label for="numTicket" :class="sucursalActivaFactura ? 'facturando' : 'no-facturando'">
-  {{ sucursalActivaFactura ? 'Sucursal facturando' : 'Datos SAR Sucursal desactualizados' }}
-</label>
+            {{ sucursalActivaFactura ? 'Sucursal facturando' : 'Datos SAR Sucursal desactualizados' }}
+          </label>
 
 
           <br />
@@ -118,6 +122,9 @@
 
       <div class="footer-container">
         <button @click="buscarProducto">Buscar producto [F2]</button>
+        <BuscarProductoModal :isVisible="isBuscarProductoModalVisible" :productos="productos"
+          @close="closeBuscarProductoModal" @product-selected="handleProductSelected"
+          @modal-focused="handleModalFocus" />
         <button @click="openModal">Buscar cliente [F3]</button>
         <button @click="consultarAnular">Consultar anular [F4]</button>
         <button @click="eliminarItem">Eliminar item [F5]</button>
@@ -129,12 +136,8 @@
         <button @click="descuentoGeneral">Dscto. Gen. [F10]</button>
         <button @click="descuentoIndividual">Dscto. Ind. [F11]</button>
         <button @click="openPagoModal">Registrar Pago [F12]</button>
-        <RegistrarPagoModal 
-        :isVisible="isPagoModalVisible" 
-        :factura="factura" 
-        @close="closePagoModal"
-         @confirm-payment="realizarPago"
-        @modal-focused="handleModalFocus" />
+        <RegistrarPagoModal :isVisible="isPagoModalVisible" :factura="factura" @close="closePagoModal"
+          @confirm-payment="realizarPago" @modal-focused="handleModalFocus" />
         <button @click="nuevoCliente">Nuevo Cliente [ALT] + [C]</button>
         <button @click="salir">Salir [ALT] + [S]</button>
       </div>
@@ -147,12 +150,13 @@ import axios from 'axios';
 import ClienteModal from '../components/modalesCrearVenta/ClienteModal.vue';
 import RegistrarPagoModal from '../components/modalesCrearVenta/RegistrarPagoModal.vue';
 import EliminarItemsModal from '../components/modalesCrearVenta/EliminarItemsModal.vue';
+import BuscarProductoModal from '../components/modalesCrearVenta/BuscarProductoModal.vue';
 import { useToast } from "vue-toastification";
 import { notificaciones } from '../../services/notificaciones.js';
 
 
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, getProductos, agregarProductoCodigo, postVenta,eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, getProductos, agregarProductoCodigo, postVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
 
@@ -160,7 +164,8 @@ export default {
   components: {
     ClienteModal,
     RegistrarPagoModal,
-    EliminarItemsModal
+    EliminarItemsModal,
+    BuscarProductoModal
   },
   data() {
     return {
@@ -171,6 +176,7 @@ export default {
       id_usuario: 0,
       prueba: 'prueba',
       info: '',
+      isBuscarProductoModalVisible: false,
       isEditing: false,
       isModalVisible: false,
       isPagoModalVisible: false,
@@ -185,7 +191,7 @@ export default {
       venta: [],
       factura: [],
       usaSAR: false,
-     
+
     };
   },
 
@@ -208,7 +214,15 @@ export default {
       } else {
         this.resumeMainKeyboardEvents();
       }
-    }
+    },
+    isBuscarProductoModalVisible(newVal) {
+      this.isAnyModalOpen = newVal;
+      if (newVal) {
+        this.pauseMainKeyboardEvents();
+      } else {
+        this.resumeMainKeyboardEvents();
+      }
+    },
   },
 
   computed: {
@@ -216,10 +230,10 @@ export default {
       return this.productosLista.reduce((total, p) => total + (p.precioImpuesto * p.cantidad), 0);
     },
 
-    sucursalActivaFactura(){
+    sucursalActivaFactura() {
       return this.usaSAR;
     },
-    
+
   },
 
   remainingRows() {
@@ -229,6 +243,36 @@ export default {
   methods: {
     async salir() {
       this.logout();
+    },
+
+    buscarProducto() {
+      this.isBuscarProductoModalVisible = true;
+    },
+
+    closeBuscarProductoModal() {
+      this.isBuscarProductoModalVisible = false;
+      this.$nextTick(() => {
+        this.$refs.codigoRef?.focus();
+      });
+    },
+
+    handleProductSelected(product) {
+      const existingProduct = this.productosLista.find(p => p.codigo_producto === product.codigo_producto);
+
+      if (existingProduct) {
+        existingProduct.cantidad += 1;
+      } else {
+        this.productosLista.push({
+          ...product,
+          cantidad: 1
+        });
+      }
+
+      this.closeBuscarProductoModal();
+    },
+
+    setConsumidorFinal() {
+      this.clienteSeleccionado = null; // Restablece la selección del cliente
     },
 
     handleModalFocus(isFocused) {
@@ -248,23 +292,23 @@ export default {
       this.isEliminarModalVisible = true;
     },
 
-   async handleItemDelete(item) {
-    try {
-      const index = this.productosLista.findIndex(p => p === item);
-      if (index !== -1) {
-        
-        const eliminando = await eliminarProductoVenta(this.productosLista[index].id_producto, this.id_usuario);
-        if(!eliminando){
-          throw 'Ocurrio un error al eliminar Item';
-        }        this.productosLista.splice(index, 1);
-        this.selectedItem = null;
-        const toast = useToast();
-        toast.success("Item eliminado correctamente");
+    async handleItemDelete(item) {
+      try {
+        const index = this.productosLista.findIndex(p => p === item);
+        if (index !== -1) {
+
+          const eliminando = await eliminarProductoVenta(this.productosLista[index].id_producto, this.id_usuario);
+          if (!eliminando) {
+            throw 'Ocurrio un error al eliminar Item';
+          } this.productosLista.splice(index, 1);
+          this.selectedItem = null;
+          const toast = useToast();
+          toast.success("Item eliminado correctamente");
+        }
+      } catch (error) {
+        notificaciones('error', error.message);
       }
-    } catch (error) {
-      notificaciones('error', error.message);
-    }
-      
+
     },
 
     closeEliminarModal() {
@@ -293,7 +337,7 @@ export default {
       this.closeModal();
     },
 
-   async openModal() {
+    async openModal() {
       // const toast = useToast();
       // toast.info("Modal abierto");
       this.clientes = await getClientesbyEmpresa(this.id_usuario);
@@ -315,10 +359,10 @@ export default {
       });
     },
 
-    async realizarPago(datosPago){
+    async realizarPago(datosPago) {
       try {
         const pagando = await pagar(datosPago.monto, this.venta.id_venta, this.id_usuario);
-        if(!pagando){
+        if (!pagando) {
           throw 'No se realizo el pago';
         }
         this.limpiarPagado();
@@ -327,28 +371,28 @@ export default {
       }
     },
 
-   async openPagoModal() {
+    async openPagoModal() {
 
-    try {
-      this.venta = await postVenta(
-        this.productosLista, 
-        this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0, 
-        this.id_usuario);
+      try {
+        this.venta = await postVenta(
+          this.productosLista,
+          this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0,
+          this.id_usuario);
 
         this.factura = this.venta.factura;
-      
-      this.isPagoModalVisible = true;
-      this.$nextTick(() => {
-        const pagoModalElement = document.querySelector('.modal-content');
-        if (pagoModalElement) {
-          pagoModalElement.focus();
-        }
-      });
-    } catch (error) {
-      notificaciones('error', error.message);
-    }
 
-      
+        this.isPagoModalVisible = true;
+        this.$nextTick(() => {
+          const pagoModalElement = document.querySelector('.modal-content');
+          if (pagoModalElement) {
+            pagoModalElement.focus();
+          }
+        });
+      } catch (error) {
+        notificaciones('error', error.message);
+      }
+
+
       // const toast = useToast();
       // toast.info("Modal abierto");
     },
@@ -396,6 +440,12 @@ export default {
       } else if (event.altKey && key === "s") {
         event.preventDefault();
         this.logout();
+      } else if (event.altKey && key === "c") {
+        event.preventDefault();
+        this.openModal();
+      } else if (key === "F2") {
+        event.preventDefault();
+        this.buscarProducto();
       } else if (key === "F3") {
         event.preventDefault();
         this.openModal();
@@ -422,7 +472,7 @@ export default {
       this.addQuery = "";
     },
 
-    limpiarPagado(){
+    limpiarPagado() {
       this.addQuery = "";
       this.productosLista = [];
       this.venta = [];
@@ -434,10 +484,10 @@ export default {
       this.agregarProducto();
     },
 
-   async agregarProducto() {
-    let nuevaCantidad;
-    let reducirInventario;
-    const codigoValidar = this.addQuery;
+    async agregarProducto() {
+      let nuevaCantidad;
+      let reducirInventario;
+      const codigoValidar = this.addQuery;
       if (!codigoValidar) {
         const toast = useToast();
         toast.warning("Ingresa un código");
@@ -446,39 +496,39 @@ export default {
 
       try {
         this.limpiar();
-      const newProduct = this.productos.find((p) => p.codigo_producto === codigoValidar);
-      if (!newProduct) {
-        const toast = useToast();
-        toast.warning("No existe el producto");
+        const newProduct = this.productos.find((p) => p.codigo_producto === codigoValidar);
+        if (!newProduct) {
+          const toast = useToast();
+          toast.warning("No existe el producto");
 
-        return;
-      }
+          return;
+        }
 
-      const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
-      if (existingProduct) {
-        existingProduct.cantidad += 1;
-        nuevaCantidad = 1;
+        const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
+        if (existingProduct) {
+          existingProduct.cantidad += 1;
+          nuevaCantidad = 1;
 
-         reducirInventario = await agregarProductoCodigo(nuevaCantidad, existingProduct.codigo_producto, this.id_usuario);
-         
-      } else {
-        newProduct.cantidad = 1;
-        nuevaCantidad = 1;
-        this.productosLista.push({ ...newProduct });
+          reducirInventario = await agregarProductoCodigo(nuevaCantidad, existingProduct.codigo_producto, this.id_usuario);
 
-         reducirInventario = await agregarProductoCodigo(nuevaCantidad, newProduct.codigo_producto, this.id_usuario);
-      }
-      console.log(reducirInventario);
-      
+        } else {
+          newProduct.cantidad = 1;
+          nuevaCantidad = 1;
+          this.productosLista.push({ ...newProduct });
+
+          reducirInventario = await agregarProductoCodigo(nuevaCantidad, newProduct.codigo_producto, this.id_usuario);
+        }
+        console.log(reducirInventario);
+
       } catch (error) {
         console.log(error);
         notificaciones('error', error.message);
       }
 
-      
+
     },
 
-    
+
 
     pushEsc(event) {
       if (event.key === "Esc" || event.key === "Escape") {
@@ -523,17 +573,17 @@ export default {
     }
   },
 
- async mounted() {
+  async mounted() {
     window.addEventListener("keydown", this.handleKeyPress);
     document.title = "Crear Ventas";
     this.changeFavicon('/img/spiderman.ico');
 
     try {
-      
-    this.id_usuario = await solicitudes.solicitarUsuarioToken();
-    this.usaSAR = await sucursalSar(this.id_usuario);
-    this.info = await getInfoBasic(this.id_usuario);
-    this.productos = await getProductos(this.id_usuario);
+
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      this.usaSAR = await sucursalSar(this.id_usuario);
+      this.info = await getInfoBasic(this.id_usuario);
+      this.productos = await getProductos(this.id_usuario);
     } catch (error) {
       notificaciones('error', error.message);
     }
@@ -564,14 +614,18 @@ export default {
 
 /* Estilo cuando la sucursal está facturando */
 .facturando {
-  color: #006400; /* Verde oscuro */
-  font-weight: bold; /* Texto en negrita */
+  color: #006400;
+  /* Verde oscuro */
+  font-weight: bold;
+  /* Texto en negrita */
 }
 
 /* Estilo cuando la sucursal no está facturando o los datos SAR están desactualizados */
 .no-facturando {
-  color: #8B0000; /* Rojo oscuro */
-  font-weight: bold; /* Texto en negrita */
+  color: #8B0000;
+  /* Rojo oscuro */
+  font-weight: bold;
+  /* Texto en negrita */
 }
 
 
@@ -609,6 +663,12 @@ export default {
   flex-direction: column;
   gap: 5px;
   width: 100%;
+}
+
+.buttons-header {
+  display: flex;
+  gap: 5px;
+  /* Espacio entre los botones */
 }
 
 .inputs-container {
