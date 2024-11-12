@@ -2,6 +2,8 @@ import axios from 'axios';
   const homeUrl = 'http://localhost:3000/api';
  // const nextUrl = '/sesion-user';
 
+ 
+
   export default  {
     async solicitarUsuario (parametros)  {
         try {

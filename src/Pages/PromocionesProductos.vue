@@ -170,7 +170,6 @@
 </template>
 
 
-
 <script>
 import ProfileButton from "../components/ProfileButton.vue";
 import solicitudes from "../../services/soli";
@@ -303,51 +302,60 @@ export default {
     },
 
     async agregarPromocion() {
-      try {
-        if (!this.validarFormulario()) {
-          return;
-        }
+  try {
+    if (!this.validarFormulario()) {
+      return;
+    }
 
-        if (!this.isEditing) {
-          const response = await solicitudes.postRegistro(
-            '/promocionesP/crear-promocion',
-            this.promForm
-          );
+    if (!this.isEditing) {
+      const response = await solicitudes.postRegistro(
+        '/promocionesP/crear-promocion',
+        this.promForm
+      );
 
-          if (response.length > 0) {
-            await this.cargarPromociones();
-            this.$emit('mostrar-notificacion', {
-              mensaje: 'Promoción creada exitosamente',
-              tipo: 'success'
-            });
-          }
-        } else {
-          const promocion = this.promociones[this.editIndex];
-          const response = await solicitudes.patchRegistro(
-            `/promocionesP/actualizar-promocion/${promocion.id_promocion}`,
-            this.promFormModal
-          );
-
-          if (response) {
-            await this.cargarPromociones();
-            this.$emit('mostrar-notificacion', {
-              mensaje: 'Promoción actualizada exitosamente',
-              tipo: 'success'
-            });
-          }
-        }
-
-        this.clearForm();
-        this.isShowModal = false;
-        this.activeForm = false;
-      } catch (error) {
-        console.error('Error en agregarPromocion:', error);
+      if (response.length > 0) {
+        await this.cargarPromociones();
         this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al procesar la promoción',
-          tipo: 'error'
+          mensaje: 'Promoción creada exitosamente',
+          tipo: 'success'
         });
       }
-    },
+    } else {
+      // Usar directamente el ID guardado en el formulario modal
+      console.log('Actualizando promoción:', this.promFormModal); // Para debugging
+      
+      const response = await solicitudes.patchRegistro(
+        `/promocionesP/actualizar-promocion/${this.promFormModal.id}`,
+        {
+          promocion_nombre: this.promFormModal.promocion_nombre,
+          porcentaje_descuento: this.promFormModal.porcentaje_descuento,
+          fecha_inicio: this.promFormModal.fecha_inicio,
+          fecha_final: this.promFormModal.fecha_final,
+          estado: this.promFormModal.estado
+        }
+      );
+
+      if (response) {
+        await this.cargarPromociones();
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Promoción actualizada exitosamente',
+          tipo: 'success'
+        });
+      }
+    }
+
+    this.clearForm();
+    this.isShowModal = false;
+    this.activeForm = false;
+    this.isEditing = false;
+  } catch (error) {
+    console.error('Error en agregarPromocion:', error);
+    this.$emit('mostrar-notificacion', {
+      mensaje: 'Error al procesar la promoción',
+      tipo: 'error'
+    });
+  }
+},
 
     validarFormulario() {
       const form = this.isEditing ? this.promFormModal : this.promForm;
@@ -383,87 +391,107 @@ export default {
     },
 
     editarPromocion(index) {
-      const promocion = this.promociones[index];
-      this.promFormModal = {
-        ...promocion,
-        producto: promocion.producto?.nombre || promocion.producto,
-      };
-      this.editIndex = index;
-      this.isEditing = true;
-      this.showModal();
-    },
+  const promocion = this.promociones[index];
+  console.log('Editando promoción:', promocion); // Para debugging
+  
+  this.promFormModal = {
+    id: promocion.id, // Agregamos el id aquí
+    producto_id: promocion.producto_Id,
+    producto: promocion.producto?.nombre || promocion.producto,
+    promocion_nombre: promocion.promocion_nombre,
+    porcentaje_descuento: promocion.porcentaje_descuento,
+    fecha_inicio: promocion.fecha_inicio,
+    fecha_final: promocion.fecha_final,
+    estado: promocion.estado
+  };
+  
+  this.editIndex = index;
+  this.isEditing = true;
+  this.showModal();
+},
 
-    async desactivarProm(index) {
+
+async activarProm(index) {
+  try {
+    const promocion = this.promociones[index];
+    console.log('Activando promoción:', promocion.id); // Para debug
+    const response = await solicitudes.patchRegistro(
+      `/promocionesP/cambiar-estado-promocion/${promocion.id}`,
+      { estado: true }
+    );
+
+    if (response) {
+      await this.cargarPromociones();
+      this.$emit('mostrar-notificacion', {
+        mensaje: 'Promoción activada exitosamente',
+        tipo: 'success'
+      });
+    }
+  } catch (error) {
+    console.error('Error al activar promoción:', error);
+    this.$emit('mostrar-notificacion', {
+      mensaje: 'Error al activar la promoción',
+      tipo: 'error'
+    });
+  }
+},
+
+async desactivarProm(index) {
+  try {
+    const promocion = this.promociones[index];
+    console.log('Desactivando promoción:', promocion.id); // Para debug
+    const response = await solicitudes.patchRegistro(
+      `/promocionesP/cambiar-estado-promocion/${promocion.id}`,
+      { estado: false }
+    );
+
+    if (response) {
+      await this.cargarPromociones();
+      this.$emit('mostrar-notificacion', {
+        mensaje: 'Promoción desactivada exitosamente',
+        tipo: 'success'
+      });
+    }
+  } catch (error) {
+    console.error('Error al desactivar promoción:', error);
+    this.$emit('mostrar-notificacion', {
+      mensaje: 'Error al desactivar la promoción',
+      tipo: 'error'
+    });
+  }
+},
+
+    async eliminarProm() {
       try {
-        const promocion = this.promociones[index];
-        const response = await solicitudes.patchRegistro(
-          `/promocionesP/desactivar-promocion/${promocion.id_promocion}`,
-          { estado: false }
-        );
+    const promocion = this.promociones[this.editIndex]; // Cambio: usar editIndex en lugar de index
+    console.log('Eliminando promoción:', promocion); // Para debugging
 
-        if (response) {
-          await this.cargarPromociones();
-          this.$emit('mostrar-notificacion', {
-            mensaje: 'Promoción desactivada exitosamente',
-            tipo: 'success'
-          });
-        }
-      } catch (error) {
-        console.error('Error al desactivar promoción:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al desactivar la promoción',
-          tipo: 'error'
-        });
-      }
-    },
+    if (!promocion || !promocion.id) {
+      throw new Error('Promoción no válida');
+    }
 
-    async activarProm(index) {
-      try {
-        const promocion = this.promociones[index];
-        const response = await solicitudes.patchRegistro(
-          `/promocionesP/desactivar-promocion/${promocion.id_promocion}`,
-          { estado: true }
-        );
+    const response = await solicitudes.deleteRegistro(
+      `/promocionesP/eliminar-promocion/${promocion.id}`
+    );
 
-        if (response) {
-          await this.cargarPromociones();
-          this.$emit('mostrar-notificacion', {
-            mensaje: 'Promoción activada exitosamente',
-            tipo: 'success'
-          });
-        }
-      } catch (error) {
-        console.error('Error al activar promoción:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al activar la promoción',
-          tipo: 'error'
-        });
-      }
-    },
-
-    async eliminarProm(index) {
-      try {
-        const promocion = this.promociones[index];
-        const response = await solicitudes.deleteRegistro(
-          `/promocionesP/eliminar-promocion/${promocion.id_promocion}`
-        );
-
-        if (response === true) {
-          await this.cargarPromociones();
-          this.$emit('mostrar-notificacion', {
-            mensaje: 'Promoción eliminada exitosamente',
-            tipo: 'success'
-          });
-          this.showConfirmModal = false;
-        }
-      } catch (error) {
-        console.error('Error al eliminar promoción:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al eliminar la promoción',
-          tipo: 'error'
-        });
-      }
-    },
+    if (response === true) {
+      await this.cargarPromociones();
+      this.$emit('mostrar-notificacion', {
+        mensaje: 'Promoción eliminada exitosamente',
+        tipo: 'success'
+      });
+      this.showConfirmModal = false;
+    }
+  } catch (error) {
+    console.error('Error al eliminar promoción:', error);
+    this.$emit('mostrar-notificacion', {
+      mensaje: 'Error al eliminar la promoción',
+      tipo: 'error'
+    });
+  } finally {
+    this.editIndex = null;
+  }
+},
 
     showModal() {
       this.isShowModal = true;
