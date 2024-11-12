@@ -282,7 +282,11 @@ export default {
     },
 
     eliminarItem() {
-      if (!this.selectedItem) {
+      if (this.productos.length === 0) {
+        const toast = useToast();
+        toast.warning("No hay datos en la tabla.");
+        return;
+      } else if (!this.selectedItem) {
         const toast = useToast();
         toast.warning("Seleccione un item para eliminar");
         return;
@@ -370,6 +374,11 @@ export default {
     },
 
     async openPagoModal() {
+      const toast = useToast();
+      if (this.productos.length === 0) {
+        toast.warning("No hay datos en la tabla.");
+        return;
+      }
 
       try {
         this.venta = await postVenta(
@@ -387,12 +396,8 @@ export default {
           }
         });
       } catch (error) {
-        notificaciones('error', error.message);
+        toast.warning("No hay datos en la tabla.");
       }
-
-
-      // const toast = useToast();
-      // toast.info("Modal abierto");
     },
 
     closePagoModal() {

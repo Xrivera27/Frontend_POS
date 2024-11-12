@@ -1,12 +1,10 @@
 <template>
     <Teleport to="body">
         <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
-           
             <div class="modal-content">
                 <div class="header-container" tabindex="-1">
                     <h2 class="modal-title">Clientes</h2>
-                    <input type="text" v-model="searchQuery" placeholder="Búsqueda por nombre"
-                        class="search-input" />
+                    <input type="text" v-model="searchQuery" placeholder="Búsqueda por nombre" class="search-input" />
                 </div>
                 <div class="form-container">
                     <div class="form-group">
@@ -27,25 +25,27 @@
                     </div>
                 </div>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Dirección</th>
-                            <th>RTN</th>
-                            <th>Teléfono</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="client in filterClients" :key="client.rtn" @dblclick="selectClient(client)"
-                            class="client-row">
-                            <td>{{ client.nombre_completo }}</td>
-                            <td>{{ client.direccion }}</td>
-                            <td>{{ client.rtn }}</td>
-                            <td>{{ client.telefono }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-nombre">Nombre</th>
+                                <th class="col-direccion">Dirección</th>
+                                <th class="col-rtn">RTN</th>
+                                <th class="col-telefono">Teléfono</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="client in filterClients" :key="client.rtn" @dblclick="selectClient(client)"
+                                class="client-row">
+                                <td class="col-nombre">{{ client.nombre_completo }}</td>
+                                <td class="col-direccion">{{ client.direccion }}</td>
+                                <td class="col-rtn">{{ client.rtn }}</td>
+                                <td class="col-telefono">{{ client.telefono }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="button-container">
                     <button @click="addClient">Nuevo</button>
@@ -57,19 +57,17 @@
 </template>
 
 <script>
+// [Script section se mantiene igual]
 export default {
     props: {
         isVisible: {
             type: Boolean,
             required: true
         },
-
         clientes: {
             type: Array,
             required: true
         }
-
-
     },
     data() {
         return {
@@ -85,31 +83,27 @@ export default {
     },
     computed: {
         filterClients() {
-            if(this.searchQuery === ''){
-               return  this.clientes;
+            if (this.searchQuery === '') {
+                return this.clientes;
             }
-            else{
-               return this.clientes.filter(client =>
-                client.nombre_completo.toLowerCase().includes(this.searchQuery.toLowerCase())
-            );
+            else {
+                return this.clientes.filter(client =>
+                    client.nombre_completo.toLowerCase().includes(this.searchQuery.toLowerCase())
+                );
             }
-            
         },
     },
     methods: {
         onFocus() {
             this.$emit('modal-focused');
         },
-
-        returnClientes(clientes){
+        returnClientes(clientes) {
             return clientes;
         },
-
         closeModal() {
             console.log(this.clientes);
             this.$emit('close');
         },
-        
         selectClient(client) {
             this.$emit('client-selected', client);
         },
@@ -123,11 +117,6 @@ export default {
             this.newClient = { nombre: '', direccion: '', rtn: '', telefono: '' };
         },
     },
-
-    // mounted() {
-    //     this.filteredClients = this.clients;
-        
-    // },
 };
 </script>
 
@@ -155,32 +144,71 @@ export default {
     background: white;
     padding: 20px;
     border-radius: 5px;
-    width: 500px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1010;
+    width: 90%;
+    max-width: 1200px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.modal-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
+/* Nuevo contenedor para la tabla con scroll */
+.table-container {
+    flex: 1;
+    overflow: auto;
+    position: relative;
 }
 
-.close-button {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    position: absolute;
-    top: 10px;
-    right: 10px;
+/* Estilos para la tabla con encabezado fijo */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
-.modal-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
+thead {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 1;
+}
+
+thead th {
+    border-top: 1px solid #ddd;
+    border-bottom: 2px solid #ddd;
+    /* Borde más grueso para el encabezado */
+    background-color: #f8f9fa;
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 10px;
     text-align: left;
+}
+
+/* Asegurarse de que las columnas mantengan sus proporciones */
+.col-nombre {
+    width: 20%;
+}
+
+.col-direccion {
+    width: 50%;
+}
+
+.col-rtn {
+    width: 15%;
+}
+
+.col-telefono {
+    width: 15%;
+}
+
+/* Resto de los estilos se mantienen igual */
+.modal-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
 }
 
 .form-container {
@@ -193,37 +221,28 @@ export default {
 .form-group {
     display: flex;
     flex-direction: column;
-    /* Alinea el label y el input verticalmente */
-    margin-right: 20px;
-    /* Espacio entre los grupos de formulario */
     flex: 1;
-    /* Esto permite que cada grupo ocupe el mismo espacio */
 }
 
-label {
-    margin-bottom: 5px;
-    text-align: left;
-    /* Alinea el texto del label a la izquierda */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 40% !important;
 }
 
 input[type="text"] {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    width: 95%;
-    /* Asegúrate de que el input ocupe todo el ancho del grupo */
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th,
-td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
+    width: 80% !important;
 }
 
 .button-container {
@@ -243,50 +262,6 @@ button {
 
 button:hover {
     background-color: #3e8e41;
-}
-
-.header-container,
-.button-container {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-button:hover {
-    background-color: #3e8e41;
-}
-
-.search-input,
-input[type="text"] {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 95%;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th,
-td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
-}
-
-.modal-title {
-    margin: 0;
-    /* Elimina el margen predeterminado del h2 */
-}
-
-.search-input {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 40% !important;
-    /* Ajusta el ancho según sea necesario */
 }
 
 .client-row {

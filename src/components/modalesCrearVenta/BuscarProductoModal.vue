@@ -173,7 +173,6 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    max-height: 80%;
 }
 
 .search-container {
@@ -217,6 +216,7 @@ export default {
 .table-container {
     flex: 1;
     overflow-y: auto;
+    position: relative;
     border: 1px solid #ddd;
     border-radius: 4px;
     margin-bottom: 15px;
