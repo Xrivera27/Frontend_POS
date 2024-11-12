@@ -590,8 +590,9 @@ input {
 }
 
 #btnDesactivar {
-  background-color: #198754;  /* Verde para activo */
-  color: white;
+
+background-color: rgb(24, 233, 24);
+color: white;
 }
 
 #btnActivar {
