@@ -67,7 +67,7 @@
                   <td class="col-codigo">{{ producto.codigo_producto }}</td>
                   <td class="col-descripcion">{{ producto.nombre }}</td>
                   <td class="col-cantidad">{{ producto.cantidad }}</td>
-                  <td class="col-precio">{{ producto.precioImpuesto }}</td>
+                  <td class="col-precio">{{ producto.precio_unitario }}</td>
                   <td class="col-importe">{{ producto.precioImpuesto * producto.cantidad }}</td>
                 </tr>
                 <!-- Filas vacías para llenar el espacio -->
@@ -263,7 +263,6 @@ export default {
       } else {
         this.productosLista.push({
           ...product,
-          cantidad: 1
         });
       }
 
