@@ -141,13 +141,31 @@ export default {
         body: JSON.stringify(datosNuevos)
       });
 
+      const data = await respuesta.json();
+
       if (!respuesta.ok) {
-        throw new Error(`No se pudo crear: ${respuesta.statusText}`);
+        // Crear un objeto de error personalizado que incluye tanto el status como los datos
+        const error = new Error(data.error || 'Error en la solicitud');
+        error.response = {
+          status: respuesta.status,
+          data: data
+        };
+        throw error;
       }
 
-      return await respuesta.json();
+      return data;
     } catch (error) {
-      throw new Error(`Ocurrió un error: ${error.message}`);
+      // Si el error ya tiene la estructura que necesitamos, lo propagamos
+      if (error.response) {
+        throw error;
+      }
+      // Si no, creamos un nuevo error con la estructura correcta
+      const customError = new Error(error.message);
+      customError.response = {
+        status: error.status || 500,
+        data: { error: error.message }
+      };
+      throw customError;
     }
   },
 
