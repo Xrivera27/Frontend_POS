@@ -90,7 +90,7 @@
                 <ul :class="{ 'dropdown-menu': true, 'open': dropdowns.compras }">
                     <li><router-link to="/administrar-compras" class="nav-link">Administrar compras</router-link></li>
                     <li><router-link to="/compras" class="nav-link">Crear compra</router-link></li>
-                    <li><router-link to="/reporte-ventas" class="nav-link">Reporte de compras</router-link></li>
+                    <li><router-link to="/admin-invenario" class="nav-link">Administrar inventario</router-link></li>
                 </ul>
             </li>
 

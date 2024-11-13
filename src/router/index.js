@@ -19,6 +19,7 @@ import PromocionesCategorias from "@/Pages/PromocionesCategorias.vue";
 import ConfigPage from "@/Pages/ConfigPage.vue";
 import ConfigCompany from "@/Pages/ConfigCompany.vue";
 import ConfigSar from "@/Pages/configSar.vue";
+import AdministrarInventario from "@/Pages/AdministrarInventario.vue";
 
 // Función para obtener el rol desde localStorage
 function getRole() {
@@ -153,6 +154,12 @@ const routes = [
     name: "Config-sar",
     component: ConfigSar,
     meta: { requiresAuth: true, role: [1] },
+  },
+  {
+    path: "/admin-invenario",
+    name: "Admin-inventario",
+    component: AdministrarInventario,
+    meta: { requiresAuth: true, role: [1, 2, 3, 4] },
   },
   {
     path: "/:pathMatch(.*)*", // Ruta para manejar rutas no encontradas
