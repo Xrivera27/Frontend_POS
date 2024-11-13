@@ -40,10 +40,10 @@
         </div>
         <div class="contenedor-interno contenedor-derecho">
           <label for="fecha_inicio">Fecha de inicio:</label>
-          <input  type="date"  id="fecha_inicio"  name="fecha_inicio"  v-model="promForm.fecha_inicio"  :min="getFechaMinima()" required />
+          <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promForm.fecha_inicio" required />
 
           <label for="fecha_final">Fecha final:</label>
-          <input type="date" id="fecha_final" name="fecha_final" v-model="promForm.fecha_final" :min="promForm.fecha_inicio || getFechaMinima()" required />
+          <input type="date" id="fecha_final" name="fecha_final" v-model="promForm.fecha_final" required />
         </div>
       </div>
       <div class="contenedor-boton">
@@ -137,11 +137,10 @@
             </div>
             <div class="contenedor-interno contenedor-derecho">
               <label for="fecha_inicio">Fecha de inicio:</label>
-              <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promFormModal.fecha_inicio" :min="getFechaMinima()" required />
-
+              <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promFormModal.fecha_inicio" required />
 
               <label for="fecha_final">Fecha final:</label>
-              <input type="date" id="fecha_final" name="fecha_final" v-model="promFormModal.fecha_final" :min="promFormModal.fecha_inicio || getFechaMinima()" required />
+              <input type="date" id="fecha_final" name="fecha_final" v-model="promFormModal.fecha_final" required />
             </div>
           </div>
           <div class="contenedor-boton">
@@ -209,7 +208,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import ProfileButton from "../components/ProfileButton.vue";
@@ -279,14 +277,6 @@ export default {
   },
 
   methods: {
-
-    getFechaMinima() {
-    const hoy = new Date();
-    // Formatear la fecha a YYYY-MM-DD
-    return hoy.toISOString().split('T')[0];
-  },
-  
-
     formatDate(dateString) {
       if (!dateString) return '';
       const date = new Date(dateString);
@@ -372,8 +362,7 @@ export default {
       this.editIndex = null;
     },
 
- 
-async agregarPromocion() {
+    async agregarPromocion() {
   try {
     if (!this.validarFormulario()) {
       return;
@@ -471,53 +460,37 @@ async agregarPromocion() {
     },
 
     validarFormulario() {
-    const form = this.isEditing ? this.promFormModal : this.promForm;
-    if (!form.categoria_id || !form.nombre_promocion || 
-        !form.porcentaje_descuento || !form.fecha_inicio || 
-        !form.fecha_final) {
-      this.$emit('mostrar-notificacion', {
-        mensaje: 'Todos los campos son obligatorios',
-        tipo: 'error'
-      });
-      return false;
-    }
-    
-    if (form.porcentaje_descuento < 0 || form.porcentaje_descuento > 100) {
-      this.$emit('mostrar-notificacion', {
-        mensaje: 'El porcentaje de descuento debe estar entre 0 y 100',
-        tipo: 'error'
-      });
-      return false;
-    }
+      const form = this.isEditing ? this.promFormModal : this.promForm;
+      if (!form.producto_id || !form.promocion_nombre || 
+          !form.porcentaje_descuento || !form.fecha_inicio || 
+          !form.fecha_final) {
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Todos los campos son obligatorios',
+          tipo: 'error'
+        });
+        return false;
+      }
+      
+      if (form.porcentaje_descuento < 0 || form.porcentaje_descuento > 100) {
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'El porcentaje de descuento debe estar entre 0 y 100',
+          tipo: 'error'
+        });
+        return false;
+      }
 
-    const fechaInicio = new Date(form.fecha_inicio);
-    const fechaFinal = new Date(form.fecha_final);
-    const hoy = new Date();
-    
-    // Establecer las horas a 0 para comparar solo fechas
-    hoy.setHours(0, 0, 0, 0);
-    fechaInicio.setHours(0, 0, 0, 0);
-    fechaFinal.setHours(0, 0, 0, 0);
+      const fechaInicio = new Date(form.fecha_inicio);
+      const fechaFinal = new Date(form.fecha_final);
+      if (fechaInicio > fechaFinal) {
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'La fecha final debe ser posterior a la fecha inicial',
+          tipo: 'error'
+        });
+        return false;
+      }
 
-    if (fechaInicio < hoy) {
-      this.$emit('mostrar-notificacion', {
-        mensaje: 'La fecha de inicio no puede ser anterior a hoy',
-        tipo: 'error'
-      });
-      return false;
-    }
-
-    if (fechaInicio > fechaFinal) {
-      this.$emit('mostrar-notificacion', {
-        mensaje: 'La fecha final debe ser posterior a la fecha inicial',
-        tipo: 'error'
-      });
-      return false;
-    }
-
-    return true;
-  },
-
+      return true;
+    },
 
     editarPromocion(index) {
       const promocion = this.promociones[index];
