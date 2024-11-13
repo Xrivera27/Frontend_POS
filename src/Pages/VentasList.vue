@@ -68,7 +68,7 @@
                   <td class="col-descripcion">{{ producto.nombre }}</td>
                   <td class="col-cantidad">{{ producto.cantidad }}</td>
                   <td class="col-precio">{{ producto.precio_unitario }}</td>
-                  <td class="col-importe">{{ producto.precioImpuesto * producto.cantidad }}</td>
+                  <td class="col-importe">{{ calcularImporte(producto) }}</td>
                 </tr>
                 <!-- Filas vacías para llenar el espacio -->
                 <tr v-for="n in remainingRows" :key="`empty-${n}`" class="empty-row">
@@ -226,7 +226,7 @@ export default {
 
   computed: {
     calcularTotal() {
-      return this.productosLista.reduce((total, p) => total + (p.precioImpuesto * p.cantidad), 0);
+      return this.productosLista.reduce((total, p) => total + (p.precio_final), 0);
     },
 
     sucursalActivaFactura() {
@@ -271,6 +271,17 @@ export default {
 
     setConsumidorFinal() {
       this.clienteSeleccionado = null; // Restablece la selección del cliente
+    },
+
+    calcularImporte(producto){
+      if(producto.cantidad >= producto.cantidad_activar_mayorista){
+        producto.precio_final = producto.cantidad * producto.precioImpuestoMayorista;
+
+      }
+      else{
+        producto.precio_final = producto.cantidad * producto.precioImpuesto;
+      }
+      return producto.precio_final;
     },
 
     handleModalFocus(isFocused) {
@@ -372,6 +383,8 @@ export default {
         notificaciones('error', error.message);
       }
     },
+
+    
 
     async openPagoModal() {
       const toast = useToast();
@@ -527,11 +540,7 @@ export default {
         console.log(error);
         notificaciones('error', error.message);
       }
-
-
     },
-
-
 
     pushEsc(event) {
       if (event.key === "Esc" || event.key === "Escape") {
