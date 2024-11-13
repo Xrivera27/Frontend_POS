@@ -67,7 +67,7 @@
                   <td class="col-codigo">{{ producto.codigo_producto }}</td>
                   <td class="col-descripcion">{{ producto.nombre }}</td>
                   <td class="col-cantidad">{{ producto.cantidad }}</td>
-                  <td class="col-precio">{{ producto.precio_unitario }}</td>
+                  <td class="col-precio">{{ mostrarPrecioFinal(producto) }}</td>
                   <td class="col-importe">{{ calcularImporte(producto) }}</td>
                 </tr>
                 <!-- Filas vacías para llenar el espacio -->
@@ -285,7 +285,17 @@ export default {
       return producto.precio_final;
     },
 
-    mostrarPrecioFinal(){},
+    mostrarPrecioFinal(producto){
+      if((producto.precio_mayorista > 0 && producto.cantidad_activar_mayorista > 0)&&
+      (producto.cantidad >= producto.cantidad_activar_mayorista)){
+        return producto.precio_mayorista;
+
+      }
+      else{
+        return producto.precio_unitario;
+      }
+      
+    },
 
     handleModalFocus(isFocused) {
       this.isModalFocused = isFocused;
