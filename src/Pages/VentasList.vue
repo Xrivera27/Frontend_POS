@@ -274,7 +274,8 @@ export default {
     },
 
     calcularImporte(producto){
-      if(producto.cantidad >= producto.cantidad_activar_mayorista){
+      if((producto.precio_mayorista > 0 && producto.cantidad_activar_mayorista > 0)&&
+      (producto.cantidad >= producto.cantidad_activar_mayorista)){
         producto.precio_final = producto.cantidad * producto.precioImpuestoMayorista;
 
       }
@@ -283,6 +284,8 @@ export default {
       }
       return producto.precio_final;
     },
+
+    mostrarPrecioFinal(){},
 
     handleModalFocus(isFocused) {
       this.isModalFocused = isFocused;
