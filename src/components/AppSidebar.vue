@@ -1,3 +1,4 @@
+<!-- Mi Sidebar :D -->
 <template>
     <aside ref="sidebar" v-if="!isLoginRoute" class="sidebar" :class="{ expanded, dark: isDarkMode }">
         <!-- Toggle button for expanding/collapsing -->
@@ -66,31 +67,36 @@
                 </router-link>
             </li>
 
+            <!-- Ventas Dropdown -->
             <li v-if="hasPermission('Venta')" class="nav-item dropdown" ref="ventasDropdown"
-                @mouseover="openDropdown('ventas')" @mouseleave="closeDropdown('ventas')">
+                @mouseover="$emit('open-dropdown', 'ventas')" @mouseleave="$emit('close-dropdown', 'ventas')">
                 <a href="#" class="nav-link">
                     <i class="bi bi-cash-stack"></i>
                     <span v-if="expanded" class="tooltip-text">Ventas</span>
-                    <i class="bi bi-chevron-right"></i>
+                    <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': dropdowns.ventas }"></i>
                 </a>
-                <ul :class="{ 'dropdown-menu': true, 'open': dropdowns.ventas }">
-                    <li><router-link to="/administrar-ventas" class="nav-link">Administrar ventas</router-link></li>
-                    <li><router-link to="/ventas" class="nav-link">Crear venta</router-link></li>
-                    <li><router-link to="/reporte" class="nav-link">Reporte de ventas</router-link></li>
+                <ul class="dropdown-menu" :class="{ 'show': dropdowns.ventas }">
+                    <li><router-link to="/administrar-ventas" class="dropdown-item">Administrar ventas</router-link>
+                    </li>
+                    <li><router-link to="/ventas" class="dropdown-item">Crear venta</router-link></li>
+                    <li><router-link to="/reporte" class="dropdown-item">Reporte de ventas</router-link></li>
                 </ul>
             </li>
 
+            <!-- Compras Dropdown -->
             <li v-if="hasPermission('Compra')" class="nav-item dropdown" ref="comprasDropdown"
-                @mouseover="openDropdown('compras')" @mouseleave="closeDropdown('compras')">
+                @mouseover="$emit('open-dropdown', 'compras')" @mouseleave="$emit('close-dropdown', 'compras')">
                 <a href="#" class="nav-link">
                     <i class="bi bi-cart-plus-fill"></i>
                     <span v-if="expanded" class="tooltip-text">Compras</span>
-                    <i class="bi bi-chevron-right"></i>
+                    <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': dropdowns.compras }"></i>
                 </a>
-                <ul :class="{ 'dropdown-menu': true, 'open': dropdowns.compras }">
-                    <li><router-link to="/administrar-compras" class="nav-link">Administrar compras</router-link></li>
-                    <li><router-link to="/compras" class="nav-link">Crear compra</router-link></li>
-                    <li><router-link to="/admin-invenario" class="nav-link">Administrar inventario</router-link></li>
+                <ul class="dropdown-menu" :class="{ 'show': dropdowns.compras }">
+                    <li><router-link to="/administrar-compras" class="dropdown-item">Administrar compras</router-link>
+                    </li>
+                    <li><router-link to="/compras" class="dropdown-item">Crear compra</router-link></li>
+                    <li><router-link to="/admin-invenario" class="dropdown-item">Administrar inventario</router-link>
+                    </li>
                 </ul>
             </li>
 
@@ -126,6 +132,15 @@
 <script>
 export default {
     name: 'AppSidebar',
+    data() {
+        return {
+            openDropdowns: {
+                ventas: false,
+                compras: false
+            }
+        }
+    },
+
     props: {
         isDarkMode: {
             type: Boolean,
@@ -152,11 +167,12 @@ export default {
         toggleSidebar() {
             this.$emit('toggle-sidebar');
         },
-        openDropdown(menu) {
-            this.$emit('open-dropdown', menu);
+        toggleDropdown(menu) {
+            this.openDropdowns[menu] = !this.openDropdowns[menu];
         },
-        closeDropdown(menu) {
-            this.$emit('close-dropdown', menu);
+
+        isDropdownOpen(menu) {
+            return this.openDropdowns[menu];
         },
         logout() {
             this.$emit('logout');
@@ -206,6 +222,8 @@ ul.nav {
    Estilos del Sidebar
 ======================================================= */
 .sidebar {
+    display: flex;
+    flex-direction: column;
     position: fixed;
     top: 0;
     left: 0;
@@ -216,16 +234,101 @@ ul.nav {
     padding-top: 20px;
     padding-right: 0;
     margin: 0;
-    z-index: 10;
-    transition: width 0.3s ease;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Para iconos cuando el sidebar está colapsado */
+.sidebar:not(.expanded) .nav-link {
+    justify-content: center;
+    padding: 1vh;
+}
+
+.sidebar:not(.expanded) .nav-link i {
+    margin: 0;
+}
+
+.sidebar:not(.expanded) .dropdown-menu {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    min-width: 200px;
+    background-color: #ebebeb;
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.1);
+    border-radius: 0 8px 8px 0;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar:not(.expanded) .nav-item.dropdown {
+    position: relative;
+    width: 100%;
+}
+
+/* Ajuste para el modo oscuro */
+.sidebar.dark:not(.expanded) .dropdown-menu {
+    background-color: #333;
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Ocultar la flecha del dropdown cuando está colapsado */
+.sidebar:not(.expanded) .dropdown-arrow {
+    transform: rotate(-90deg);
+}
+
+/* Ajustar el ancho del dropdown cuando está expandido */
+.sidebar.expanded .nav-item.dropdown {
+    width: 88%;
+}
+
+/* Para mantener el estilo cuando está expandido */
+.sidebar.expanded .nav-link {
+    justify-content: flex-start;
+    padding: 1vh 1.5vh;
+}
+
+/* Específico para dropdowns */
+.nav-item.dropdown .nav-link {
+    justify-content: space-between;
+}
+
+/* Animaciones mejoradas para el sidebar */
+.sidebar.expanded {
+    width: 200px;
+    transform: translateX(0);
+}
+
+.sidebar-content {
+    height: calc(100% - 65px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 10px;
+}
+
+/* Overlay para móviles */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar-overlay.show {
+    opacity: 1;
+    visibility: visible;
 }
 
 .sidebar.expanded {
-    width: 255px;
-}
-
-.sidebar.expanded .nav-item {
-    padding-left: 40px;
+    width: 200px;
 }
 
 .sidebar.expanded .toggle-btn {
@@ -255,21 +358,84 @@ ul.nav {
     /* Mantiene el color del ícono en modo oscuro */
 }
 
+.sidebar.dark .dropdown-menu {
+    background-color: rgba(192, 157, 98, 0.05);
+}
+
+.sidebar.dark .dropdown-item:hover {
+    background-color: rgba(192, 157, 98, 0.15);
+}
+
 /* =======================================================
    Estilos de los Elementos de Navegación
 ======================================================= */
 .nav-item {
-    position: relative;
-    justify-content: center;
-    margin-bottom: 0.10vh;
+    transform: translateX(-10px);
+    opacity: 0;
+    animation: slideIn 0.3s ease forwards;
+    padding: 4px 0;
+}
+
+.nav-item.dropdown {
+    width: 88%;
+    padding: 4px 0;
+    /* Mismo padding que los otros elementos */
+}
+
+.nav-item.dropdown .nav-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+@keyframes slideIn {
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.nav-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.nav-item:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.nav-item:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.nav-item:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.nav-item:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.nav-item:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+.nav-item:nth-child(7) {
+    animation-delay: 0.7s;
+}
+
+.nav-item:nth-child(8) {
+    animation-delay: 0.8s;
 }
 
 .nav-link {
     display: flex;
+    position: relative;
+    overflow: hidden;
     align-items: center;
     justify-content: flex-start;
     /* Alinea los íconos a la izquierda */
-    padding: 1vh 1.5vh;
+
     color: #c09d62;
     text-decoration: none;
     border-radius: 8px;
@@ -277,20 +443,38 @@ ul.nav {
 }
 
 .nav-link i {
-    font-size: 3.5vh;
-    /* Tamaño uniforme para los íconos */
+    font-size: 2.5vh;
     color: inherit;
-    /* Hereda el color del texto */
+    transition: transform 0.3s ease;
 }
 
 .nav-link:hover {
     background-color: #dadada;
 }
 
+.nav-link:hover::after {
+    width: 100%;
+}
+
 .nav-link.active {
     background-color: #d4d4d4;
     color: #79552f;
     /* Color del texto y los íconos en estado activo */
+}
+
+.nav-link:hover i {
+    transform: scale(1.1);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #c09d62;
+    transition: width 0.3s ease;
 }
 
 /* =======================================================
@@ -301,24 +485,35 @@ ul.nav {
     justify-content: center;
     align-items: center;
     width: 35px;
-    /* Ancho fijo */
+    /* Tamaño fijo */
     height: 35px;
-    /* Alto fijo */
+    /* Tamaño fijo */
+    min-width: 35px;
+    /* Evita que se encoja */
+    min-height: 35px;
+    /* Evita que se encoja */
     border-radius: 50%;
-    /* Mantiene la forma circular */
-    padding: 5px;
+    padding: 0;
+    /* Elimina el padding */
     cursor: pointer;
-    text-align: center;
-    margin: 10px auto;
-    /* Centra horizontalmente */
+    margin-bottom: 2px;
+    margin-left: auto;
+    margin-right: auto;
     position: relative;
-    /* Para posicionamiento interno si es necesario */
     flex-shrink: 0;
-    /* Evita que se encoja con el sidebar */
+    /* Evita que se encoja */
+    background-color: transparent;
+    transition: background-color 0.3s ease;
+    /* Solo transición para el hover */
+}
+
+.toggle-btn i {
+    font-size: 20px;
+    /* Tamaño fijo del icono */
 }
 
 .toggle-btn:hover {
-    background-color: #d4d4d4;
+    background-color: rgba(192, 157, 98, 0.1);
 }
 
 /* =======================================================
@@ -326,36 +521,118 @@ ul.nav {
 ======================================================= */
 .tooltip-text {
     margin-left: 10px;
-    font-weight: bold;
     font-size: 15px;
 }
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 250px;
+    }
+
+    .sidebar.expanded {
+        transform: translateX(0);
+    }
+
+    .mobile-collapsed {
+        transform: translateX(-100%);
+    }
+
+    .nav-link {
+        padding: 15px 20px;
+        /* Aumentar área táctil en móviles */
+    }
+
+    .tooltip-text {
+        font-size: 16px;
+        /* Texto más grande para móviles */
+    }
+
+    .dropdown-menu.show {
+        padding: 4px 0;
+    }
+
+    .dropdown-item {
+        padding: 12px 16px;
+        margin: 2px 0;
+    }
+
+    .toggle-btn {
+        width: 40px;
+        height: 40px;
+        /* Botón más grande para móviles */
+    }
+}
+
 
 /* =======================================================
    Estilos del Menú Desplegable
 ======================================================= */
 .dropdown-menu {
-    position: absolute;
-    top: 0;
-    left: 100%;
-    background-color: #ebebeb;
-    padding: 0;
-    width: auto;
-    min-width: 24vh;
-    max-width: 25vh;
+    position: static;
     max-height: 0;
-    overflow: hidden;
     opacity: 0;
-    transform: translateY(-10px);
-    transition: max-height 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
-    pointer-events: none;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    background-color: rgba(192, 157, 98, 0.1);
+    border-radius: 8px;
+    margin: 0 8px;
+}
+
+/* Animación suave para el dropdown */
+.dropdown-menu {
+    transform-origin: top;
+    transform: scaleY(0);
+    transition: all 0.3s ease;
+}
+
+.dropdown-menu.show {
+    transform: scaleY(1);
+}
+
+/* Animación para el modo oscuro */
+.sidebar,
+.nav-link,
+.dropdown-menu {
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+.dropdown-menu.show {
+    max-height: 1000px;
+    opacity: 1;
+    padding: 8px 0;
 }
 
 .dropdown-menu.open {
-    max-height: 300px;
+    transform: scaleY(1);
     opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
 }
+
+.dropdown-item {
+    padding: 8px 16px;
+    color: #c09d62;
+    display: block;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(192, 157, 98, 0.2);
+    padding-left: 20px;
+}
+
+.dropdown-arrow {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+}
+
+.dropdown-arrow.rotated {
+    transform: rotate(180deg);
+}
+
 
 .dropdown-menu a {
     font-size: 14px;
@@ -375,7 +652,8 @@ ul.nav {
     width: 60%;
     height: 1px;
     background-color: #c09d62;
-    margin: 10px auto;
+    margin: 8px auto;
+    /* Ajustar el margen de la línea divisora */
 }
 
 /* =======================================================

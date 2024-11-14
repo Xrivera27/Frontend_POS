@@ -234,7 +234,7 @@ ul.nav {
 }
 
 .main-content.expanded {
-  margin-left: 255px;
+  margin-left: 200px;
   z-index: 1;
 }
 

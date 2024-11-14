@@ -273,28 +273,28 @@ export default {
       this.clienteSeleccionado = null; // Restablece la selección del cliente
     },
 
-    calcularImporte(producto){
-      if((producto.precio_mayorista > 0 && producto.cantidad_activar_mayorista > 0)&&
-      (producto.cantidad >= producto.cantidad_activar_mayorista)){
+    calcularImporte(producto) {
+      if ((producto.precio_mayorista > 0 && producto.cantidad_activar_mayorista > 0) &&
+        (producto.cantidad >= producto.cantidad_activar_mayorista)) {
         producto.precio_final = producto.cantidad * producto.precioImpuestoMayorista;
 
       }
-      else{
+      else {
         producto.precio_final = producto.cantidad * producto.precioImpuesto;
       }
       return producto.precio_final;
     },
 
-    mostrarPrecioFinal(producto){
-      if((producto.precio_mayorista > 0 && producto.cantidad_activar_mayorista > 0)&&
-      (producto.cantidad >= producto.cantidad_activar_mayorista)){
+    mostrarPrecioFinal(producto) {
+      if ((producto.precio_mayorista > 0 && producto.cantidad_activar_mayorista > 0) &&
+        (producto.cantidad >= producto.cantidad_activar_mayorista)) {
         return producto.precio_mayorista;
 
       }
-      else{
+      else {
         return producto.precio_unitario;
       }
-      
+
     },
 
     handleModalFocus(isFocused) {
@@ -397,7 +397,7 @@ export default {
       }
     },
 
-    
+
 
     async openPagoModal() {
       const toast = useToast();
@@ -639,7 +639,7 @@ export default {
 
 /* Estilo cuando la sucursal está facturando */
 .facturando {
-  color: #006400;
+  color: #12c901;
   /* Verde oscuro */
   font-weight: bold;
   /* Texto en negrita */
@@ -647,7 +647,7 @@ export default {
 
 /* Estilo cuando la sucursal no está facturando o los datos SAR están desactualizados */
 .no-facturando {
-  color: #8B0000;
+  color: #c90101;
   /* Rojo oscuro */
   font-weight: bold;
   /* Texto en negrita */
