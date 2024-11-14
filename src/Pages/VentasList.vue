@@ -19,7 +19,7 @@
               <button class="search-button" @click="openModal">
                 Buscar
               </button>
-              <ClienteModal :isVisible="isModalVisible" :clientes="clientes" @close="closeModal"
+              <ClienteModal :isVisible="isModalVisible" :clientes="clientes" :id_usuario="id_usuario" @close="closeModal"
                 @client-selected="handleClientSelected" />
               <!-- Botón para volver a "Consumidor final" -->
               <button v-if="clienteSeleccionado" class="search-button" @click="setConsumidorFinal">Consumidor

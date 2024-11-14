@@ -9,8 +9,8 @@
                 <div>
                     <div class="form-container">
                     <div class="form-group">
-                        <label>Nombre:</label>
-                        <input type="text" v-model="newClient.nombre" />
+                        <label>Nombre Completo:</label>
+                        <input type="text" v-model="newClient.nombre_completo" />
                     </div>
                     <div class="form-group">
                         <label>Correo:</label>
@@ -31,8 +31,6 @@
                     </div>
                 </div>
                
-               
-
                 <div class="table-container">
                     <table>
                         <thead>
@@ -66,10 +64,16 @@
 
 <script>
 // [Script section se mantiene igual]
+const { postCliente } = require('../../../services/clienteSolicitudes.js');
+import { notificaciones } from '../../../services/notificaciones.js';
 export default {
     props: {
         isVisible: {
             type: Boolean,
+            required: true
+        },
+        id_usuario: {
+            type: Number,
             required: true
         },
         clientes: {
@@ -82,33 +86,34 @@ export default {
             searchQuery: '',
             filteredClients: [],
             newClient: {
-                nombre: '',
+                nombre_completo: '',
                 correo: '',
                 direccion: '',
                 rtn: '',
                 telefono: '',
             },
+            clients: [...this.clientes],
         };
     },
     computed: {
         filterClients() {
             if (this.searchQuery === '') {
-                return this.clientes;
+                return this.clients;
             }
             else {
-                return this.clientes.filter(client =>
+                return this.clients.filter(client =>
                     client.nombre_completo.toLowerCase().includes(this.searchQuery.toLowerCase())
                 );
             }
         },
+
+
     },
     methods: {
         onFocus() {
             this.$emit('modal-focused');
         },
-        returnClientes(clientes) {
-            return clientes;
-        },
+
         closeModal() {
             console.log(this.clientes);
             this.$emit('close');
@@ -116,14 +121,19 @@ export default {
         selectClient(client) {
             this.$emit('client-selected', client);
         },
-        addClient() {
-            const { nombre, correo, direccion, rtn, telefono } = this.newClient;
-            if (!nombre || !direccion || !rtn || !telefono || !correo) {
-                alert('Por favor, completa todos los campos.');
-                return;
+        async addClient() {
+            try {
+                await postCliente(this.newClient, this.id_usuario);
+                const { nombre_completo, correo, direccion, rtn, telefono } = this.newClient;
+            if (!nombre_completo || !direccion || !rtn || !telefono || !correo) {
+                throw'Por favor, completa todos los campos.';
             }
-            this.clients.push({ ...this.newClient });
-            this.newClient = { nombre: '', direccion: '', rtn: '', telefono: '', correo: '' };
+            this.clients.unshift({ ...this.newClient });
+            this.newClient = { nombre_completo: '', direccion: '', rtn: '', telefono: '', correo: '' };
+            } catch (error) {
+                notificaciones('error', error.message);
+            }
+            
         },
     },
 };
