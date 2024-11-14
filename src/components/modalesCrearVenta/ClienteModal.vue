@@ -6,14 +6,15 @@
                     <h2 class="modal-title">Clientes</h2>
                     <input type="text" v-model="searchQuery" placeholder="Búsqueda por nombre" class="search-input" />
                 </div>
-                <div class="form-container">
+                <div>
+                    <div class="form-container">
                     <div class="form-group">
                         <label>Nombre:</label>
                         <input type="text" v-model="newClient.nombre" />
                     </div>
                     <div class="form-group">
-                        <label>Dirección:</label>
-                        <input type="text" v-model="newClient.direccion" />
+                        <label>Correo:</label>
+                        <input type="text" v-model="newClient.correo" />
                     </div>
                     <div class="form-group">
                         <label>RTN:</label>
@@ -24,6 +25,13 @@
                         <input type="text" v-model="newClient.telefono" />
                     </div>
                 </div>
+                <div class="form-group">
+                        <label>Direccion:</label>
+                        <input type="text" v-model="newClient.direccion" />
+                    </div>
+                </div>
+               
+               
 
                 <div class="table-container">
                     <table>
@@ -75,6 +83,7 @@ export default {
             filteredClients: [],
             newClient: {
                 nombre: '',
+                correo: '',
                 direccion: '',
                 rtn: '',
                 telefono: '',
@@ -108,13 +117,13 @@ export default {
             this.$emit('client-selected', client);
         },
         addClient() {
-            const { nombre, direccion, rtn, telefono } = this.newClient;
-            if (!nombre || !direccion || !rtn || !telefono) {
+            const { nombre, correo, direccion, rtn, telefono } = this.newClient;
+            if (!nombre || !direccion || !rtn || !telefono || !correo) {
                 alert('Por favor, completa todos los campos.');
                 return;
             }
             this.clients.push({ ...this.newClient });
-            this.newClient = { nombre: '', direccion: '', rtn: '', telefono: '' };
+            this.newClient = { nombre: '', direccion: '', rtn: '', telefono: '', correo: '' };
         },
     },
 };
@@ -215,7 +224,7 @@ td {
     display: flex;
     flex-wrap: wrap;
     /* Permite que los inputs se ajusten a la siguiente línea si no hay suficiente espacio */
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .form-group {
@@ -228,7 +237,7 @@ td {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    
 }
 
 .search-input {
