@@ -19,7 +19,7 @@
               <button class="search-button" @click="openModal">
                 Buscar
               </button>
-              <ClienteModal :isVisible="isModalVisible" :clientes="clientes" @close="closeModal"
+              <ClienteModal :isVisible="isModalVisible" :clientes="clientes" :id_usuario="id_usuario" @close="closeModal"
                 @client-selected="handleClientSelected" />
               <!-- Botón para volver a "Consumidor final" -->
               <button v-if="clienteSeleccionado" class="search-button" @click="setConsumidorFinal">Consumidor
@@ -155,7 +155,7 @@ import { notificaciones } from '../../services/notificaciones.js';
 
 
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, getProductos, agregarProductoCodigo, postVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, getProductos, agregarProductoCodigo,guardarVenta, getVentasGuardadas, postVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
 
@@ -364,8 +364,6 @@ export default {
     },
 
     async openModal() {
-      // const toast = useToast();
-      // toast.info("Modal abierto");
       this.clientes = await getClientesbyEmpresa(this.id_usuario);
       this.isModalVisible = true;
       this.$nextTick(() => {
@@ -377,8 +375,6 @@ export default {
     },
 
     closeModal() {
-      // const toast = useToast();
-      // toast.info("Modal cerrado");
       this.isModalVisible = false;
       this.$nextTick(() => {
         this.$refs.codigoRef?.focus();
@@ -396,8 +392,6 @@ export default {
         notificaciones('error', error.message);
       }
     },
-
-
 
     async openPagoModal() {
       const toast = useToast();
@@ -552,6 +546,42 @@ export default {
       } catch (error) {
         console.log(error);
         notificaciones('error', error.message);
+      }
+    },
+
+    async guardarVenta(){
+      if(!this.clienteSeleccionado){
+        notificaciones('error', 'No hay ningun cliente seleccionado.');
+        return;
+      }
+
+      if(this.productosLista.length < 1){
+        notificaciones('error', 'No hay compras registradas aun.');
+        return;
+      }
+      try {
+        const response = await guardarVenta(this.clienteSeleccionado.nombre_completo, this.id_usuario);
+        if(response){
+          this.limpiarPagado();
+          notificaciones('venta-guardada');
+        }
+        else{
+          throw 'Ocurrio un error al guardar venta. Intente mas tarde';
+        }
+      } catch (error) {
+        console.log(error);
+        notificaciones('error', error.message);
+      }
+      
+    },
+
+    async recVenta(){
+      try {
+        const ventasGuardadas = await getVentasGuardadas(this.id_usuario);
+        console.log(ventasGuardadas);
+    
+      } catch (error) {
+        notificaciones('error', error);
       }
     },
 

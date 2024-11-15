@@ -45,6 +45,10 @@ function notificaciones(tipo, objeto = "") {
       mensaje = "Actualizando datos...";
       break;
 
+      case "venta-guardada":
+      mensaje = "Guardando Venta...";
+      break;
+
     case "error":
       mensaje = objeto;
       break;
@@ -53,7 +57,7 @@ function notificaciones(tipo, objeto = "") {
       mensaje = "Ocurrio un error desconocido";
   }
 
-  if (tipo === "form-success" || tipo === "success") {
+  if (tipo === "form-success" || tipo === "success" || tipo === "venta-guardada") {
     toast.success(mensaje, { timeout: 5000 });
   } else {
     toast.error(mensaje, { timeout: 5000 });

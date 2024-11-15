@@ -6,14 +6,15 @@
                     <h2 class="modal-title">Clientes</h2>
                     <input type="text" v-model="searchQuery" placeholder="Búsqueda por nombre" class="search-input" />
                 </div>
-                <div class="form-container">
+                <div>
+                    <div class="form-container">
                     <div class="form-group">
-                        <label>Nombre:</label>
-                        <input type="text" v-model="newClient.nombre" />
+                        <label>Nombre Completo:</label>
+                        <input type="text" v-model="newClient.nombre_completo" />
                     </div>
                     <div class="form-group">
-                        <label>Dirección:</label>
-                        <input type="text" v-model="newClient.direccion" />
+                        <label>Correo:</label>
+                        <input type="text" v-model="newClient.correo" />
                     </div>
                     <div class="form-group">
                         <label>RTN:</label>
@@ -24,7 +25,12 @@
                         <input type="text" v-model="newClient.telefono" />
                     </div>
                 </div>
-
+                <div class="form-group">
+                        <label>Direccion:</label>
+                        <input type="text" v-model="newClient.direccion" />
+                    </div>
+                </div>
+               
                 <div class="table-container">
                     <table>
                         <thead>
@@ -58,10 +64,16 @@
 
 <script>
 // [Script section se mantiene igual]
+const { postCliente } = require('../../../services/clienteSolicitudes.js');
+import { notificaciones } from '../../../services/notificaciones.js';
 export default {
     props: {
         isVisible: {
             type: Boolean,
+            required: true
+        },
+        id_usuario: {
+            type: Number,
             required: true
         },
         clientes: {
@@ -74,32 +86,42 @@ export default {
             searchQuery: '',
             filteredClients: [],
             newClient: {
-                nombre: '',
+                nombre_completo: '',
+                correo: '',
                 direccion: '',
                 rtn: '',
                 telefono: '',
             },
+            clients: [...this.clientes],
         };
     },
     computed: {
         filterClients() {
             if (this.searchQuery === '') {
-                return this.clientes;
+                return this.clients;
             }
             else {
-                return this.clientes.filter(client =>
+                return this.clients.filter(client =>
                     client.nombre_completo.toLowerCase().includes(this.searchQuery.toLowerCase())
                 );
             }
         },
+
+
+    },
+    watch: {
+        clientes(newValue){
+            if(newValue){
+this.clients = newValue;
+            }
+            
+        }
     },
     methods: {
         onFocus() {
             this.$emit('modal-focused');
         },
-        returnClientes(clientes) {
-            return clientes;
-        },
+
         closeModal() {
             console.log(this.clientes);
             this.$emit('close');
@@ -107,14 +129,19 @@ export default {
         selectClient(client) {
             this.$emit('client-selected', client);
         },
-        addClient() {
-            const { nombre, direccion, rtn, telefono } = this.newClient;
-            if (!nombre || !direccion || !rtn || !telefono) {
-                alert('Por favor, completa todos los campos.');
-                return;
+        async addClient() {
+            try {
+                await postCliente(this.newClient, this.id_usuario);
+                const { nombre_completo, correo, direccion, rtn, telefono } = this.newClient;
+            if (!nombre_completo || !direccion || !rtn || !telefono || !correo) {
+                throw'Por favor, completa todos los campos.';
             }
-            this.clients.push({ ...this.newClient });
-            this.newClient = { nombre: '', direccion: '', rtn: '', telefono: '' };
+            this.clients.unshift({ ...this.newClient });
+            this.newClient = { nombre_completo: '', direccion: '', rtn: '', telefono: '', correo: '' };
+            } catch (error) {
+                notificaciones('error', error.message);
+            }
+            
         },
     },
 };
@@ -215,7 +242,7 @@ td {
     display: flex;
     flex-wrap: wrap;
     /* Permite que los inputs se ajusten a la siguiente línea si no hay suficiente espacio */
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .form-group {
@@ -228,7 +255,7 @@ td {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    
 }
 
 .search-input {
