@@ -26,6 +26,19 @@ export const getProductos = async (id_usuario) => {
     }
 }
 
+export const getVentasGuardadas = async (id_usuario) => {
+    try {
+        const ventas = await solicitudes.fetchRegistros(`/ventas/mostrar-ventas/${id_usuario}`);
+
+        return ventas;
+    } catch (error) {
+        console.error('Error al obtener los productos:', error);
+
+        throw new Error('No se pudo obtener los productos el usuario especificado.');
+    
+    }
+}
+
 export const agregarProductoCodigo = async (cantidad, codigo, id_usuario) => {
 
     const datos = {
@@ -82,6 +95,24 @@ export const borrarProductoVenta = async (id_usuario, id_producto) => {
 
     } catch (error) {
         console.error('Error en patchProducto:', error); 
+        throw error;
+    }
+}
+
+export const guardarVenta = async (nombre_completo, id_usuario) => {
+    const parametros = `/ventas/guardar-venta/${id_usuario}`;
+
+    const datos = {
+        nombre_completo: nombre_completo
+    }
+
+    try {
+        const response = await solicitudes.postRegistro(parametros, datos);
+
+        return response;
+
+    } catch (error) {
+        console.error('Error en guardar Venta:', error);
         throw error;
     }
 }

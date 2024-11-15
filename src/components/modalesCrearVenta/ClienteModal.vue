@@ -109,6 +109,14 @@ export default {
 
 
     },
+    watch: {
+        clientes(newValue){
+            if(newValue){
+this.clients = newValue;
+            }
+            
+        }
+    },
     methods: {
         onFocus() {
             this.$emit('modal-focused');

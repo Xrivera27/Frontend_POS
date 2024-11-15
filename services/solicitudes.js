@@ -161,7 +161,6 @@ import axios from 'axios';
             throw new Error(`No se pudo crear: ${respuesta.statusText}`);
           }
           
-          
           else {
             
             const nuevoRegistro = await respuesta.json();
