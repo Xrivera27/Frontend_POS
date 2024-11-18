@@ -39,6 +39,26 @@ export const getVentasGuardadas = async (id_usuario) => {
     }
 }
 
+export const cajaUsuario = async (id_usuario) => {
+    const parametros = `/ventas/existencia-caja/${id_usuario}`;
+    try {
+
+        const response = await solicitudes.fetchEstadoRegistros(parametros);
+
+        if (response.ok || response.status === 304) {
+
+            return true; // Retorna el registro creado o la respuesta completa
+
+        } else {
+            return false;
+        }
+
+    } catch (error) {
+        console.error('Error en get registro:', error); // Registra el error para depuración
+        return false; // Opcional: vuelve a lanzar el error para manejarlo en otro lugar
+    }
+}
+
 export const agregarProductoCodigo = async (cantidad, codigo, id_usuario) => {
 
     const datos = {

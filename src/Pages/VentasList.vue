@@ -31,7 +31,8 @@
         <div class="informacion-1">
           <label for="sucursal">Sucursal: {{ info.nombreSucursal }}</label>
           <br />
-          <label for="usuario">Usuario: {{ info.nombre_usuario }}</label>
+          <label v-if="!isCajaAbierta" class="no-facturando" >Abrir caja antes de facturar!</label>
+          <label v-else for="usuario">Usuario: {{ info.nombre_usuario }}</label>
         </div>
 
         <div class="informacion-2">
@@ -155,7 +156,7 @@ import { notificaciones } from '../../services/notificaciones.js';
 
 
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, getProductos, agregarProductoCodigo,guardarVenta, getVentasGuardadas, postVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, cajaUsuario, getProductos, agregarProductoCodigo,guardarVenta, getVentasGuardadas, postVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
 
@@ -190,6 +191,7 @@ export default {
       venta: [],
       factura: [],
       usaSAR: false,
+      cajaAbierta: false,
 
     };
   },
@@ -231,6 +233,10 @@ export default {
 
     sucursalActivaFactura() {
       return this.usaSAR;
+    },
+
+    isCajaAbierta() {
+      return this.cajaAbierta;
     },
 
   },
@@ -639,6 +645,7 @@ export default {
       this.usaSAR = await sucursalSar(this.id_usuario);
       this.info = await getInfoBasic(this.id_usuario);
       this.productos = await getProductos(this.id_usuario);
+      this.cajaAbierta = await cajaUsuario(this.id_usuario);
     } catch (error) {
       notificaciones('error', error.message);
     }
@@ -669,7 +676,7 @@ export default {
 
 /* Estilo cuando la sucursal está facturando */
 .facturando {
-  color: #12c901;
+  color: #0c9200;
   /* Verde oscuro */
   font-weight: bold;
   /* Texto en negrita */
