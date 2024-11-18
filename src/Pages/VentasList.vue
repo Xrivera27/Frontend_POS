@@ -399,8 +399,6 @@ export default {
       }
     },
 
-    
-
     async openPagoModal() {
       const toast = useToast();
       if (this.productos.length === 0) {
