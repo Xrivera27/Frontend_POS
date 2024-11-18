@@ -160,6 +160,27 @@ export const postVenta = async (productos, id_cliente, id_usuario) => {
     }
 }
 
+export const eliminarVenta = async (id_venta, id_factura) => {
+
+    const parametros = `/ventas/eliminar-venta/${id_venta}/${id_factura}`;
+    try {
+        const response = await solicitudes.deleteRegistro(parametros);
+        if(response){
+            return {
+                message: 'Se elimino la venta',
+                resultado: true
+            };
+        }
+
+        throw response;
+    } catch (error) {
+        return {
+            message: error,
+            resultado: false
+        }
+    }
+}
+
 export const pagar = async (pago, id_venta, id_usuario) => {
 
     const datos = {

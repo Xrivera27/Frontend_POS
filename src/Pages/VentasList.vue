@@ -156,7 +156,7 @@ import { notificaciones } from '../../services/notificaciones.js';
 
 
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, cajaUsuario, getProductos, agregarProductoCodigo,guardarVenta, getVentasGuardadas, postVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, cajaUsuario, getProductos, agregarProductoCodigo,guardarVenta, getVentasGuardadas, postVenta, eliminarVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
 
@@ -399,6 +399,8 @@ export default {
       }
     },
 
+    
+
     async openPagoModal() {
       const toast = useToast();
       if (this.productos.length === 0) {
@@ -413,6 +415,29 @@ export default {
           this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0,
           this.id_usuario);
         }
+        
+        else if(this.venta.factura.total !== this.calcularTotal){
+          const id_venta = this.venta.id_venta;
+          const id_factura = this.venta.factura.id_factura;
+
+          const promesas = [
+          eliminarVenta(id_venta, id_factura),
+          postVenta(
+          this.productosLista,
+          this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0,
+          this.id_usuario)
+          ];
+
+          const resultados = await Promise.all(promesas);
+          const { resultado: resultadoEliVenta, message: messageElimVenta } = resultados[0];
+          
+          if(!resultadoEliVenta){
+            console.error('Ocurrio un error de servidor', messageElimVenta);
+          }
+
+          this.venta = resultados[1];
+          
+        }
 
         this.factura = this.venta.factura;
 
@@ -424,7 +449,8 @@ export default {
           }
         });
       } catch (error) {
-        toast.warning("No hay datos en la tabla.");
+        console.log(error);
+        toast.error('Ocurrio un error al registrar venta.');
       }
     },
 
