@@ -407,10 +407,12 @@ export default {
       }
 
       try {
-        this.venta = await postVenta(
+        if(this.venta.length === 0){
+          this.venta = await postVenta(
           this.productosLista,
           this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0,
           this.id_usuario);
+        }
 
         this.factura = this.venta.factura;
 
