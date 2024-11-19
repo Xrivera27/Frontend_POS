@@ -637,14 +637,14 @@ export default {
           // Primero desactivar la promoción existente
           const desactivarResponse = await solicitudes.patchRegistro(
             `/promocionesC/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
-            { estado: false }
+            { manejo_automatico: false }
           );
     
           if (desactivarResponse) {
             // Luego activar la nueva promoción
             const activarResponse = await solicitudes.patchRegistro(
               `/promocionesC/cambiar-estado-promocion/${this.tempPromocionData.id}`,
-              { estado: true }
+              { manejo_automatico: true }
             );
     
             if (activarResponse) {
