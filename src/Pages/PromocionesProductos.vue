@@ -104,10 +104,11 @@
                   @click="desactivarProm(index)">
                   <b><i class="bi bi-check"></i></b>
                 </button>
-                <button v-if="!p.manejo_automatico" id="btnActivar" class="btn btn-secondary"
-                  @click="activarProm(index)">
-                  <b><i class="bi bi-x"></i></b>
-                </button>
+              <!-- Cambiar en el template -->
+<button v-if="!p.manejo_automatico" id="btnActivar" class="btn btn-secondary"
+  @click="activarProm(p.id)">
+  <b><i class="bi bi-x"></i></b>
+</button>
                 <button id="btnEliminar" class="btn btn-danger" @click="confirmDelete(index)">
                   <b><i class="bi bi-trash-fill"></i></b>
                 </button>
@@ -560,25 +561,81 @@ export default {
       }
     },
 
-    async activarProm(index) {
+    async activarProm(promocionId) {
   try {
-    const promocionAActivar = this.promociones[index];
-    console.log('Intentando activar promoción:', promocionAActivar.id);
+    const promocionAActivar = this.promociones.find(p => p.id === promocionId);
+    if (!promocionAActivar) {
+      throw new Error('Promoción no encontrada');
+    }
 
-    // Verificar si ya existe una promoción activa para el mismo producto
-    const promocionActiva = this.promociones.find(p => 
-      p.manejo_automatico && 
-      p.producto_id === promocionAActivar.producto_id && 
-      p.id !== promocionAActivar.id
-    );
+    console.log('Intentando activar promoción:', {
+      id: promocionAActivar.id,
+      producto: promocionAActivar.producto?.nombre || promocionAActivar.producto,
+      producto_Id: promocionAActivar.producto_Id // Ajustado según la BD
+    });
 
-    if (promocionActiva) {
-      // Si existe una promoción activa, mostrar el modal de conflicto
+    // Buscar promociones activas solo del mismo producto
+    const promocionActivaMismoProducto = this.promociones.find(p => {
+      // Verificar si es el mismo producto usando producto_Id
+      const esMismoProducto = p.producto_Id === promocionAActivar.producto_Id;
+      
+      // Si no es el mismo producto, no hay conflicto
+      if (!esMismoProducto) {
+        console.log('Productos diferentes:', {
+          productoActual: promocionAActivar.producto_Id,
+          productoComparado: p.producto_Id
+        });
+        return false;
+      }
+
+      // Verificar si está activa y es diferente a la actual
+      const estaActiva = p.manejo_automatico === true;
+      const esDistinta = p.id !== promocionId;
+      
+      if (!estaActiva || !esDistinta) {
+        return false;
+      }
+
+      // Si es el mismo producto y está activa, verificar fechas
+      const fechaInicioActual = new Date(promocionAActivar.fecha_inicio);
+      const fechaFinalActual = new Date(promocionAActivar.fecha_final);
+      const fechaInicioExistente = new Date(p.fecha_inicio);
+      const fechaFinalExistente = new Date(p.fecha_final);
+
+      // Verificar superposición de fechas
+      const hayConflicto = (
+        fechaInicioActual <= fechaFinalExistente && 
+        fechaFinalActual >= fechaInicioExistente
+      );
+
+      console.log('Comparando promoción del mismo producto:', {
+        id: p.id,
+        producto: p.producto?.nombre || p.producto,
+        estaActiva,
+        hayConflicto,
+        fechas: {
+          promocionActual: {
+            inicio: fechaInicioActual,
+            fin: fechaFinalActual
+          },
+          promocionExistente: {
+            inicio: fechaInicioExistente,
+            fin: fechaFinalExistente
+          }
+        }
+      });
+
+      return hayConflicto;
+    });
+
+    // Si hay una promoción activa del mismo producto con fechas superpuestas
+    if (promocionActivaMismoProducto) {
+      console.log('Se encontró conflicto:', promocionActivaMismoProducto);
       this.tempPromocionData = promocionAActivar;
-      this.conflictingPromocion = promocionActiva;
+      this.conflictingPromocion = promocionActivaMismoProducto;
       
       this.$emit('mostrar-notificacion', {
-        mensaje: 'Ya existe una promoción activa para este producto',
+        mensaje: 'Ya existe una promoción activa para este producto en las fechas seleccionadas',
         tipo: 'warning'
       });
       
@@ -586,9 +643,9 @@ export default {
       return;
     }
 
-    // Si no hay conflicto, proceder con la activación
+    // Si no hay conflicto, activar la promoción
     const response = await solicitudes.patchRegistro(
-      `/promocionesP/cambiar-estado-promocion/${promocionAActivar.id}`,
+      `/promocionesP/cambiar-estado-promocion/${promocionId}`,
       { manejo_automatico: true }
     );
 

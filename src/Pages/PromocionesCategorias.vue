@@ -134,9 +134,9 @@
                   <b><i class="bi bi-check"></i></b>
                 </button>
                 <button v-if="!p.manejo_automatico" id="btnActivar" class="btn btn-secondary"
-                  @click="activarProm(index)">
-                  <b><i class="bi bi-x"></i></b>
-                </button>
+  @click="activarProm(p.id)">
+  <b><i class="bi bi-x"></i></b>
+</button>
                 <button id="btnEliminar" class="btn btn-danger" @click="confirmDelete(index)">
                   <b><i class="bi bi-trash-fill"></i></b>
                 </button>
@@ -582,53 +582,116 @@ export default {
       }
     },
 
-    async activarProm(index) {
-      try {
-        const promocionAActivar = this.promociones[index];
-        console.log('Intentando activar promoción:', promocionAActivar.id);
+    async activarProm(promocionId) {
+  try {
+    const promocionAActivar = this.promociones.find(p => p.id === promocionId);
+    if (!promocionAActivar) {
+      throw new Error('Promoción no encontrada');
+    }
+
+    console.log('Promoción a activar:', {
+      id: promocionAActivar.id,
+      categoria: promocionAActivar.categoria?.nombre_categoria,
+      categoria_id: promocionAActivar.categoria_id,
+      categoria_producto_Id: promocionAActivar.categoria_producto_Id
+    });
     
-        // Verificar si ya existe una promoción activa para la misma categoría
-        const promocionActiva = this.promociones.find(p => 
-          p.manejo_automatico && 
-          p.categoria_id === promocionAActivar.categoria_id && 
-          p.id !== promocionAActivar.id
-        );
-    
-        if (promocionActiva) {
-          // Si existe una promoción activa, mostrar el modal de conflicto
-          this.tempPromocionData = promocionAActivar;
-          this.conflictingPromocion = promocionActiva;
-          
-          this.$emit('mostrar-notificacion', {
-            mensaje: 'Ya existe una promoción activa para esta categoría',
-            tipo: 'warning'
-          });
-          
-          this.showConflictModal = true;
-          return;
-        }
-    
-        // Si no hay conflicto, proceder con la activación
-        const response = await solicitudes.patchRegistro(
-          `/promocionesC/cambiar-estado-promocion/${promocionAActivar.id}`,
-          { manejo_automatico: true }
-        );
-    
-        if (response) {
-          await this.cargarPromociones();
-          this.$emit('mostrar-notificacion', {
-            mensaje: 'Promoción activada exitosamente',
-            tipo: 'success'
-          });
-        }
-      } catch (error) {
-        console.error('Error al activar promoción:', error);
+    // Verificar si ya existe una promoción activa para la misma categoría
+    const promocionesActivas = this.promociones.filter(p => {
+      const mismaCategoria = 
+        (promocionAActivar.categoria_producto_Id && p.categoria_producto_Id === promocionAActivar.categoria_producto_Id) ||
+        (promocionAActivar.categoria_id && p.categoria_id === promocionAActivar.categoria_id);
+
+      const estaActiva = p.manejo_automatico;
+      const esDistinta = p.id !== promocionId;
+
+      console.log('Comparando con promoción:', {
+        id: p.id,
+        categoria: p.categoria?.nombre_categoria,
+        categoria_id: p.categoria_id,
+        categoria_producto_Id: p.categoria_producto_Id,
+        activa: estaActiva,
+        mismaCategoria: mismaCategoria,
+        esDistinta: esDistinta
+      });
+
+      return estaActiva && esDistinta && mismaCategoria;
+    });
+
+    console.log('Promociones activas encontradas:', promocionesActivas.length);
+
+    // Si no hay promociones activas para esta categoría, activar directamente
+    if (promocionesActivas.length === 0) {
+      const response = await solicitudes.patchRegistro(
+        `/promocionesC/cambiar-estado-promocion/${promocionId}`,
+        { manejo_automatico: true }
+      );
+
+      if (response) {
+        await this.cargarPromociones();
         this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al activar la promoción',
-          tipo: 'error'
+          mensaje: 'Promoción activada exitosamente',
+          tipo: 'success'
         });
       }
-    },
+      return;
+    }
+
+    // Si hay promociones activas, verificar conflictos de fecha
+    const fechaInicioActual = new Date(promocionAActivar.fecha_inicio);
+    const fechaFinalActual = new Date(promocionAActivar.fecha_final);
+
+    const promocionConflicto = promocionesActivas.find(p => {
+      const fechaInicioExistente = new Date(p.fecha_inicio);
+      const fechaFinalExistente = new Date(p.fecha_final);
+
+      const hayConflicto = fechaInicioActual <= fechaFinalExistente && 
+                          fechaFinalActual >= fechaInicioExistente;
+
+      console.log('Verificando conflicto de fechas:', {
+        promocionId: p.id,
+        fechaInicioActual: fechaInicioActual.toISOString(),
+        fechaFinalActual: fechaFinalActual.toISOString(),
+        fechaInicioExistente: fechaInicioExistente.toISOString(),
+        fechaFinalExistente: fechaFinalExistente.toISOString(),
+        hayConflicto
+      });
+
+      return hayConflicto;
+    });
+
+    if (promocionConflicto) {
+      this.tempPromocionData = promocionAActivar;
+      this.conflictingPromocion = promocionConflicto;
+      this.showConflictModal = true;
+      
+      this.$emit('mostrar-notificacion', {
+        mensaje: 'Ya existe una promoción activa para esta categoría en las fechas seleccionadas',
+        tipo: 'warning'
+      });
+    } else {
+      // Si no hay conflicto de fechas, activar la promoción
+      const response = await solicitudes.patchRegistro(
+        `/promocionesC/cambiar-estado-promocion/${promocionId}`,
+        { manejo_automatico: true }
+      );
+
+      if (response) {
+        await this.cargarPromociones();
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Promoción activada exitosamente',
+          tipo: 'success'
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error al activar promoción:', error);
+    this.$emit('mostrar-notificacion', {
+      mensaje: 'Error al activar la promoción',
+      tipo: 'error'
+    });
+  }
+},
 
     async createAnywayPromocion() {
       try {
