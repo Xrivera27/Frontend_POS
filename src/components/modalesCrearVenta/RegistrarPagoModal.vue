@@ -136,6 +136,7 @@ export default {
     },
     data() {
         return {
+            isModalLoading: false,
             monto: 0,
             metodoPago: 'Efectivo',
             notas: '',
@@ -159,11 +160,11 @@ export default {
         total() {
             return this.factura.total;
         },
-        mostrarSubtotal(){
+        mostrarSubtotal() {
             return this.factura.sub_total
         },
-        impuesto(){
-            return this.factura.total_ISV; 
+        impuesto() {
+            return this.factura.total_ISV;
         },
         isPagoValido() {
             if (this.metodoPago === 'Efectivo') {
@@ -218,32 +219,37 @@ export default {
             }
             return true;
         },
-        confirmarPago() {
+        async confirmarPago() {
             if (!this.isPagoValido) return;
 
-            const datosPago = {
-                metodoPago: this.metodoPago,
-                monto: this.monto,
-                cambio: this.cambio,
-                notas: this.notas
-            };
-
-            if (this.metodoPago === 'Tarjeta' || this.metodoPago === 'Mixto') {
-                datosPago.datosTarjeta = {
-                    tipo: this.tipoTarjeta,
-                    numero: this.numeroTarjeta,
-                    fechaExp: this.fechaExp,
-                    cuotas: this.cuotas
+            this.isModalLoading = true;
+            try {
+                const datosPago = {
+                    metodoPago: this.metodoPago,
+                    monto: this.monto,
+                    cambio: this.cambio,
+                    notas: this.notas
                 };
-            }
 
-            if (this.metodoPago === 'Mixto') {
-                datosPago.montoEfectivo = this.montoEfectivo;
-                datosPago.montoTarjeta = this.montoTarjeta;
-            }
+                if (this.metodoPago === 'Tarjeta' || this.metodoPago === 'Mixto') {
+                    datosPago.datosTarjeta = {
+                        tipo: this.tipoTarjeta,
+                        numero: this.numeroTarjeta,
+                        fechaExp: this.fechaExp,
+                        cuotas: this.cuotas
+                    };
+                }
 
-            this.$emit('confirm-payment', datosPago);
-            this.$emit('close');
+                if (this.metodoPago === 'Mixto') {
+                    datosPago.montoEfectivo = this.montoEfectivo;
+                    datosPago.montoTarjeta = this.montoTarjeta;
+                }
+
+                await this.$emit('confirm-payment', datosPago);
+                this.$emit('close');
+            } finally {
+                this.isModalLoading = false;
+            }
         }
     },
     watch: {

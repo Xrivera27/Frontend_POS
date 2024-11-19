@@ -1,5 +1,6 @@
 <template>
   <div class="wrapper">
+    <ModalLoading :isLoading="isModalLoading" mensaje="Cargando datos..." />
     <div class="main-container">
       <div class="header-container">
         <!-- Aquí estaba el error, había un div y template anidados innecesariamente -->
@@ -19,8 +20,8 @@
               <button class="search-button" @click="openModal">
                 Buscar
               </button>
-              <ClienteModal :isVisible="isModalVisible" :clientes="clientes" :id_usuario="id_usuario" @close="closeModal"
-                @client-selected="handleClientSelected" />
+              <ClienteModal :isVisible="isModalVisible" :clientes="clientes" :id_usuario="id_usuario"
+                @close="closeModal" @client-selected="handleClientSelected" />
               <!-- Botón para volver a "Consumidor final" -->
               <button v-if="clienteSeleccionado" class="search-button" @click="setConsumidorFinal">Consumidor
                 final</button>
@@ -31,7 +32,7 @@
         <div class="informacion-1">
           <label for="sucursal">Sucursal: {{ info.nombreSucursal }}</label>
           <br />
-          <label v-if="!isCajaAbierta" class="no-facturando" >Abrir caja antes de facturar!</label>
+          <label v-if="!isCajaAbierta" class="no-facturando">Abrir caja antes de facturar!</label>
           <label v-else for="usuario">Usuario: {{ info.nombre_usuario }}</label>
         </div>
 
@@ -153,10 +154,11 @@ import EliminarItemsModal from '../components/modalesCrearVenta/EliminarItemsMod
 import BuscarProductoModal from '../components/modalesCrearVenta/BuscarProductoModal.vue';
 import { useToast } from "vue-toastification";
 import { notificaciones } from '../../services/notificaciones.js';
+import ModalLoading from '@/components/ModalLoading.vue';
 
 
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, cajaUsuario, getProductos, agregarProductoCodigo,guardarVenta, getVentasGuardadas, postVenta, eliminarVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, cajaUsuario, getProductos, agregarProductoCodigo, guardarVenta, getVentasGuardadas, postVenta, eliminarVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
 
@@ -165,7 +167,8 @@ export default {
     ClienteModal,
     RegistrarPagoModal,
     EliminarItemsModal,
-    BuscarProductoModal
+    BuscarProductoModal,
+    ModalLoading
   },
   data() {
     return {
@@ -192,7 +195,8 @@ export default {
       factura: [],
       usaSAR: false,
       cajaAbierta: false,
-
+      isModalLoading: false,
+      loadingMessage: ''
     };
   },
 
@@ -250,8 +254,15 @@ export default {
       this.logout();
     },
 
-    buscarProducto() {
-      this.isBuscarProductoModalVisible = true;
+    async buscarProducto() {
+      this.isModalLoading = true;
+      this.loadingMessage = 'Cargando productos...';
+      try {
+        this.productos = await getProductos(this.id_usuario);
+        this.isBuscarProductoModalVisible = true;
+      } finally {
+        this.isModalLoading = false;
+      }
     },
 
     closeBuscarProductoModal() {
@@ -325,22 +336,25 @@ export default {
     },
 
     async handleItemDelete(item) {
+      this.isModalLoading = true;
+      this.loadingMessage = 'Eliminando item...';
       try {
         const index = this.productosLista.findIndex(p => p === item);
         if (index !== -1) {
-
           const eliminando = await eliminarProductoVenta(this.productosLista[index].id_producto, this.id_usuario);
           if (!eliminando) {
             throw 'Ocurrio un error al eliminar Item';
-          } this.productosLista.splice(index, 1);
+          }
+          this.productosLista.splice(index, 1);
           this.selectedItem = null;
           const toast = useToast();
           toast.success("Item eliminado correctamente");
         }
       } catch (error) {
         notificaciones('error', error.message);
+      } finally {
+        this.isModalLoading = false;
       }
-
     },
 
     closeEliminarModal() {
@@ -370,14 +384,14 @@ export default {
     },
 
     async openModal() {
-      this.clientes = await getClientesbyEmpresa(this.id_usuario);
-      this.isModalVisible = true;
-      this.$nextTick(() => {
-        const modalElement = document.querySelector('.modal-content');
-        if (modalElement) {
-          modalElement.focus();
-        }
-      });
+      this.isModalLoading = true;
+      this.loadingMessage = 'Cargando clientes...';
+      try {
+        this.clientes = await getClientesbyEmpresa(this.id_usuario);
+        this.isModalVisible = true;
+      } finally {
+        this.isModalLoading = false;
+      }
     },
 
     closeModal() {
@@ -388,6 +402,8 @@ export default {
     },
 
     async realizarPago(datosPago) {
+      this.isModalLoading = true;
+      this.loadingMessage = 'Procesando pago...';
       try {
         const pagando = await pagar(datosPago.monto, this.venta.id_venta, this.id_usuario);
         if (!pagando) {
@@ -396,6 +412,8 @@ export default {
         this.limpiarPagado();
       } catch (error) {
         notificaciones('error', error.message);
+      } finally {
+        this.isModalLoading = false;
       }
     },
 
@@ -406,40 +424,40 @@ export default {
         return;
       }
 
+      this.isModalLoading = true;
+      this.loadingMessage = 'Procesando venta...';
       try {
-        if(this.venta.length === 0){
+        if (this.venta.length === 0) {
           this.venta = await postVenta(
-          this.productosLista,
-          this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0,
-          this.id_usuario);
+            this.productosLista,
+            this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0,
+            this.id_usuario);
         }
-        
-        else if(this.venta.factura.total !== this.calcularTotal){
+        else if (this.venta.factura.total !== this.calcularTotal) {
           const id_venta = this.venta.id_venta;
           const id_factura = this.venta.factura.id_factura;
 
           const promesas = [
-          eliminarVenta(id_venta, id_factura),
-          postVenta(
-          this.productosLista,
-          this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0,
-          this.id_usuario)
+            eliminarVenta(id_venta, id_factura),
+            postVenta(
+              this.productosLista,
+              this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0,
+              this.id_usuario)
           ];
 
           const resultados = await Promise.all(promesas);
           const { resultado: resultadoEliVenta, message: messageElimVenta } = resultados[0];
-          
-          if(!resultadoEliVenta){
+
+          if (!resultadoEliVenta) {
             console.error('Ocurrio un error de servidor', messageElimVenta);
           }
 
           this.venta = resultados[1];
-          
         }
 
         this.factura = this.venta.factura;
-
         this.isPagoModalVisible = true;
+
         this.$nextTick(() => {
           const pagoModalElement = document.querySelector('.modal-content');
           if (pagoModalElement) {
@@ -449,6 +467,8 @@ export default {
       } catch (error) {
         console.log(error);
         toast.error('Ocurrio un error al registrar venta.');
+      } finally {
+        this.isModalLoading = false;
       }
     },
 
@@ -581,37 +601,37 @@ export default {
       }
     },
 
-    async guardarVenta(){
-      if(!this.clienteSeleccionado){
+    async guardarVenta() {
+      if (!this.clienteSeleccionado) {
         notificaciones('error', 'No hay ningun cliente seleccionado.');
         return;
       }
 
-      if(this.productosLista.length < 1){
+      if (this.productosLista.length < 1) {
         notificaciones('error', 'No hay compras registradas aun.');
         return;
       }
       try {
         const response = await guardarVenta(this.clienteSeleccionado.nombre_completo, this.id_usuario);
-        if(response){
+        if (response) {
           this.limpiarPagado();
           notificaciones('venta-guardada');
         }
-        else{
+        else {
           throw 'Ocurrio un error al guardar venta. Intente mas tarde';
         }
       } catch (error) {
         console.log(error);
         notificaciones('error', error.message);
       }
-      
+
     },
 
-    async recVenta(){
+    async recVenta() {
       try {
         const ventasGuardadas = await getVentasGuardadas(this.id_usuario);
         console.log(ventasGuardadas);
-    
+
       } catch (error) {
         notificaciones('error', error);
       }
