@@ -95,16 +95,16 @@
               <td>{{ p.porcentaje_descuento }}</td>
               <td>{{ formatDate(p.fecha_inicio) }}</td>
               <td>{{ formatDate(p.fecha_final) }}</td>
-              <td>{{ p.estado ? 'Activo' : 'Inactivo' }}</td>
+              <td>{{ p.manejo_automatico ? 'Activo' : 'Inactivo' }}</td>
               <td class="td-botones">
                 <button id="btnEditar" class="btn btn-warning" @click="editarPromocion(index)">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <button v-if="p.estado" id="btnDesactivar" class="btn btn-success"
+                <button v-if="p.manejo_automatico" id="btnDesactivar" class="btn btn-success"
                   @click="desactivarProm(index)">
                   <b><i class="bi bi-check"></i></b>
                 </button>
-                <button v-if="!p.estado" id="btnActivar" class="btn btn-secondary"
+                <button v-if="!p.manejo_automatico" id="btnActivar" class="btn btn-secondary"
                   @click="activarProm(index)">
                   <b><i class="bi bi-x"></i></b>
                 </button>
@@ -567,7 +567,7 @@ export default {
 
     // Verificar si ya existe una promoción activa para el mismo producto
     const promocionActiva = this.promociones.find(p => 
-      p.estado && 
+      p.manejo_automatico && 
       p.producto_id === promocionAActivar.producto_id && 
       p.id !== promocionAActivar.id
     );
@@ -589,7 +589,7 @@ export default {
     // Si no hay conflicto, proceder con la activación
     const response = await solicitudes.patchRegistro(
       `/promocionesP/cambiar-estado-promocion/${promocionAActivar.id}`,
-      { estado: true }
+      { manejo_automatico: true }
     );
 
     if (response) {
@@ -616,14 +616,14 @@ async createAnywayPromocion() {
       // Primero desactivar la promoción existente
       const desactivarResponse = await solicitudes.patchRegistro(
         `/promocionesP/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
-        { estado: false }
+        { manejo_automatico: false }
       );
 
       if (desactivarResponse) {
         // Luego activar la nueva promoción
         const activarResponse = await solicitudes.patchRegistro(
           `/promocionesP/cambiar-estado-promocion/${this.tempPromocionData.id}`,
-          { estado: true }
+          { manejo_automatico: true }
         );
 
         if (activarResponse) {
@@ -654,7 +654,7 @@ async createAnywayPromocion() {
         console.log('Desactivando promoción:', promocion.id);
         const response = await solicitudes.patchRegistro(
           `/promocionesP/cambiar-estado-promocion/${promocion.id}`,
-          { estado: false }
+          { manejo_automatico: false }
         );
 
         if (response) {
