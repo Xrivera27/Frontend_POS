@@ -124,16 +124,16 @@
               <td>{{ p.porcentaje_descuento }}</td>
               <td>{{ formatDate(p.fecha_inicio) }}</td>
               <td>{{ formatDate(p.fecha_final) }}</td>
-              <td>{{ p.estado ? 'Activo' : 'Inactivo' }}</td>
+              <td>{{ p.manejo_automatico ? 'Activo' : 'Inactivo' }}</td>
               <td class="td-botones">
                 <button id="btnEditar" class="btn btn-warning" @click="editarPromocion(index)">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <button v-if="p.estado" id="btnDesactivar" class="btn btn-success"
+                <button v-if="p.manejo_automatico" id="btnDesactivar" class="btn btn-success"
                   @click="desactivarProm(index)">
                   <b><i class="bi bi-check"></i></b>
                 </button>
-                <button v-if="!p.estado" id="btnActivar" class="btn btn-secondary"
+                <button v-if="!p.manejo_automatico" id="btnActivar" class="btn btn-secondary"
                   @click="activarProm(index)">
                   <b><i class="bi bi-x"></i></b>
                 </button>
@@ -589,7 +589,7 @@ export default {
     
         // Verificar si ya existe una promoción activa para la misma categoría
         const promocionActiva = this.promociones.find(p => 
-          p.estado && 
+          p.manejo_automatico && 
           p.categoria_id === promocionAActivar.categoria_id && 
           p.id !== promocionAActivar.id
         );
@@ -611,7 +611,7 @@ export default {
         // Si no hay conflicto, proceder con la activación
         const response = await solicitudes.patchRegistro(
           `/promocionesC/cambiar-estado-promocion/${promocionAActivar.id}`,
-          { estado: true }
+          { manejo_automatico: true }
         );
     
         if (response) {
@@ -675,7 +675,7 @@ export default {
         console.log('Desactivando promoción:', promocion.id);
         const response = await solicitudes.patchRegistro(
           `/promocionesC/cambiar-estado-promocion/${promocion.id}`,
-          { estado: false }
+          { manejo_automatico: false }
         );
 
         if (response) {
