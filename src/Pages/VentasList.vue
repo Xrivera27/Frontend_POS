@@ -133,7 +133,11 @@
           @confirm-delete="handleItemDelete" @modal-focused="handleModalFocus" />
         <button @click="limpiarPantalla">Limpiar pantalla [F6]</button>
         <button @click="guardarVenta">Guardar venta [F8]</button>
+        <GuardarVentaModal :isVisible="isGuardarVentaModalVisible" :isConsumidorFinal="!clienteSeleccionado"
+          @close="isGuardarVentaModalVisible = false" @save="handleSaveVenta" @modal-focused="handleModalFocus" />
         <button @click="recVenta">Rec. Venta [F9]</button>
+        <RecuperarVentaModal :isVisible="isRecuperarVentaModalVisible" :ventas="ventasGuardadas"
+          @close="isRecuperarVentaModalVisible = false" @venta-selected="handleVentaSelected" />
         <button @click="descuentoGeneral">Dscto. Gen. [F10]</button>
         <button @click="descuentoIndividual">Dscto. Ind. [F11]</button>
         <button @click="openPagoModal">Registrar Pago [F12]</button>
@@ -155,6 +159,8 @@ import BuscarProductoModal from '../components/modalesCrearVenta/BuscarProductoM
 import { useToast } from "vue-toastification";
 import { notificaciones } from '../../services/notificaciones.js';
 import ModalLoading from '@/components/ModalLoading.vue';
+import GuardarVentaModal from '@/components/modalesCrearVenta/GuardarVentaModal.vue';
+import RecuperarVentaModal from '@/components/modalesCrearVenta/RecuperarVentaModal.vue';
 
 
 import solicitudes from "../../services/solicitudes.js";
@@ -168,7 +174,9 @@ export default {
     RegistrarPagoModal,
     EliminarItemsModal,
     BuscarProductoModal,
-    ModalLoading
+    ModalLoading,
+    GuardarVentaModal,
+    RecuperarVentaModal
   },
   data() {
     return {
@@ -196,7 +204,9 @@ export default {
       usaSAR: false,
       cajaAbierta: false,
       isModalLoading: false,
-      loadingMessage: ''
+      loadingMessage: '',
+      isGuardarVentaModalVisible: false,
+      isRecuperarVentaModalVisible: false,
     };
   },
 
@@ -530,6 +540,12 @@ export default {
       } else if (key === "F5") {
         event.preventDefault();
         this.eliminarItem();
+      } else if (key === "F9") {
+        event.preventDefault();
+        this.recVenta();
+      } else if (key === "F8") {
+        event.preventDefault();
+        this.guardarVenta();
       }
     },
 
@@ -602,36 +618,44 @@ export default {
     },
 
     async guardarVenta() {
-      if (!this.clienteSeleccionado) {
-        notificaciones('error', 'No hay ningun cliente seleccionado.');
+      if (this.productosLista.length === 0) {
+        const toast = useToast();
+        toast.warning("No hay productos para guardar");
         return;
       }
+      this.isGuardarVentaModalVisible = true;
+    },
 
-      if (this.productosLista.length < 1) {
-        notificaciones('error', 'No hay compras registradas aun.');
-        return;
-      }
+    async handleSaveVenta(data) {
       try {
-        const response = await guardarVenta(this.clienteSeleccionado.nombre_completo, this.id_usuario);
-        if (response) {
-          this.limpiarPagado();
-          notificaciones('venta-guardada');
-        }
-        else {
-          throw 'Ocurrio un error al guardar venta. Intente mas tarde';
+        this.isModalLoading = true;
+        this.loadingMessage = 'Guardando venta...';
+
+        const resultado = await guardarVenta(
+          this.productosLista,
+          data.nombreCliente,
+          data.observaciones,
+          this.id_usuario
+        );
+
+        if (resultado) {
+          this.productosLista = [];
+          this.clienteSeleccionado = null;
+          notificaciones('success', 'Venta guardada correctamente');
         }
       } catch (error) {
-        console.log(error);
         notificaciones('error', error.message);
+      } finally {
+        this.isModalLoading = false;
+        this.isGuardarVentaModalVisible = false;
       }
-
     },
 
     async recVenta() {
       try {
         const ventasGuardadas = await getVentasGuardadas(this.id_usuario);
-        console.log(ventasGuardadas);
-
+        this.ventasGuardadas = ventasGuardadas;
+        this.isRecuperarVentaModalVisible = true;
       } catch (error) {
         notificaciones('error', error);
       }
@@ -647,6 +671,7 @@ export default {
         this.cancelarVenta();
       }
     },
+
     pushDelete(event) {
       const target = event.target;
       const isInputField =
