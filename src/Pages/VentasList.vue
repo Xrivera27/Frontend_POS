@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <ModalLoading :isLoading="isModalLoading" mensaje="Cargando datos..." />
+    <ModalLoading :isLoading="isModalLoading" />
     <div class="main-container">
       <div class="header-container">
         <!-- Aquí estaba el error, había un div y template anidados innecesariamente -->

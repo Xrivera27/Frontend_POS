@@ -1,5 +1,6 @@
 <template>
     <div v-if="isVisible" class="modal-overlay" @click="handleOverlayClick" @keydown.stop>
+        <ModalLoading :isLoading="isModalLoading" mensaje="Eliminando item..." />
         <div class="modal-content" @click.stop>
             <div class="modal-header">
                 <h2>Eliminar Item</h2>
@@ -45,8 +46,12 @@
 
 <script>
 import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
+import ModalLoading from '@/components/ModalLoading.vue';
 
 export default {
+    components: {
+        ModalLoading
+    },
     name: 'EliminarItemsModal',
     props: {
         isVisible: {
@@ -62,6 +67,7 @@ export default {
     emits: ['close', 'confirm-delete', 'modal-focused'],
 
     setup(props, { emit }) {
+        const isModalLoading = ref(false);
         const mostrarInputClave = ref(false);
         const claveIngresada = ref('');
         const error = ref('');
@@ -106,16 +112,15 @@ export default {
             });
         };
 
-        const validarClave = () => {
+        const validarClave = async () => {
             if (claveIngresada.value === CLAVE_ADMIN) {
+                isModalLoading.value = true;
                 emit('confirm-delete', props.item);
                 emit('close');
+                isModalLoading.value = false;
             } else {
                 error.value = 'Clave incorrecta';
                 claveIngresada.value = '';
-                if (claveInput.value) {
-                    claveInput.value.focus();
-                }
             }
         };
 
@@ -154,7 +159,8 @@ export default {
             solicitarClave,
             validarClave,
             volverConfirmacion,
-            handleOverlayClick
+            handleOverlayClick,
+            isModalLoading
         };
     }
 };
