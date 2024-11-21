@@ -1,5 +1,6 @@
 <!-- Mi Sidebar :D -->
 <template>
+    <div v-if="isMobile && expanded" class="sidebar-overlay" @click="toggleSidebar"></div>
     <aside ref="sidebar" v-if="!isLoginRoute" class="sidebar" :class="{ expanded, dark: isDarkMode }">
         <!-- Toggle button for expanding/collapsing -->
         <!-- Toggle Sidebar Arrow -->
@@ -13,7 +14,8 @@
 
             <!-- Home -->
             <li v-if="hasPermission('Home')" class="nav-item">
-                <router-link to="/home" class="nav-link" :class="{ active: isActive('/home') }">
+                <router-link @click="handleRouteChange" to="/home" class="nav-link"
+                    :class="{ active: isActive('/home') }">
                     <i class="bi bi-house-door-fill"></i>
                     <span v-if="expanded" class="tooltip-text">Home</span>
                 </router-link>
@@ -21,7 +23,8 @@
 
             <!-- Sucursales -->
             <li v-if="hasPermission('Sucursal')" class="nav-item">
-                <router-link to="/sucursales" class="nav-link" :class="{ active: isActive('/sucursales') }">
+                <router-link @click="handleRouteChange" to="/sucursales" class="nav-link"
+                    :class="{ active: isActive('/sucursales') }">
                     <i class="bi bi-shop-window"></i>
                     <span v-if="expanded" class="tooltip-text">Sucursal</span>
                 </router-link>
@@ -29,7 +32,8 @@
 
             <!-- Usuario -->
             <li v-if="hasPermission('Usuario')" class="nav-item">
-                <router-link to="/empleados" class="nav-link" :class="{ active: isActive('/empleados') }">
+                <router-link @click="handleRouteChange" to="/empleados" class="nav-link"
+                    :class="{ active: isActive('/empleados') }">
                     <i class="bi bi-person-fill"></i>
                     <span v-if="expanded" class="tooltip-text">Usuario</span>
                 </router-link>
@@ -37,7 +41,8 @@
 
             <!-- Categorías -->
             <li v-if="hasPermission('Categorias')" class="nav-item">
-                <router-link to="/categorias" class="nav-link" :class="{ active: isActive('/registro') }">
+                <router-link @click="handleRouteChange" to="/categorias" class="nav-link"
+                    :class="{ active: isActive('/registro') }">
                     <i class="bi bi-tags-fill"></i>
                     <span v-if="expanded" class="tooltip-text">Categorías</span>
                 </router-link>
@@ -45,7 +50,8 @@
 
             <!-- Productos -->
             <li v-if="hasPermission('Productos')" class="nav-item">
-                <router-link to="/productos" class="nav-link" :class="{ active: isActive('/productos') }">
+                <router-link @click="handleRouteChange" to="/productos" class="nav-link"
+                    :class="{ active: isActive('/productos') }">
                     <i class="bi bi-box-seam"></i>
                     <span v-if="expanded" class="tooltip-text">Productos</span>
                 </router-link>
@@ -53,7 +59,8 @@
 
             <!-- Clientes -->
             <li v-if="hasPermission('Clientes')" class="nav-item">
-                <router-link to="/clientes" class="nav-link" :class="{ active: isActive('/clientes') }">
+                <router-link @click="handleRouteChange" to="/clientes" class="nav-link"
+                    :class="{ active: isActive('/clientes') }">
                     <i class="bi bi-people-fill"></i>
                     <span v-if="expanded" class="tooltip-text">Clientes</span>
                 </router-link>
@@ -61,42 +68,44 @@
 
             <!-- Proveedores -->
             <li v-if="hasPermission('Proveedores')" class="nav-item">
-                <router-link to="/proveedores" class="nav-link" :class="{ active: isActive('/proveedores') }">
+                <router-link @click="handleRouteChange" to="/proveedores" class="nav-link"
+                    :class="{ active: isActive('/proveedores') }">
                     <i class="bi bi-truck"></i>
                     <span v-if="expanded" class="tooltip-text">Proveedores</span>
                 </router-link>
             </li>
 
             <!-- Ventas Dropdown -->
-            <li v-if="hasPermission('Venta')" class="nav-item dropdown" ref="ventasDropdown"
-                @mouseover="$emit('open-dropdown', 'ventas')" @mouseleave="$emit('close-dropdown', 'ventas')">
-                <a href="#" class="nav-link">
+            <li v-if="hasPermission('Venta')" class="nav-item dropdown" ref="ventasDropdown">
+                <a href="#" class="nav-link" @click.prevent="toggleDropdown('ventas')">
                     <i class="bi bi-cash-stack"></i>
                     <span v-if="expanded" class="tooltip-text">Ventas</span>
-                    <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': dropdowns.ventas }"></i>
+                    <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': openDropdowns.ventas }"></i>
                 </a>
-                <ul class="dropdown-menu" :class="{ 'show': dropdowns.ventas }">
-                    <li><router-link to="/administrar-ventas" class="dropdown-item">Administrar ventas</router-link>
-                    </li>
-                    <li><router-link to="/ventas" class="dropdown-item">Crear venta</router-link></li>
-                    <li><router-link to="/reporte" class="dropdown-item">Reporte de ventas</router-link></li>
+                <ul class="dropdown-menu" :class="{ 'show': openDropdowns.ventas }">
+                    <li><router-link @click="handleRouteChange" to="/administrar-ventas"
+                            class="dropdown-item">Administrar ventas</router-link></li>
+                    <li><router-link @click="handleRouteChange" to="/ventas" class="dropdown-item">Crear
+                            venta</router-link></li>
+                    <li><router-link @click="handleRouteChange" to="/reporte" class="dropdown-item">Reporte de
+                            ventas</router-link></li>
                 </ul>
             </li>
 
             <!-- Compras Dropdown -->
-            <li v-if="hasPermission('Compra')" class="nav-item dropdown" ref="comprasDropdown"
-                @mouseover="$emit('open-dropdown', 'compras')" @mouseleave="$emit('close-dropdown', 'compras')">
-                <a href="#" class="nav-link">
+            <li v-if="hasPermission('Compra')" class="nav-item dropdown" ref="comprasDropdown">
+                <a href="#" class="nav-link" @click.prevent="toggleDropdown('compras')">
                     <i class="bi bi-cart-plus-fill"></i>
                     <span v-if="expanded" class="tooltip-text">Compras</span>
-                    <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': dropdowns.compras }"></i>
+                    <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': openDropdowns.compras }"></i>
                 </a>
-                <ul class="dropdown-menu" :class="{ 'show': dropdowns.compras }">
-                    <li><router-link to="/administrar-compras" class="dropdown-item">Administrar compras</router-link>
-                    </li>
-                    <li><router-link to="/compras" class="dropdown-item">Crear compra</router-link></li>
-                    <li><router-link to="/admin-invenario" class="dropdown-item">Administrar inventario</router-link>
-                    </li>
+                <ul class="dropdown-menu" :class="{ 'show': openDropdowns.compras }">
+                    <li><router-link @click="handleRouteChange" to="/administrar-compras"
+                            class="dropdown-item">Administrar compras</router-link></li>
+                    <li><router-link @click="handleRouteChange" to="/compras" class="dropdown-item">Crear
+                            compra</router-link></li>
+                    <li><router-link @click="handleRouteChange" to="/admin-invenario" class="dropdown-item">Administrar
+                            inventario</router-link></li>
                 </ul>
             </li>
 
@@ -107,7 +116,8 @@
         <ul class="nav flex-column">
             <!-- Configuración -->
             <li class="nav-item">
-                <router-link to="/config-page" class="nav-link" :class="{ active: isActive('/config-page') }">
+                <router-link @click="handleRouteChange" to="/config-page" class="nav-link"
+                    :class="{ active: isActive('/config-page') }">
                     <i class="bi bi-gear-fill"></i>
                     <span v-if="expanded" class="tooltip-text">Configuración</span>
                 </router-link>
@@ -127,6 +137,9 @@
             </li>
         </ul>
     </aside>
+    <button v-if="isMobile" class="mobile-toggle" @click="toggleSidebar">
+        <i class="bi bi-list"></i>
+    </button>
 </template>
 
 <script>
@@ -134,6 +147,7 @@ export default {
     name: 'AppSidebar',
     data() {
         return {
+            isMobile: window.innerWidth <= 480,
             openDropdowns: {
                 ventas: false,
                 compras: false
@@ -170,7 +184,6 @@ export default {
         toggleDropdown(menu) {
             this.openDropdowns[menu] = !this.openDropdowns[menu];
         },
-
         isDropdownOpen(menu) {
             return this.openDropdowns[menu];
         },
@@ -186,6 +199,19 @@ export default {
         collapseSidebar() {
             this.$emit('collapse-sidebar'); // Emitir evento para contraer
         },
+        handleRouteChange() {
+            if (this.isMobile) {
+                this.$emit('toggle-sidebar');
+            }
+            // Cerrar los dropdowns
+            this.openDropdowns.ventas = false;
+            this.openDropdowns.compras = false;
+        }
+    },
+    mounted() {
+        window.addEventListener('resize', () => {
+            this.isMobile = window.innerWidth <= 480;
+        });
     }
 }
 </script>
@@ -524,6 +550,82 @@ ul.nav {
     font-size: 15px;
 }
 
+@media (max-width: 480px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 100%;
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar.expanded {
+        transform: translateX(0);
+        width: 50%;
+    }
+
+    /* Hamburger menu button */
+    .mobile-toggle {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        width: 40px;
+        height: 40px;
+        background-color: #ebebeb;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1001;
+        border: none;
+    }
+
+    .sidebar.dark .mobile-toggle {
+        background-color: #333;
+    }
+
+    /* Overlay for backdrop */
+    .sidebar-overlay {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Adjust nav items for better touch targets */
+    .nav-item {
+        margin: 8px 0;
+    }
+
+    .nav-link {
+        padding: 12px 20px;
+    }
+
+    /* Hide default toggle button */
+    .toggle-btn {
+        display: none;
+    }
+
+    /* Adjust dropdown positioning */
+    .dropdown-menu {
+        position: static;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+}
+
 /* Estilos responsivos */
 @media (max-width: 768px) {
     .sidebar {
@@ -565,6 +667,15 @@ ul.nav {
     }
 }
 
+.mobile-toggle {
+    background-color: transparent;
+    color: #c09d62;
+}
+
+.sidebar.dark .mobile-toggle {
+    color: #c09d62;
+    background-color: transparent;
+}
 
 /* =======================================================
    Estilos del Menú Desplegable
