@@ -294,21 +294,30 @@ export default {
 
 * {
   font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
 }
 
 .encabezado {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 16px;
+  gap: 16px;
 }
 
 .categorias-wrapper {
   padding: 16px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .opciones {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .button-categorias {
@@ -318,6 +327,7 @@ export default {
   border: none;
   cursor: pointer;
   border-radius: 10px;
+  font-size: clamp(14px, 2vw, 16px);
 }
 
 .btn {
@@ -326,6 +336,7 @@ export default {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: clamp(14px, 2vw, 16px);
 }
 
 .mostrar-producto {
@@ -345,6 +356,7 @@ export default {
   border-radius: 10px;
   color: black;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 #btnAdd:hover {
@@ -417,6 +429,7 @@ export default {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 1rem;
 }
 
 .modal-content {
@@ -426,24 +439,27 @@ export default {
   background-color: white;
   padding: 20px;
   border-radius: 4px;
+  width: 90%;
   max-width: 400px;
   min-height: 250px;
-  width: 100%;
+  margin: 20px;
 }
 
 /* Formulario */
 .form-group {
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .form-group label {
   margin-bottom: 8px;
+  display: block;
 }
 
 .form-group input,
 .descriptionForm {
-  width: 95%;
-  height: 25%;
+  width: 100%;
+  height: 35px;
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -451,6 +467,7 @@ export default {
 
 .descriptionForm {
   resize: vertical;
+  min-height: 100px;
 }
 
 /* Estilos para textarea */
@@ -461,6 +478,7 @@ textarea {
   border: 1px solid #ccc;
   border-radius: 8px;
   resize: vertical;
+  min-height: 100px;
 }
 
 textarea:focus {
@@ -507,11 +525,12 @@ select,
 
 /* Barra de búsqueda */
 .busqueda {
-  float: right;
   padding: 10px;
   font-size: 14px;
   border-radius: 10px;
   border-width: 0.5px;
+  width: 100%;
+  max-width: 300px;
 }
 
 /* Tabla */
@@ -520,8 +539,23 @@ select,
   border-radius: 10px;
   border: 1px solid #ddd;
   margin-top: 16px;
-  height: 480px;
+  height: auto;
+  max-height: 480px;
+  overflow-x: auto;
   overflow-y: auto;
+}
+
+.table-modal-container {
+  max-height: 400px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .table thead {
@@ -531,29 +565,17 @@ select,
   background-color: white;
 }
 
-.table-modal-container {
-  max-height: 400px;
-  overflow-y: scroll;
-}
-
-.table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
 .table th,
 .table td {
   padding: 8px;
+  text-align: center;
 }
 
 .table thead th {
-  text-align: center;
   border-bottom: 1px solid #ddd;
 }
 
 .table tbody td {
-  text-align: center;
   border-top: 1px solid #ddd;
 }
 
@@ -571,5 +593,108 @@ select,
 
 .table tbody tr:last-child td:last-child {
   border-bottom-right-radius: 10px;
+}
+
+/* Custom scrollbar */
+.table-container::-webkit-scrollbar,
+.table-modal-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track,
+.table-modal-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb,
+.table-modal-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover,
+.table-modal-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .busqueda,
+  #btnAdd {
+    width: 100%;
+    margin: 8px 0;
+  }
+  
+  .custom-select {
+    width: 100%;
+    max-width: none;
+  }
+  
+  #btnEditar,
+  #btnEliminar {
+    width: 40px;
+    height: 35px;
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .table-container {
+    margin-top: 24px;
+  }
+  
+  #AddUnidadModal,
+  #BtnCerrar {
+    width: 100%;
+    margin: 8px 0;
+  }
+  
+  .button-categorias {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+    margin: 10px;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+  
+  #btnAdd {
+    font-size: 14px;
+    height: 35px;
+  }
+  
+  .rol {
+    text-align: center;
+    margin-top: 8px;
+  }
+  
+  textarea,
+  .descriptionForm {
+    min-height: 80px;
+  }
 }
 </style>

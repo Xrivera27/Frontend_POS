@@ -166,12 +166,17 @@ export default {
 /* Estilos Generales */
 * {
   font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body,
 html {
   margin: 0;
   padding: 0;
+  height: 100%;
+  width: 100%;
 }
 
 /* Contenedor del Login */
@@ -180,7 +185,7 @@ html {
   justify-content: center;
   align-items: center;
   background-image: url('@/../public/img/fondo-login.jpg');
-  background-size: 100% 100%;
+  background-size: cover;
   background-position: center;
   position: fixed;
   top: 0;
@@ -188,6 +193,7 @@ html {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  padding: 20px;
 }
 
 /* Capa de oscurecimiento */
@@ -199,30 +205,26 @@ html {
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  /* Oscurecimiento con opacidad */
   z-index: 1;
-  /* Asegúrate de que esté por debajo del contenido */
 }
 
 /* Tarjeta de Login */
 .login-card {
-  background-color: rgba(255, 255, 255, 0.8);
-  /* Fondo blanco con un poco de transparencia */
-  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: clamp(1.5rem, 4vw, 2rem);
   border-radius: 12px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
   text-align: center;
-  max-width: 400px;
   width: 100%;
+  max-width: 400px;
   position: relative;
-  /* Para que esté por encima del pseudo-elemento */
   z-index: 2;
-  /* Asegúrate de que esté por encima del oscurecimiento */
+  backdrop-filter: blur(10px);
 }
 
 /* Títulos */
 h2 {
-  font-size: 24px;
+  font-size: clamp(20px, 4vw, 24px);
   font-weight: 600;
   color: #39b378;
   margin-bottom: 20px;
@@ -230,7 +232,7 @@ h2 {
 
 /* Mensajes de bienvenida */
 .welcome-message {
-  font-size: 16px;
+  font-size: clamp(14px, 3vw, 16px);
   margin-bottom: 10px;
   color: #888;
 }
@@ -238,13 +240,14 @@ h2 {
 /* Texto de separación */
 .or-text {
   margin-bottom: 20px;
-  font-size: 16px;
+  font-size: clamp(14px, 3vw, 16px);
   color: #333;
 }
 
 /* Grupos de formulario */
 .form-group {
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 /* Estilos de Inputs */
@@ -252,16 +255,24 @@ input[type="text"],
 input[type="password"],
 input[type="email"],
 input[type="tel"] {
-  width: 95%;
+  width: 100%;
   padding: 0.8rem;
   border-radius: 8px;
   border: 1px solid #ddd;
-  font-size: 1rem;
+  font-size: clamp(14px, 3vw, 16px);
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #39b378;
+  box-shadow: 0 0 0 2px rgba(57, 179, 120, 0.2);
 }
 
 /* Grupo de contraseña */
 .password-group {
   position: relative;
+  width: 100%;
 }
 
 /* Icono de visibilidad de contraseña */
@@ -272,6 +283,7 @@ input[type="tel"] {
   transform: translateY(-50%);
   cursor: pointer;
   color: #888;
+  padding: 5px;
 }
 
 /* Botón de envío */
@@ -288,12 +300,16 @@ input[type="tel"] {
   align-items: center;
   color: white;
   font-size: 2.5rem;
-  /* Ajusta el tamaño del ícono aquí */
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  transform: scale(1.1);
+  background-color: #2d8f5f;
 }
 
 .submit-btn i {
   font-size: 2.5rem;
-  /* Asegúrate de que el tamaño sea consistente */
 }
 
 /* Opciones de formulario */
@@ -302,23 +318,88 @@ input[type="tel"] {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .checkbox-container {
   display: flex;
   align-items: center;
-  font-size: 0.9rem;
+  font-size: clamp(12px, 2.5vw, 14px);
   color: #333;
+  gap: 5px;
 }
 
 .forgot-password {
-  font-size: 12px;
+  font-size: clamp(11px, 2.5vw, 12px);
   color: #39b378;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: #2d8f5f;
 }
 
 /* Centrar el botón de submit */
 .button-container {
   display: flex;
   justify-content: center;
+  margin-top: 20px;
 }
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .login-card {
+    padding: 1.5rem;
+  }
+
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .login-container {
+    padding: 15px;
+  }
+
+  .login-card {
+    padding: 1rem;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="tel"] {
+    padding: 0.6rem;
+  }
+
+  .submit-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .submit-btn i {
+    font-size: 2rem;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-card {
+  animation: fadeIn 0.5s ease-out;
+}
+
 </style>

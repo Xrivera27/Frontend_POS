@@ -214,11 +214,15 @@ export default {
 
 * {
   font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
 }
 
 .encabezado {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 16px;
+  gap: 16px;
 }
 
 .opciones {
@@ -227,14 +231,18 @@ export default {
   justify-content: space-between;
   margin-bottom: 2%;
   margin-top: 2%;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
 }
 
 .busqueda {
-  float: right;
   padding: 10px;
   font-size: 14px;
   border-radius: 10px;
   border-width: 0.5px;
+  width: 100%;
+  max-width: 300px;
 }
 
 .export-button {
@@ -268,10 +276,12 @@ export default {
   display: flex;
   justify-content: center;
   width: 100%;
+  overflow-x: auto;
 }
 
 .table {
   width: 100%;
+  min-width: 800px;
   border-collapse: collapse;
   margin-bottom: 20px;
 }
@@ -286,6 +296,10 @@ export default {
 .table th {
   background-color: none;
   font-weight: bold;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
 }
 
 .modal {
@@ -306,7 +320,10 @@ export default {
   padding: 20px;
   border-radius: 4px;
   max-width: 1500px;
-  width: 100%;
+  width: 90%;
+  margin: 20px;
+  overflow-y: auto;
+  max-height: 90vh;
 }
 
 .h2-modal-content {
@@ -345,5 +362,97 @@ export default {
   padding: 5px;
   border-radius: 5px;
   border: 1px solid #ced4da;
+  width: auto;
+}
+
+/* Scroll personalizado */
+.table-container::-webkit-scrollbar,
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track,
+.modal-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb,
+.modal-content::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover,
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .busqueda,
+  .custom-select,
+  .export-button {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  #btnDetalles {
+    width: 40px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .bi-eye-fill {
+    font-size: 16px;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .btn {
+    width: 100%;
+    margin: 5px 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .h2-modal-content {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .table th,
+  .table td {
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  .busqueda {
+    max-width: 100%;
+  }
+
+  .modal-content {
+    margin: 10px;
+    padding: 10px;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
 }
 </style>

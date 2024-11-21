@@ -553,11 +553,15 @@ export default {
 
 * {
   font-family: "Montserrat", sans-serif;
+  box-sizing: border-box;
 }
 
 .encabezado {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 16px;
+  gap: 16px;
 }
 
 .wrapper {
@@ -571,7 +575,6 @@ export default {
 .input-container label {
   white-space: nowrap;
 }
-
 
 .input-container {
   display: flex;
@@ -638,8 +641,6 @@ export default {
   margin-right: 0.5vw;
 }
 
-
-
 .agregar-producto {
   background-color: #46ce10;
   width: 100px;
@@ -669,7 +670,9 @@ export default {
   border-radius: 10px;
   border: 1px solid #ddd;
   margin-top: 16px;
-  height: 480px;
+  height: auto;
+  max-height: 480px;
+  overflow-x: auto;
   overflow-y: auto;
 }
 
@@ -682,6 +685,7 @@ export default {
 
 .table {
   width: 100%;
+  min-width: 800px;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -795,7 +799,6 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
-
   border-top: solid rgb(75, 75, 75) 1px;
 }
 
@@ -912,19 +915,15 @@ export default {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
-  /* Espacio entre los campos */
 }
 
 .div-modal-resumen label {
   width: 120px;
-  /* Ajusta el ancho del label según sea necesario */
   margin-right: 10px;
-  /* Espacio entre el label y el input */
 }
 
 .div-modal-resumen input {
   flex: 1;
-  /* El input ocupará el resto del espacio disponible */
 }
 
 .div-modal-resumen-rtn {
@@ -951,5 +950,124 @@ export default {
 .cancelar:hover,
 .close-btn:hover {
   background-color: #bd0d1f;
+}
+
+/* Scroll personalizado */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .input-container-exterior {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  #div_nombre {
+    width: 100%;
+    padding-left: 0;
+    margin-bottom: 10px;
+  }
+  
+  .input-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .campo {
+    width: 100%;
+  }
+  
+  .end-container-cobro {
+    flex-direction: column;
+    height: auto;
+    align-items: stretch;
+  }
+  
+  .end-container {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  #boton-cobrar,
+  #cancelar-compra {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  
+  .modal-content {
+    width: 95%;
+  }
+  
+  .div-modal-resumen {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .div-modal-resumen label {
+    width: 100%;
+    margin-right: 0;
+  }
+  
+  .div-modal-resumen-rtn {
+    margin-left: 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .wrapper {
+    padding: 8px;
+  }
+  
+  #total {
+    font-size: 30px;
+  }
+  
+  .btn-botones-accion {
+    font-size: 18px;
+  }
+  
+  .table th,
+  .table td {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .label-input {
+    font-size: 12px;
+  }
+  
+  .modal-content {
+    padding: 15px;
+  }
+  
+  .agregar-producto {
+    width: 100%;
+  }
+  
+  #cancelar-compra span {
+    font-size: 13px;
+  }
+  
+  .btn-end {
+    min-height: 60px;
+  }
 }
 </style>

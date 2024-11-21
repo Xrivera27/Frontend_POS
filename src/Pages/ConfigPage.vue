@@ -232,10 +232,18 @@ async updateUserData() {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
 
+* {
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+}
+
 /* Encabezado */
 .encabezado {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 16px;
+  gap: 16px;
 }
 
 /* Configuración del usuario */
@@ -246,6 +254,8 @@ async updateUserData() {
 /* Contenedores principales */
 .config-wrapper {
   padding: 16px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .contenedor-titulo {
@@ -259,6 +269,8 @@ async updateUserData() {
 .contenedor-principal {
   display: flex;
   justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .contenedor-interno {
@@ -273,7 +285,8 @@ form {
   border: 1px solid rgb(110, 109, 109);
   padding: 3% 0 2% 0;
   border-radius: 10px;
-  min-width: 800px;
+  min-width: 300px;
+  width: 100%;
   min-height: 200px;
   position: relative;
 }
@@ -321,6 +334,8 @@ input {
   display: flex;
   justify-content: end;
   margin-right: 2.5%;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .botones-container .btn {
@@ -368,5 +383,104 @@ input {
 .inactivo {
   background-color: rgb(238, 62, 62);
   color: white;
+}
+
+/* Media Queries */
+@media screen and (max-width: 1024px) {
+  .contenedor-principal {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .contenedor-interno {
+    width: 90%;
+    padding: 0;
+  }
+
+  form {
+    min-width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .config-wrapper {
+    padding: 8px;
+  }
+
+  .botones-container {
+    justify-content: center;
+    margin-right: 0;
+  }
+
+  .btn {
+    width: 100%;
+    margin: 4px 0;
+  }
+
+  input {
+    width: 100%;
+  }
+
+  .contenedor-interno {
+    width: 100%;
+  }
+
+  .titulo-form {
+    font-size: 14px;
+    top: -10%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .configuracion-usuario {
+    padding: 8px;
+  }
+
+  form {
+    padding: 20px 10px;
+  }
+
+  .botones-container {
+    flex-direction: column;
+  }
+
+  .boton-switch {
+    width: 100%;
+    text-align: center;
+  }
+
+  input {
+    font-size: 14px;
+  }
+
+  .titulo-form {
+    font-size: 12px;
+    top: -8%;
+  }
+}
+
+/* Scroll personalizado */
+.config-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.config-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.config-wrapper::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.config-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
 }
 </style>

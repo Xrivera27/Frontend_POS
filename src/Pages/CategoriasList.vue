@@ -272,22 +272,22 @@ export default {
 
 * {
   font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
 }
 
+/* Encabezado */
 .encabezado {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 16px;
+  gap: 16px;
 }
 
 .categorias-wrapper {
   padding: 16px;
 }
 
-.opciones {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
 
 .button-promocion {
   background-color: #4cafaf;
@@ -307,32 +307,52 @@ export default {
   border-radius: 10px;
 }
 
-.btn {
-  padding: 8px 16px;
-  margin: 4px;
-  border: none;
-  cursor: pointer;
+/* Opciones y búsqueda */
+.opciones {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
+.busqueda {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 10px;
+  border-width: 0.5px;
+  width: 100%;
+  max-width: 300px;
 }
 
+.registros {
+  height: 100%;
+  padding-bottom: 1%;
+  flex-grow: 1;
+  min-width: 200px;
+}
+
+/* Botones */
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
-  width: 170px;
+  width: auto;
+  min-width: 170px;
   height: 40px;
   border-radius: 10px;
   color: black;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 #btnAdd:hover {
   background-color: #a38655;
   transform: scale(1.05);
   transition: all 0.3s ease;
+}
+
+.export-button {
+  margin: 0;
 }
 
 #btnEditar,
@@ -345,6 +365,7 @@ export default {
 
 #btnEditar {
   background-color: #ffc107;
+  color: black;
 }
 
 #btnEditar:hover {
@@ -355,6 +376,7 @@ export default {
 
 #btnEliminar {
   color: black;
+  background-color: #dc3545;
 }
 
 #btnEliminar:hover {
@@ -363,28 +385,23 @@ export default {
   transition: all 0.3s ease;
 }
 
-#AddCategoriaModal,
+#AddClienteModal,
 #BtnCerrar {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
   font-size: 1rem;
+  color: #fff;
   cursor: pointer;
   margin-right: 1rem;
 }
 
-#AddCategoriaModal {
+#AddClienteModal {
   background-color: #007bff;
-  color: #fff;
 }
 
 #BtnCerrar {
   background-color: rgb(93, 100, 104);
-  color: #fff;
-}
-
-.export-button {
-  margin: 0;
 }
 
 /* Modal */
@@ -405,112 +422,36 @@ export default {
   background-color: white;
   padding: 20px;
   border-radius: 4px;
+  width: 90%;
   max-width: 500px;
-  width: 100%;
+  margin: 20px;
 }
 
-/* Formulario */
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-group label {
-  margin-bottom: 8px;
-}
-
-.form-group input,
-.descriptionForm {
-  width: 95%;
-  height: 25%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.descriptionForm {
-  resize: vertical;
-}
-
-/* Estilos para textarea */
-textarea {
-  width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  resize: vertical;
-}
-
-textarea:focus {
-  outline: none;
-  border-color: #a38655;
-  box-shadow: 0 0 5px rgba(163, 134, 85, 0.5);
-}
-
-/* Estilos generales */
-.container-top {
-  width: 100%;
-  text-align: right;
-}
-
-.rol {
-  color: #969696;
-  font-size: 14px;
-}
-
-select,
-.custom-select {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  height: 35px;
-  font-size: 16px;
-  margin: 10px 5px;
-}
-
-.custom-select {
-  padding: 5px;
-  background-color: #fff;
-  cursor: pointer;
-  width: 80px;
-}
-
-.custom-select:focus {
-  outline: none;
-  border-color: #a38655;
-}
-
-.custom-select option {
-  font-size: 16px;
-}
-
-/* Barra de búsqueda */
-.busqueda {
-  float: right;
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 10px;
-  border-width: 0.5px;
+.h2-modal-content {
+  margin-top: 0px;
 }
 
 /* Tabla */
+.clientes-wrapper {
+  padding: 16px;
+  width: 100%;
+  overflow-x: hidden;
+}
+
 .table-container {
   width: 100%;
   border-radius: 10px;
   border: 1px solid #ddd;
   margin-top: 16px;
-  height: 480px;
+  height: auto;
+  max-height: 480px;
+  overflow-x: auto;
   overflow-y: auto;
-}
-
-.table thead {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color: white;
 }
 
 .table {
   width: 100%;
+  min-width: 800px;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -518,6 +459,13 @@ select,
 .table th,
 .table td {
   padding: 8px;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: white;
 }
 
 .table thead th {
@@ -544,5 +492,165 @@ select,
 
 .table tbody tr:last-child td:last-child {
   border-bottom-right-radius: 10px;
+}
+
+/* Formulario */
+.form-group {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.form-group label {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+#form-tel {
+  width: 100%;
+  max-width: 300px;
+}
+
+/* Selección personalizada */
+.custom-select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 35px;
+  font-size: 16px;
+  padding: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 80px;
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: #a38655;
+}
+
+.custom-select option {
+  font-size: 16px;
+}
+
+/* Estilos generales */
+.btn {
+  padding: 8px 16px;
+  margin: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.rol {
+  color: #969696;
+  font-size: 14px;
+}
+
+#campana {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #a38655;
+}
+
+.container-top {
+  width: 100%;
+  text-align: right;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .busqueda,
+  .registros,
+  #btnAdd,
+  .export-button {
+    width: 100%;
+    margin: 8px 0;
+  }
+  
+  .custom-select {
+    width: 100%;
+    max-width: none;
+  }
+  
+  #btnEditar,
+  #btnEliminar {
+    width: 40px;
+    height: 35px;
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .table-container {
+    margin-top: 24px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .h2-modal-content {
+    font-size: 20px;
+  }
+
+  #form-tel {
+    max-width: 100%;
+  }
+
+  .busqueda {
+    max-width: 100%;
+  }
+}
+
+/* Estilo para scroll personalizado */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
 }
 </style>

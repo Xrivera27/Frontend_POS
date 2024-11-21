@@ -456,42 +456,34 @@ export default {
 
 * {
   font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
 }
 
 .info-icon {
   cursor: pointer;
   margin-right: 5px;
-  /* Espacio entre el ícono y el texto */
   vertical-align: middle;
-  /* Alinea el ícono verticalmente con el texto */
   position: relative;
-  /* Para que el tooltip se posicione en relación a este ícono */
 }
 
 .tooltip {
   display: inline-block;
   position: absolute;
-  /* Cambiar a absolute para posicionarlo relativo al ícono */
   left: 20px;
-  /* Ajusta este valor para que el tooltip esté justo al lado del ícono */
   top: 0;
-  /* Alinea el tooltip verticalmente con el ícono */
   background-color: #f9f9f9;
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 5px;
   z-index: 1000;
-  /* Asegúrate de que el tooltip esté por encima de otros elementos */
   width: 250px;
-  /* Ajusta el ancho según sea necesario */
   margin-top: 5px;
-  /* Espacio entre el ícono y el tooltip */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/* aqui empieza */
 .modal {
   position: fixed;
+  z-index: 1000;
   top: 0;
   left: 0;
   width: 100%;
@@ -508,6 +500,9 @@ export default {
   background-color: white;
   padding: 20px;
   border-radius: 4px;
+  width: 90%;
+  max-width: 500px;
+  margin: 20px;
 }
 
 #modal-usuario {
@@ -526,7 +521,6 @@ export default {
   width: 80%;
 }
 
-/* Contenedores */
 .contenedor-principal {
   display: flex;
   width: 100%;
@@ -537,7 +531,6 @@ export default {
   width: 45%;
 }
 
-/* Formularios */
 .form-group {
   margin-bottom: 16px;
   position: relative;
@@ -552,7 +545,6 @@ export default {
   min-width: 80%;
   display: flexbox;
   flex-direction: row;
-
 }
 
 .form-group input {
@@ -575,7 +567,6 @@ export default {
   margin: 5px;
 }
 
-/* Selectores */
 .form-select {
   width: 100%;
   border: none;
@@ -584,7 +575,6 @@ export default {
   padding: 8px 16px;
 }
 
-/* Botones */
 .btn {
   padding: 8px 16px;
   border: none;
@@ -617,7 +607,6 @@ export default {
   color: white;
 }
 
-/* Botón registrar usuario */
 #registrar-usuario {
   background-color: rgb(253, 253, 56);
   margin-left: 30px;
@@ -630,7 +619,6 @@ export default {
   transition: all 0.3s ease;
 }
 
-/* Categorías */
 .form-categoria {
   display: flex;
   flex-direction: column;
@@ -641,7 +629,6 @@ export default {
   align-items: center;
 }
 
-/* Modal de categorías */
 .modal-content-categoria {
   display: flex;
   flex-direction: column;
@@ -674,19 +661,21 @@ export default {
   width: 100%;
 }
 
-
-/* aqui termina el modal */
-
 .encabezado {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 16px;
+  gap: 16px;
 }
 
 .opciones {
-  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
 }
 
 .busqueda {
@@ -694,7 +683,8 @@ export default {
   font-size: 14px;
   border-radius: 10px;
   border-width: 0.5px;
-  min-width: 350px;
+  width: 100%;
+  max-width: 350px;
 }
 
 .registros {
@@ -706,26 +696,17 @@ export default {
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
-  width: 170px;
+  width: auto;
+  min-width: 170px;
   height: 40px;
   border-radius: 10px;
   color: black;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .export-button {
   margin: 0;
-}
-
-
-.opciones {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.h2-modal-content {
-  margin-top: 0px
 }
 
 #btnAdd:hover {
@@ -779,16 +760,26 @@ export default {
 
 .empleados-wrapper {
   padding: 16px;
+  width: 100%;
+  overflow-x: hidden;
 }
-
 
 .table-container {
   width: 100%;
   border-radius: 10px;
   border: 1px solid #ddd;
   margin-top: 16px;
-  height: 480px;
+  height: auto;
+  max-height: 480px;
+  overflow-x: auto;
   overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .table thead {
@@ -796,12 +787,6 @@ export default {
   top: 0;
   z-index: 1;
   background-color: white;
-}
-
-.table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
 }
 
 .table th,
@@ -854,20 +839,17 @@ button {
 .custom-select {
   border: 1px solid #ccc;
   border-radius: 5px;
-
   font-size: 16px;
   padding: 10px;
   background-color: #fff;
   cursor: pointer;
   width: 60%;
   min-width: 400px;
-  /* Ajusta el ancho a 120px o el valor que prefieras */
 }
 
 .custom-select:focus {
   outline: none;
   border-color: #a38655;
-  /* Ajusta el color del borde al de tu diseño */
 }
 
 .custom-select option {
@@ -898,5 +880,133 @@ button {
 
 .password-wrapper .toggle-password:hover {
   color: #000;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .contenedor-principal {
+    flex-direction: column;
+  }
+
+  .contenedor {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  #modal-usuario {
+    min-width: 90%;
+    max-width: 95%;
+  }
+
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .busqueda,
+  .custom-select,
+  #btnAdd,
+  .export-button {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 8px 0;
+  }
+  
+  #btnEditar,
+  #btnEliminar {
+    width: 40px;
+    height: 35px;
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .table-container {
+    margin-top: 24px;
+  }
+
+  .modal-content-categoria {
+    width: 90%;
+    min-width: auto;
+  }
+
+  #registrar-usuario {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group input,
+  .password-wrapper input {
+    width: 100%;
+  }
+
+  .h2-modal-content {
+    font-size: 20px;
+  }
+
+  .busqueda {
+    min-width: auto;
+  }
+
+  .form-form-categoria {
+    padding: 10px;
+    height: 200px;
+  }
+
+  .categoria-botones {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #AddUsuarioModal,
+  #BtnCerrar {
+    width: 100%;
+  }
+
+  .password-wrapper .toggle-password {
+    right: 0.5rem;
+  }
+}
+
+/* Estilo para scroll personalizado */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
 }
 </style>

@@ -261,12 +261,16 @@ export default {
 /* Estilos globales */
 * {
   font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
 }
 
 /* Encabezado */
 .encabezado {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 16px;
+  gap: 16px;
 }
 
 /* Opciones */
@@ -275,15 +279,19 @@ export default {
   align-items: center;
   justify-content: space-between;
   margin: 2% 0;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
 }
 
 /* Barra de búsqueda */
 .busqueda {
-  float: right;
   padding: 10px;
   font-size: 14px;
   border-radius: 10px;
   border-width: 0.5px;
+  width: 100%;
+  max-width: 300px;
 }
 
 /* Botón de exportación */
@@ -320,11 +328,13 @@ export default {
   display: flex;
   justify-content: center;
   width: 100%;
+  overflow-x: auto;
 }
 
 /* Estilos de la tabla */
 .table {
   width: 100%;
+  min-width: 800px;
   border-collapse: collapse;
   margin-bottom: 20px;
 }
@@ -338,6 +348,10 @@ export default {
 
 .table th {
   font-weight: bold;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
 }
 
 /* Modal */
@@ -359,7 +373,10 @@ export default {
   padding: 20px;
   border-radius: 4px;
   max-width: 1500px;
-  width: 100%;
+  width: 90%;
+  margin: 20px;
+  overflow-y: auto;
+  max-height: 90vh;
 }
 
 .h2-modal-content {
@@ -400,6 +417,7 @@ export default {
   padding: 5px;
   border-radius: 5px;
   border: 1px solid #ced4da;
+  width: auto;
 }
 
 /* Filtro de fechas */
@@ -407,10 +425,13 @@ export default {
   display: flex;
   align-items: center;
   margin-right: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .date-filter label {
   margin-right: 10px;
+  white-space: nowrap;
 }
 
 .date-filter input {
@@ -418,6 +439,7 @@ export default {
   border-radius: 5px;
   border: 1px solid #ced4da;
   margin-right: 20px;
+  width: auto;
 }
 
 .date-filter button {
@@ -427,9 +449,123 @@ export default {
   color: white;
   border: none;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .date-filter button:hover {
   background-color: #0056b3;
+}
+
+/* Scroll personalizado */
+.table-container::-webkit-scrollbar,
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track,
+.modal-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb,
+.modal-content::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover,
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .busqueda,
+  .custom-select,
+  .export-button {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  .date-filter {
+    flex-direction: column;
+    align-items: stretch;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .date-filter input {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .date-filter button {
+    width: 100%;
+  }
+
+  #btnDetalles {
+    width: 40px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .bi-eye-fill {
+    font-size: 16px;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .btn {
+    width: 100%;
+    margin: 5px 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .h2-modal-content {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .table th,
+  .table td {
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  .busqueda {
+    max-width: 100%;
+  }
+
+  .modal-content {
+    margin: 10px;
+    padding: 10px;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .date-filter label {
+    margin-right: 0;
+    margin-bottom: 5px;
+  }
 }
 </style>

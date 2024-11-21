@@ -734,6 +734,9 @@ export default {
 
 * {
   font-family: "Montserrat", sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 /* Layout Principal */
@@ -741,26 +744,21 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: clamp(10px, 2vw, 20px);
   z-index: 1;
+  min-height: 100vh;
 }
 
-/* Estilo cuando la sucursal está facturando */
+/* Estados de Facturación */
 .facturando {
   color: #0c9200;
-  /* Verde oscuro */
   font-weight: bold;
-  /* Texto en negrita */
 }
 
-/* Estilo cuando la sucursal no está facturando o los datos SAR están desactualizados */
 .no-facturando {
   color: #c90101;
-  /* Rojo oscuro */
   font-weight: bold;
-  /* Texto en negrita */
 }
-
 
 .main-container {
   display: flex;
@@ -769,6 +767,7 @@ export default {
   width: 100%;
   z-index: 1;
   margin: 0;
+  padding: 0 clamp(10px, 2vw, 20px);
 }
 
 /* Header */
@@ -778,10 +777,12 @@ export default {
   justify-content: flex-start;
   align-items: center;
   text-align: center;
-  padding: 10px;
+  padding: clamp(5px, 1.5vw, 10px);
   border-bottom: 1px solid #ccc;
-  gap: 150px;
+  gap: clamp(20px, 5vw, 150px);
   z-index: 1;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 /* Cliente Input Section */
@@ -789,6 +790,8 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  width: 100%;
+  max-width: 600px;
 }
 
 .input-button-container {
@@ -801,7 +804,7 @@ export default {
 .buttons-header {
   display: flex;
   gap: 5px;
-  /* Espacio entre los botones */
+  flex-wrap: wrap;
 }
 
 .inputs-container {
@@ -809,6 +812,7 @@ export default {
   flex-direction: row;
   gap: 5px;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .cliente-input,
@@ -818,7 +822,8 @@ export default {
   border-radius: 4px;
   background-color: #f5f5f5;
   height: 30px;
-  font-size: 14px;
+  font-size: clamp(12px, 1.5vw, 14px);
+  min-width: 120px;
 }
 
 .cliente-input {
@@ -845,7 +850,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: clamp(16px, 2vw, 20px);
   margin-bottom: 15px;
   text-align: center;
   width: 100%;
@@ -863,7 +868,7 @@ export default {
   align-items: center;
   justify-content: center;
   margin: 0;
-  font-size: 14px;
+  font-size: clamp(12px, 1.5vw, 14px);
 }
 
 .search-button:hover {
@@ -876,7 +881,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-left: 20px;
+  margin-left: clamp(10px, 2vw, 20px);
 }
 
 /* Column Container y Tabla */
@@ -887,25 +892,25 @@ export default {
   height: calc(100vh - 250px);
   margin-bottom: 10px;
   z-index: 1;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .table-container {
   width: 100%;
-  flex-grow: 1;
+  flex: 1 1 300px;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow-y: auto;
 }
 
-/* Updated table styles for fixed header */
 .table-wrapper {
   flex-grow: 1;
   border: 1px solid #ccc;
   display: flex;
   flex-direction: column;
   height: 100%;
-  /* Prevent wrapper scroll */
 }
 
 .table {
@@ -914,7 +919,6 @@ export default {
   background: white;
 }
 
-/* Fixed header styles */
 .table thead {
   position: sticky;
   top: 0;
@@ -925,19 +929,11 @@ export default {
   table-layout: fixed;
 }
 
-.table thead tr {
-  width: 100%;
-}
-
 .table tbody {
   display: block;
   overflow-y: auto;
-  /* Cambiado de auto a scroll para forzar la barra */
   width: 100%;
-  /* Altura fija para garantizar el scroll */
-  height: 340px;
-  /* Puedes ajustar este valor según necesites */
-  /* Altura máxima relativa a la ventana */
+  height: clamp(200px, 50vh, 340px);
 }
 
 .table tbody tr {
@@ -946,86 +942,45 @@ export default {
   table-layout: fixed;
 }
 
-/* Columnas de la tabla */
-.col-item {
-  width: 10%;
+/* Columnas responsivas */
+@media screen and (min-width: 768px) {
+  .col-item { width: 10%; }
+  .col-codigo { width: 20%; }
+  .col-descripcion { width: 40%; }
+  .col-cantidad { width: 10%; }
+  .col-precio { width: 10%; }
+  .col-importe { width: 10%; }
 }
 
-.col-codigo {
-  width: 20%;
-}
-
-.col-descripcion {
-  width: 40%;
-}
-
-.col-cantidad {
-  width: 10%;
-}
-
-.col-precio {
-  width: 10%;
-}
-
-.col-importe {
-  width: 10%;
+@media screen and (max-width: 767px) {
+  .col-item { width: 15%; }
+  .col-codigo { width: 25%; }
+  .col-descripcion { width: 30%; }
+  .col-cantidad { width: 10%; }
+  .col-precio { width: 10%; }
+  .col-importe { width: 10%; }
 }
 
 /* Estilos de la tabla */
 th {
   background-color: #f0f0f0;
   border-bottom: 1px solid #ccc;
-  padding: 10px;
+  padding: clamp(5px, 1.5vw, 10px);
   text-align: left;
   font-weight: 600;
+  font-size: clamp(12px, 1.5vw, 14px);
 }
-
 
 td {
-  padding: 10px;
+  padding: clamp(5px, 1.5vw, 10px);
   text-align: left;
   border-bottom: 1px solid #eee;
-}
-
-.empty-row td {
-  border-bottom: none;
-  height: 41px;
-  /* Match the height of regular rows */
-}
-
-.table tbody tr:not(.empty-row):hover {
-  background-color: #f8f9fa;
-}
-
-/* Updated Total Container styles */
-.total-container {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 20px;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border: 1px solid #ccc;
-  border-top: none;
-}
-
-.cantidad-input,
-.total-input {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.cantidad-input input {
-  width: 120px;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  font-size: clamp(12px, 1.5vw, 14px);
 }
 
 /* Teclado Numérico */
 .numeric-keypad {
-  width: 20%;
+  width: clamp(250px, 20%, 300px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1037,23 +992,46 @@ td {
 .keypad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: clamp(5px, 1vw, 10px);
+  width: 100%;
 }
 
-/* Botones Generales */
+/* Botones */
 button {
   width: 100%;
-  height: 40px;
-  font-size: 18px;
+  height: clamp(35px, 5vw, 40px);
+  font-size: clamp(14px, 2vw, 18px);
   border: none;
   border-radius: 5px;
   background-color: #f0f0f0;
   cursor: pointer;
-  align-self: flex-end;
 }
 
-button:hover {
-  background-color: #ccc;
+/* Total Container */
+.total-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: clamp(10px, 2vw, 20px);
+  padding: clamp(5px, 1.5vw, 10px);
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-top: none;
+  flex-wrap: wrap;
+}
+
+.cantidad-input,
+.total-input {
+  display: flex;
+  align-items: center;
+  gap: clamp(5px, 1vw, 10px);
+}
+
+.cantidad-input input {
+  width: clamp(80px, 15vw, 120px);
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 /* Footer */
@@ -1065,27 +1043,27 @@ button:hover {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
-  padding: 5px;
+  padding: clamp(3px, 1vw, 5px);
   background-color: #f0f0f0;
   border-top: 1px solid #ccc;
   z-index: 2;
+  gap: 5px;
 }
 
 .footer-container button {
-  width: 70px;
-  height: 70px;
+  width: clamp(50px, 10vw, 70px);
+  height: clamp(50px, 10vw, 70px);
   border-radius: 50%;
-  font-size: 12px;
+  font-size: clamp(10px, 1.5vw, 12px);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .subTotal {
-  font-size: 250%;
+  font-size: clamp(24px, 5vw, 36px);
   font-weight: bold;
-  margin-top: 0%;
-  margin-bottom: 0%;
+  margin: 0;
 }
 
 .selected {
@@ -1094,5 +1072,66 @@ button:hover {
 
 .table tbody tr.selected:hover {
   background-color: #d1e8ff !important;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .numeric-keypad {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #ccc;
+  }
+
+  .column-container {
+    flex-direction: column;
+  }
+
+  .total-container {
+    justify-content: center;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .inputs-container {
+    flex-direction: column;
+  }
+
+  .cliente-input,
+  .rtn-input {
+    width: 100%;
+  }
+
+  .footer-container button {
+    font-size: 10px;
+  }
+  
+  .buttons-header {
+    width: 100%;
+  }
+}
+
+/* Scrollbar personalizado */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 </style>

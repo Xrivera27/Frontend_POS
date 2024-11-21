@@ -1216,5 +1216,101 @@ input[type="date"] {
   cursor: pointer;
 }
 
+/* Scroll personalizado */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Media Queries */
+@media screen and (max-width: 1024px) {
+  .contenedor-principal {
+    flex-direction: column;
+  }
+
+  .contenedor-interno {
+    width: 100%;
+    padding: 0;
+  }
+
+  form {
+    min-width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .categorias-wrapper {
+    padding: 8px;
+  }
+
+  .modal-content {
+    padding: 15px;
+  }
+
+  .btn {
+    width: 100%;
+    margin: 4px 0;
+  }
+
+  .busqueda {
+    width: 100%;
+  }
+
+  #btnDesactivar,
+  #btnActivar {
+    font-size: 20px;
+    padding: 5px 10px;
+  }
+
+  .td-botones {
+    flex-direction: column;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions .btn {
+    min-width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .titulo-form {
+    font-size: 12px;
+    top: -8%;
+  }
+
+  .promocion-details {
+    padding: 10px;
+  }
+
+  .modal-content {
+    padding: 10px;
+  }
+
+  .btn {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+}
 </style>

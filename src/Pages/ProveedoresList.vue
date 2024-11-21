@@ -294,12 +294,16 @@ export default {
 /* Fuentes */
 * {
   font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
 }
 
 /* Encabezado */
 .encabezado {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 16px;
+  gap: 16px;
 }
 
 /* Opciones */
@@ -307,11 +311,16 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .registros {
   height: 100%;
   padding-bottom: 1%;
+  flex-grow: 1;
+  min-width: 200px;
 }
 
 /* Selección personalizada */
@@ -331,12 +340,12 @@ export default {
   background-color: #c09d62;
   font-size: 16px;
   width: 200px;
-  /* Ancho ajustado */
   height: 40px;
   border-radius: 10px;
   color: black;
   font-weight: bold;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 #btnAdd:hover {
@@ -373,11 +382,12 @@ export default {
 
 /* Estilo de la búsqueda */
 .busqueda {
-  float: right;
   padding: 10px;
   font-size: 14px;
   border-radius: 10px;
   border-width: 0.5px;
+  width: 100%;
+  max-width: 300px;
 }
 
 /* Selección */
@@ -392,6 +402,8 @@ select {
 /* Contenedor de proveedores */
 .proveedores-wrapper {
   padding: 16px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* Contenedor de tabla */
@@ -400,8 +412,18 @@ select {
   border-radius: 10px;
   border: 1px solid #ddd;
   margin-top: 16px;
-  height: 480px;
+  height: auto;
+  max-height: 480px;
+  overflow-x: auto;
   overflow-y: auto;
+}
+
+/* Estilo de la tabla */
+.table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .table thead {
@@ -409,13 +431,6 @@ select {
   top: 0;
   z-index: 1;
   background-color: white;
-}
-
-/* Estilo de la tabla */
-.table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
 }
 
 .table th,
@@ -484,8 +499,9 @@ select {
   background-color: white;
   padding: 20px;
   border-radius: 4px;
+  width: 90%;
   max-width: 500px;
-  width: 100%;
+  margin: 20px;
 }
 
 /* Estilo de formulario */
@@ -495,16 +511,97 @@ select {
 
 .form-group label {
   margin-bottom: 8px;
+  display: flex;
 }
 
 .form-group input {
-  width: 95%;
+  width: 100%;
   height: 35px;
-  /* Ajustado para mejor estética */
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 /* Otros estilos */
 .h2-modal-content {
   margin-top: 0px;
+}
+
+/* Estilo para scroll personalizado */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .busqueda,
+  .registros,
+  #btnAdd {
+    width: 100%;
+    margin: 8px 0;
+  }
+  
+  .custom-select {
+    width: 100%;
+    max-width: none;
+  }
+  
+  #btnEditar,
+  #btnEliminar {
+    width: 40px;
+    height: 35px;
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .table-container {
+    margin-top: 24px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .h2-modal-content {
+    font-size: 20px;
+  }
 }
 </style>

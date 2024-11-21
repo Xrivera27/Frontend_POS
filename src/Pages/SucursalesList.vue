@@ -331,30 +331,40 @@ export default {
 
 * {
   font-family: "Montserrat", sans-serif;
+  box-sizing: border-box;
 }
 
 .encabezado {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 0 16px;
+  gap: 16px;
 }
 
 .opciones {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .busqueda {
-  float: right;
   padding: 10px;
   font-size: 14px;
   border-radius: 10px;
   border-width: 0.5px;
+  width: 100%;
+  max-width: 300px;
 }
 
 .registros {
   height: 100%;
   padding-bottom: 1%;
+  flex-grow: 1;
+  min-width: 200px;
 }
 
 #btnAdd {
@@ -366,6 +376,7 @@ export default {
   color: black;
   font-weight: bold;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 #btnAdd:hover {
@@ -378,7 +389,8 @@ export default {
 }
 
 .h2-modal-content {
-  margin-top: 0px;
+  margin-top: 0;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
 }
 
 #btnEditar,
@@ -429,7 +441,6 @@ select {
   border-radius: 5px;
 }
 
-/* Selección personalizada */
 .custom-select {
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -443,6 +454,8 @@ select {
 
 .sucursales-wrapper {
   padding: 16px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .table-container {
@@ -450,8 +463,17 @@ select {
   border-radius: 10px;
   border: 1px solid #ddd;
   margin-top: 16px;
-  height: 480px;
+  height: auto;
+  max-height: 480px;
+  overflow-x: auto;
   overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .table thead {
@@ -459,12 +481,6 @@ select {
   top: 0;
   z-index: 1;
   background-color: white;
-}
-
-.table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
 }
 
 .table th,
@@ -544,29 +560,127 @@ select {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 1rem;
 }
 
 .modal-content {
   background-color: white;
   padding: 20px;
   border-radius: 4px;
+  width: 90%;
   max-width: 500px;
-  width: 100%;
+  margin: 20px;
 }
 
 .form-group {
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .form-group label {
   margin-bottom: 8px;
+  display: block;
 }
 
 .form-group input {
-  width: 95%;
-  height: 25%;
+  width: 100%;
+  height: 35px;
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
+}
+
+/* Custom scrollbar */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .busqueda,
+  .registros,
+  #btnAdd {
+    width: 100%;
+    margin: 8px 0;
+  }
+  
+  .custom-select {
+    width: 100%;
+    max-width: none;
+  }
+  
+  #btnEditar,
+  #btnEliminar {
+    width: 40px;
+    height: 35px;
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .table-container {
+    margin-top: 24px;
+  }
+  
+  #AddSucursalModal,
+  #BtnCerrar {
+    width: 100%;
+    margin: 8px 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .h2-modal-content {
+    font-size: 20px;
+  }
+  
+  #btnAdd {
+    font-size: 14px;
+    height: 35px;
+  }
+  
+  .rol {
+    text-align: center;
+    margin-top: 8px;
+  }
 }
 </style>

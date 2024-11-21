@@ -648,11 +648,7 @@ export default {
 
 * {
   font-family: 'Montserrat', sans-serif;
-}
-
-.encabezado {
-  display: flex;
-  justify-content: space-between;
+  box-sizing: border-box;
 }
 
 .encabezado {
@@ -699,7 +695,6 @@ export default {
   min-width: 80%;
   display: flexbox;
   flex-direction: row;
-
 }
 
 .form-group input {
@@ -724,6 +719,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .form-select {
@@ -735,21 +732,24 @@ export default {
 }
 
 .busqueda {
-  float: right;
   padding: 10px;
   font-size: 14px;
   border-radius: 10px;
   border-width: 0.5px;
+  width: 100%;
+  max-width: 300px;
 }
 
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
-  width: 170px;
+  width: auto;
+  min-width: 170px;
   height: 40px;
   border-radius: 10px;
   color: black;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .button-promocion {
@@ -804,6 +804,8 @@ export default {
 
 .productos-wrapper {
   padding: 16px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .table-container {
@@ -811,8 +813,17 @@ export default {
   border-radius: 10px;
   border: 1px solid #ddd;
   margin-top: 16px;
-  height: 480px;
+  height: auto;
+  max-height: 480px;
+  overflow-x: auto;
   overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .table thead {
@@ -822,19 +833,12 @@ export default {
   background-color: white;
 }
 
-.table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
 .table th,
 .table td {
   padding: 8px;
 }
 
 .table thead th {
-  background-color: none;
   text-align: center;
   border-bottom: 1px solid #ddd;
 }
@@ -882,19 +886,6 @@ export default {
   color: white;
 }
 
-.h2-modal-content {
-  margin-top: 0px;
-}
-
-.edit-stock {
-  padding: 5px;
-  border: none;
-  border-radius: 5px;
-  background-color: #163ef3;
-  color: rgb(238, 238, 238);
-  font-size: 15px;
-}
-
 .modal {
   position: fixed;
   top: 0;
@@ -912,8 +903,9 @@ export default {
   background-color: white;
   padding: 20px;
   border-radius: 4px;
+  width: 90%;
   max-width: 500px;
-  width: 100%;
+  margin: 20px;
 }
 
 .modal-content-categoria {
@@ -935,91 +927,17 @@ export default {
   max-width: 400px;
 }
 
-.categoria-encabezado {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
+.h2-modal-content {
+  margin-top: 0px;
 }
 
-.categoria-contenedor {
-  width: 100%;
-}
-
-.form-form-categoria {
-  padding: 20px;
-  padding-top: 0;
-  max-height: 240px;
-  overflow-y: scroll;
-}
-
-.form-form-stock {
-  margin: 10px;
-  height: 100%;
-  width: 100%;
-}
-
-.primer-label {
-  margin-left: 10px;
-}
-
-.label-categoria {
-  display: inline-block;
-  margin-right: 20px;
-  margin-bottom: 10px;
-}
-
-.br-label {
-  margin-bottom: 10px;
-}
-
-.search-bar input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.form-group {
-  margin-bottom: 16px;
-}
-
-
-
-.form-group label {
-  display: flexbox;
-  margin-bottom: 8px;
-}
-
-.form-group input,
-textarea {
-  width: 95%;
-  height: 25%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  justify-content: center;
-}
-
-#textArea {
-  min-height: 80px;
-}
-
-.stock-group {
-
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-}
-
-.stock-group label {
-  margin: 5px;
-}
-
-button {
-  cursor: pointer;
+.edit-stock {
+  padding: 5px;
+  border: none;
+  border-radius: 5px;
+  background-color: #163ef3;
+  color: rgb(238, 238, 238);
+  font-size: 15px;
 }
 
 .custom-select {
@@ -1030,8 +948,7 @@ button {
   padding: 5px;
   background-color: #fff;
   cursor: pointer;
-  width: 30%;
-  /* Ajusta el ancho a 120px o el valor que prefieras */
+  width: 80px;
 }
 
 .select-sucursal {
@@ -1041,7 +958,6 @@ button {
 .custom-select:focus {
   outline: none;
   border-color: #a38655;
-  /* Ajusta el color del borde al de tu diseño */
 }
 
 .custom-select option {
@@ -1063,5 +979,118 @@ button {
 
 .btn-export:hover {
   background-color: #45a049;
+}
+
+/* Estilo para scroll personalizado */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .contenedor-principal {
+    flex-direction: column;
+  }
+
+  .contenedor {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .busqueda,
+  .custom-select,
+  #btnAdd,
+  .export-button,
+  .button-promocion {
+    width: 100%;
+    margin: 8px 0;
+  }
+  
+  .select-sucursal {
+    min-width: 100%;
+  }
+  
+  #btnEditar,
+  #btnEliminar {
+    width: 40px;
+    height: 35px;
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .table-container {
+    margin-top: 24px;
+  }
+
+  .modal-content-categoria {
+    width: 90%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 16px;
+  }
+  
+  .modal-content,
+  .modal-content-stock {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group input,
+  .form-group-stock input {
+    width: 100%;
+  }
+
+  .h2-modal-content {
+    font-size: 20px;
+  }
+
+  .busqueda {
+    max-width: 100%;
+  }
+
+  .form-form-categoria {
+    padding: 10px;
+    max-height: 200px;
+  }
+
+  .label-categoria {
+    margin-right: 10px;
+    margin-bottom: 8px;
+  }
 }
 </style>

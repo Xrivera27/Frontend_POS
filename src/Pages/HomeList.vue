@@ -102,6 +102,9 @@ export default {
 /* Estilos Generales */
 * {
   font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 /* Encabezado */
@@ -109,15 +112,23 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0 16px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 h1 {
   color: #39b378;
+  font-size: clamp(24px, 4vw, 32px);
+  margin: 10px 0;
 }
 
 /* Dashboard */
 .dashboard {
   padding: 20px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 /* Caja */
@@ -125,6 +136,12 @@ h1 {
   background: #f5f5f5;
   padding: 20px;
   margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.box-header {
+  margin-bottom: 15px;
 }
 
 .box-header h3 {
@@ -134,12 +151,18 @@ h1 {
 /* Encabezados */
 h3 {
   color: #333;
+  font-size: clamp(18px, 3vw, 24px);
 }
 
 /* Contenido adicional */
 .container-top {
   width: 100%;
   text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 #campana {
@@ -162,9 +185,84 @@ h3 {
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  white-space: nowrap;
 }
 
 .navigate-button:hover {
   background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .dashboard {
+    padding: 15px;
+  }
+
+  .box {
+    padding: 15px;
+  }
+
+  .encabezado {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .container-top {
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .navigate-button {
+    margin: 5px;
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .dashboard {
+    padding: 10px;
+  }
+
+  .box {
+    padding: 12px;
+    margin-bottom: 15px;
+  }
+
+  .rol {
+    font-size: 12px;
+  }
+
+  #campana {
+    font-size: 16px;
+  }
+
+  .container-top {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .navigate-button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.box {
+  animation: fadeIn 0.3s ease-out;
 }
 </style>

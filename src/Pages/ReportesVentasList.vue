@@ -169,40 +169,54 @@ export default {
 
   
 <style scoped>
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* Fuentes */
+* {
+  font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
+}
+
 .report-container {
   background-color: #f5f5f5;
   color: #000;
-  padding: 20px;
+  padding: clamp(1rem, 3vw, 2rem);
   border-radius: 8px;
   max-width: 90rem;
-  margin: auto;
+  margin: 1rem auto;
+  width: 95%;
 }
 
 .title-bold {
   font-weight: bold;
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  margin-bottom: 1rem;
 }
 
 .input-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: clamp(10px, 2vw, 20px);
+  margin-bottom: clamp(1rem, 3vw, 2rem);
 }
 
 .input-field {
-  flex: 1 1 45%;
+  flex: 1 1 calc(50% - 10px);
+  min-width: 250px;
 }
 
-.fecha, /* Renombrado para mejor claridad */
+.fecha,
 input[type="date"],
-input[list], /* Asegura que el input del datalist se ajuste */
+input[list],
 select {
   width: 100%;
-  padding: 8px;
+  padding: clamp(6px, 1.5vw, 8px);
   border: 1px solid #444;
   border-radius: 4px;
   background-color: #f5f5f5;
   color: #000;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
 }
 
 label {
@@ -210,21 +224,32 @@ label {
   font-weight: bold;
   margin-bottom: 5px;
   color: #000;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
 }
 
 .button-group {
   display: flex;
-  gap: 10px;
-  margin-top: 20px;
-  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: clamp(5px, 1.5vw, 10px);
+  margin-top: clamp(1rem, 3vw, 1.5rem);
+  margin-bottom: clamp(0.5rem, 2vw, 1rem);
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: clamp(8px, 1.5vw, 10px) clamp(15px, 2vw, 20px);
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+  transition: opacity 0.3s ease;
+  flex: 1;
+  min-width: 120px;
+  max-width: 200px;
+}
+
+.btn:hover {
+  opacity: 0.9;
 }
 
 .pdf-btn {
@@ -243,42 +268,113 @@ label {
 }
 
 .table-header {
-  height: 40px;
+  height: clamp(35px, 5vw, 40px);
   background-color: #00a3ff;
   border-radius: 4px 4px 0 0;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: clamp(0.5rem, 2vw, 1rem);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   border: 1px solid #000;
-  margin-top: 10px;
+  min-width: 600px;
 }
 
 thead th {
   text-align: left;
-  padding: 8px;
+  padding: clamp(6px, 1.5vw, 8px);
   background-color: #f5f5f5;
   color: #000;
   font-weight: bold;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+  white-space: nowrap;
 }
 
 tbody td {
-  padding: 8px;
+  padding: clamp(6px, 1.5vw, 8px);
   border-top: 1px solid #333;
   color: #000;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
 }
 
 .totals {
-  margin-top: 20px;
+  margin-top: clamp(1rem, 3vw, 1.5rem);
   display: flex;
   flex-wrap: wrap;
+  gap: clamp(10px, 2vw, 20px);
   justify-content: space-between;
 }
 
 .totals div {
-  margin: 5px 0;
-  flex: 1 1 45%;
+  flex: 1 1 calc(50% - 10px);
+  min-width: 250px;
   color: #000;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .input-field {
+    flex: 1 1 100%;
+  }
+  
+  .button-group {
+    justify-content: center;
+  }
+  
+  .btn {
+    flex: 1 1 auto;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .report-container {
+    padding: 1rem;
+    margin: 0.5rem auto;
+    width: 98%;
+  }
+  
+  .totals div {
+    flex: 1 1 100%;
+  }
+  
+  .table-container {
+    margin: 0 -1rem;
+    padding: 0 1rem;
+    width: calc(100% + 2rem);
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .btn {
+    max-width: none;
+  }
+}
+
+/* Scrollbar personalizado para la tabla */
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 </style>

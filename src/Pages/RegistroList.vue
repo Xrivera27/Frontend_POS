@@ -124,6 +124,9 @@ const handleSubmit = async () => {
 
 * {
   font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 #categoria {
@@ -139,8 +142,9 @@ const handleSubmit = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   background-color: transparent;
+  padding: 1rem;
 }
 
 .register-card {
@@ -151,15 +155,18 @@ const handleSubmit = async () => {
   text-align: center;
   max-width: 600px;
   width: 100%;
+  margin: 1rem;
 }
 
 h2 {
   color: #39b378;
+  margin-bottom: 1.5rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
 }
 
 .form-group {
-  margin-bottom: 1rem;
- 
+  margin-bottom: 1.5rem;
+  width: 100%;
 }
 
 input[type="text"],
@@ -168,11 +175,18 @@ input[type="tel"],
 input[type="number"],
 input[type="date"],
 select {
-  width: 95%;
+  width: 100%;
   padding: 0.8rem;
   border-radius: 8px;
   border: 1px solid #ddd;
   font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+input:focus,
+select:focus {
+  border-color: #39b378;
 }
 
 .form-options {
@@ -180,12 +194,16 @@ select {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .checkbox-container {
   display: flex;
   align-items: center;
   font-size: 0.9rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 input[type="checkbox"] {
@@ -214,6 +232,12 @@ input[type="checkbox"] {
   align-items: center;
   color: white;
   font-size: 2.5rem;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  transform: scale(1.05);
+  background-color: #2d8f5f;
 }
 
 .submit-btn i {
@@ -232,6 +256,7 @@ input[type="checkbox"] {
   margin-bottom: 0.5rem;
   font-size: 1rem;
   color: #333;
+  text-align: left;
 }
 
 /* Estilos para el popup personalizado */
@@ -246,6 +271,7 @@ input[type="checkbox"] {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 1rem;
 }
 
 .popup-content {
@@ -253,10 +279,12 @@ input[type="checkbox"] {
   padding: 20px;
   border-radius: 8px;
   text-align: center;
+  width: 90%;
+  max-width: 400px;
 }
 
 .popup-content p {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 3vw, 1.2rem);
   margin-bottom: 1rem;
 }
 
@@ -265,7 +293,58 @@ input[type="checkbox"] {
   color: white;
   border: none;
   border-radius: 5px;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
   cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.popup-content button:hover {
+  background-color: #2d8f5f;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .register-card {
+    padding: 1.5rem;
+  }
+  
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .checkbox-container {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .register-card {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="date"],
+  select {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  .submit-btn,
+  .submit-btn i {
+    font-size: 2rem;
+    width: 42px;
+    height: 42px;
+  }
+  
+  .popup-content {
+    padding: 15px;
+  }
 }
 </style>
