@@ -26,6 +26,32 @@ export const getProductos = async (id_usuario) => {
     }
 }
 
+export const getVentaPendiente = async (id_usuario) => {
+    try {
+        const productos = await solicitudes.fetchRegistros(`/ventas/venta-pendiente/${id_usuario}`);
+
+        return productos;
+    } catch (error) {
+        console.error('Error al obtener los productos:', error);
+
+        throw new Error('No se pudo obtener los productos el usuario especificado.');
+    
+    }
+}
+
+export const getRecProductoVenta = async (id_compra) => {
+    try {
+        const productos = await solicitudes.fetchRegistros(`/ventas/rec-venta/${id_compra}`);
+
+        return productos;
+    } catch (error) {
+        console.error('Error al obtener los productos:', error);
+
+        throw new Error('No se pudo obtener los productos el usuario especificado.');
+    
+    }
+}
+
 export const getVentasGuardadas = async (id_usuario) => {
     try {
         const ventas = await solicitudes.fetchRegistros(`/ventas/mostrar-ventas/${id_usuario}`);
