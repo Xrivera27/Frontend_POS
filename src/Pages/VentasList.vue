@@ -623,7 +623,6 @@ export default {
 
         }
         
-        
       } catch (error) {
         console.log(error);
         notificaciones('error', error.message);
