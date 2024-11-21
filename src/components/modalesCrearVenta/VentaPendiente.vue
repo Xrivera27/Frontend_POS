@@ -3,29 +3,10 @@
         <div class="modal-content">
             <h2>Recuperar Venta</h2>
 
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No. Venta</th>
-                            <th>Cliente</th>
-                            <!-- <th>Observaciones</th> -->
-                            <th>Fecha y Hora</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(venta, index) in returnVentas" :key="index" @dblclick="handleVentaSelect(venta)"
-                            class="venta-row">
-                            <td>{{ index+1 }}</td>
-                            <td>{{ venta.nombre_cliente }}</td>
-                            <td>{{ formatearFecha(venta.created_at) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <h1>Venta pendiente encontrada.</h1>
 
             <div class="button-group">
-                <button @click="$emit('close')" class="btn-cancel">Cerrar</button>
+                <button @click="$emit('close')" class="btn-cancel">Recuperar</button>
             </div>
         </div>
     </div>
@@ -33,33 +14,21 @@
 
 <script>
 export default {
-    name: 'RecuperarVentaModal',
+    name: 'VentaPendienteModal',
     props: {
         isVisible: {
             type: Boolean,
             required: true
         },
-        ventas: {
-            type: Array,
-            required: true
-        }
     },
 
-    computed: {
-        returnVentas(){
-            return this.ventas;
-        }
-    },
+
 
     methods: {
-        handleVentaSelect(venta) {
-            this.$emit('venta-selected', venta);
+        cerrarModal() {
             
             this.$emit('close');
         },
-        formatearFecha(fecha) {
-            return new Date(fecha).toLocaleString();
-        }
     }
 }
 </script>

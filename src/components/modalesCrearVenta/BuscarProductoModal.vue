@@ -128,7 +128,7 @@ export default {
         productos: {
             immediate: true,
             handler(newProducts) {
-                console.log('Productos recibidos:', newProducts); // Para debugging
+               // console.log('Productos recibidos:', newProducts); // Para debugging
                 this.filteredProducts = [...newProducts];
             }
         },

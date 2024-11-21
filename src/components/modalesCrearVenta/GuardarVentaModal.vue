@@ -12,15 +12,15 @@
                         <input type="text" v-model="formData.nombreCliente" @focus="onFocus" @blur="onBlur"
                             @keydown.stop />
                     </div>
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label>Observaciones:</label>
                         <input type="text" v-model="formData.observaciones" @focus="onFocus" @blur="onBlur"
                             @keydown.stop />
-                    </div>
+                    </div> -->
                 </div>
 
                 <div class="button-container">
-                    <button @click="handleSave">Guardar</button>
+                    <button @click="handleSave"  >Guardar</button>
                     <button @click="$emit('close')">Salir</button>
                 </div>
             </div>
@@ -39,7 +39,7 @@ export default {
         return {
             formData: {
                 nombreCliente: '',
-                observaciones: ''
+               // observaciones: ''
             }
         }
     },
@@ -59,10 +59,12 @@ export default {
                 return;
             }
 
-            this.$emit('save', this.formData);
+            this.$emit('cliente-temporal', this.formData.nombreCliente);
+
+           // this.$emit('save', this.formData);
             this.formData = {
                 nombreCliente: '',
-                observaciones: ''
+              //  observaciones: ''
             };
         }
     }
