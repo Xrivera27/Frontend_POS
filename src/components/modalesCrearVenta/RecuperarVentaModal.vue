@@ -7,17 +7,18 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>No. Venta</th>
                             <th>Cliente</th>
-                            <th>Observaciones</th>
-                            <th>Fecha</th>
+                            <!-- <th>Observaciones</th> -->
+                            <th>Fecha y Hora</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(venta, index) in ventas" :key="index" @dblclick="handleVentaSelect(venta)"
+                        <tr v-for="(venta, index) in returnVentas" :key="index" @dblclick="handleVentaSelect(venta)"
                             class="venta-row">
-                            <td>{{ venta.nombreCliente }}</td>
-                            <td>{{ venta.observaciones }}</td>
-                            <td>{{ formatearFecha(venta.fecha) }}</td>
+                            <td>{{ index+1 }}</td>
+                            <td>{{ venta.nombre_cliente }}</td>
+                            <td>{{ formatearFecha(venta.created_at) }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -43,6 +44,13 @@ export default {
             required: true
         }
     },
+
+    computed: {
+        returnVentas(){
+            return this.ventas;
+        }
+    },
+
     methods: {
         handleVentaSelect(venta) {
             this.$emit('venta-selected', venta);

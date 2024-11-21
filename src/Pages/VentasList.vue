@@ -668,6 +668,7 @@ export default {
       try {
         const ventasGuardadas = await getVentasGuardadas(this.id_usuario);
         this.ventasGuardadas = ventasGuardadas;
+        console.log(ventasGuardadas);
         this.isRecuperarVentaModalVisible = true;
       } catch (error) {
         notificaciones('error', error);
