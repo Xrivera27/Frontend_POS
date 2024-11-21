@@ -134,7 +134,7 @@
         <button @click="limpiarPantalla">Limpiar pantalla [F6]</button>
         <button @click="guardarVenta">Guardar venta [F8]</button>
         <GuardarVentaModal :isVisible="isGuardarVentaModalVisible" :isConsumidorFinal="!clienteSeleccionado"
-          @close="isGuardarVentaModalVisible = false" @save="handleSaveVenta" @modal-focused="handleModalFocus" />
+          @close="isGuardarVentaModalVisible = false" @cliente-temporal="handleSaveVenta" @modal-focused="handleModalFocus" />
         <button @click="recVenta">Rec. Venta [F9]</button>
         <RecuperarVentaModal :isVisible="isRecuperarVentaModalVisible" :ventas="ventasGuardadas"
           @close="isRecuperarVentaModalVisible = false" @venta-selected="handleVentaSelected" />
