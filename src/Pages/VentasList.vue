@@ -623,7 +623,30 @@ export default {
         toast.warning("No hay productos para guardar");
         return;
       }
-      this.isGuardarVentaModalVisible = true;
+
+      if (!this.clienteSeleccionado) {
+        this.isGuardarVentaModalVisible = true;
+      }
+      else{
+        this.guardarVentainBD(this.clienteSeleccionado.nombre_completo);
+      }
+      
+    },
+    async guardarVentainBD(nombre_completo){
+      try {
+        const response = await guardarVenta(nombre_completo, this.id_usuario);
+        if(response){
+          this.limpiarPagado();
+          notificaciones('venta-guardada');
+        }
+        else{
+          throw 'Ocurrio un error al guardar venta. Intente mas tarde';
+        }
+      } catch (error) {
+        console.log(error);
+        notificaciones('error', error.message);
+      }
+      
     },
 
     async handleSaveVenta(data) {
@@ -631,18 +654,8 @@ export default {
         this.isModalLoading = true;
         this.loadingMessage = 'Guardando venta...';
 
-        const resultado = await guardarVenta(
-          this.productosLista,
-          data.nombreCliente,
-          data.observaciones,
-          this.id_usuario
-        );
+        this.guardarVentainBD(data);
 
-        if (resultado) {
-          this.productosLista = [];
-          this.clienteSeleccionado = null;
-          notificaciones('success', 'Venta guardada correctamente');
-        }
       } catch (error) {
         notificaciones('error', error.message);
       } finally {
@@ -656,6 +669,18 @@ export default {
         const ventasGuardadas = await getVentasGuardadas(this.id_usuario);
         this.ventasGuardadas = ventasGuardadas;
         this.isRecuperarVentaModalVisible = true;
+      } catch (error) {
+        notificaciones('error', error);
+      }
+    },
+
+   
+
+    async recVenta2(){
+      try {
+        const ventasGuardadas = await getVentasGuardadas(this.id_usuario);
+        console.log(ventasGuardadas);
+    
       } catch (error) {
         notificaciones('error', error);
       }
