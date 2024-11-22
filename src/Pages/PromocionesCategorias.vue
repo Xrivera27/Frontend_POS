@@ -584,7 +584,8 @@ export default {
 
     async activarProm(promocionId) {
   try {
-    const promocionAActivar = this.promociones.find(p => p.id === promocionId);
+    // Usar filterPromociones para encontrar la promoción correcta
+    const promocionAActivar = this.filterPromociones.find(p => p.id === promocionId);
     if (!promocionAActivar) {
       throw new Error('Promoción no encontrada');
     }
@@ -598,6 +599,7 @@ export default {
     
     // Verificar si ya existe una promoción activa para la misma categoría
     const promocionesActivas = this.promociones.filter(p => {
+      // Verificar si es la misma categoría usando cualquiera de los IDs disponibles
       const mismaCategoria = 
         (promocionAActivar.categoria_producto_Id && p.categoria_producto_Id === promocionAActivar.categoria_producto_Id) ||
         (promocionAActivar.categoria_id && p.categoria_id === promocionAActivar.categoria_id);
@@ -637,7 +639,7 @@ export default {
       return;
     }
 
-    // Si hay promociones activas, verificar conflictos de fecha
+    // Verificar conflictos de fecha con las promociones activas
     const fechaInicioActual = new Date(promocionAActivar.fecha_inicio);
     const fechaFinalActual = new Date(promocionAActivar.fecha_final);
 
@@ -661,6 +663,7 @@ export default {
     });
 
     if (promocionConflicto) {
+      // Si hay conflicto, mostrar el modal de conflicto
       this.tempPromocionData = promocionAActivar;
       this.conflictingPromocion = promocionConflicto;
       this.showConflictModal = true;
@@ -693,121 +696,129 @@ export default {
   }
 },
 
-    async createAnywayPromocion() {
-      try {
-        console.log('Procesando promoción con conflicto');
-        if (this.tempPromocionData) {
-          // Primero desactivar la promoción existente
-          const desactivarResponse = await solicitudes.patchRegistro(
-            `/promocionesC/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
-            { manejo_automatico: false }
-          );
-    
-          if (desactivarResponse) {
-            // Luego activar la nueva promoción
-            const activarResponse = await solicitudes.patchRegistro(
-              `/promocionesC/cambiar-estado-promocion/${this.tempPromocionData.id}`,
-              { manejo_automatico: true }
-            );
-    
-            if (activarResponse) {
-              await this.cargarPromociones();
-              this.$emit('mostrar-notificacion', {
-                mensaje: 'Nueva promoción activada y promoción anterior desactivada exitosamente',
-                tipo: 'success'
-              });
-              this.clearForm();
-              this.isShowModal = false;
-              this.activeForm = false;
-              this.closeConflictModal();
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error al procesar la promoción:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al procesar las promociones',
-          tipo: 'error'
-        });
-      }
-    },
+// También actualizar el método createAnywayPromocion para mantener la consistencia
+async createAnywayPromocion() {
+  try {
+    console.log('Procesando promoción con conflicto');
+    if (this.tempPromocionData) {
+      // Primero desactivar la promoción existente
+      const desactivarResponse = await solicitudes.patchRegistro(
+        `/promocionesC/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
+        { manejo_automatico: false }
+      );
 
-    async desactivarProm(index) {
-      try {
-        const promocion = this.promociones[index];
-        console.log('Desactivando promoción:', promocion.id);
-        const response = await solicitudes.patchRegistro(
-          `/promocionesC/cambiar-estado-promocion/${promocion.id}`,
-          { manejo_automatico: false }
+      if (desactivarResponse) {
+        // Luego activar la nueva promoción
+        const activarResponse = await solicitudes.patchRegistro(
+          `/promocionesC/cambiar-estado-promocion/${this.tempPromocionData.id}`,
+          { manejo_automatico: true }
         );
 
-        if (response) {
+        if (activarResponse) {
           await this.cargarPromociones();
           this.$emit('mostrar-notificacion', {
-            mensaje: 'Promoción desactivada exitosamente',
+            mensaje: 'Nueva promoción activada y promoción anterior desactivada exitosamente',
             tipo: 'success'
           });
+          this.clearForm();
+          this.isShowModal = false;
+          this.activeForm = false;
+          this.closeConflictModal();
         }
-      } catch (error) {
-        console.error('Error al desactivar promoción:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al desactivar la promoción',
-          tipo: 'error'
-        });
       }
-    },
+    }
+  } catch (error) {
+    console.error('Error al procesar la promoción:', error);
+    this.$emit('mostrar-notificacion', {
+      mensaje: 'Error al procesar las promociones',
+      tipo: 'error'
+    });
+  }
+},
+
+    // Método desactivarProm actualizado
+async desactivarProm(index) {
+  try {
+    // Usar filterPromociones en lugar de promociones
+    const promocion = this.filterPromociones[index];
+    if (!promocion || !promocion.id) {
+      throw new Error('Promoción no válida');
+    }
+
+    console.log('Desactivando promoción:', promocion.id);
+    const response = await solicitudes.patchRegistro(
+      `/promocionesC/cambiar-estado-promocion/${promocion.id}`,
+      { manejo_automatico: false }
+    );
+
+    if (response) {
+      await this.cargarPromociones();
+      this.$emit('mostrar-notificacion', {
+        mensaje: 'Promoción desactivada exitosamente',
+        tipo: 'success'
+      });
+    }
+  } catch (error) {
+    console.error('Error al desactivar promoción:', error);
+    this.$emit('mostrar-notificacion', {
+      mensaje: 'Error al desactivar la promoción',
+      tipo: 'error'
+    });
+  }
+},
 
     editarPromocion(index) {
-      const promocion = this.promociones[index];
-      
-      this.promFormModal = {
-        id: promocion.id,
-        categoria_id: promocion.categoria_producto_Id,
-        categoria: promocion.categoria?.nombre_categoria || promocion.categoria,
-        nombre_promocion: promocion.nombre_promocion,
-        porcentaje_descuento: promocion.porcentaje_descuento,
-        fecha_inicio: promocion.fecha_inicio,
-        fecha_final: promocion.fecha_final,
-        estado: promocion.estado
-      };
-      
-      this.editIndex = index;
-      this.isEditing = true;
-      this.showModal();
-    },
+  // Usar filterPromociones en lugar de promociones
+  const promocion = this.filterPromociones[index];
+  
+  this.promFormModal = {
+    id: promocion.id,
+    categoria_id: promocion.categoria_producto_Id,
+    categoria: promocion.categoria?.nombre_categoria || promocion.categoria,
+    nombre_promocion: promocion.nombre_promocion,
+    porcentaje_descuento: promocion.porcentaje_descuento,
+    fecha_inicio: promocion.fecha_inicio,
+    fecha_final: promocion.fecha_final,
+    estado: promocion.estado
+  };
+  
+  // Encontrar el índice real en la lista completa
+  this.editIndex = this.promociones.findIndex(p => p.id === promocion.id);
+  this.isEditing = true;
+  this.showModal();
+},
 
-    async eliminarProm() {
-      try {
-        const promocion = this.promociones[this.editIndex];
-        console.log('Intentando eliminar promoción:', promocion);
-        
-        if (!promocion || !promocion.id) {
-          throw new Error('Promoción no válida');
-        }
+async eliminarProm() {
+  try {
+    const promocion = this.promociones[this.editIndex];
+    console.log('Intentando eliminar promoción:', promocion);
+    
+    if (!promocion || !promocion.id) {
+      throw new Error('Promoción no válida');
+    }
 
-        const response = await solicitudes.deleteRegistro(
-          `/promocionesC/eliminar-promocion/${promocion.id}`
-        );
+    const response = await solicitudes.deleteRegistro(
+      `/promocionesC/eliminar-promocion/${promocion.id}`
+    );
 
-        if (response === true) {
-          await this.cargarPromociones();
-          this.$emit('mostrar-notificacion', {
-            mensaje: 'Promoción eliminada exitosamente',
-            tipo: 'success'
-          });
-          this.showConfirmModal = false;
-        }
-      } catch (error) {
-        console.error('Error al eliminar promoción:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al eliminar la promoción',
-          tipo: 'error'
-        });
-      } finally {
-        this.editIndex = null;
-      }
-    },
-
+    if (response === true) {
+      await this.cargarPromociones();
+      this.$emit('mostrar-notificacion', {
+        mensaje: 'Promoción eliminada exitosamente',
+        tipo: 'success'
+      });
+      this.showConfirmModal = false;
+    }
+  } catch (error) {
+    console.error('Error al eliminar promoción:', error);
+    this.$emit('mostrar-notificacion', {
+      mensaje: 'Error al eliminar la promoción',
+      tipo: 'error'
+    });
+  } finally {
+    this.editIndex = null;
+  }
+},
     showModal() {
       this.isShowModal = true;
     },
