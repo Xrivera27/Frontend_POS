@@ -421,23 +421,13 @@ export default {
       });
     },
 
-    /*  async realizarPago(datosPago) {
-        this.isModalLoading = true;
-        this.loadingMessage = 'Procesando pago...';
-        try {
-          const pagando = await pagar(datosPago.monto, this.venta.id_venta, this.id_usuario);
-          if (!pagando) {
-            throw 'No se realizo el pago';
-          }
-          this.limpiarPagado();
-        } catch (error) {
-          notificaciones('error', error.message);
-        } finally {
-          this.isModalLoading = false;
-        }
-      }, */
-
     async realizarPago(datosPago) {
+      if (this.productosLista.length === 0) {
+        const toast = useToast();
+        toast.warning("No hay productos en la tabla de ventas.");
+        return;
+      }
+
       try {
         const pagando = await pagar(datosPago.monto, this.venta.id_venta, this.id_usuario);
         if (!pagando) {
@@ -456,14 +446,15 @@ export default {
     },
 
     async openPagoModal() {
+
       const toast = useToast();
-      if (this.productos.length === 0) {
-        toast.warning("No hay datos en la tabla.");
+      if (this.productosLista.length === 0) {
+        toast.warning("No hay productos en la tabla de ventas.");
         return;
       }
-
       this.isModalLoading = true;
       this.loadingMessage = 'Procesando venta...';
+
       try {
         if (this.venta.length === 0) {
           this.venta = await postVenta(
@@ -885,45 +876,31 @@ export default {
 .header-container {
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  text-align: center;
+  justify-content: space-between;
+  /* Cambiado a space-between para distribuir uniformemente */
+  align-items: flex-start;
+  /* Alinear al inicio para mantener la altura consistente */
   padding: clamp(5px, 1.5vw, 10px);
   border-bottom: 1px solid #ccc;
-  gap: clamp(20px, 5vw, 150px);
-  z-index: 1;
   width: 100%;
-  flex-wrap: wrap;
-}
-
-/* Cliente Input Section */
-.tipo-cliente {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  width: 100%;
-  max-width: 600px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .input-button-container {
+  width: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 5px;
-  width: 100%;
 }
 
+.inputs-container,
 .buttons-header {
+  justify-content: center;
   display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-}
-
-.inputs-container {
-  display: flex;
-  flex-direction: row;
   gap: 5px;
   width: 100%;
-  flex-wrap: wrap;
 }
 
 .cliente-input,
@@ -934,22 +911,21 @@ export default {
   background-color: #f5f5f5;
   height: 30px;
   font-size: clamp(12px, 1.5vw, 14px);
-  min-width: 120px;
-}
-
-.cliente-input {
-  flex: 2;
+  width: 50%;
 }
 
 .rtn-input {
-  flex: 1;
-  font-size: 0.9em;
   color: #666;
 }
 
-.cliente-input.single {
-  flex: 1;
-  width: 100%;
+.search-button {
+  height: 30px;
+  padding: 0 8px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: clamp(12px, 1.5vw, 14px);
+  width: 50%;
 }
 
 .campo {
@@ -967,32 +943,24 @@ export default {
   width: 100%;
 }
 
-.search-button {
-  height: 30px;
-  width: 100%;
-  padding: 0 8px;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  font-size: clamp(12px, 1.5vw, 14px);
-}
-
 .search-button:hover {
   background-color: #e0e0e0;
 }
 
 /* Información Section */
+
+.tipo-cliente,
 .informacion-1,
 .informacion-2 {
+  flex: 1;
+  /* Cada columna toma el mismo espacio */
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-left: clamp(10px, 2vw, 20px);
+  padding: 0 15px;
+  /* Padding horizontal uniforme */
+  max-width: 400px;
+  /* Ancho máximo para cada columna */
 }
 
 /* Column Container y Tabla */
@@ -1223,7 +1191,16 @@ button {
 @media screen and (max-width: 768px) {
   .header-container {
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .tipo-cliente,
+  .informacion-1,
+  .informacion-2 {
+    width: 100%;
+    padding: 0;
+    margin-bottom: 10px;
   }
 
   .numeric-keypad {
