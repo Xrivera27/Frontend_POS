@@ -60,6 +60,21 @@
       </table>
     </div>
 
+    <div class="modal" v-if="showConfirmModal">
+      <div class="modal-content">
+        <h2>Confirmación</h2>
+        <p>¿Estás seguro de que quieres eliminar esta categoría?</p>
+        <div class="modal-actions">
+          <button class="btn modalShowConfirm-Si" @click="deleteCategoria()">
+            Sí, eliminar
+          </button>
+          <button class="btn modalShowConfirm-no" @click="cancelDelete">
+            No, regresar
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal para agregar o editar categorías -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
@@ -110,6 +125,8 @@ export default {
   data() {
     return {
       titulo: 'Categorías',
+      showConfirmModal: false, // Agregar esto
+      categoriaToDelete: null,
       searchQuery: '', // Almacena el texto de búsqueda
       itemsPerPage: "",
       id_usuario: '', // Valor por defecto para mostrar todos los registros
@@ -185,20 +202,41 @@ export default {
       this.categoriaForm = { ...categoria };
       this.editIndex = this.categorias.findIndex(item => item.id_categoria === categoria.id_categoria);
     },
+
     async deleteCategoria(categoria) {
-      const toast = useToast();
-      try {
+      if (!this.showConfirmModal) {
+        // Si hay productos, mostrar error directamente sin modal de confirmación
         if (categoria.totalProd > 0) {
+          const toast = useToast();
           toast.error('Productos existentes dentro de esta categoría');
+          return;
         }
-        const response = await deleteCategoria(categoria.id_categoria);
+        // Si no hay productos, mostrar modal de confirmación
+        this.categoriaToDelete = categoria;
+        this.showConfirmModal = true;
+        return;
+      }
+
+      try {
+        const response = await deleteCategoria(this.categoriaToDelete.id_categoria);
 
         if (response == true) {
-          this.categorias = this.categorias.filter(item => item.id_categoria !== categoria.id_categoria);
+          this.categorias = this.categorias.filter(
+            item => item.id_categoria !== this.categoriaToDelete.id_categoria
+          );
+          notificaciones('success', 'Categoría eliminada correctamente');
         }
       } catch (error) {
         notificaciones('error', new Error(error).message);
+      } finally {
+        this.showConfirmModal = false;
+        this.categoriaToDelete = null;
       }
+    },
+
+    cancelDelete() {
+      this.showConfirmModal = false;
+      this.categoriaToDelete = null;
     },
 
     async guardarCategoria() {
@@ -424,6 +462,16 @@ export default {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+}
+
+.modalShowConfirm-Si {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modalShowConfirm-no {
+  background-color: #6c757d;
+  color: white;
 }
 
 .modal-content {

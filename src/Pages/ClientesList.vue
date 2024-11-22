@@ -60,6 +60,21 @@
       </table>
     </div>
 
+    <div class="modal" v-if="showConfirmModal">
+      <div class="modal-content">
+        <h2>Confirmación</h2>
+        <p>¿Estás seguro de que quieres eliminar este cliente?</p>
+        <div class="modal-actions">
+          <button class="btn modalShowConfirm-Si" @click="deleteCliente()">
+            Sí, eliminar
+          </button>
+          <button class="btn modalShowConfirm-no" @click="cancelDelete">
+            No, regresar
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
         <h2 class="h2-modal-content">{{ isEditing ? 'Editar Cliente' : 'Agregar Cliente' }}</h2>
@@ -117,6 +132,8 @@ export default {
   data() {
     return {
       titulo: 'Clientes',
+      showConfirmModal: false, // Agregar esto
+      clienteToDelete: null,
       searchQuery: '',
       itemsPerPage: "",
       isModalOpen: false,
@@ -241,6 +258,7 @@ export default {
       }
       this.closeModal();
     },
+
     editCliente(cliente) {
       this.clienteForm = { ...cliente };
       this.isEditing = true;
@@ -248,19 +266,33 @@ export default {
       this.openModal();
     },
     async deleteCliente(cliente) {
+      if (!this.showConfirmModal) {
+        this.clienteToDelete = cliente;
+        this.showConfirmModal = true;
+        return;
+      }
+
       try {
-        const response = await desactivarCliente(cliente.id_cliente);
-        console.log(response);
+        const response = await desactivarCliente(this.clienteToDelete.id_cliente);
         if (response === true) {
-          this.clientes = this.clientes.filter(item => item.id_cliente !== cliente.id_cliente);
-        }
-        else {
+          this.clientes = this.clientes.filter(item => item.id_cliente !== this.clienteToDelete.id_cliente);
+          notificaciones('success', 'Cliente eliminado correctamente');
+        } else {
           throw response;
         }
       } catch (error) {
         notificaciones('error', error.message);
+      } finally {
+        this.showConfirmModal = false;
+        this.clienteToDelete = null;
       }
     },
+
+    cancelDelete() {
+      this.showConfirmModal = false;
+      this.clienteToDelete = null;
+    },
+
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
@@ -392,6 +424,16 @@ export default {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+}
+
+.modalShowConfirm-Si {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modalShowConfirm-no {
+  background-color: #6c757d;
+  color: white;
 }
 
 .modal-content {

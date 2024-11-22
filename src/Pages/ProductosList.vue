@@ -81,6 +81,21 @@
       </table>
     </div>
 
+    <div class="modal" v-if="showConfirmModal">
+      <div class="modal-content">
+        <h2>Confirmación</h2>
+        <p>¿Estás seguro de que quieres eliminar este producto?</p>
+        <div class="modal-actions">
+          <button class="btn modalShowConfirm-Si" @click="deleteProducto()">
+            Sí, eliminar
+          </button>
+          <button class="btn modalShowConfirm-no" @click="cancelDelete">
+            No, regresar
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal para agregar o editar productos -->
     <div v-if="isModalOpen" class="modal">
       <div id="modal-producto" class="modal-content">
@@ -274,6 +289,8 @@ export default {
   data() {
     return {
       titulo: 'Productos',
+      showConfirmModal: false, // Agregar esto
+      productoToDelete: null,
       searchQuery: '',
       searchCategoria: '',
       searchSucursal: 'default',
@@ -575,20 +592,38 @@ export default {
       }
 
     },
+
     async deleteProducto(producto) {
-      const toast = useToast();
-      try {
-        const registroEliminado = await desactivarProducto(producto.id_producto);
-
-        if (registroEliminado == true) this.productos = this.productos.filter(item => item.id_producto !== producto.id_producto);
-
-        else { toast.error('Error al eliminar producto'); }
-
-      } catch (error) {
-        console.error(error);
+      if (!this.showConfirmModal) {
+        this.productoToDelete = producto;
+        this.showConfirmModal = true;
+        return;
       }
 
+      const toast = useToast();
+      try {
+        const registroEliminado = await desactivarProducto(this.productoToDelete.id_producto);
+
+        if (registroEliminado == true) {
+          this.productos = this.productos.filter(item => item.id_producto !== this.productoToDelete.id_producto);
+          notificaciones('success', 'Producto eliminado correctamente');
+        } else {
+          toast.error('Error al eliminar producto');
+        }
+      } catch (error) {
+        console.error(error);
+        notificaciones('error', 'Error al eliminar el producto');
+      } finally {
+        this.showConfirmModal = false;
+        this.productoToDelete = null;
+      }
     },
+
+    cancelDelete() {
+      this.showConfirmModal = false;
+      this.categoriaToDelete = null;
+    },
+
     generateRows() {
       // Genera las filas basadas en los productos paginados
       this.rows = this.paginatedProductos.map((producto, index) => ({
@@ -888,6 +923,16 @@ export default {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+}
+
+.modalShowConfirm-Si {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modalShowConfirm-no {
+  background-color: #6c757d;
+  color: white;
 }
 
 .modal-content {

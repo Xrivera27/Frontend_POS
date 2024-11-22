@@ -54,6 +54,21 @@
       </table>
     </div>
 
+    <div class="modal" v-if="showConfirmModal">
+      <div class="modal-content">
+        <h2>Confirmación</h2>
+        <p>¿Estás seguro de que quieres eliminar este proveedor?</p>
+        <div class="modal-actions">
+          <button class="btn modalShowConfirm-Si" @click="deleteProveedor(proveedor)">
+            Sí, eliminar
+          </button>
+          <button class="btn modalShowConfirm-no" @click="cancelDelete">
+            No, regresar
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal para agregar o editar proveedores -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
@@ -106,6 +121,8 @@ export default {
   data() {
     return {
       titulo: 'Proveedores',
+      showConfirmModal: false, // Agregar esto
+      proveedoresToDelete: null,
       searchQuery: '', // Almacena el texto de búsqueda
       isModalOpen: false,
       isEditing: false,
@@ -251,15 +268,21 @@ export default {
       this.editIndex = this.proveedores.findIndex(item => item.id === proveedor.id);
       this.openModal();
     },
-    async deleteProveedor(proveedor) {
-      let response;
 
+    async deleteProveedor(proveedor) {
+      if (!this.showConfirmModal) {
+        this.proveedorToDelete = proveedor;
+        this.showConfirmModal = true;
+        return;
+      }
+
+      let response;
       const datosActualizados = {
         estado: false,
         id_usuario: this.id_usuario
       };
 
-      const parametros = `/proveedores/desactivar-proveedor/${proveedor.id}`;
+      const parametros = `/proveedores/desactivar-proveedor/${this.proveedorToDelete.id}`;
 
       try {
         response = await solicitudes.desactivarRegistro(
@@ -268,12 +291,22 @@ export default {
         );
 
         if (response == true) {
-          this.proveedores = this.proveedores.filter(item => item.id !== proveedor.id);
+          this.proveedores = this.proveedores.filter(item => item.id !== this.proveedorToDelete.id);
+          notificaciones('success', 'Proveedor eliminado correctamente');
         }
       } catch (error) {
-        console.log(new Error(response));
+        notificaciones('error', error.message);
+      } finally {
+        this.showConfirmModal = false;
+        this.proveedorToDelete = null;
       }
     },
+
+    cancelDelete() {
+      this.showConfirmModal = false;
+      this.proveedorToDelete = null;
+    },
+
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
@@ -505,6 +538,16 @@ select {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+}
+
+.modalShowConfirm-Si {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modalShowConfirm-no {
+  background-color: #6c757d;
+  color: white;
 }
 
 .modal-content {

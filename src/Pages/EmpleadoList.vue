@@ -59,6 +59,21 @@
       </table>
     </div>
 
+    <div class="modal" v-if="showConfirmModal">
+      <div class="modal-content">
+        <h2>Confirmación</h2>
+        <p>¿Estás seguro de que quieres eliminar este usuario?</p>
+        <div class="modal-actions">
+          <button class="btn modalShowConfirm-Si" @click="deleteUsuariol(empleado)">
+            Sí, eliminar
+          </button>
+          <button class="btn modalShowConfirm-no" @click="cancelDelete">
+            No, regresar
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal para agregar o editar empleados -->
     <div v-if="isModalOpen" class="modal">
       <div id="modal-usuario" class="modal-content">
@@ -162,6 +177,8 @@ export default {
   },
   data() {
     return {
+      showConfirmModal: false,
+      empleadoToDelete: null,
       titulo: 'Usuarios',
       isLoading: false,
       showTooltip: false,
@@ -379,13 +396,18 @@ export default {
     },
 
     async deleteUsuariol(empleado) {
-      let response;
+      if (!this.showConfirmModal) {
+        this.empleadoToDelete = empleado;
+        this.showConfirmModal = true;
+        return;
+      }
 
+      let response;
       const datosActualizados = {
         estado: false,
       };
 
-      const parametros = `/usuario/desactivar/${empleado.id_usuario}`; // Usa el id del empleado que se pasa
+      const parametros = `/usuario/desactivar/${this.empleadoToDelete.id_usuario}`;
 
       try {
         response = await solicitudes.desactivarRegistro(
@@ -394,15 +416,23 @@ export default {
         );
 
         if (response == true) {
-          // Encuentra el índice del empleado en el array original y lo elimina
-          const index = this.empleados.findIndex(e => e.id_usuario === empleado.id_usuario);
+          const index = this.empleados.findIndex(e => e.id_usuario === this.empleadoToDelete.id_usuario);
           if (index !== -1) {
             this.empleados.splice(index, 1);
           }
+          notificaciones('success', 'Usuario eliminado correctamente');
         }
       } catch (error) {
         notificaciones('error', error.message);
+      } finally {
+        this.showConfirmModal = false;
+        this.empleadoToDelete = null;
       }
+    },
+
+    cancelDelete() {
+      this.showConfirmModal = false;
+      this.empleadoToDelete = null;
     },
 
     editEmpleado(empleado) {
@@ -487,6 +517,16 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.modalShowConfirm-Si {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modalShowConfirm-no {
+  background-color: #6c757d;
+  color: white;
 }
 
 .modal-content {
