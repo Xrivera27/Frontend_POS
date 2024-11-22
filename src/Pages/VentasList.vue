@@ -1,6 +1,7 @@
 <template>
   <div class="wrapper">
     <ModalLoading :isLoading="isModalLoading" />
+    <PaymentAnimationModal :isVisible="isPaymentAnimationVisible" @complete="handlePaymentComplete" />
     <div class="main-container">
       <div class="header-container">
         <!-- Aquí estaba el error, había un div y template anidados innecesariamente -->
@@ -162,6 +163,7 @@ import { notificaciones } from '../../services/notificaciones.js';
 import ModalLoading from '@/components/ModalLoading.vue';
 import GuardarVentaModal from '@/components/modalesCrearVenta/GuardarVentaModal.vue';
 import RecuperarVentaModal from '@/components/modalesCrearVenta/RecuperarVentaModal.vue';
+import PaymentAnimationModal from '@/components/PaymentAnimationModal.vue';
 //import VentaPendienteModal from '@/components/modalesCrearVenta/VentaPendiente.vue';
 
 
@@ -173,6 +175,7 @@ const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
 export default {
   components: {
     ClienteModal,
+    PaymentAnimationModal,
     RegistrarPagoModal,
     EliminarItemsModal,
     BuscarProductoModal,
@@ -213,6 +216,7 @@ export default {
       isGuardarVentaModalVisible: false,
       isRecuperarVentaModalVisible: false,
       ventaPendiente: false,
+      isPaymentAnimationVisible: false,
     };
   },
 
@@ -417,20 +421,38 @@ export default {
       });
     },
 
+    /*  async realizarPago(datosPago) {
+        this.isModalLoading = true;
+        this.loadingMessage = 'Procesando pago...';
+        try {
+          const pagando = await pagar(datosPago.monto, this.venta.id_venta, this.id_usuario);
+          if (!pagando) {
+            throw 'No se realizo el pago';
+          }
+          this.limpiarPagado();
+        } catch (error) {
+          notificaciones('error', error.message);
+        } finally {
+          this.isModalLoading = false;
+        }
+      }, */
+
     async realizarPago(datosPago) {
-      this.isModalLoading = true;
-      this.loadingMessage = 'Procesando pago...';
       try {
         const pagando = await pagar(datosPago.monto, this.venta.id_venta, this.id_usuario);
         if (!pagando) {
           throw 'No se realizo el pago';
         }
-        this.limpiarPagado();
+        this.isPagoModalVisible = false;
+        this.isPaymentAnimationVisible = true;
       } catch (error) {
         notificaciones('error', error.message);
-      } finally {
-        this.isModalLoading = false;
       }
+    },
+
+    handlePaymentComplete() {
+      this.isPaymentAnimationVisible = false;
+      this.limpiarPagado();
     },
 
     async openPagoModal() {
