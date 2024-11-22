@@ -1,7 +1,6 @@
 <template>
-  <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
   <div class="report-container">
-    <h1><span class="title-bold">Reporte</span> Ventas</h1>
+    <PageHeader :titulo="titulo" />
 
     <!-- Formulario para filtros de reporte -->
     <div class="input-group">
@@ -17,14 +16,16 @@
         <label>Usuarios</label>
         <input list="usuarios" v-model="usuarioSeleccionado" class="fechas" placeholder="Selecciona un usuario" />
         <datalist id="usuarios">
-          <option v-for="usuario in usuarios" :key="usuario.id_usuario" :value="usuario.nombre"></option> <!-- Asegúrate de que 'nombre' sea la propiedad correcta -->
+          <option v-for="usuario in usuarios" :key="usuario.id_usuario" :value="usuario.nombre"></option>
+          <!-- Asegúrate de que 'nombre' sea la propiedad correcta -->
         </datalist>
       </div>
       <div class="input-field">
         <label>Clientes</label>
         <input list="clientes" v-model="clienteSeleccionado" class="fechas" placeholder="Selecciona un cliente" />
         <datalist id="clientes">
-          <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.Clientes || cliente.nombre_completo"></option>
+          <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.Clientes || cliente.nombre_completo">
+          </option>
         </datalist>
       </div>
       <div class="input-field">
@@ -94,15 +95,16 @@
 </template>
 
 <script>
-import ProfileButton from "../components/ProfileButton.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import solicitudes from "../../services/solicitudes.js";
 
 export default {
   components: {
-    ProfileButton,
+    PageHeader,
   },
   data() {
     return {
+      titulo: 'Reporte de Ventas',
       fechaInicio: '',
       fechaFin: '',
       clienteSeleccionado: '',
@@ -165,11 +167,7 @@ export default {
 };
 </script>
 
-
-
-  
 <style scoped>
-
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 /* Fuentes */
@@ -182,16 +180,11 @@ export default {
   background-color: #f5f5f5;
   color: #000;
   padding: clamp(1rem, 3vw, 2rem);
-  border-radius: 8px;
-  max-width: 90rem;
-  margin: 1rem auto;
-  width: 95%;
-}
-
-.title-bold {
-  font-weight: bold;
-  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-  margin-bottom: 1rem;
+  border-radius: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-height: 100vh;
 }
 
 .input-group {
@@ -320,14 +313,22 @@ tbody td {
 
 /* Media Queries */
 @media screen and (max-width: 768px) {
+
+  .report-container {
+    padding: 1rem;
+    margin: 0;
+    /* Quitado el margen */
+    width: 100%;
+  }
+
   .input-field {
     flex: 1 1 100%;
   }
-  
+
   .button-group {
     justify-content: center;
   }
-  
+
   .btn {
     flex: 1 1 auto;
   }
@@ -339,21 +340,21 @@ tbody td {
     margin: 0.5rem auto;
     width: 98%;
   }
-  
+
   .totals div {
     flex: 1 1 100%;
   }
-  
+
   .table-container {
     margin: 0 -1rem;
     padding: 0 1rem;
     width: calc(100% + 2rem);
   }
-  
+
   .button-group {
     flex-direction: column;
   }
-  
+
   .btn {
     max-width: none;
   }

@@ -1,9 +1,5 @@
 <template>
-  <div class="encabezado">
-    <h1>Unidades de Inventario y venta</h1>
-    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-  </div>
-  <hr>
+  <PageHeader :titulo="titulo" />
 
   <div class="categorias-wrapper">
     <div class="opciones">
@@ -116,7 +112,7 @@
 <script>
 
 //componentes
-import ProfileButton from '../components/ProfileButton.vue';
+import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
 import validarCamposService from '../../services/validarCampos.js';
@@ -131,12 +127,13 @@ import { getUnidadMedidaEmpresas, postUnidad, patchUnidad, getProductosUnidad, e
 export default {
   components:
   {
-    ProfileButton,
+    PageHeader,
     btnGuardarModal,
     btnCerrarModal,
   },
   data() {
     return {
+      titulo: 'Unidades de Inventario y Venta',
       searchQuery: '', // Almacena el texto de búsqueda
       itemsPerPage: "",
       id_usuario: '', // Valor por defecto para mostrar todos los registros
@@ -295,14 +292,6 @@ export default {
 * {
   font-family: 'Montserrat', sans-serif;
   box-sizing: border-box;
-}
-
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 16px;
-  gap: 16px;
 }
 
 .categorias-wrapper {
@@ -625,18 +614,18 @@ select,
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .busqueda,
   #btnAdd {
     width: 100%;
     margin: 8px 0;
   }
-  
+
   .custom-select {
     width: 100%;
     max-width: none;
   }
-  
+
   #btnEditar,
   #btnEliminar {
     width: 40px;
@@ -648,30 +637,26 @@ select,
   .table-container {
     margin-top: 24px;
   }
-  
+
   #AddUnidadModal,
   #BtnCerrar {
     width: 100%;
     margin: 8px 0;
   }
-  
+
   .button-categorias {
     width: 100%;
   }
 }
 
 @media screen and (max-width: 480px) {
-  .encabezado {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
+
   .modal-content {
     width: 95%;
     padding: 15px;
     margin: 10px;
   }
-  
+
   .table thead th,
   .table tbody td {
     padding: 6px;
@@ -681,17 +666,17 @@ select,
   .form-group {
     margin-bottom: 12px;
   }
-  
+
   #btnAdd {
     font-size: 14px;
     height: 35px;
   }
-  
+
   .rol {
     text-align: center;
     margin-top: 8px;
   }
-  
+
   textarea,
   .descriptionForm {
     min-height: 80px;

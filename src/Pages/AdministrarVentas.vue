@@ -1,11 +1,7 @@
 <template>
-  <div class="encabezado">
-    <h1>Administrar Ventas</h1>
-    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-  </div>
-  <hr>
-
   <div class="ventas-wrapper">
+    <PageHeader :titulo="titulo" />
+
     <div class="opciones">
       <div class="registros">
         <span>Mostrar
@@ -118,16 +114,17 @@
 </template>
 
 <script>
-import ProfileButton from '../components/ProfileButton.vue';
+import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
 
 export default {
   components: {
-    ProfileButton,
+    PageHeader,
     ExportButton
   },
   data() {
     return {
+      titulo: 'Administrar Ventas',
       searchQuery: '', // Para la búsqueda de texto
       itemsPerPage: "", // Control de paginación
       startDate: '', // Fecha de inicio para el filtro
@@ -262,15 +259,6 @@ export default {
 * {
   font-family: 'Montserrat', sans-serif;
   box-sizing: border-box;
-}
-
-/* Encabezado */
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 16px;
-  gap: 16px;
 }
 
 /* Opciones */
@@ -486,7 +474,7 @@ export default {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .busqueda,
   .custom-select,
   .export-button {
@@ -525,7 +513,7 @@ export default {
     width: 95%;
     padding: 15px;
   }
-  
+
   .btn {
     width: 100%;
     margin: 5px 0;
@@ -533,16 +521,12 @@ export default {
 }
 
 @media screen and (max-width: 480px) {
-  .encabezado {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
+
   .h2-modal-content {
     font-size: 20px;
     margin-bottom: 15px;
   }
-  
+
   .table th,
   .table td {
     padding: 6px;

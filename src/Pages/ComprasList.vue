@@ -1,11 +1,7 @@
 <template>
-  <div class="encabezado">
-    <h1>Crear Compras</h1>
-    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-  </div>
-  <hr />
-
   <div class="wrapper">
+    <PageHeader :titulo="titulo" />
+    
     <div class="main-container">
       <form @submit.prevent="agregarProducto" autocomplete="off">
 
@@ -205,15 +201,16 @@
 </template>
 
 <script>
-import ProfileButton from "../components/ProfileButton.vue";
+import PageHeader from "@/components/PageHeader.vue";
 import AgregarProductoModal from "../components/AgregarProductoModal.vue";
 export default {
   components: {
-    ProfileButton,
+    PageHeader,
     AgregarProductoModal,
   },
   data() {
     return {
+      titulo: 'Crear Compras',
       addQuery: "",
       addQuantity: "",
       addQuantityPackage: "",
@@ -554,14 +551,6 @@ export default {
 * {
   font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
-}
-
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 16px;
-  gap: 16px;
 }
 
 .wrapper {
@@ -978,54 +967,54 @@ export default {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   #div_nombre {
     width: 100%;
     padding-left: 0;
     margin-bottom: 10px;
   }
-  
+
   .input-container {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .campo {
     width: 100%;
   }
-  
+
   .end-container-cobro {
     flex-direction: column;
     height: auto;
     align-items: stretch;
   }
-  
+
   .end-container {
     flex-direction: column;
     text-align: center;
   }
-  
+
   #boton-cobrar,
   #cancelar-compra {
     width: 100%;
     margin-right: 0;
     margin-bottom: 10px;
   }
-  
+
   .modal-content {
     width: 95%;
   }
-  
+
   .div-modal-resumen {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .div-modal-resumen label {
     width: 100%;
     margin-right: 0;
   }
-  
+
   .div-modal-resumen-rtn {
     margin-left: 0;
   }
@@ -1035,37 +1024,37 @@ export default {
   .wrapper {
     padding: 8px;
   }
-  
+
   #total {
     font-size: 30px;
   }
-  
+
   .btn-botones-accion {
     font-size: 18px;
   }
-  
+
   .table th,
   .table td {
     padding: 6px;
     font-size: 14px;
   }
-  
+
   .label-input {
     font-size: 12px;
   }
-  
+
   .modal-content {
     padding: 15px;
   }
-  
+
   .agregar-producto {
     width: 100%;
   }
-  
+
   #cancelar-compra span {
     font-size: 13px;
   }
-  
+
   .btn-end {
     min-height: 60px;
   }

@@ -472,6 +472,7 @@ ul.nav {
 
 /* Mejoras de accesibilidad */
 @media (prefers-reduced-motion: reduce) {
+
   .main-content,
   .toggle-btn,
   .nav-link,
@@ -481,7 +482,9 @@ ul.nav {
 }
 
 /* Soporte para dispositivos de alta densidad */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+
   .nav-link i,
   .toggle-btn i {
     -webkit-font-smoothing: antialiased;
@@ -491,6 +494,7 @@ ul.nav {
 
 /* Optimizaciones para pantallas táctiles */
 @media (hover: none) {
+
   .nav-link,
   .toggle-btn {
     -webkit-tap-highlight-color: transparent;

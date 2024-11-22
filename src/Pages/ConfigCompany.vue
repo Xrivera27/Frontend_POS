@@ -1,12 +1,8 @@
 <template>
   <div class="configuracion-usuario">
-    <div class="encabezado">
-      <h1>Configuración</h1>
-      <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-    </div>
-    <hr />
-
     <div class="config-wrapper">
+      <PageHeader :titulo="titulo" />
+
       <div class="company-config">
         <form autocomplete="off" class="formulario form-company">
           <fieldset :disabled="businessEditing">
@@ -20,10 +16,12 @@
                 <input v-model="companyForm.nombre" type="text" id="nombre-company" name="nombre-company" />
 
                 <label for="telefono-empresa">Teléfono principal:</label>
-                <input v-model="companyForm.telefono_principal" type="text" id="telefono_principal" name="telefono_empresa" />
+                <input v-model="companyForm.telefono_principal" type="text" id="telefono_principal"
+                  name="telefono_empresa" />
 
                 <label for="correo-principal">Correo principal:</label>
-                <input v-model="companyForm.correo_principal" type="email" id="correo_principal" name="correo_principal" />
+                <input v-model="companyForm.correo_principal" type="email" id="correo_principal"
+                  name="correo_principal" />
               </div>
             </div>
           </fieldset>
@@ -50,14 +48,15 @@
 
 <script>
 import axios from 'axios';
-import ProfileButton from '../components/ProfileButton.vue';
+import PageHeader from "@/components/PageHeader.vue";
 
 export default {
   components: {
-    ProfileButton,
+    PageHeader
   },
   data() {
     return {
+      titulo: 'Configuración',
       businessEditing: true, // Establece el formulario como deshabilitado por defecto
 
       companyForm: {
@@ -136,15 +135,6 @@ export default {
 * {
   box-sizing: border-box;
   font-family: 'Montserrat', sans-serif;
-}
-
-/* Encabezado */
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 16px;
-  gap: 16px;
 }
 
 /* Configuración del usuario */
@@ -339,10 +329,6 @@ input {
 }
 
 @media screen and (max-width: 480px) {
-  .encabezado {
-    flex-direction: column;
-    align-items: stretch;
-  }
 
   .configuracion-usuario {
     padding: 8px;

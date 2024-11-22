@@ -1,82 +1,83 @@
 <template>
   <div class="configuracion-usuario">
-    <div class="encabezado">
-      <h1>Configuración</h1>
-      <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-    </div>
-    <hr />
-
     <div class="config-wrapper">
+
+      <PageHeader :titulo="titulo" />
       <div class="usuario-config" v-if="showUser">
-      <!-- Formulario básico de usuario -->
-<form @submit.prevent="updateUserData" autocomplete="off" class="formulario form-basic-user">
-  <fieldset :disabled="usuarioEditing">
-    <div class="contenedor-titulo">
-      <h2 class="titulo-form">Configuración</h2>
-    </div>
-    <div class="contenedor-principal">
-      <div class="contenedor-interno contenedor-izquierdo">
-        <label for="nombre-usuario">Nombre de usuario:</label>
-        <input v-model="userForm.nombre_usuario" type="text" id="nombre_usuario" name="nombre_usuario" required />
-        
-        <label for="telefono">Teléfono:</label>
-        <input v-model="userForm.telefono" type="text" id="telefono" name="telefono" required />
+        <!-- Formulario básico de usuario -->
+        <form @submit.prevent="updateUserData" autocomplete="off" class="formulario form-basic-user">
+          <fieldset :disabled="usuarioEditing">
+            <div class="contenedor-titulo">
+              <h2 class="titulo-form">Configuración</h2>
+            </div>
+            <div class="contenedor-principal">
+              <div class="contenedor-interno contenedor-izquierdo">
+                <label for="nombre-usuario">Nombre de usuario:</label>
+                <input v-model="userForm.nombre_usuario" type="text" id="nombre_usuario" name="nombre_usuario"
+                  required />
 
-        <label for="direccion">Dirección:</label>
-        <input v-model="userForm.direccion" type="text" id="direccion" name="direccion" required />
-      </div>
-      <div class="contenedor-interno contenedor-derecho">
-        <label for="contrasena">Contraseña actual:</label>
-        <input v-model="userForm.contraseña" type="password" id="contraseña" name="contraseña" required />
-        <label for="contrasena-nueva">Contraseña nueva:</label>
-            <input v-model="userForm.contraseña_nueva" type="password" id="contraseña_nueva" name="contraseña_nueva" />
+                <label for="telefono">Teléfono:</label>
+                <input v-model="userForm.telefono" type="text" id="telefono" name="telefono" required />
 
-           <label for="contrasena-confirmar">Confirmar contraseña:</label>
-          <input v-model="userForm.contraseña_confirm" type="password" id="contraseña_confirm" name="contraseña_confirm" />
+                <label for="direccion">Dirección:</label>
+                <input v-model="userForm.direccion" type="text" id="direccion" name="direccion" required />
+              </div>
+              <div class="contenedor-interno contenedor-derecho">
+                <label for="contrasena">Contraseña actual:</label>
+                <input v-model="userForm.contraseña" type="password" id="contraseña" name="contraseña" required />
+                <label for="contrasena-nueva">Contraseña nueva:</label>
+                <input v-model="userForm.contraseña_nueva" type="password" id="contraseña_nueva"
+                  name="contraseña_nueva" />
+
+                <label for="contrasena-confirmar">Confirmar contraseña:</label>
+                <input v-model="userForm.contraseña_confirm" type="password" id="contraseña_confirm"
+                  name="contraseña_confirm" />
 
 
-      </div>
-    </div>
-  </fieldset>
-  <div class="botones-container">
-    <button class="btn editar" @click="isEditing(1)" :disabled="!usuarioEditing">Editar</button>
-    <button type="submit" class="btn guardar" :disabled="usuarioEditing">Guardar</button>
-  </div>
-</form>
+              </div>
+            </div>
+          </fieldset>
+          <div class="botones-container">
+            <button class="btn editar" @click="isEditing(1)" :disabled="!usuarioEditing">Editar</button>
+            <button type="submit" class="btn guardar" :disabled="usuarioEditing">Guardar</button>
+          </div>
+        </form>
 
-<!-- Formulario avanzado de usuario -->
-<form @submit.prevent="updateUserData" autocomplete="off" class="formulario form-avanced-user">
-  <fieldset :disabled="usuarioAvancedEditing">
-    <div class="contenedor-titulo">
-      <h2 class="titulo-form">Configuración avanzada</h2>
-    </div>
-    <div class="contenedor-principal">
-      <div class="contenedor-interno contenedor-izquierdo">
-        <label for="Nombre">Nombre:</label>
-        <input v-model="userFormAdvanced.nombre" type="text" id="nombre" name="nombre" required />
+        <!-- Formulario avanzado de usuario -->
+        <form @submit.prevent="updateUserData" autocomplete="off" class="formulario form-avanced-user">
+          <fieldset :disabled="usuarioAvancedEditing">
+            <div class="contenedor-titulo">
+              <h2 class="titulo-form">Configuración avanzada</h2>
+            </div>
+            <div class="contenedor-principal">
+              <div class="contenedor-interno contenedor-izquierdo">
+                <label for="Nombre">Nombre:</label>
+                <input v-model="userFormAdvanced.nombre" type="text" id="nombre" name="nombre" required />
 
-        <label for="apellido">Apellido:</label>
-        <input v-model="userFormAdvanced.apellido" type="text" id="apellido" name="apellido" required />
+                <label for="apellido">Apellido:</label>
+                <input v-model="userFormAdvanced.apellido" type="text" id="apellido" name="apellido" required />
 
-        <label for="correo">Correo:</label>
-        <input v-model="userFormAdvanced.correo" type="email" id="correo" name="correo" required />
-      </div>
-    </div>
-  </fieldset>
-  <div class="botones-container">
-    <button class="btn editar" @click="isEditing(2)" :disabled="!usuarioAvancedEditing">Editar</button>
-    <button type="submit" class="btn guardar" :disabled="usuarioAvancedEditing">Guardar</button>
-  </div>
-</form>
+                <label for="correo">Correo:</label>
+                <input v-model="userFormAdvanced.correo" type="email" id="correo" name="correo" required />
+              </div>
+            </div>
+          </fieldset>
+          <div class="botones-container">
+            <button class="btn editar" @click="isEditing(2)" :disabled="!usuarioAvancedEditing">Editar</button>
+            <button type="submit" class="btn guardar" :disabled="usuarioAvancedEditing">Guardar</button>
+          </div>
+        </form>
       </div>
 
       <!-- Botones de navegación -->
-      <button :class="{ 'activo': userActive, 'inactivo': !userActive }" :disabled="userBoton" class="btn boton-switch" @click="switchBools">
+      <button :class="{ 'activo': userActive, 'inactivo': !userActive }" :disabled="userBoton" class="btn boton-switch"
+        @click="switchBools">
         Config. Usuario
       </button>
-      
+
       <router-link to="/config-company">
-        <button :class="{ 'inactivo': userActive, 'activo': !userActive }" :disabled="companyBoton" class="btn boton-switch">
+        <button :class="{ 'inactivo': userActive, 'activo': !userActive }" :disabled="companyBoton"
+          class="btn boton-switch">
           Config. Empresa
         </button>
       </router-link>
@@ -87,14 +88,15 @@
 
 <script>
 import axios from 'axios';
-//import ProfileButton from '../components/ProfileButton.vue';
+import PageHeader from "@/components/PageHeader.vue";
 
 export default {
   components: {
-   // ProfileButton,
+    PageHeader
   },
   data() {
     return {
+      titulo: 'Configuración',
       userBoton: true,
       companyBoton: false,
       showUser: true,
@@ -118,74 +120,74 @@ export default {
   },
   methods: {
     async getUserData() {
-  try {
-    const token = localStorage.getItem('auth'); // Usa 'auth' para obtener el token
+      try {
+        const token = localStorage.getItem('auth'); // Usa 'auth' para obtener el token
 
-    const response = await axios.get('http://localhost:3000/api/usuarios', { // Cambia a '/usuarios'
-      headers: {
-        Authorization: `Bearer ${token}`
+        const response = await axios.get('http://localhost:3000/api/usuarios', { // Cambia a '/usuarios'
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log(response.data);
+
+        const userData = response.data;
+        this.userForm.nombre_usuario = userData.nombre_usuario || '';
+        this.userForm.telefono = userData.telefono || '';
+        this.userForm.direccion = userData.direccion || '';
+        this.userForm.contraseña = userData.contraseña || '';
+        this.userFormAdvanced.nombre = userData.nombre || '';
+        this.userFormAdvanced.apellido = userData.apellido || '';
+        this.userFormAdvanced.correo = userData.correo || '';
+      } catch (error) {
+        console.error('Error al obtener los datos del usuario:', error);
+        alert('No se pudo obtener la información del usuario.'); // Mensaje para el usuario
       }
-    });
-    console.log(response.data);
+    },
 
-    const userData = response.data;
-    this.userForm.nombre_usuario = userData.nombre_usuario || '';
-    this.userForm.telefono = userData.telefono || '';
-    this.userForm.direccion = userData.direccion || '';
-    this.userForm.contraseña = userData.contraseña || '';
-    this.userFormAdvanced.nombre = userData.nombre || '';
-    this.userFormAdvanced.apellido = userData.apellido || '';
-    this.userFormAdvanced.correo = userData.correo || '';
-  } catch (error) {
-    console.error('Error al obtener los datos del usuario:', error);
-    alert('No se pudo obtener la información del usuario.'); // Mensaje para el usuario
-  }
-},
+    async updateUserData() {
+      try {
+        const token = localStorage.getItem('auth');
 
-async updateUserData() {
-  try {
-    const token = localStorage.getItem('auth');
+        // Verificar si se están intentando cambiar las contraseñas
+        if (this.userForm.contraseña_nueva || this.userForm.contraseña_confirm) {
+          // Si una de las contraseñas nuevas está presente, ambas deben coincidir
+          if (this.userForm.contraseña_nueva !== this.userForm.contraseña_confirm) {
+            alert('Las contraseñas no coinciden.');
+            return;
+          }
+        }
 
-    // Verificar si se están intentando cambiar las contraseñas
-    if (this.userForm.contraseña_nueva || this.userForm.contraseña_confirm) {
-      // Si una de las contraseñas nuevas está presente, ambas deben coincidir
-      if (this.userForm.contraseña_nueva !== this.userForm.contraseña_confirm) {
-        alert('Las contraseñas no coinciden.');
-        return;
+        const updatedData = {
+          nombre_usuario: this.userForm.nombre_usuario,
+          telefono: this.userForm.telefono,
+          direccion: this.userForm.direccion,
+          // Asegúrate de enviar la contraseña actual y las nuevas
+          contraseña: this.userForm.contraseña, // Contraseña actual
+          contraseña_nueva: this.userForm.contraseña_nueva || undefined,
+          contraseña_confirm: this.userForm.contraseña_confirm || undefined, // Asegúrate de que este campo esté presente
+          nombre: this.userFormAdvanced.nombre,
+          apellido: this.userFormAdvanced.apellido,
+          correo: this.userFormAdvanced.correo,
+        };
+
+        const response = await axios.put('http://localhost:3000/api/configuser', updatedData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        console.log('Respuesta del servidor:', response);
+
+        if (response.status === 200) {
+          alert('Usuario actualizado exitosamente');
+          window.location.reload(); // Recargar la página después de guardar
+        }
+      } catch (error) {
+        console.error('Error al actualizar los datos del usuario:', error);
+        alert('Hubo un problema al guardar los datos.');
       }
-    }
-
-    const updatedData = {
-      nombre_usuario: this.userForm.nombre_usuario,
-      telefono: this.userForm.telefono,
-      direccion: this.userForm.direccion,
-      // Asegúrate de enviar la contraseña actual y las nuevas
-      contraseña: this.userForm.contraseña, // Contraseña actual
-      contraseña_nueva: this.userForm.contraseña_nueva || undefined,
-      contraseña_confirm: this.userForm.contraseña_confirm || undefined, // Asegúrate de que este campo esté presente
-      nombre: this.userFormAdvanced.nombre,
-      apellido: this.userFormAdvanced.apellido,
-      correo: this.userFormAdvanced.correo,
-    };
-
-    const response = await axios.put('http://localhost:3000/api/configuser', updatedData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    console.log('Respuesta del servidor:', response);
-
-    if (response.status === 200) {
-      alert('Usuario actualizado exitosamente');
-      window.location.reload(); // Recargar la página después de guardar
-    }
-  } catch (error) {
-    console.error('Error al actualizar los datos del usuario:', error);
-    alert('Hubo un problema al guardar los datos.');
-  }
-},
+    },
 
 
 
@@ -235,15 +237,6 @@ async updateUserData() {
 * {
   box-sizing: border-box;
   font-family: 'Montserrat', sans-serif;
-}
-
-/* Encabezado */
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 16px;
-  gap: 16px;
 }
 
 /* Configuración del usuario */
@@ -432,10 +425,6 @@ input {
 }
 
 @media screen and (max-width: 480px) {
-  .encabezado {
-    flex-direction: column;
-    align-items: stretch;
-  }
 
   .configuracion-usuario {
     padding: 8px;

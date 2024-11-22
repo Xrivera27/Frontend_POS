@@ -1,11 +1,7 @@
 <template>
-  <div class="encabezado">
-    <h1>Administración Sucursales</h1>
-    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-  </div>
-  <hr />
-
   <div class="sucursales-wrapper">
+    <PageHeader :titulo="titulo" />
+
     <div class="opciones">
       <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap">
         Agregar sucursales
@@ -97,25 +93,26 @@
 </template>
 
 <script>
-import ProfileButton from "../components/ProfileButton.vue";
 import ExportButton from "../components/ExportButton.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
 import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
+import PageHeader from "@/components/PageHeader.vue";
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
 
 export default {
   components: {
-    ProfileButton,
     ExportButton,
     btnGuardarModal,
     btnCerrarModal,
+    PageHeader
   },
   data() {
     return {
+      titulo: "Administración de Sucursales",
       id_usuario: 1,
       id_empresa: 11, //esto es provisional, cuando se cree el controller empresa el sistema sera capaz de reconocer automaitcamente a que empresa pertenece cada usuario
       searchQuery: "", // Almacena el texto de búsqueda
@@ -332,14 +329,6 @@ export default {
 * {
   font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
-}
-
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 16px;
-  gap: 16px;
 }
 
 .opciones {
@@ -616,19 +605,19 @@ select {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .busqueda,
   .registros,
   #btnAdd {
     width: 100%;
     margin: 8px 0;
   }
-  
+
   .custom-select {
     width: 100%;
     max-width: none;
   }
-  
+
   #btnEditar,
   #btnEliminar {
     width: 40px;
@@ -640,7 +629,7 @@ select {
   .table-container {
     margin-top: 24px;
   }
-  
+
   #AddSucursalModal,
   #BtnCerrar {
     width: 100%;
@@ -649,16 +638,12 @@ select {
 }
 
 @media screen and (max-width: 480px) {
-  .encabezado {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
+
   .modal-content {
     width: 95%;
     padding: 15px;
   }
-  
+
   .table thead th,
   .table tbody td {
     padding: 6px;
@@ -672,12 +657,12 @@ select {
   .h2-modal-content {
     font-size: 20px;
   }
-  
+
   #btnAdd {
     font-size: 14px;
     height: 35px;
   }
-  
+
   .rol {
     text-align: center;
     margin-top: 8px;

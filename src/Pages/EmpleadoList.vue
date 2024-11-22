@@ -1,12 +1,7 @@
 <template>
-
-  <div class="encabezado">
-    <h1>Usuarios</h1>
-    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-  </div>
-  <hr>
-
   <div class="empleados-wrapper">
+    <PageHeader :titulo="titulo" />
+
     <div class="opciones">
       <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
         Usuario</button>
@@ -152,22 +147,22 @@
 </template>
 
 <script>
-import ProfileButton from '../components/ProfileButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 import solicitudes from "../../services/solicitudes.js";
 import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
+import PageHeader from "@/components/PageHeader.vue";
 
 export default {
   components: {
-    ProfileButton,
     btnGuardarModal,
     btnCerrarModal,
-
+    PageHeader
   },
   data() {
     return {
+      titulo: 'Usuarios',
       isLoading: false,
       showTooltip: false,
       searchQuery: '',
@@ -661,13 +656,6 @@ export default {
   width: 100%;
 }
 
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 16px;
-  gap: 16px;
-}
 
 .opciones {
   display: flex;
@@ -902,7 +890,7 @@ button {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .busqueda,
   .custom-select,
   #btnAdd,
@@ -912,7 +900,7 @@ button {
     min-width: 0;
     margin: 8px 0;
   }
-  
+
   #btnEditar,
   #btnEliminar {
     width: 40px;
@@ -937,16 +925,12 @@ button {
 }
 
 @media screen and (max-width: 480px) {
-  .encabezado {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
+
   .modal-content {
     width: 95%;
     padding: 15px;
   }
-  
+
   .table thead th,
   .table tbody td {
     padding: 6px;

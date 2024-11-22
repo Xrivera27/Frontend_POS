@@ -1,11 +1,7 @@
 <template>
-  <div class="encabezado">
-    <h1>Bienvenido al Panel</h1>
-    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-  </div>
-  <hr>
-
   <div class="dashboard">
+    <PageHeader :titulo="titulo" titleColor="lightseagreen" />
+
     <div v-if="role === 1">
       <!-- Secciones visibles solo para Administrador -->
       <BarChart />
@@ -32,7 +28,6 @@
         <p>Aquí puedes ver los reportes de ventas.</p>
       </div>
     </div>
-
 
     <div v-if="role === 4">
       <!-- Secciones visibles solo para Gerente -->
@@ -68,15 +63,16 @@
 
 <script>
 import BarChart from '../components/BarChartList.vue';
-import ProfileButton from '../components/ProfileButton.vue';
+import PageHeader from "@/components/PageHeader.vue";
 
 export default {
   components: {
-    ProfileButton,
+    PageHeader,
     BarChart,
   },
   data() {
     return {
+      titulo: 'Bienvenido al Panel',
       role: Number(localStorage.getItem('role')) || 0,
     };
   },
@@ -105,22 +101,6 @@ export default {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-/* Encabezado */
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 16px;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-h1 {
-  color: #39b378;
-  font-size: clamp(24px, 4vw, 32px);
-  margin: 10px 0;
 }
 
 /* Dashboard */
@@ -204,11 +184,6 @@ h3 {
     padding: 15px;
   }
 
-  .encabezado {
-    flex-direction: column;
-    text-align: center;
-  }
-
   .container-top {
     justify-content: center;
     margin-top: 10px;
@@ -256,6 +231,7 @@ h3 {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

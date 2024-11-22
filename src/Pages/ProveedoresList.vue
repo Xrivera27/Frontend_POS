@@ -1,11 +1,7 @@
 <template>
-  <div class="encabezado">
-    <h1>Proveedores</h1>
-    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-  </div>
-  <hr>
-
   <div class="proveedores-wrapper">
+    <PageHeader :titulo="titulo" />
+
     <div class="opciones">
       <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
         Proveedor</button>
@@ -93,7 +89,7 @@
 </template>
 
 <script>
-import ProfileButton from '../components/ProfileButton.vue';
+import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 import validarCamposService from '../../services/validarCampos.js';
@@ -103,12 +99,13 @@ import { notificaciones } from '../../services/notificaciones.js';
 import solicitudes from "../../services/solicitudes.js";
 export default {
   components: {
-    ProfileButton,
+    PageHeader,
     btnGuardarModal,
     btnCerrarModal
   },
   data() {
     return {
+      titulo: 'Proveedores',
       searchQuery: '', // Almacena el texto de búsqueda
       isModalOpen: false,
       isEditing: false,
@@ -295,15 +292,6 @@ export default {
 * {
   font-family: 'Montserrat', sans-serif;
   box-sizing: border-box;
-}
-
-/* Encabezado */
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 16px;
-  gap: 16px;
 }
 
 /* Opciones */
@@ -553,19 +541,19 @@ select {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .busqueda,
   .registros,
   #btnAdd {
     width: 100%;
     margin: 8px 0;
   }
-  
+
   .custom-select {
     width: 100%;
     max-width: none;
   }
-  
+
   #btnEditar,
   #btnEliminar {
     width: 40px;
@@ -580,16 +568,12 @@ select {
 }
 
 @media screen and (max-width: 480px) {
-  .encabezado {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
+
   .modal-content {
     width: 95%;
     padding: 15px;
   }
-  
+
   .table thead th,
   .table tbody td {
     padding: 6px;

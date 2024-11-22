@@ -1,12 +1,8 @@
 <template>
   <div class="configuracion-usuario">
-    <div class="encabezado">
-      <h1>Configuración</h1>
-      <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-    </div>
-    <hr />
-
     <div class="config-wrapper">
+      <PageHeader :titulo="titulo" />
+      
       <div class="company-config">
         <form @submit.prevent="guardarConfiguracionSAR" autocomplete="off" class="formulario form-company-SAR">
           <fieldset :disabled="busisnessSarEditing">
@@ -53,17 +49,17 @@
 
 
 <script>
-import ProfileButton from '../components/ProfileButton.vue';
+import PageHeader from "@/components/PageHeader.vue";
 import axios from 'axios';
 
 
 export default {
   components: {
-    ProfileButton,
-
+    PageHeader
   },
   data() {
     return {
+      titulo: 'Configuración SAR',
       busisnessSarEditing: true,
       configuracionSAR: {
         numero_CAI: '',
@@ -209,15 +205,6 @@ export default {
 * {
   box-sizing: border-box;
   font-family: 'Montserrat', sans-serif;
-}
-
-/* Encabezado */
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 16px;
-  gap: 16px;
 }
 
 /* Configuración del usuario */
@@ -432,10 +419,6 @@ input {
 }
 
 @media screen and (max-width: 480px) {
-  .encabezado {
-    flex-direction: column;
-    align-items: stretch;
-  }
 
   .configuracion-usuario {
     padding: 8px;
