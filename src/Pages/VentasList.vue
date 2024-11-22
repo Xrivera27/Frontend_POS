@@ -134,7 +134,8 @@
         <button @click="limpiarPantalla">Limpiar pantalla [F6]</button>
         <button @click="guardarVenta">Guardar venta [F8]</button>
         <GuardarVentaModal :isVisible="isGuardarVentaModalVisible" :isConsumidorFinal="!clienteSeleccionado"
-          @close="isGuardarVentaModalVisible = false" @cliente-temporal="handleSaveVenta" @modal-focused="handleModalFocus" />
+          @close="isGuardarVentaModalVisible = false" @cliente-temporal="handleSaveVenta"
+          @modal-focused="handleModalFocus" />
         <button @click="recVenta">Rec. Venta [F9]</button>
         <RecuperarVentaModal :isVisible="isRecuperarVentaModalVisible" :ventas="ventasGuardadas"
           @close="isRecuperarVentaModalVisible = false" @venta-selected="handleVentaSelected" />
@@ -178,7 +179,7 @@ export default {
     ModalLoading,
     GuardarVentaModal,
     RecuperarVentaModal,
-   // VentaPendienteModal
+    // VentaPendienteModal
   },
   data() {
     return {
@@ -583,7 +584,7 @@ export default {
     },
 
     async agregarProducto() {
-      let nuevaCantidad = this.totalCantidad ;
+      let nuevaCantidad = this.totalCantidad;
       let productoReducir;
       const codigoValidar = this.addQuery;
       if (!codigoValidar) {
@@ -592,7 +593,7 @@ export default {
         return;
       }
 
-      if(!nuevaCantidad || nuevaCantidad === 0 || nuevaCantidad === ""){
+      if (!nuevaCantidad || nuevaCantidad === 0 || nuevaCantidad === "") {
         nuevaCantidad = 1;
       }
 
@@ -617,12 +618,12 @@ export default {
           productoReducir = newProduct.codigo_producto;
 
         }
-        if(!this.recuperandoVenta){
-        //  alert(nuevaCantidad);
+        if (!this.recuperandoVenta) {
+          //  alert(nuevaCantidad);
           await agregarProductoCodigo(nuevaCantidad, productoReducir, this.id_usuario);
 
         }
-        
+
       } catch (error) {
         console.log(error);
         notificaciones('error', error.message);
@@ -639,71 +640,71 @@ export default {
       if (!this.clienteSeleccionado) {
         this.isGuardarVentaModalVisible = true;
       }
-      else{
+      else {
         this.guardarVentainBD(this.clienteSeleccionado.nombre_completo);
       }
-      
+
     },
-    async guardarVentainBD(nombre_completo){
+    async guardarVentainBD(nombre_completo) {
       try {
         const response = await guardarVenta(nombre_completo, this.id_usuario);
-        if(response){
+        if (response) {
           this.limpiarPagado();
           notificaciones('venta-guardada');
         }
-        else{
+        else {
           throw 'Ocurrio un error al guardar venta. Intente mas tarde';
         }
       } catch (error) {
         console.log(error);
         notificaciones('error', error.message);
       }
-      
+
     },
 
-   async handleVentaSelected(data){
-    try {
-    //  console.log(`id de compra guardada: ${data.id_compra_guardada}`);
-      const productosRec = await getRecProductoVenta(data.id_compra_guardada);
-     // console.log(productosRec);
-    //  console.log(productosRec.length);
-      this.recuperandoVenta = true;
-   //   console.log(`Productos de la compra: ${productosRec}`);
+    async handleVentaSelected(data) {
+      try {
+        //  console.log(`id de compra guardada: ${data.id_compra_guardada}`);
+        const productosRec = await getRecProductoVenta(data.id_compra_guardada);
+        // console.log(productosRec);
+        //  console.log(productosRec.length);
+        this.recuperandoVenta = true;
+        //   console.log(`Productos de la compra: ${productosRec}`);
 
-      for(const producto of productosRec){
-       // console.log(`Cantidad del producto: ${producto.cantidad}`);
-        this.addQuery = producto.codigo_producto;
-        this.totalCantidad = producto.cantidad;
-        await this.agregarProducto();
+        for (const producto of productosRec) {
+          // console.log(`Cantidad del producto: ${producto.cantidad}`);
+          this.addQuery = producto.codigo_producto;
+          this.totalCantidad = producto.cantidad;
+          await this.agregarProducto();
+        }
+
+        this.recuperandoVenta = false;
+
+      } catch (error) {
+        notificaciones('error', "Error al recuperar venta. Intente de nuevo mas tarde.");
       }
 
-      this.recuperandoVenta = false;
-
-    } catch (error) {
-      notificaciones('error', "Error al recuperar venta. Intente de nuevo mas tarde.");
-    }
-      
     },
 
-    async RecventaPendiente(productosRec){
-    try {
+    async RecventaPendiente(productosRec) {
+      try {
 
-      this.recuperandoVenta = true;
+        this.recuperandoVenta = true;
 
-      for(const producto of productosRec){
-        console.log(`Cantidad del producto: ${producto.cantidad}`);
-        this.addQuery = producto.codigo_producto;
-        this.totalCantidad = producto.cantidad;
-        await this.agregarProducto();
+        for (const producto of productosRec) {
+          console.log(`Cantidad del producto: ${producto.cantidad}`);
+          this.addQuery = producto.codigo_producto;
+          this.totalCantidad = producto.cantidad;
+          await this.agregarProducto();
+        }
+
+        this.recuperandoVenta = false;
+
+
+      } catch (error) {
+        notificaciones('error', "Error al recuperar venta. Intente de nuevo mas tarde.");
       }
 
-      this.recuperandoVenta = false;
-      
-
-    } catch (error) {
-      notificaciones('error', "Error al recuperar venta. Intente de nuevo mas tarde.");
-    }
-      
     },
 
     async handleSaveVenta(data) {
@@ -732,13 +733,13 @@ export default {
       }
     },
 
-   
 
-    async recVenta2(){
+
+    async recVenta2() {
       try {
         const ventasGuardadas = await getVentasGuardadas(this.id_usuario);
         console.log(ventasGuardadas);
-    
+
       } catch (error) {
         notificaciones('error', error);
       }
@@ -802,7 +803,7 @@ export default {
       this.cajaAbierta = await cajaUsuario(this.id_usuario);
       ventaRecuperada = await getVentaPendiente(this.id_usuario);
       console.log(ventaRecuperada.resultado);
-      if(ventaRecuperada.resultado){
+      if (ventaRecuperada.resultado) {
         await this.RecventaPendiente(ventaRecuperada.productos);
       }
     } catch (error) {
@@ -1032,21 +1033,55 @@ export default {
 
 /* Columnas responsivas */
 @media screen and (min-width: 768px) {
-  .col-item { width: 10%; }
-  .col-codigo { width: 20%; }
-  .col-descripcion { width: 40%; }
-  .col-cantidad { width: 10%; }
-  .col-precio { width: 10%; }
-  .col-importe { width: 10%; }
+  .col-item {
+    width: 10%;
+  }
+
+  .col-codigo {
+    width: 20%;
+  }
+
+  .col-descripcion {
+    width: 40%;
+  }
+
+  .col-cantidad {
+    width: 10%;
+  }
+
+  .col-precio {
+    width: 10%;
+  }
+
+  .col-importe {
+    width: 10%;
+  }
 }
 
 @media screen and (max-width: 767px) {
-  .col-item { width: 15%; }
-  .col-codigo { width: 25%; }
-  .col-descripcion { width: 30%; }
-  .col-cantidad { width: 10%; }
-  .col-precio { width: 10%; }
-  .col-importe { width: 10%; }
+  .col-item {
+    width: 15%;
+  }
+
+  .col-codigo {
+    width: 25%;
+  }
+
+  .col-descripcion {
+    width: 30%;
+  }
+
+  .col-cantidad {
+    width: 10%;
+  }
+
+  .col-precio {
+    width: 10%;
+  }
+
+  .col-importe {
+    width: 10%;
+  }
 }
 
 /* Estilos de la tabla */
@@ -1197,7 +1232,7 @@ button {
   .footer-container button {
     font-size: 10px;
   }
-  
+
   .buttons-header {
     width: 100%;
   }

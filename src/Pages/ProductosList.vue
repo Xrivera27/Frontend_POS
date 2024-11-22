@@ -1,12 +1,7 @@
 <template>
-  <div class="encabezado">
-    <h1>Productos</h1>
-    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-
-  </div>
-  <hr>
-
   <div class="productos-wrapper">
+    <PageHeader :titulo="titulo" />
+
     <div class="opciones">
       <div class="action-bar">
         <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">
@@ -244,7 +239,7 @@
 <script>
 
 //compontentes
-import ProfileButton from '../components/ProfileButton.vue';
+import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
@@ -271,13 +266,14 @@ const { impuestos } = require('../resources/impuestos.js');
 
 export default {
   components: {
-    ProfileButton,
+    PageHeader,
     ExportButton,
     btnGuardarModal,
     btnCerrarModal
   },
   data() {
     return {
+      titulo: 'Productos',
       searchQuery: '',
       searchCategoria: '',
       searchSucursal: 'default',
@@ -651,11 +647,6 @@ export default {
   box-sizing: border-box;
 }
 
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-}
-
 .contenedor-principal {
   display: flex;
   width: 100%;
@@ -1016,7 +1007,7 @@ export default {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .busqueda,
   .custom-select,
   #btnAdd,
@@ -1025,11 +1016,11 @@ export default {
     width: 100%;
     margin: 8px 0;
   }
-  
+
   .select-sucursal {
     min-width: 100%;
   }
-  
+
   #btnEditar,
   #btnEliminar {
     width: 40px;
@@ -1048,18 +1039,13 @@ export default {
 }
 
 @media screen and (max-width: 480px) {
-  .encabezado {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0 16px;
-  }
-  
+
   .modal-content,
   .modal-content-stock {
     width: 95%;
     padding: 15px;
   }
-  
+
   .table thead th,
   .table tbody td {
     padding: 6px;

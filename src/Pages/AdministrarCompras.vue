@@ -1,11 +1,7 @@
 <template>
-  <div class="encabezado">
-    <h1>Administrar Compras</h1>
-    <ProfileButton :companyName="'Perdomo y Asociados'" :role="'Gerente'" />
-  </div>
-  <hr>
-
   <div class="compras-wrapper">
+    <PageHeader :titulo="titulo" />
+
     <div class="opciones">
       <div class="registros">
         <span>Mostrar
@@ -100,8 +96,8 @@
             </tr>
           </tbody>
         </table>
-       
-        <btnCerrarModal :texto = "'Cerrar'" @click="closeDetallesModal"></btnCerrarModal>
+
+        <btnCerrarModal :texto="'Cerrar'" @click="closeDetallesModal"></btnCerrarModal>
       </div>
     </div>
 
@@ -109,18 +105,19 @@
 </template>
 
 <script>
-import ProfileButton from '../components/ProfileButton.vue';
 import ExportButton from '../components/ExportButton.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
+import PageHeader from "@/components/PageHeader.vue";
 
 export default {
   components: {
-    ProfileButton,
+    PageHeader,
     ExportButton,
     btnCerrarModal
   },
   data() {
     return {
+      titulo: 'Administrar Compras',
       searchQuery: '',
       itemsPerPage: "",
       isDetallesModalOpen: false,
@@ -215,14 +212,6 @@ export default {
 * {
   font-family: 'Montserrat', sans-serif;
   box-sizing: border-box;
-}
-
-.encabezado {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  padding: 0 16px;
-  gap: 16px;
 }
 
 .opciones {
@@ -395,7 +384,7 @@ export default {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .busqueda,
   .custom-select,
   .export-button {
@@ -417,7 +406,7 @@ export default {
     width: 95%;
     padding: 15px;
   }
-  
+
   .btn {
     width: 100%;
     margin: 5px 0;
@@ -425,16 +414,12 @@ export default {
 }
 
 @media screen and (max-width: 480px) {
-  .encabezado {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
+
   .h2-modal-content {
     font-size: 20px;
     margin-bottom: 15px;
   }
-  
+
   .table th,
   .table td {
     padding: 6px;
