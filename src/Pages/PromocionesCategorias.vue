@@ -509,7 +509,8 @@ export default {
 
     async activarProm(promocionId) {
   try {
-    const promocionAActivar = this.promociones.find(p => p.id === promocionId);
+    // Usar filterPromociones para encontrar la promoción correcta
+    const promocionAActivar = this.filterPromociones.find(p => p.id === promocionId);
     if (!promocionAActivar) {
       throw new Error('Promoción no encontrada');
     }
@@ -523,69 +524,71 @@ export default {
     
     // Verificar si ya existe una promoción activa para la misma categoría
     const promocionesActivas = this.promociones.filter(p => {
+      // Verificar si es la misma categoría usando cualquiera de los IDs disponibles
       const mismaCategoria = 
         (promocionAActivar.categoria_producto_Id && p.categoria_producto_Id === promocionAActivar.categoria_producto_Id) ||
         (promocionAActivar.categoria_id && p.categoria_id === promocionAActivar.categoria_id);
 
-          const estaActiva = p.manejo_automatico;
-          const esDistinta = p.id !== promocionId;
+      const estaActiva = p.manejo_automatico;
+      const esDistinta = p.id !== promocionId;
 
-          console.log('Comparando con promoción:', {
-            id: p.id,
-            categoria: p.categoria?.nombre_categoria,
-            categoria_id: p.categoria_id,
-            categoria_producto_Id: p.categoria_producto_Id,
-            activa: estaActiva,
-            mismaCategoria: mismaCategoria,
-            esDistinta: esDistinta
-          });
+      console.log('Comparando con promoción:', {
+        id: p.id,
+        categoria: p.categoria?.nombre_categoria,
+        categoria_id: p.categoria_id,
+        categoria_producto_Id: p.categoria_producto_Id,
+        activa: estaActiva,
+        mismaCategoria: mismaCategoria,
+        esDistinta: esDistinta
+      });
 
-          return estaActiva && esDistinta && mismaCategoria;
+      return estaActiva && esDistinta && mismaCategoria;
+    });
+
+    console.log('Promociones activas encontradas:', promocionesActivas.length);
+
+    // Si no hay promociones activas para esta categoría, activar directamente
+    if (promocionesActivas.length === 0) {
+      const response = await solicitudes.patchRegistro(
+        `/promocionesC/cambiar-estado-promocion/${promocionId}`,
+        { manejo_automatico: true }
+      );
+
+      if (response) {
+        await this.cargarPromociones();
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Promoción activada exitosamente',
+          tipo: 'success'
         });
+      }
+      return;
+    }
 
-        console.log('Promociones activas encontradas:', promocionesActivas.length);
-
-        // Si no hay promociones activas para esta categoría, activar directamente
-        if (promocionesActivas.length === 0) {
-          const response = await solicitudes.patchRegistro(
-            `/promocionesC/cambiar-estado-promocion/${promocionId}`,
-            { manejo_automatico: true }
-          );
-
-          if (response) {
-            await this.cargarPromociones();
-            this.$emit('mostrar-notificacion', {
-              mensaje: 'Promoción activada exitosamente',
-              tipo: 'success'
-            });
-          }
-          return;
-        }
-
-    // Si hay promociones activas, verificar conflictos de fecha
+    // Verificar conflictos de fecha con las promociones activas
     const fechaInicioActual = new Date(promocionAActivar.fecha_inicio);
     const fechaFinalActual = new Date(promocionAActivar.fecha_final);
 
-        const promocionConflicto = promocionesActivas.find(p => {
-          const fechaInicioExistente = new Date(p.fecha_inicio);
-          const fechaFinalExistente = new Date(p.fecha_final);
+    const promocionConflicto = promocionesActivas.find(p => {
+      const fechaInicioExistente = new Date(p.fecha_inicio);
+      const fechaFinalExistente = new Date(p.fecha_final);
 
-          const hayConflicto = fechaInicioActual <= fechaFinalExistente &&
-            fechaFinalActual >= fechaInicioExistente;
+      const hayConflicto = fechaInicioActual <= fechaFinalExistente && 
+                          fechaFinalActual >= fechaInicioExistente;
 
-          console.log('Verificando conflicto de fechas:', {
-            promocionId: p.id,
-            fechaInicioActual: fechaInicioActual.toISOString(),
-            fechaFinalActual: fechaFinalActual.toISOString(),
-            fechaInicioExistente: fechaInicioExistente.toISOString(),
-            fechaFinalExistente: fechaFinalExistente.toISOString(),
-            hayConflicto
-          });
+      console.log('Verificando conflicto de fechas:', {
+        promocionId: p.id,
+        fechaInicioActual: fechaInicioActual.toISOString(),
+        fechaFinalActual: fechaFinalActual.toISOString(),
+        fechaInicioExistente: fechaInicioExistente.toISOString(),
+        fechaFinalExistente: fechaFinalExistente.toISOString(),
+        hayConflicto
+      });
 
-          return hayConflicto;
-        });
+      return hayConflicto;
+    });
 
     if (promocionConflicto) {
+      // Si hay conflicto, mostrar el modal de conflicto
       this.tempPromocionData = promocionAActivar;
       this.conflictingPromocion = promocionConflicto;
       this.showConflictModal = true;
@@ -601,63 +604,66 @@ export default {
         { manejo_automatico: true }
       );
 
-          if (response) {
-            await this.cargarPromociones();
-            this.$emit('mostrar-notificacion', {
-              mensaje: 'Promoción activada exitosamente',
-              tipo: 'success'
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error al activar promoción:', error);
+      if (response) {
+        await this.cargarPromociones();
         this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al activar la promoción',
-          tipo: 'error'
+          mensaje: 'Promoción activada exitosamente',
+          tipo: 'success'
         });
       }
-    },
+    }
+  } catch (error) {
+    console.error('Error al activar promoción:', error);
+    this.$emit('mostrar-notificacion', {
+      mensaje: 'Error al activar la promoción',
+      tipo: 'error'
+    });
+  }
+},
 
-    async createAnywayPromocion() {
-      try {
-        console.log('Procesando promoción con conflicto');
-        if (this.tempPromocionData) {
-          // Primero desactivar la promoción existente
-          const desactivarResponse = await solicitudes.patchRegistro(
-            `/promocionesC/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
-            { manejo_automatico: false }
-          );
-    
-          if (desactivarResponse) {
-            // Luego activar la nueva promoción
-            const activarResponse = await solicitudes.patchRegistro(
-              `/promocionesC/cambiar-estado-promocion/${this.tempPromocionData.id}`,
-              { manejo_automatico: true }
-            );
-    
-            if (activarResponse) {
-              await this.cargarPromociones();
-              this.$emit('mostrar-notificacion', {
-                mensaje: 'Nueva promoción activada y promoción anterior desactivada exitosamente',
-                tipo: 'success'
-              });
-              this.clearForm();
-              this.isShowModal = false;
-              this.activeForm = false;
-              this.closeConflictModal();
-            }
-          }
+// También actualizar el método createAnywayPromocion para mantener la consistencia
+async createAnywayPromocion() {
+  try {
+    console.log('Procesando promoción con conflicto');
+    if (this.tempPromocionData) {
+      // Primero desactivar la promoción existente
+      const desactivarResponse = await solicitudes.patchRegistro(
+        `/promocionesC/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
+        { manejo_automatico: false }
+      );
+
+      if (desactivarResponse) {
+        // Luego activar la nueva promoción
+        const activarResponse = await solicitudes.patchRegistro(
+          `/promocionesC/cambiar-estado-promocion/${this.tempPromocionData.id}`,
+          { manejo_automatico: true }
+        );
+
+        if (activarResponse) {
+          await this.cargarPromociones();
+          this.$emit('mostrar-notificacion', {
+            mensaje: 'Nueva promoción activada y promoción anterior desactivada exitosamente',
+            tipo: 'success'
+          });
+          this.clearForm();
+          this.isShowModal = false;
+          this.activeForm = false;
+          this.closeConflictModal();
         }
-      } catch (error) {
-        console.error('Error al procesar la promoción:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al procesar las promociones',
-          tipo: 'error'
-        });
       }
-    },
+    }
+  } catch (error) {
+    console.error('Error al procesar la promoción:', error);
+    this.$emit('mostrar-notificacion', {
+      mensaje: 'Error al procesar las promociones',
+      tipo: 'error'
+    });
+  }
+},
 
-    // Método desactivarProm actualizado
+   
+
+ // Método desactivarProm actualizado
 async desactivarProm(index) {
   try {
     // Usar filterPromociones en lugar de promociones
@@ -688,33 +694,37 @@ async desactivarProm(index) {
   }
 },
 
-    editarPromocion(index) {
-      const promocion = this.promociones[index];
-      
-      this.promFormModal = {
-        id: promocion.id,
-        categoria_id: promocion.categoria_producto_Id,
-        categoria: promocion.categoria?.nombre_categoria || promocion.categoria,
-        nombre_promocion: promocion.nombre_promocion,
-        porcentaje_descuento: promocion.porcentaje_descuento,
-        fecha_inicio: promocion.fecha_inicio,
-        fecha_final: promocion.fecha_final,
-        estado: promocion.estado
-      };
-      
-      this.editIndex = index;
-      this.isEditing = true;
-      this.showModal();
-    },
 
-    async eliminarProm() {
-      try {
-        const promocion = this.promociones[this.editIndex];
-        console.log('Intentando eliminar promoción:', promocion);
-        
-        if (!promocion || !promocion.id) {
-          throw new Error('Promoción no válida');
-        }
+    editarPromocion(index) {
+  // Usar filterPromociones en lugar de promociones
+  const promocion = this.filterPromociones[index];
+  
+  this.promFormModal = {
+    id: promocion.id,
+    categoria_id: promocion.categoria_producto_Id,
+    categoria: promocion.categoria?.nombre_categoria || promocion.categoria,
+    nombre_promocion: promocion.nombre_promocion,
+    porcentaje_descuento: promocion.porcentaje_descuento,
+    fecha_inicio: promocion.fecha_inicio,
+    fecha_final: promocion.fecha_final,
+    estado: promocion.estado
+  };
+  
+  // Encontrar el índice real en la lista completa
+  this.editIndex = this.promociones.findIndex(p => p.id === promocion.id);
+  this.isEditing = true;
+  this.showModal();
+},
+
+   // Método eliminarProm actualizado
+async eliminarProm() {
+  try {
+    const promocion = this.promociones[this.editIndex];
+    console.log('Intentando eliminar promoción:', promocion);
+    
+    if (!promocion || !promocion.id) {
+      throw new Error('Promoción no válida');
+    }
 
     const response = await solicitudes.deleteRegistro(
       `/promocionesC/eliminar-promocion/${promocion.id}`
@@ -738,6 +748,7 @@ async desactivarProm(index) {
     this.editIndex = null;
   }
 },
+
     showModal() {
       this.isShowModal = true;
     },

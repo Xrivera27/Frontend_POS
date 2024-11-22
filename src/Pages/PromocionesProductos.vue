@@ -523,7 +523,6 @@ export default {
     },
 
     async activarProm(promocionId) {
-
   try {
     // Usar filterPromociones en lugar de promociones
     const promocionAActivar = this.filterPromociones.find(p => p.id === promocionId);
@@ -580,19 +579,11 @@ export default {
             inicio: fechaInicioExistente,
             fin: fechaFinalExistente
           }
-
-      try {
-        const promocionAActivar = this.promociones.find(p => p.id === promocionId);
-        if (!promocionAActivar) {
-          throw new Error('Promoción no encontrada');
-
         }
+      });
 
-        console.log('Intentando activar promoción:', {
-          id: promocionAActivar.id,
-          producto: promocionAActivar.producto?.nombre || promocionAActivar.producto,
-          producto_Id: promocionAActivar.producto_Id // Ajustado según la BD
-        });
+      return hayConflicto;
+    });
 
     if (promocionActivaMismoProducto) {
       console.log('Se encontró conflicto:', promocionActivaMismoProducto);
@@ -613,91 +604,21 @@ export default {
       { manejo_automatico: true }
     );
 
-          // Verificar si está activa y es diferente a la actual
-          const estaActiva = p.manejo_automatico === true;
-          const esDistinta = p.id !== promocionId;
-
-
-// Actualizar el método createAnywayPromocion para manejar la activación forzada
-async createAnywayPromocion() {
-  try {
-    console.log('Procesando promoción con conflicto');
-    if (this.tempPromocionData) {
-      // Primero desactivar la promoción existente
-      const desactivarResponse = await solicitudes.patchRegistro(
-        `/promocionesP/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
-        { manejo_automatico: false }
-      );
-
-          // Si es el mismo producto y está activa, verificar fechas
-          const fechaInicioActual = new Date(promocionAActivar.fecha_inicio);
-          const fechaFinalActual = new Date(promocionAActivar.fecha_final);
-          const fechaInicioExistente = new Date(p.fecha_inicio);
-          const fechaFinalExistente = new Date(p.fecha_final);
-
-          // Verificar superposición de fechas
-          const hayConflicto = (
-            fechaInicioActual <= fechaFinalExistente &&
-            fechaFinalActual >= fechaInicioExistente
-          );
-
-          console.log('Comparando promoción del mismo producto:', {
-            id: p.id,
-            producto: p.producto?.nombre || p.producto,
-            estaActiva,
-            hayConflicto,
-            fechas: {
-              promocionActual: {
-                inicio: fechaInicioActual,
-                fin: fechaFinalActual
-              },
-              promocionExistente: {
-                inicio: fechaInicioExistente,
-                fin: fechaFinalExistente
-              }
-            }
-          });
-
-          return hayConflicto;
-        });
-
-        // Si hay una promoción activa del mismo producto con fechas superpuestas
-        if (promocionActivaMismoProducto) {
-          console.log('Se encontró conflicto:', promocionActivaMismoProducto);
-          this.tempPromocionData = promocionAActivar;
-          this.conflictingPromocion = promocionActivaMismoProducto;
-
-          this.$emit('mostrar-notificacion', {
-            mensaje: 'Ya existe una promoción activa para este producto en las fechas seleccionadas',
-            tipo: 'warning'
-          });
-
-          this.showConflictModal = true;
-          return;
-        }
-
-        // Si no hay conflicto, activar la promoción
-        const response = await solicitudes.patchRegistro(
-          `/promocionesP/cambiar-estado-promocion/${promocionId}`,
-          { manejo_automatico: true }
-        );
-
-        if (response) {
-          await this.cargarPromociones();
-          this.$emit('mostrar-notificacion', {
-            mensaje: 'Promoción activada exitosamente',
-            tipo: 'success'
-          });
-        }
-      } catch (error) {
-        console.error('Error al activar promoción:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al activar la promoción',
-          tipo: 'error'
-        });
-      }
-    },
-
+    if (response) {
+      await this.cargarPromociones();
+      this.$emit('mostrar-notificacion', {
+        mensaje: 'Promoción activada exitosamente',
+        tipo: 'success'
+      });
+    }
+  } catch (error) {
+    console.error('Error al activar promoción:', error);
+    this.$emit('mostrar-notificacion', {
+      mensaje: 'Error al activar la promoción',
+      tipo: 'error'
+    });
+  }
+},
     // Actualizar el método createAnywayPromocion para manejar la activación forzada
     async createAnywayPromocion() {
       try {
@@ -738,7 +659,7 @@ async createAnywayPromocion() {
       }
     },
 
-async desactivarProm(index) {
+    async desactivarProm(index) {
   try {
     // Usar filterPromociones en lugar de promociones
     const promocion = this.filterPromociones[index];
