@@ -36,11 +36,11 @@
       <table class="table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Productos Usados</th>
-            <th>Acciones</th>
+            <th class="col-id">#</th>
+            <th class="col-nombre">Nombre</th>
+            <th class="col-descripcion">Descripción</th>
+            <th class="col-productos-usados">Productos Usados</th>
+            <th class="col-acciones">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -390,6 +390,26 @@ export default {
 
 #BtnCerrar {
   background-color: rgb(93, 100, 104);
+}
+
+.col-id {
+  width: 10%;
+}
+
+.col-nombre {
+  width: 10%;
+}
+
+.col-descripcion {
+  width: 45%;
+}
+
+.col-productos-usados {
+  width: 20%;
+}
+
+.col-acciones {
+  width: 15%;
 }
 
 /* Modal */

@@ -191,6 +191,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: clamp(10px, 2vw, 20px);
+  margin-top: 5%;
   margin-bottom: clamp(1rem, 3vw, 2rem);
 }
 

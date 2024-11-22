@@ -21,7 +21,7 @@ export default {
 
   data() {
     return {
-      titulo: 'Administrar Inventario',
+      titulo: 'Alertas de Inventario',
       products: [
         { name: 'Leche', description: 'Entera 1L' },
         { name: 'Pan', description: 'Integral 500g' },

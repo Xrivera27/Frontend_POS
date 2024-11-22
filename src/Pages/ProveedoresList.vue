@@ -28,12 +28,12 @@
       <table class="table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>Teléfono</th>
-            <th>Email</th>
-            <th>Direccion</th>
-            <th>Acciones</th>
+            <th class="col-id">#</th>
+            <th class="col-nombre">Nombre</th>
+            <th class="col-telefono">Teléfono</th>
+            <th class="col-email">Email</th>
+            <th class="col-direccion">Direccion</th>
+            <th class="col-acciones">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -449,6 +449,30 @@ select {
 
 .table tbody tr:last-child td:last-child {
   border-bottom-right-radius: 10px;
+}
+
+.col-id {
+  width: 10%;
+}
+
+.col-nombre {
+  width: 10%;
+}
+
+.col-telefono {
+  width: 10%;
+}
+
+.col-email {
+  width: 15%;
+}
+
+.col-direccion {
+  width: 40%;
+}
+
+.col-acciones {
+  width: 15%;
 }
 
 /* Botones generales */

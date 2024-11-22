@@ -19,7 +19,7 @@ import PromocionesCategorias from "@/Pages/PromocionesCategorias.vue";
 import ConfigPage from "@/Pages/ConfigPage.vue";
 import ConfigCompany from "@/Pages/ConfigCompany.vue";
 import ConfigSar from "@/Pages/configSar.vue";
-import AdministrarInventario from "@/Pages/AdministrarInventario.vue";
+import AdministrarInventario from "@/Pages/AlertasInventario.vue";
 
 // Función para obtener el rol desde localStorage
 function getRole() {

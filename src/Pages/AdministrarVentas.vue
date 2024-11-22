@@ -261,17 +261,6 @@ export default {
   box-sizing: border-box;
 }
 
-/* Opciones */
-.opciones {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 2% 0;
-  flex-wrap: wrap;
-  gap: 16px;
-  width: 100%;
-}
-
 /* Barra de búsqueda */
 .busqueda {
   padding: 10px;
@@ -305,6 +294,21 @@ export default {
   background-color: #17a2b8;
   transform: scale(1.05);
   transition: all 0.3s ease;
+}
+
+.ventas-wrapper {
+  padding: 16px;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ajustar las opciones igual que en categorías */
+.opciones {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .bi-eye-fill {

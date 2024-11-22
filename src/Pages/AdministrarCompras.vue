@@ -214,15 +214,19 @@ export default {
   box-sizing: border-box;
 }
 
+.compras-wrapper {
+  padding: 16px;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ajustar las opciones igual que en categorías */
 .opciones {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2%;
-  margin-top: 2%;
   flex-wrap: wrap;
   gap: 16px;
-  width: 100%;
+  margin-bottom: 16px;
 }
 
 .busqueda {

@@ -28,12 +28,12 @@
       <table class="table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Telefono</th>
-            <th>Direccion</th>
-            <th>Acciones</th>
+            <th class="col-id">#</th>
+            <th class="col-nombre">Nombre</th>
+            <th class="col-correo">Correo</th>
+            <th class="col-telefono">Telefono</th>
+            <th class="col-direccion">Direccion</th>
+            <th class="col-acciones">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -195,7 +195,9 @@ export default {
         direccion: "",
       };
     },
+
     async guardarSucursal() {
+      // Validamos los campos sin importar si es edición o creación
       if (!this.validarCampos(this.sucursalForm)) {
         return;
       }
@@ -203,51 +205,44 @@ export default {
 
       let response;
       let parametros;
-      if (this.isEditing) {
-        try {
 
-          parametros = `/sucursales/actualizar-sucursal/${this.sucursales[this.editIndex].id_sucursal
-            }`;
-          response = await solicitudes.patchRegistro(
-            parametros,
-            this.sucursalForm
-          );
-
+      try {
+        if (this.isEditing) {
+          parametros = `/sucursales/actualizar-sucursal/${this.sucursales[this.editIndex].id_sucursal}`;
+          response = await solicitudes.patchRegistro(parametros, this.sucursalForm);
 
           if (response == true) {
-
             Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
-          } else notificaciones('error', response.message);
-        } catch (error) {
-          notificaciones('error', error.message);
-        }
-      } else {
-        parametros = `/sucursales/crear-sucursal/${this.id_usuario}`;
-        try {
-          response = await solicitudes.postRegistro(
-            parametros,
-            this.sucursalForm
-          );
+            notificaciones('success', 'Sucursal actualizada correctamente');
+          } else {
+            notificaciones('error', response.message);
+          }
+        } else {
+          parametros = `/sucursales/crear-sucursal/${this.id_usuario}`;
+          response = await solicitudes.postRegistro(parametros, this.sucursalForm);
 
           if (response.length > 0) {
-
             this.sucursales.push(response[0]);
-
+            notificaciones('success', 'Sucursal creada correctamente');
           } else {
             throw response;
           }
-        } catch (error) {
-          notificaciones('error', error.message);
         }
+        this.closeModal();
+      } catch (error) {
+        notificaciones('error', error.message);
       }
-      this.closeModal();
     },
+
     editSucursal(sucursal) {
+      // Primero cargamos los datos en el formulario
       this.isModalOpen = true;
       this.isEditing = true;
       this.editIndex = this.sucursales.findIndex(item => item.id_sucursal === sucursal.id_sucursal);
       this.sucursalForm = { ...sucursal };
+      // Quitamos la validación de aquí ya que se hará al guardar
     },
+
     async deleteSucursal(sucursal) {
       let response;
 
@@ -420,6 +415,30 @@ export default {
 .rol {
   color: #969696;
   font-size: 14px;
+}
+
+.col-id {
+  width: 5%;
+}
+
+.col-nombre {
+  width: 10%;
+}
+
+.col-correo {
+  width: 10%;
+}
+
+.col-telefono {
+  width: 5%;
+}
+
+.col-direccion {
+  width: 20%;
+}
+
+.col-acciones {
+  width: 15%;
 }
 
 select {

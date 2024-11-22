@@ -104,11 +104,10 @@
                             class="dropdown-item">Administrar compras</router-link></li>
                     <li><router-link @click="handleRouteChange" to="/compras" class="dropdown-item">Crear
                             compra</router-link></li>
-                    <li><router-link @click="handleRouteChange" to="/admin-invenario" class="dropdown-item">Administrar
-                            inventario</router-link></li>
+                    <li><router-link @click="handleRouteChange" to="/admin-invenario" class="dropdown-item">
+                            Alertas de inventario</router-link></li>
                 </ul>
             </li>
-
         </ul>
 
         <div id="aside-line"></div>
@@ -182,7 +181,23 @@ export default {
             this.$emit('toggle-sidebar');
         },
         toggleDropdown(menu) {
+            if (menu === 'ventas') {
+                this.openDropdowns.compras = false;
+            } else if (menu === 'compras') {
+                this.openDropdowns.ventas = false;
+            }
+
             this.openDropdowns[menu] = !this.openDropdowns[menu];
+        },
+        closeDropdowns(event) {
+            // Verificar si el click fue fuera de los dropdowns
+            const ventasDropdown = this.$refs.ventasDropdown;
+            const comprasDropdown = this.$refs.comprasDropdown;
+
+            if (!ventasDropdown?.contains(event.target) && !comprasDropdown?.contains(event.target)) {
+                this.openDropdowns.ventas = false;
+                this.openDropdowns.compras = false;
+            }
         },
         isDropdownOpen(menu) {
             return this.openDropdowns[menu];
@@ -209,7 +224,16 @@ export default {
         }
     },
     mounted() {
+        document.addEventListener('click', this.closeDropdowns);
+
         window.addEventListener('resize', () => {
+            this.isMobile = window.innerWidth <= 480;
+        });
+    },
+
+    beforeUnmount() {
+        document.removeEventListener('click', this.closeDropdowns);
+        window.removeEventListener('resize', () => {
             this.isMobile = window.innerWidth <= 480;
         });
     }

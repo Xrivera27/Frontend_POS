@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <PageHeader :titulo="titulo" />
-    
+
     <div class="main-container">
       <form @submit.prevent="agregarProducto" autocomplete="off">
 
@@ -210,7 +210,7 @@ export default {
   },
   data() {
     return {
-      titulo: 'Crear Compras',
+      titulo: 'Registro de Compras',
       addQuery: "",
       addQuantity: "",
       addQuantityPackage: "",
