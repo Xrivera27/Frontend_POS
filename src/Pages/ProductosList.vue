@@ -581,6 +581,7 @@ export default {
         this.productoForm.unidad_medida = infoExtra.id_unidad_medida;
         this.productoForm.precio_mayorista = infoExtra.precio_mayorista;
         this.productoForm.proveedor = infoExtra.id_proveedor;
+        this.productoForm.cantidad_activar_mayorista = infoExtra.cantidad_activar_mayorista;
         this.categoriasSeleccionadas = infoExtra.categorias;
 
         this.isEditing = true;
