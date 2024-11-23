@@ -19,9 +19,9 @@
                             <span>Impuesto:</span>
                             <span>L. {{ impuesto }}</span>
                         </div>
-                        <div class="resumen-item">
+                        <div class="resumen-item item-descuento">
                             <span>Descuento:</span>
-                            <span>L. 0</span>
+                            <span>L.-{{ returnDescuento }}</span>
                         </div>
                         <div class="resumen-item total">
                             <span>Total:</span>
@@ -166,6 +166,11 @@ export default {
         impuesto() {
             return this.factura.total_ISV;
         },
+
+        returnDescuento(){
+            return this.factura.descuento;
+        },
+
         isPagoValido() {
             if (this.metodoPago === 'Efectivo') {
                 return this.monto >= this.total;
@@ -288,6 +293,10 @@ export default {
     display: flex;
     justify-content: space-between;
     padding: 5px 0;
+}
+
+.item-descuento{
+    color: rgb(194, 30, 30);
 }
 
 .resumen-item.total {
