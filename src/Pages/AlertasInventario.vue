@@ -3,9 +3,15 @@
     <PageHeader :titulo="titulo" />
 
     <div class="categories-container">
-      <div class="category-box" v-for="(product, index) in products" :key="index">
+      <div 
+        class="category-box" 
+        v-for="(product, index) in products" 
+        :key="index"
+        :class="getEstadoClass(product.puntaje)"
+      >
         <div class="product-name">{{ product.name }}</div>
         <div class="product-description">Descripción: {{ product.description }}</div>
+        <div class="product-status">Estado: {{ getEstadoLabel(product.puntaje) }}</div>
       </div>
     </div>
   </div>
@@ -20,54 +26,68 @@ export default {
   },
 
   data() {
-    return {
-      titulo: 'Alertas de Inventario',
-      products: [
-        { name: 'Leche', description: 'Entera 1L' },
-        { name: 'Pan', description: 'Integral 500g' },
-        { name: 'Huevos', description: 'Docena' },
-        { name: 'Manzanas', description: 'Rojas 1kg' },
-        { name: 'Cereal', description: 'Avena 250g' },
-        { name: 'Yogur', description: 'Natural 150g' },
-        { name: 'Arroz', description: 'Blanco 1kg' },
-        { name: 'Pasta', description: 'Spaghetti 500g' },
-        { name: 'Tomate', description: 'Fresco 1kg' },
-        { name: 'Aceite', description: 'Oliva 500ml' },
-        { name: 'Azúcar', description: 'Blanca 1kg' },
-        { name: 'Sal', description: 'Refinada 500g' },
-        { name: 'Jabón', description: 'En barra' },
-        { name: 'Detergente', description: 'Líquido 1L' },
-        { name: 'Papel higiénico', description: 'Paquete 4 rollos' },
-        { name: 'Refresco', description: 'Cola 2L' },
-        { name: 'Galletas', description: 'Chocolate 200g' },
-        { name: 'Café', description: 'Molido 250g' },
-        { name: 'Te', description: 'Verde 100g' },
-        { name: 'Queso', description: 'Gouda 200g' },
-        { name: 'Pollo', description: 'Pechuga 500g' },
-        { name: 'Carne', description: 'Res 1kg' },
-        { name: 'Pescado', description: 'Salmón 200g' },
-        { name: 'Mantequilla', description: 'Sin sal 250g' }
-      ]
-    };
+  return {
+    titulo: 'Alertas de Inventario',
+    products: [
+      { name: 'Leche', description: 'Entera 1L', puntaje: 90 },
+      { name: 'Pan', description: 'Integral 500g', puntaje: 60 },
+      { name: 'Huevos', description: 'Docena', puntaje: 10 },
+      { name: 'Manzanas', description: 'Rojas 1kg', puntaje: 60 },
+      { name: 'Cereal', description: 'Avena 250g', puntaje: 10 },
+      { name: 'Yogur', description: 'Natural 150g', puntaje: 90 },
+      { name: 'Arroz', description: 'Blanco 1kg', puntaje: 10 },
+      { name: 'Pasta', description: 'Spaghetti 500g', puntaje: 60 },
+      { name: 'Tomate', description: 'Fresco 1kg', puntaje: 10 },
+      { name: 'Aceite', description: 'Oliva 500ml', puntaje: 90 },
+      { name: 'Queso', description: 'Cheddar 200g', puntaje: 60 },
+      { name: 'Pollo', description: 'Pechuga 500g', puntaje: 90 },
+      { name: 'Carne', description: 'Molida 1kg', puntaje: 10 },
+      { name: 'Pescado', description: 'Salmón 300g', puntaje: 60 },
+      { name: 'Jugo', description: 'Naranja 1L', puntaje: 10 },
+      { name: 'Azúcar', description: 'Morena 1kg', puntaje: 90 },
+      { name: 'Sal', description: 'Gruesa 500g', puntaje: 10 },
+      { name: 'Café', description: 'Molido 250g', puntaje: 60 },
+      { name: 'Té', description: 'Negro 100g', puntaje: 10 },
+      { name: 'Galletas', description: 'Con chispas de chocolate 300g', puntaje: 90 },
+      { name: 'Refresco', description: 'Cola 2L', puntaje: 60 },
+      { name: 'Mantequilla', description: 'Sin sal 250g', puntaje: 10 },
+      { name: 'Harina', description: 'De trigo 1kg', puntaje: 90 },
+      { name: 'Lechuga', description: 'Orgánica 500g', puntaje: 60 },
+      { name: 'Zanahorias', description: 'Frescas 1kg', puntaje: 10 },
+      { name: 'Cebolla', description: 'Blanca 1kg', puntaje: 60 },
+      { name: 'Salsa', description: 'Tomate 500ml', puntaje: 10 },
+      { name: 'Helado', description: 'Vainilla 1L', puntaje: 60 }
+    ]
+  };
+},
+
+  methods: {
+    getEstadoLabel(puntaje) {
+      if (puntaje === 90) return "URGENTE";
+      if (puntaje === 60) return "ATENCION";
+      if (puntaje === 10) return "NORMAL";
+    },
+    getEstadoClass(puntaje) {
+      if (puntaje === 90) return "urgente";
+      if (puntaje === 60) return "atencion";
+      if (puntaje === 10) return "normal";
+    }
   }
 };
 </script>
 
 <style scoped>
 /* Reset básico */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-.alertas-wrapper {
-  padding: 16px;
-  width: 100%;
+  font-family: 'Montserrat', sans-serif;
 }
 
 body {
-  font-family: Arial, sans-serif;
   background: #f4f4f9;
   display: flex;
   justify-content: center;
@@ -77,22 +97,25 @@ body {
   color: #333;
 }
 
-/* Contenedor principal */
+.alertas-wrapper {
+  padding: 16px;
+  width: 100%;
+}
+
 .categories-container {
   display: grid;
-  margin-top: 1rem;
+  margin: 2rem auto 0;
   grid-template-columns: repeat(4, 1fr);
   grid-auto-rows: minmax(100px, auto);
   gap: 15px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 95%;
   background-color: #ffffff;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilo de cada categoría */
 .category-box {
   background-color: #ffffff;
   padding: 20px;
@@ -111,7 +134,6 @@ body {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Título de producto */
 .product-name {
   font-size: 1.1em;
   font-weight: 600;
@@ -119,45 +141,53 @@ body {
   color: #333;
 }
 
-/* Descripción del producto */
 .product-description {
   font-size: 0.9em;
   color: #555;
 }
 
-/* Efecto de hover dorado */
-.category-box:hover .product-name,
-.category-box:hover .product-description {
-  color: #928120;
-  /* Dorado */
+.product-status {
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-top: 8px;
 }
 
-/* Responsividad */
-@media (max-width: 1200px) {
-  .categories-container {
-    grid-template-columns: repeat(4, 1fr);
-    /* 4 columnas en pantallas medianas */
-  }
+.urgente {
+  border: 2px solid #e74c3c;
+  background-color: #fdecea;
 }
 
-@media (max-width: 992px) {
-  .categories-container {
-    grid-template-columns: repeat(3, 1fr);
-    /* 3 columnas en pantallas medianas */
-  }
+.urgente .product-status {
+  color: #e74c3c;
+}
+
+.atencion {
+  border: 2px solid #f39c12;
+  background-color: #fff8e6;
+}
+
+.atencion .product-status {
+  color: #f39c12;
+}
+
+.normal {
+  border: 2px solid #2ecc71;
+  background-color: #eafaf1;
+}
+
+.normal .product-status {
+  color: #2ecc71;
 }
 
 @media (max-width: 768px) {
   .categories-container {
     grid-template-columns: repeat(2, 1fr);
-    /* 2 columnas en pantallas pequeñas */
   }
 }
 
 @media (max-width: 480px) {
   .categories-container {
     grid-template-columns: 1fr;
-    /* 1 columna en pantallas muy pequeñas */
   }
 }
 </style>
