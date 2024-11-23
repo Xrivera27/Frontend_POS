@@ -99,8 +99,8 @@
 
         <!-- Teclado numérico -->
         <div class="numeric-keypad">
-          <input name="codigo-producto" ref="codigoRef" type="text" class="campo" v-model="addQuery" tabindex="1"
-            :disabled="isModalFocused || isModalVisible" required />
+          <input name="codigo-producto" autocomplete="off0" ref="codigoRef" type="text" class="campo" v-model="addQuery"
+            tabindex="1" :disabled="isModalFocused || isModalVisible" required />
 
           <div class="keypad">
             <button @click="agregarNumero(1)">1</button>
@@ -165,7 +165,6 @@ import GuardarVentaModal from '@/components/modalesCrearVenta/GuardarVentaModal.
 import RecuperarVentaModal from '@/components/modalesCrearVenta/RecuperarVentaModal.vue';
 import PaymentAnimationModal from '@/components/PaymentAnimationModal.vue';
 //import VentaPendienteModal from '@/components/modalesCrearVenta/VentaPendiente.vue';
-
 
 import solicitudes from "../../services/solicitudes.js";
 import { getInfoBasic, cajaUsuario, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
@@ -252,7 +251,8 @@ export default {
 
   computed: {
     calcularTotal() {
-      return this.productosLista.reduce((total, p) => total + (p.precio_final), 0);
+      const total = this.productosLista.reduce((total, p) => total + (p.precio_final), 0);
+      return total.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     },
 
     sucursalActivaFactura() {

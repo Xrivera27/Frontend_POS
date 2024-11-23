@@ -30,8 +30,9 @@
                 <div class="modal-body">
                     <p>Ingrese la clave de administrador:</p>
                     <div class="input-container">
-                        <input type="password" v-model="claveIngresada" ref="claveInput" @keyup.enter="validarClave"
-                            @keydown.stop :class="{ 'error': error }" placeholder="Ingrese la clave" tabindex="0">
+                        <input type="password" autocomplete="off" v-model="claveIngresada" ref="claveInput"
+                            @keyup.enter="validarClave" @keydown.stop :class="{ 'error': error }"
+                            placeholder="Ingrese la clave" tabindex="0">
                         <p v-if="error" class="error-message">{{ error }}</p>
                     </div>
                 </div>

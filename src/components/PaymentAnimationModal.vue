@@ -106,7 +106,13 @@ export default {
     transform: translate(-50%, -50%);
     font-size: 24px;
     color: #3498db;
-    animation: bounce 0.5s ease infinite alternate;
+    animation: bounceCenter 0.5s ease infinite alternate;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
 }
 
 .check-container {
@@ -168,6 +174,16 @@ export default {
 
     100% {
         transform: scale(1);
+    }
+}
+
+@keyframes bounceCenter {
+    from {
+        transform: translate(-50%, -50%) translateY(-5px);
+    }
+
+    to {
+        transform: translate(-50%, -50%) translateY(5px);
     }
 }
 </style>
