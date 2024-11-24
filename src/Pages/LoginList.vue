@@ -402,4 +402,86 @@ input:focus {
   animation: fadeIn 0.5s ease-out;
 }
 
+
+/* Contenedor principal */
+.dark .login-container::before {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Tarjeta de login */
+.dark .login-card {
+  background-color: rgba(45, 45, 45, 0.9);
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Títulos */
+.dark h2 {
+  color: #00ffcc;
+}
+
+/* Mensajes y textos */
+.dark .welcome-message {
+  color: #b0b0b0;
+}
+
+.dark .or-text {
+  color: #fff;
+}
+
+/* Inputs */
+.dark input[type="text"],
+.dark input[type="password"],
+.dark input[type="email"],
+.dark input[type="tel"] {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark input:focus {
+  border-color: #00ffcc;
+  box-shadow: 0 0 0 2px rgba(0, 255, 204, 0.2);
+}
+
+.dark input::placeholder {
+  color: #888;
+}
+
+/* Icono de visibilidad de contraseña */
+.dark .toggle-password {
+  color: #b0b0b0;
+}
+
+/* Botón de envío */
+.dark .submit-btn {
+  background-color: #00ffcc;
+  color: #1e1e1e;
+}
+
+.dark .submit-btn:hover {
+  background-color: #00ccaa;
+}
+
+/* Opciones de formulario */
+.dark .checkbox-container {
+  color: #fff;
+}
+
+.dark .forgot-password {
+  color: #00ffcc;
+}
+
+.dark .forgot-password:hover {
+  color: #00ccaa;
+}
+
+/* Input autofill en modo oscuro */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  -webkit-box-shadow: 0 0 0px 1000px #383838 inset;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: #fff;
+}
 </style>

@@ -446,4 +446,126 @@ input {
     top: -8%;
   }
 }
+
+
+/* Contenedor principal */
+.dark .configuracion-usuario {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+.dark .config-wrapper {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+/* Formularios */
+.dark form {
+  border-color: #404040;
+  background-color: #2d2d2d;
+}
+
+.dark .titulo-form {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+/* Inputs y campos de formulario */
+.dark input {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark input:focus {
+  border-color: #c09d62;
+}
+
+/* Campos deshabilitados */
+.dark fieldset:disabled label,
+.dark fieldset:disabled input {
+  color: #666;
+  background-color: #2d2d2d;
+}
+
+/* Botones */
+.dark .guardar {
+  background-color: #00b81a;
+  color: #fff;
+}
+
+.dark .guardar:disabled {
+  background-color: #666;
+  color: #999;
+}
+
+.dark .editar {
+  background-color: #5a5a5a;
+  color: #fff;
+}
+
+.dark .editar:disabled {
+  background-color: #666;
+  color: #999;
+}
+
+.dark .SAR {
+  background-color: #0031c7;
+  color: #fff;
+}
+
+.dark .SAR:disabled {
+  background-color: #666;
+  color: #999;
+}
+
+/* Botones de cambio */
+.dark .boton-switch.activo {
+  background-color: #00b81a;
+  color: #fff;
+}
+
+.dark .boton-switch.inactivo {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+/* Scroll personalizado en modo oscuro */
+.dark .config-wrapper::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.dark .config-wrapper::-webkit-scrollbar-thumb {
+  background: #c09d62;
+}
+
+.dark .config-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Otros elementos en modo oscuro */
+.dark label {
+  color: #fff;
+}
+
+.dark ::-webkit-input-placeholder {
+  color: #666;
+}
+
+.dark :-ms-input-placeholder {
+  color: #666;
+}
+
+.dark ::placeholder {
+  color: #666;
+}
+
+/* Input autofill en modo oscuro */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  -webkit-box-shadow: 0 0 0px 1000px #383838 inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
 </style>

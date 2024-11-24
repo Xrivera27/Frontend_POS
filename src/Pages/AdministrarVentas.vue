@@ -556,4 +556,133 @@ export default {
     margin-bottom: 5px;
   }
 }
+/* =======================================================
+   Modo Oscuro
+======================================================= */
+/* Contenedor principal */
+.dark .categorias-wrapper {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+/* Inputs y búsqueda en modo oscuro */
+.dark .busqueda {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .custom-select {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .custom-select option {
+  background-color: #2d2d2d;
+  color: #fff;
+}
+
+/* Tabla en modo oscuro */
+.dark .table-container {
+  border-color: #404040;
+  background-color: #2d2d2d;
+}
+
+.dark .table thead {
+  background-color: #2d2d2d;
+}
+
+.dark .table th {
+  background-color: #383838;
+  color: #fff;
+  border-color: #404040;
+}
+
+.dark .table td {
+  color: #fff;
+  border-color: #404040;
+}
+
+.dark .table tr:hover {
+  background-color: #383838;
+}
+
+/* Modal en modo oscuro */
+.dark .modal-content {
+  background-color: #2d2d2d;
+  color: #fff;
+}
+
+.dark .modal-content input,
+.dark .modal-content textarea {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .form-group label {
+  color: #fff;
+}
+
+/* Scroll personalizado en modo oscuro */
+.dark .table-container::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.dark .table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+}
+
+.dark .table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Botones en modo oscuro (manteniendo los colores originales) */
+.dark .button-promocion {
+  background-color: #4cafaf;
+  color: white;
+}
+
+.dark .button-unidad-medida {
+  background-color: #4caf4c;
+  color: #000;
+}
+
+.dark #btnAdd {
+  background-color: #c09d62;
+  color: black;
+}
+
+.dark #btnAdd:hover {
+  background-color: #a38655;
+}
+
+.dark #btnEditar {
+  background-color: #ffc107;
+  color: black;
+}
+
+.dark #btnEditar:hover {
+  background-color: #e8af06;
+}
+
+.dark #btnEliminar {
+  background-color: #dc3545;
+  color: black;
+}
+
+.dark #btnEliminar:hover {
+  background-color: #b72433;
+}
+
+.dark .modalShowConfirm-Si {
+  background-color: #dc3545;
+  color: white;
+}
+
+.dark .modalShowConfirm-no {
+  background-color: #6c757d;
+  color: white;
+}
 </style>

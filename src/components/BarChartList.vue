@@ -150,6 +150,14 @@ export default {
   font-family: 'Montserrat', sans-serif;
 }
 
+/* =======================================================
+   Estilos Base del Dashboard
+======================================================= */
+.dashboard-container {
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
 /* Contenedor de las tarjetas */
 .cards-container {
   display: grid;
@@ -165,11 +173,12 @@ export default {
 
 /* Estilo para las tarjetas */
 .card {
-  background-color: #f7f7f7;
+  background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 8px;
   text-align: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .card-content {
@@ -188,17 +197,20 @@ export default {
 .item-value {
   display: inline;
   padding: 10px;
+  color: #333;
 }
 
 .card h3 {
   font-size: 1.25rem;
   color: #333;
+  margin-bottom: 0.5rem;
 }
 
 .card p {
   font-size: 1.5rem;
   font-weight: bold;
   color: #333;
+  margin: 0.5rem 0;
 }
 
 .card-link {
@@ -207,6 +219,7 @@ export default {
   color: #007bff;
   text-decoration: none;
   font-weight: bold;
+  transition: color 0.3s ease;
 }
 
 /* Contenedor de los gráficos */
@@ -214,11 +227,16 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-bottom: 2rem;
+  gap: 2rem;
 }
 
 .line-chart,
 .pie-chart {
-  width: 30%;
+  width: 45%;
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* Estilo para la tabla de ventas */
@@ -226,21 +244,28 @@ export default {
   width: 100%;
   border-collapse: collapse;
   margin-top: 2rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .sales-table th,
 .sales-table td {
   padding: 12px;
   border: 1px solid #ddd;
+  transition: all 0.3s ease;
 }
 
 .sales-table th {
   background-color: #f4f4f4;
   font-weight: bold;
+  color: #333;
 }
 
 .sales-table td {
   text-align: center;
+  color: #333;
 }
 
 .sales-table a,
@@ -251,5 +276,126 @@ export default {
   border: none;
   background-color: transparent;
   cursor: pointer;
+  transition: color 0.3s ease;
 }
+
+.sales-table span {
+  color: #ddd;
+  margin: 0 5px;
+}
+
+/* =======================================================
+   Estilos en Modo Oscuro
+======================================================= */
+/* Contenedor principal en modo oscuro */
+.dark .dashboard-container {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+/* Tarjetas en modo oscuro */
+.dark .card {
+  background-color: #2d2d2d;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.dark .card h3,
+.dark .card p,
+.dark .item-value {
+  color: #fff;
+}
+
+.dark .card-icon {
+  color: #00ffcc;
+}
+
+.dark .card-link {
+  color: #00ffcc;
+}
+
+.dark .card-link:hover {
+  color: #00ccaa;
+}
+
+/* Gráficos en modo oscuro */
+.dark .line-chart,
+.dark .pie-chart {
+  background-color: #2d2d2d;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Tabla en modo oscuro */
+.dark .sales-table {
+  background-color: #2d2d2d;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.dark .sales-table th {
+  background-color: #383838;
+  color: #fff;
+  border-color: #404040;
+}
+
+.dark .sales-table td {
+  color: #fff;
+  border-color: #404040;
+}
+
+.dark .sales-table tr:hover {
+  background-color: #383838;
+}
+
+.dark .sales-table a,
+.dark .sales-table button {
+  color: #00ffcc;
+}
+
+.dark .sales-table a:hover,
+.dark .sales-table button:hover {
+  color: #00ccaa;
+}
+
+.dark .sales-table span {
+  color: #666;
+}
+
+/* Personalización de los gráficos en modo oscuro */
+.dark .charts-container canvas {
+  background-color: #2d2d2d;
+}
+
+/* =======================================================
+   Estilos Responsivos
+======================================================= */
+@media (max-width: 1200px) {
+  .cards-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .charts-container {
+    flex-direction: column;
+  }
+  
+  .line-chart,
+  .pie-chart {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .cards-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .graphics-container {
+    padding: 0;
+  }
+  
+  .sales-table {
+    overflow-x: auto;
+    display: block;
+  }
+}
+
 </style>

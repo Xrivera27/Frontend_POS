@@ -190,4 +190,76 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Contenedor principal */
+.dark .alertas-wrapper {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+.dark .categories-container {
+  background-color: #2d2d2d;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Cajas de categorías */
+.dark .category-box {
+  background-color: #383838;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .category-box:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Textos */
+.dark .product-name {
+  color: #fff;
+}
+
+.dark .product-description {
+  color: #b0b0b0;
+}
+
+/* Estados específicos en modo oscuro */
+.dark .urgente {
+  background-color: rgba(231, 76, 60, 0.2);
+  border-color: #e74c3c;
+}
+
+.dark .urgente .product-status {
+  color: #ff6b5b;
+}
+
+.dark .atencion {
+  background-color: rgba(243, 156, 18, 0.2);
+  border-color: #f39c12;
+}
+
+.dark .atencion .product-status {
+  color: #ffb74d;
+}
+
+.dark .normal {
+  background-color: rgba(46, 204, 113, 0.2);
+  border-color: #2ecc71;
+}
+
+.dark .normal .product-status {
+  color: #4eed96;
+}
+
+/* Hover states */
+.dark .category-box:hover.urgente {
+  background-color: rgba(231, 76, 60, 0.3);
+}
+
+.dark .category-box:hover.atencion {
+  background-color: rgba(243, 156, 18, 0.3);
+}
+
+.dark .category-box:hover.normal {
+  background-color: rgba(46, 204, 113, 0.3);
+}
+
 </style>

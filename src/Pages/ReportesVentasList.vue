@@ -379,4 +379,119 @@ tbody td {
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+
+/* =======================================================
+   Modo Oscuro
+======================================================= */
+/* Contenedor principal */
+.dark .report-container {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+/* Inputs y campos de formulario */
+.dark .fecha,
+.dark input[type="date"],
+.dark input[list],
+.dark select {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  -webkit-box-shadow: 0 0 0px 1000px #2d2d2d inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Labels y texto */
+.dark label {
+  color: #fff;
+}
+
+/* Botones */
+.dark .pdf-btn {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.dark .excel-btn {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.dark .generate-btn {
+  background-color: #007bff;
+  color: #fff;
+}
+
+/* Tabla y componentes relacionados */
+.dark .table-header {
+  background-color: #004c77;
+}
+
+.dark table {
+  border-color: #404040;
+}
+
+.dark thead th {
+  background-color: #383838;
+  color: #fff;
+  border-color: #404040;
+}
+
+.dark tbody td {
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark tbody tr:nth-child(even) {
+  background-color: #2d2d2d;
+}
+
+.dark tbody tr:hover {
+  background-color: #383838;
+}
+
+/* Totales */
+.dark .totals div {
+  color: #fff;
+}
+
+.dark strong {
+  color: #00ffcc;
+}
+
+/* Scrollbar personalizado en modo oscuro */
+.dark .table-container::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.dark .table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+}
+
+.dark .table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Datalist en modo oscuro */
+.dark option {
+  background-color: #2d2d2d;
+  color: #fff;
+}
+
+/* Inputs con autocompletado en modo oscuro */
+.dark input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px #2d2d2d inset !important;
+  -webkit-text-fill-color: #fff !important;
+}
 </style>

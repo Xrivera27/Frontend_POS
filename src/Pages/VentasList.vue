@@ -1256,4 +1256,149 @@ button {
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* Agregar después de todos tus estilos actuales */
+
+/* =======================================================
+   Modo Oscuro
+======================================================= */
+/* Contenedor principal */
+.dark .wrapper {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+.dark .main-container {
+  background-color: #1e1e1e;
+}
+
+/* Header y elementos de input */
+.dark .header-container {
+  border-color: #404040;
+}
+
+.dark .cliente-input,
+.dark .rtn-input {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .search-button {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .search-button:hover {
+  background-color: #383838;
+}
+
+.dark .campo {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+/* Tabla */
+.dark .table-wrapper {
+  border-color: #404040;
+  background-color: #2d2d2d;
+}
+
+.dark .table {
+  background-color: #2d2d2d;
+}
+
+.dark .table thead {
+  background-color: #2d2d2d;
+}
+
+.dark th {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark td {
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .table tbody tr:hover {
+  background-color: #383838;
+}
+
+.dark .selected {
+  background-color: #004c77 !important;
+}
+
+.dark .table tbody tr.selected:hover {
+  background-color: #005a8e !important;
+}
+
+/* Teclado numérico */
+.dark .numeric-keypad {
+  border-color: #404040;
+}
+
+.dark button {
+  background-color: #2d2d2d;
+  color: #fff;
+}
+
+.dark button:hover {
+  background-color: #383838;
+}
+
+/* Total container */
+.dark .total-container {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .cantidad-input input {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+/* Footer */
+.dark .footer-container {
+  background-color: #2d2d2d;
+  border-color: #404040;
+}
+
+/* Estados de facturación */
+.dark .facturando {
+  color: #00ff9d;
+}
+
+.dark .no-facturando {
+  color: #ff4444;
+}
+
+/* Scrollbar en modo oscuro */
+.dark .table-container::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.dark .table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+}
+
+.dark .table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+/* Input autofill en modo oscuro */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  -webkit-box-shadow: 0 0 0px 1000px #383838 inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 </style>

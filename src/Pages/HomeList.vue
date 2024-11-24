@@ -109,6 +109,7 @@ export default {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  transition: all 0.3s ease;
 }
 
 /* Caja */
@@ -118,6 +119,7 @@ export default {
   margin-bottom: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .box-header {
@@ -126,12 +128,15 @@ export default {
 
 .box-header h3 {
   margin: 0;
+  color: #333;
+  transition: color 0.3s ease;
 }
 
 /* Encabezados */
 h3 {
   color: #333;
   font-size: clamp(18px, 3vw, 24px);
+  transition: color 0.3s ease;
 }
 
 /* Contenido adicional */
@@ -149,11 +154,13 @@ h3 {
   margin-right: 10px;
   font-size: 18px;
   color: #a38655;
+  transition: color 0.3s ease;
 }
 
 .rol {
   color: #969696;
   font-size: 14px;
+  transition: color 0.3s ease;
 }
 
 /* Botones de Navegación */
@@ -165,13 +172,66 @@ h3 {
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
   white-space: nowrap;
 }
 
 .navigate-button:hover {
   background-color: #0056b3;
   transform: translateY(-2px);
+}
+
+/* =======================================================
+   Modo Oscuro
+======================================================= */
+/* Dashboard en modo oscuro */
+.dark .dashboard {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+/* Cajas en modo oscuro */
+.dark .box {
+  background: #2d2d2d;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Encabezados en modo oscuro */
+.dark h3,
+.dark .box-header h3 {
+  color: #00ffcc;
+}
+
+/* Textos en modo oscuro */
+.dark p {
+  color: #fff;
+}
+
+/* Contenido adicional en modo oscuro */
+.dark #campana {
+  color: #00ffcc;
+}
+
+.dark .rol {
+  color: #b0b0b0;
+}
+
+/* Botones en modo oscuro */
+.dark .navigate-button {
+  background-color: #00ffcc;
+  color: #1e1e1e;
+}
+
+.dark .navigate-button:hover {
+  background-color: #00ccaa;
+}
+
+/* Gráficos en modo oscuro */
+.dark .chart-container {
+  background-color: #2d2d2d;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Media Queries */
