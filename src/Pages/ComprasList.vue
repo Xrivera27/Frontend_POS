@@ -4,47 +4,89 @@
 
     <div class="main-container">
       <form @submit.prevent="agregarProducto" autocomplete="off">
-
         <div class="input-container input-superior">
           <div class="input-container" id="div_codigo">
-            <label for="codigo-busqueda" class="label-input">Codigo del producto:</label>
-            <input name="codigo-busqueda" ref="codigo" type="text" class="campo" id="campo_codigo" tabindex="1" required
-              v-model="addQuery" placeholder="Ingresar codigo" :disabled="isEditing" />
-
+            <label for="codigo-busqueda" class="label-input">Código del producto:</label>
+            <input 
+              list="codigosList"
+              name="codigo-busqueda" 
+              ref="codigo" 
+              type="text" 
+              class="campo" 
+              id="campo_codigo" 
+              tabindex="1" 
+              required
+              v-model="addQuery" 
+              placeholder="Ingresar código" 
+              :disabled="isEditing"
+              @input="handleCodigoInput"
+            />
+            <datalist id="codigosList">
+              <option v-for="producto in productos" :key="producto.id_producto" :value="producto.codigo_producto">
+                {{ producto.codigo_producto }} - {{ producto.nombre }}
+              </option>
+            </datalist>
           </div>
 
           <div class="input-container" id="div_nombre">
-            <label class="label-input">
-              Buscar por nombre: </label>
-            <input list="idDataList" class="campo" id="campo_nombre" :disabled="isEditing" v-model="addName"
-              placeholder="Ingresar nombre" @input="colocarCodigo">
-            <datalist id="idDataList">
-              <option v-for="(producto, index) in productos" :key="index" :value="producto.codigo">
-                {{ producto.codigo }} : {{ producto.nombre }}
-
+            <label class="label-input">Buscar por nombre:</label>
+            <input 
+              list="productosList" 
+              class="campo" 
+              id="campo_nombre" 
+              :disabled="isEditing" 
+              v-model="searchQuery"
+              placeholder="Ingresar nombre" 
+              @input="handleSearchInput"
+            >
+            <datalist id="productosList">
+              <option v-for="producto in productos" :key="producto.id_producto" :value="producto.nombre">
+                {{ producto.codigo_producto }} - {{ producto.nombre }}
               </option>
             </datalist>
           </div>
         </div>
 
         <div class="input-container-exterior">
-
           <div class="input-container">
             <label for="cantidad" class="label-input">Cant. Unitaria:</label>
-            <input name="cantidad" class="campo" type="text" tabindex="3" placeholder="Cantidad unitaria"
-              v-model="addQuantity" />
+            <input 
+              name="cantidad" 
+              class="campo" 
+              type="number" 
+              tabindex="3" 
+              placeholder="Cantidad unitaria"
+              v-model="addQuantity" 
+              min="1"
+            />
           </div>
 
           <div class="input-container">
             <label for="cantidad" class="label-input">Cant. paquetes:</label>
-            <input name="cantidad" class="campo" type="text" tabindex="3" placeholder="Cantidad total de paquetes"
-              v-model="addQuantityPackage" />
+            <input 
+              name="cantidad_paquetes" 
+              class="campo" 
+              type="number" 
+              tabindex="4" 
+              placeholder="Cantidad total de paquetes"
+              v-model="addQuantityPackage" 
+              min="1"
+            />
           </div>
 
           <div class="input-container">
             <label for="total-compra" class="label-input">Prec./paquete:</label>
-            <input name="total-compra" class="campo" type="text" step="0.01" tabindex="2"
-              placeholder="Total compra por paquete" required v-model="addtotalPrice" />
+            <input 
+              name="total-compra" 
+              class="campo" 
+              type="number" 
+              step="0.01" 
+              tabindex="5"
+              placeholder="Total compra por paquete" 
+              required 
+              v-model="addtotalPrice" 
+              min="0.01"
+            />
           </div>
 
           <div class="boton-container">
@@ -53,23 +95,21 @@
             </button>
           </div>
         </div>
-
-
-
       </form>
 
       <div class="table-container">
         <table class="table">
           <thead>
-            <th class="th_small">N.º</th>
-            <th class="th_medium">Codigo</th>
-            <th class="th_large">Nombre</th>
-            <th class="th_small">Paquetes</th>
-            <th class="th_small">Unidad/Paquetes</th>
-            <th class="medium">Proveedor</th>
-            <th class="th_small">Total Compra</th>
-
-            <th style="width: 100px">Opciones</th>
+            <tr>
+              <th class="th_small">N.º</th>
+              <th class="th_medium">Código</th>
+              <th class="th_large">Nombre</th>
+              <th class="th_small">Paquetes</th>
+              <th class="th_small">Unidad/Paquetes</th>
+              <th class="medium">Proveedor</th>
+              <th class="th_small">Total Compra</th>
+              <th style="width: 100px">Opciones</th>
+            </tr>
           </thead>
           <tbody>
             <tr v-for="(producto, index) in productosLista" :key="index" @click="isEditingTrue(index)">
@@ -78,17 +118,11 @@
               <td>{{ producto.nombre }}</td>
               <td>{{ producto.paquetes }}</td>
               <td>{{ producto.cantidad }}</td>
-              <td>{{ producto.proveedor }}</td>
+              <td>{{ producto.proveedor?.nombre || producto.proveedor }}</td>
               <td>{{ producto.total_compra }}</td>
               <td class="botones-accion">
-                <button id="btnDisminuir" class="btn btn-botones-accion" @click="disminuirCantidad(index)">
-                  <b><i class="bi bi-dash-circle-fill"></i></b>
-                </button>
-                <button id="btnAumentar" class="btn btn-botones-accion" @click="aumentarCantidad(index)">
-                  <b><i class="bi bi-plus-circle-fill"></i></b>
-                </button>
-                <button id="btnEliminar" class="btn btn-botones-accion" @click="deleteProducto(index)">
-                  <b><i class="bi bi-x-circle-fill"></i></b>
+                <button class="btn btn-botones-accion" @click.stop="deleteProducto(index)">
+                  <i class="bi bi-x-circle-fill"></i>
                 </button>
               </td>
             </tr>
@@ -100,18 +134,15 @@
     <div class="end-container">
       <div class="end-container-cancelar">
         <p class="texto-tecla-boton texto-esc">Esc</p>
-        <button class="btn btn-end" id="cancelar-compra" @click="cancelarcompra">
+        <button class="btn btn-end" id="cancelar-compra" @click="cancelarCompra">
           Cancelar compra
         </button>
       </div>
 
-      <AgregarProductoModal />
-
       <div class="end-container-cobro">
-
         <p class="texto-tecla-boton texto-f12">F12</p>
         <button class="btn btn-end" id="boton-cobrar" @click="payModalOpen">
-          Pagar
+          Procesar Compra
         </button>
         <div class="end-container-cobro-p">
           <p id="total">{{ calcularTotal }}</p>
@@ -120,24 +151,18 @@
       </div>
     </div>
 
+    <!-- Modal de Pago -->
     <div class="modal-overlay" v-if="payModal">
       <div class="modal-content">
         <h2>Resumen de Compra</h2>
         <div class="div-modal-resumen">
-          <label for="subtotal">Cantidad total Articulos:</label>
+          <label for="subtotal">Cantidad total Artículos:</label>
           <input type="text" id="subtotal" v-model="articulos_cant" disabled />
         </div>
 
         <div class="div-modal-resumen">
           <label for="total">Total:</label>
           <input type="text" id="totalModal" v-model="total" disabled />
-        </div>
-
-        <div class="div-modal-resumen">
-          <label for="proveedores">Proveedores:</label>
-          <button @click="listaProveedores" id="boton-ver-proveedor">
-            Proveedores
-          </button>
         </div>
 
         <div class="modal-actions">
@@ -148,10 +173,12 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Confirmación -->
     <div class="modal" v-if="confirmModal">
       <div class="modal-overlay">
         <div class="modal-content">
-          <h2>Compra Realizada.</h2>
+          <h2>Compra Realizada</h2>
           <div class="modal-summary"></div>
           <button @click="confirmPaymentClose" class="btn close-btn">
             Cerrar
@@ -160,6 +187,7 @@
       </div>
     </div>
 
+    <!-- Modal de Cancelación -->
     <div class="modal-overlay" v-if="showConfirmModal">
       <div class="modal-content">
         <h2>Confirmación</h2>
@@ -175,10 +203,11 @@
       </div>
     </div>
 
+    <!-- Modal de Proveedores -->
     <div class="modal-overlay" v-if="showProveedores">
       <div class="modal-content">
         <h2>Proveedores</h2>
-        <table border="1">
+        <table class="table">
           <thead>
             <tr>
               <th>No.Pro</th>
@@ -188,7 +217,7 @@
           <tbody>
             <tr v-for="(proveedor_actual, index) in proveedores_nombre" :key="index">
               <td>{{ index + 1 }}</td>
-              <td>{{ proveedor_actual }}</td>
+              <td>{{ proveedor_actual?.nombre || proveedor_actual }}</td>
             </tr>
           </tbody>
         </table>
@@ -202,120 +231,268 @@
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
-import AgregarProductoModal from "../components/AgregarProductoModal.vue";
+import solicompras from "../../services/solicompras";
+
 export default {
+  name: 'ComprasView',
+  
   components: {
     PageHeader,
-    AgregarProductoModal,
   },
+
   data() {
     return {
       titulo: 'Registro de Compras',
       addQuery: "",
+      searchQuery: "",
       addQuantity: "",
       addQuantityPackage: "",
       payModal: false,
       subtotal: "",
       total: "",
-      confirmModal: "",
+      confirmModal: false,
       showConfirmModal: false,
       showProveedores: false,
       addtotalPrice: "",
       articulos_cant: "",
       isEditing: false,
-      productos: [
-        {
-          codigo: "1",
-          nombre: "Leche",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          total_compra: 25,
-          proveedor: 0,
-        },
-        {
-          codigo: "2",
-          nombre: "Pan",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          total_compra: 15,
-          proveedor: 2,
-        },
-        {
-          codigo: "3",
-          nombre: "Arroz",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          total_compra: 12,
-          proveedor: 1,
-        },
-        {
-          codigo: "4",
-          nombre: "Aceite",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          total_compra: 30,
-          proveedor: 3,
-        },
-        {
-          codigo: "5",
-          nombre: "Huevos",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          total_compra: 18,
-          proveedor: 0,
-        },
-        {
-          codigo: "6",
-          nombre: "Azúcar",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          total_compra: 10,
-          proveedor: 0,
-        },
-        {
-          codigo: "7",
-          nombre: "Sal",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          total_compra: 5,
-          proveedor: 1,
-        },
-        {
-          codigo: "8",
-          nombre: "Café",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          total_compra: 50,
-          proveedor: 5,
-        },
-        {
-          codigo: "9",
-          nombre: "Harina",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          total_compra: 20,
-          proveedor: 2,
-        },
-        {
-          codigo: "10",
-          nombre: "Pasta",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          total_compra: 14,
-          proveedor: 0,
-        },
-        {
-          codigo: "11",
-          nombre: "Mantequilla",
-          cantidad: 0, // La cantidad será introducida por el usuario
-          total_compra: 22,
-          proveedor: 1,
-        },
-        // Más clientes...
-      ],
+      productos: [],
       productosLista: [],
+      proveedores_nombre: [],
+      loading: false,
+      error: null
     };
   },
 
   computed: {
     calcularTotal() {
-      let totalActual = 0;
-      this.productosLista.forEach((p) => (totalActual += p.total_compra));
-      return totalActual;
+      return this.productosLista.reduce((total, p) => total + p.total_compra, 0);
     },
   },
 
   methods: {
+    async handleCodigoInput() {
+      if (this.addQuery) {
+        const productoEncontrado = this.productos.find(p => p.codigo_producto === this.addQuery);
+        if (productoEncontrado) {
+          this.searchQuery = productoEncontrado.nombre;
+        } else {
+          this.searchQuery = "";
+        }
+      } else {
+        this.searchQuery = "";
+      }
+    },
+
+    async handleSearchInput() {
+      if (this.searchQuery) {
+        const productoEncontrado = this.productos.find(p => p.nombre === this.searchQuery);
+        if (productoEncontrado) {
+          this.addQuery = productoEncontrado.codigo_producto;
+        } else {
+          this.addQuery = "";
+        }
+      } else {
+        this.addQuery = "";
+      }
+    },
+
+    async cargarProductos() {
+      try {
+        const token = localStorage.getItem('auth');
+        if (!token) {
+          console.log('No hay token, redirigiendo a login');
+          this.$router.push('/login');
+          return;
+        }
+
+        const productos = await solicompras.fetchRegistros('/compras/productos');
+        this.productos = productos || [];
+        console.log('Productos cargados:', this.productos);
+      } catch (error) {
+        console.error('Error completo al cargar productos:', error);
+        
+        if (error.message.includes('No hay token')) {
+          console.log('Token no encontrado, redirigiendo a login');
+          this.$router.push('/login');
+          return;
+        }
+        
+        alert('Error al cargar la lista de productos');
+      }
+    },
+
+    validarDatos() {
+      if (!this.addQuery || !this.addtotalPrice) {
+        throw new Error('Por favor complete los campos requeridos');
+      }
+
+      if (this.addQuantity && (isNaN(this.addQuantity) || this.addQuantity <= 0)) {
+        throw new Error('La cantidad debe ser un número mayor a 0');
+      }
+
+      if (this.addtotalPrice && (isNaN(this.addtotalPrice) || this.addtotalPrice <= 0)) {
+        throw new Error('El precio debe ser un número mayor a 0');
+      }
+
+      if (this.addQuantityPackage && (isNaN(this.addQuantityPackage) || this.addQuantityPackage <= 0)) {
+        throw new Error('La cantidad de paquetes debe ser un número mayor a 0');
+      }
+    },
+
+    async agregarProducto() {
+      try {
+        this.validarDatos();
+
+        const cantidad = this.addQuantity || "1";
+        const cantidadPaquetes = this.addQuantityPackage || "1";
+
+        const productoExistente = this.productos.find(p => p.codigo_producto === this.addQuery);
+        
+        if (!productoExistente) {
+          throw new Error('Producto no encontrado');
+        }
+
+        const productoEnLista = this.productosLista.find(p => p.codigo === this.addQuery);
+
+        if (!this.isEditing) {
+          if (productoEnLista) {
+            productoEnLista.cantidad = Number(cantidad);
+            productoEnLista.paquetes = Number(cantidadPaquetes);
+            productoEnLista.total_compra = Number(this.addtotalPrice);
+          } else {
+            this.productosLista.push({
+              codigo: productoExistente.codigo_producto,
+              nombre: productoExistente.nombre,
+              cantidad: Number(cantidad),
+              paquetes: Number(cantidadPaquetes),
+              proveedor: productoExistente.proveedor,
+              total_compra: Number(this.addtotalPrice)
+            });
+          }
+        } else {
+          productoEnLista.cantidad = Number(cantidad);
+          productoEnLista.paquetes = Number(cantidadPaquetes);
+          productoEnLista.total_compra = Number(this.addtotalPrice);
+          this.isEditing = false;
+        }
+
+        this.reiniciarInputs();
+        this.$refs.codigo.focus();
+      } catch (error) {
+        alert(error.message);
+      }
+    },
+
+    isEditingTrue(index) {
+      const producto = this.productosLista[index];
+      if (producto) {
+        this.isEditing = true;
+        this.addQuantity = producto.cantidad.toString();
+        this.addQuery = producto.codigo;
+        this.addtotalPrice = producto.total_compra.toString();
+        this.addQuantityPackage = producto.paquetes.toString();
+        this.searchQuery = producto.nombre;
+      }
+    },
+
+    disminuirCantidad(index) {
+      if (this.productosLista[index].paquetes > 1) {
+        this.productosLista[index].paquetes -= 1;
+        const precioUnitarioPorPaquete = this.productosLista[index].total_compra / (this.productosLista[index].paquetes + 1);
+        this.productosLista[index].total_compra -= precioUnitarioPorPaquete;
+      } else {
+        this.deleteProducto(index);
+      }
+    },
+
+    aumentarCantidad(index) {
+      this.productosLista[index].paquetes += 1;
+      const precioUnitarioPorPaquete = this.productosLista[index].total_compra / (this.productosLista[index].paquetes - 1);
+      this.productosLista[index].total_compra += precioUnitarioPorPaquete;
+    },
+
+    deleteProducto(index) {
+      this.productosLista.splice(index, 1);
+    },
+
+    reiniciarInputs() {
+      this.addQuery = "";
+      this.searchQuery = "";
+      this.addQuantity = "";
+      this.addtotalPrice = "";
+      this.addQuantityPackage = "";
+      this.isEditing = false;
+    },
+
+    async confirmPayment() {
+      try {
+        this.loading = true;
+        await solicompras.registrarCompra({
+          productosLista: this.productosLista,
+          total: this.calcularTotal
+        });
+        
+        this.confirmModal = true;
+        this.payModal = false;
+        this.productosLista = [];
+        this.reiniciarInputs();
+      } catch (error) {
+        console.error('Error al confirmar la compra:', error);
+        alert(error.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    payModalOpen() {
+      if (this.productosLista.length > 0) {
+        this.articulos_cant = this.productosLista.length;
+        this.total = this.calcularTotal;
+        this.payModal = true;
+      } else {
+        alert('No hay productos en la lista');
+      }
+    },
+
+    cancelPayment() {
+      this.payModal = false;
+    },
+
+    confirmPaymentClose() {
+      this.confirmModal = false;
+      this.reiniciarInputs();
+      this.$refs.codigo.focus();
+    },
+
+    listaProveedores() {
+      this.proveedores_nombre = [...new Set(this.productosLista.map(p => p.proveedor))];
+      this.showProveedores = true;
+      this.payModal = false;
+    },
+
+    closeShowProveedores() {
+      this.showProveedores = false;
+      this.payModal = true;
+    },
+
+    cancelarCompra() {
+      if (this.productosLista.length > 0) {
+        this.showConfirmModal = true;
+      }
+    },
+
+    confirmCancel() {
+      this.productosLista = [];
+      this.showConfirmModal = false;
+      this.reiniciarInputs();
+      this.$refs.codigo.focus();
+    },
+
+    cancelCancel() {
+      this.showConfirmModal = false;
+    },
+
     pushEsc(event) {
       if (event.key === "Esc" || event.key === "Escape") {
         if (this.isEditing) {
@@ -323,9 +500,10 @@ export default {
           this.reiniciarInputs();
           return;
         }
-        this.cancelarcompra();
+        this.cancelarCompra();
       }
     },
+
     pushDelete(event) {
       const target = event.target;
       const isInputField =
@@ -333,8 +511,8 @@ export default {
         target.tagName === "TEXTAREA" ||
         target.isContentEditable;
 
-      if (!isInputField && event.key === "Backspace") {
-        this.deleteUltimo();
+      if (!isInputField && event.key === "Backspace" && this.productosLista.length > 0) {
+        this.productosLista.pop();
       }
     },
 
@@ -345,177 +523,6 @@ export default {
       }
     },
 
-    pushN(event) {
-      if (event.key === "n" || event.key === "N") {
-        alert("Modal para añadir nuevo producto");
-        this.reiniciarInputs();
-      }
-    },
-
-    agregarProducto() {
-      if (!this.addQuery || !this.addtotalPrice) {
-        alert("Campo vacio");
-        return;
-      }
-
-      if (
-        (this.addQuantity && isNaN(this.addQuantity)) ||
-        (this.addtotalPrice && isNaN(this.addtotalPrice)) ||
-        (this.addQuantityPackage && isNaN(this.addQuantityPackage))
-      ) {
-        alert("Ingresa un dato valido");
-        return;
-      }
-
-      if (this.addQuantity < 0 || this.addtotalPrice < 0 || this.addQuantityPackage < 0) {
-        alert("Ingresa un dato mayor a 0");
-        return;
-      }
-
-      if (!this.addQuantity) {
-        this.addQuantity = "1";
-      }
-
-
-      if (!this.addQuantityPackage) {
-        this.addQuantityPackage = "1";
-      }
-
-
-
-      const newProduct = this.productos.find((p) => p.codigo === this.addQuery);
-      const exitProduct = this.productosLista.find(
-        (p) => p.codigo === this.addQuery
-      );
-
-
-      if (!this.isEditing) {
-        if (!newProduct) {
-          alert("No existe el producto");
-        } else {
-          if (exitProduct) {
-            exitProduct.cantidad += Number(this.addQuantity);
-            exitProduct.total_compra += Number(this.addtotalPrice);
-          } else {
-            newProduct.cantidad = Number(this.addQuantity);
-            newProduct.total_compra = Number(this.addtotalPrice);
-            this.productosLista.push(newProduct);
-          }
-          this.reiniciarInputs();
-          this.$refs.codigo.focus();
-        }
-      }
-      else {
-        exitProduct.cantidad = Number(this.addQuantity);
-        exitProduct.total_compra = Number(this.addtotalPrice);
-      }
-
-    },
-
-    colocarCodigo() {
-      const productoSeleccionado = this.productos.find(producto => producto.codigo === this.addName);
-      // Si existe, asignamos el código al campo correspondiente
-      if (productoSeleccionado) {
-        this.addQuery = productoSeleccionado.codigo;
-        this.addName = productoSeleccionado.nombre;
-      } else {
-        this.addQuery = ''; // Si no encuentra coincidencia, vacía el código
-      }
-    },
-
-
-    isEditingTrue(index) {
-
-      if (this.productosLista[index]) {
-        this.isEditing = true;
-        this.addQuantity = this.productosLista[index].cantidad;
-        this.addQuery = this.productosLista[index].codigo;
-        this.addtotalPrice = this.productosLista[index].total_compra;
-        this.addName = this.productosLista[index].nombre;
-
-      }
-
-    },
-
-    disminuirCantidad(index) {
-      if (this.productosLista[index].cantidad > 0) {
-        this.productosLista[index].cantidad -= 1;
-        if (this.productosLista[index].cantidad == 0) {
-          this.deleteProducto(index);
-        }
-      }
-    },
-    aumentarCantidad(index) {
-      this.productosLista[index].cantidad += 1;
-    },
-    deleteUltimo() {
-      if (this.productosLista) {
-        this.productosLista.pop();
-      }
-    },
-    deleteProducto(index) {
-      this.productosLista.splice(index, 1);
-    },
-
-    confirmCancel() {
-      this.productosLista = [];
-      this.showConfirmModal = false;
-      this.cambio = 0;
-    },
-    cancelCancel() {
-      this.showConfirmModal = false;
-    },
-    cancelarcompra() {
-      if (this.productosLista.length != 0) {
-        this.showConfirmModal = true;
-      }
-    },
-    listaProveedores() {
-      this.proveedores_nombre = this.productosLista.map((p) => p.proveedor);
-      this.showProveedores = true;
-      this.payModal = false;
-    },
-
-    closeShowProveedores() {
-      this.showProveedores = false;
-      this.payModal = true;
-    },
-
-    reiniciarInputs() {
-      this.addQuery = "";
-      this.addQuantity = "";
-      this.addtotalPrice = "";
-      this.addName = "";
-      this.addQuantityPackage = "";
-    },
-
-    payModalOpen() {
-      if (this.productosLista.length > 0) {
-        this.articulos_cant = this.productosLista.length;
-        this.total = `${this.calcularTotal}`;
-        this.payModal = true;
-        this.paymentMethod = "";
-      }
-    },
-    cancelPayment() {
-      this.payModal = false;
-    },
-    selectRadioButton(opcion) {
-      if (opcion === "cash") {
-        this.paymentMethod = "cash";
-      } else {
-        this.paymentMethod = "card";
-      }
-    },
-    confirmPayment() {
-      this.confirmModal = true;
-      this.payModal = false;
-      this.productosLista = [];
-    },
-
-    confirmPaymentClose() {
-      this.confirmModal = false;
-    },
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
@@ -523,25 +530,57 @@ export default {
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
     },
+
+    async guardarCompraTemporal() {
+      if (this.productosLista.length === 0) {
+        alert('No hay productos para guardar');
+        return;
+      }
+
+      try {
+        await solicompras.guardarCompraTemp({
+          productosLista: this.productosLista,
+          total: this.calcularTotal
+        });
+        alert('Compra guardada temporalmente');
+      } catch (error) {
+        console.error('Error al guardar compra temporal:', error);
+        alert(error.message);
+      }
+    },
+
+    async recuperarCompraTemporal() {
+      try {
+        const compraTemp = await solicompras.recuperarCompraTemp();
+        if (compraTemp && compraTemp.productosLista) {
+          this.productosLista = compraTemp.productosLista;
+          alert('Compra recuperada exitosamente');
+        }
+      } catch (error) {
+        console.error('Error al recuperar compra temporal:', error);
+        alert(error.message);
+      }
+    }
+  },
+
+  async created() {
+    await this.cargarProductos();
   },
 
   mounted() {
-    // Añade el manejador de eventos cuando el componente se monta
     window.addEventListener("keydown", this.pushDelete);
     window.addEventListener("keydown", this.pushEsc);
     window.addEventListener("keydown", this.pushF12);
-    window.addEventListener("keydown", this.pushN);
     this.$refs.codigo.focus();
     document.title = "Crear Compras";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    this.changeFavicon('/img/spiderman.ico');
   },
+
   beforeUnmount() {
-    // Elimina el manejador de eventos cuando el componente se destruye
     window.removeEventListener("keydown", this.pushDelete);
     window.removeEventListener("keydown", this.pushEsc);
     window.removeEventListener("keydown", this.pushF12);
-    window.removeEventListener("keydown", this.pushN);
-  },
+  }
 };
 </script>
 
@@ -553,6 +592,7 @@ export default {
   box-sizing: border-box;
 }
 
+/* Layout Principal */
 .wrapper {
   padding: 16px;
   display: flex;
@@ -561,17 +601,22 @@ export default {
   justify-content: space-between;
 }
 
-.input-container label {
-  white-space: nowrap;
-}
-
+/* Contenedores de Input */
 .input-container {
   display: flex;
   flex-direction: row;
   align-items: center;
+  margin: 10px;
+}
+
+.input-container label {
+  white-space: nowrap;
+  margin-right: 0.5vw;
 }
 
 .input-superior {
+  display: flex;
+  justify-content: space-between;
   width: 100%;
   margin-bottom: 1%;
 }
@@ -587,73 +632,25 @@ export default {
   padding-left: 20px;
 }
 
-#delete-last-producto {
-  background-color: rgb(207, 57, 57);
-  border-radius: 10px;
-  color: white;
-  font-weight: bold;
-}
-
-#btnEliminar:hover {
-  color: #b72433;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#btnAumentar:hover {
-  color: #46ce10;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-#btnDisminuir:hover {
-  color: #13e4d9;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-.rol {
-  color: #969696;
-  font-size: 14px;
-}
-
+/* Campos de entrada */
 .campo {
   padding: 0px 10px;
   width: 100%;
   font-size: 14px;
   min-height: 30px;
   border-radius: 10px;
-  border-width: 0.5px;
-}
-
-.input-container label {
-  margin-right: 0.5vw;
-}
-
-.agregar-producto {
-  background-color: #46ce10;
-  width: 100px;
-  border: none;
-  color: white;
-  cursor: pointer;
+  border: 1px solid #ddd;
+  width: 200px;
 }
 
 .label-input {
   font-size: 14px;
   margin-right: 2%;
+  margin-bottom: 5px;
+  font-weight: bold;
 }
 
-.agregar-producto:hover {
-  background-color: #38a50d;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-.boton-container {
-  display: flex;
-  align-items: end;
-}
-
+/* Tabla */
 .table-container {
   width: 100%;
   border-radius: 10px;
@@ -665,13 +662,6 @@ export default {
   overflow-y: auto;
 }
 
-.table thead {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color: white;
-}
-
 .table {
   width: 100%;
   min-width: 800px;
@@ -679,20 +669,24 @@ export default {
   border-spacing: 0;
 }
 
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: white;
+}
+
 .table th,
 .table td {
-  padding: 8px 0;
+  padding: 8px;
+  border: 1px solid #ddd;
+  text-align: center;
 }
 
 .table thead th {
   background-color: #e7e4e4;
   text-align: center;
   border-bottom: 1px solid #ddd;
-}
-
-.table tbody td {
-  text-align: center;
-  border-top: 1px solid #ddd;
 }
 
 .table thead th:first-child {
@@ -711,6 +705,7 @@ export default {
   border-bottom-right-radius: 10px;
 }
 
+/* Botones */
 .btn {
   padding: 8px 16px;
   border: none;
@@ -721,59 +716,59 @@ export default {
 .btn-botones-accion {
   background: transparent;
   border: none;
-  padding: 0;
+  padding: 5px;
+  margin: 0 2px;
   font-size: 22px;
+  cursor: pointer;
 }
 
-#cancelar-compra {
-  background-color: #d30015;
-  color: black;
+.agregar-producto {
+  background-color: #46ce10;
+  width: 100px;
+  border: none;
+  color: white;
+  cursor: pointer;
 }
 
-#cancelar-compra:hover {
-  background-color: #ad0314;
+.agregar-producto:hover {
+  background-color: #38a50d;
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
 
-.close-btn {
-  color: white;
+/* Botones de acción */
+#btnEliminar:hover {
+  color: #b72433;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
 }
 
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+#btnAumentar:hover {
+  color: #46ce10;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+#btnDisminuir:hover {
+  color: #13e4d9;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+/* Contenedor Final */
+.end-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-top: solid rgb(75, 75, 75) 1px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.end-container-cancelar {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-#AddClienteModal {
-  background: #a38655;
-  border-radius: 15px;
-  font-size: 16px;
-}
-
-#BtnCerrar {
-  border-radius: 15px;
-  background-color: #ebebeb;
-  font-size: 16px;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 500px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
 }
 
 .end-container-cobro {
@@ -782,19 +777,6 @@ export default {
   justify-content: end;
   align-items: center;
   height: 100px;
-}
-
-.end-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  border-top: solid rgb(75, 75, 75) 1px;
-}
-
-.end-container-cancelar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .end-container-cobro-p {
@@ -809,11 +791,7 @@ export default {
   color: #094688;
 }
 
-#total {
-  font-weight: bolder;
-  font-size: 40px;
-}
-
+/* Botones de Pago */
 #boton-cobrar {
   height: 70px;
   margin-right: 15px;
@@ -837,19 +815,13 @@ export default {
   color: white;
 }
 
-#cancelar-compra span {
-  font-size: 15px;
+#cancelar-compra:hover {
+  background-color: #ad0314;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
 }
 
-.texto-esc {
-  color: #d30015;
-}
-
-.btn-end {
-  min-height: 80px;
-  max-width: 90px;
-}
-
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -858,8 +830,9 @@ export default {
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 .modal-content {
@@ -869,70 +842,24 @@ export default {
   width: 400px;
 }
 
-.texto-tecla-boton {
-  display: inline-block;
-  transform: rotate(-90deg);
-}
-
-.product-list {
-  list-style-type: none;
-  padding: 0;
-}
-
-.product-list li {
-  margin-bottom: 10px;
-}
-
-.payment-methods {
-  display: flex;
-}
-
-.payment-methods label {
-  display: block;
-  margin-bottom: 10px;
-}
-
 .modal-actions {
   margin-top: 20px;
-}
-
-.modal-actions button {
-  margin-right: 10px;
-}
-
-.div-modal-resumen {
   display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+  justify-content: space-around;
 }
 
-.div-modal-resumen label {
-  width: 120px;
-  margin-right: 10px;
-}
-
-.div-modal-resumen input {
-  flex: 1;
-}
-
-.div-modal-resumen-rtn {
-  margin-left: 30px;
-}
-
+/* Botones Modal */
 .modalShowConfirm-Si,
 .cancelar,
 .close-btn {
   background-color: #dc3545;
+  z-index: 1000;
 }
 
 .modalShowConfirm-no,
 .confirmar-pago {
   background-color: #4caf50;
-}
-
-.modalShowConfirm-no:hover,
-.confirmar-pago:hover {
-  background-color: #45a049;
+  z-index: 1000;
 }
 
 .modalShowConfirm-Si:hover,
@@ -941,7 +868,27 @@ export default {
   background-color: #bd0d1f;
 }
 
-/* Scroll personalizado */
+.modalShowConfirm-no:hover,
+.confirmar-pago:hover {
+  background-color: #45a049;
+}
+
+/* Otros elementos */
+#total {
+  font-weight: bolder;
+  font-size: 40px;
+}
+
+.texto-tecla-boton {
+  display: inline-block;
+  transform: rotate(-90deg);
+}
+
+.texto-esc {
+  color: #d30015;
+}
+
+/* Scrollbar personalizado */
 .table-container::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -1004,20 +951,6 @@ export default {
   .modal-content {
     width: 95%;
   }
-
-  .div-modal-resumen {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .div-modal-resumen label {
-    width: 100%;
-    margin-right: 0;
-  }
-
-  .div-modal-resumen-rtn {
-    margin-left: 0;
-  }
 }
 
 @media screen and (max-width: 480px) {
@@ -1053,10 +986,6 @@ export default {
 
   #cancelar-compra span {
     font-size: 13px;
-  }
-
-  .btn-end {
-    min-height: 60px;
   }
 }
 </style>
