@@ -1,95 +1,111 @@
 <template>
-  <div class="report-container">
+  <div class="report-wrapper">
     <PageHeader :titulo="titulo" />
 
-    <!-- Formulario para filtros de reporte -->
-    <div class="input-group">
-      <div class="input-field">
-        <label>Fecha Inicio</label>
-        <input type="date" class="fechas" v-model="fechaInicio" placeholder="Click para ver el calendario" />
-      </div>
-      <div class="input-field">
-        <label>Fecha Fin</label>
-        <input type="date" class="fechas" v-model="fechaFin" placeholder="Click para ver el calendario" />
-      </div>
-      <div class="input-field">
-        <label>Usuarios</label>
-        <input list="usuarios" v-model="usuarioSeleccionado" class="fechas" placeholder="Selecciona un usuario" />
-        <datalist id="usuarios">
-          <option v-for="usuario in usuarios" :key="usuario.id_usuario" :value="usuario.nombre"></option>
-          <!-- Asegúrate de que 'nombre' sea la propiedad correcta -->
-        </datalist>
-      </div>
-      <div class="input-field">
-        <label>Clientes</label>
-        <input list="clientes" v-model="clienteSeleccionado" class="fechas" placeholder="Selecciona un cliente" />
-        <datalist id="clientes">
-          <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.Clientes || cliente.nombre_completo">
-          </option>
-        </datalist>
-      </div>
-      <div class="input-field">
-        <label>Ordenar por:</label>
-        <select v-model="ordenSeleccionado">
-          <option value="correlativo">Correlativo</option>
-          <!-- Agrega más opciones según sea necesario -->
-        </select>
+    <div class="report-header">
+      <div class="logo-and-title">
+        <div class="logo-container">
+          <img v-if="logoUrl" :src="logoUrl" alt="Logo empresa" class="company-logo" />
+        </div>
+        <label class="upload-label">
+          <input type="file" @change="handleLogoUpload" accept="image/*" class="hidden-input" />
+          <span class="upload-button">{{ logoUrl ? 'Cambiar Logo' : 'Subir Logo' }}</span>
+        </label>
       </div>
     </div>
 
+    <!-- Filtros -->
+    <div class="filters-section">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Tipo de Reporte</label>
+          <select v-model="reporteSeleccionado" class="select-input">
+            <option value="ventas_cliente">Ventas por Cliente</option>
+            <option value="ventas_caja">Ventas por Caja</option>
+            <option value="ventas_sucursal">Ventas por Sucursal</option>
+            <option value="ventas_empleado">Ventas por Empleado</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Cliente</label>
+          <select v-model="filtros.cliente" class="select-input">
+            <option value="">Todos los clientes</option>
+            <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.id">
+              {{ cliente.nombre }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-row dates">
+        <div class="date-group">
+          <button @click="setHoy" class="hoy-btn">Hoy</button>
+          <div class="date-inputs">
+            <div class="date-field">
+              <label>Fecha Inicio</label>
+              <input type="date" v-model="filtros.fechaInicio" @change="validarFechas" />
+            </div>
+            <div class="date-field">
+              <label>Fecha Fin</label>
+              <input type="date" v-model="filtros.fechaFin" @change="validarFechas" :min="filtros.fechaInicio" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones -->
     <div class="button-group">
-      <button @click="generarReporte('pdf')" class="btn pdf-btn">PDF</button>
-      <button @click="generarReporte('excel')" class="btn excel-btn">EXCEL</button>
-      <button @click="generarReporte()" class="btn generate-btn">Generar</button>
+      <button @click="generarReporte('pdf')" class="btn pdf-btn" :disabled="!fechasValidas">PDF</button>
+      <button @click="generarReporte('excel')" class="btn excel-btn" :disabled="!fechasValidas">EXCEL</button>
+      <button @click="generarReporte('preview')" class="btn generate-btn" :disabled="!fechasValidas">Generar</button>
     </div>
 
-    <!-- Tabla de reporte -->
-    <div class="report-table">
-      <div class="table-header"></div> <!-- Header azul -->
+    <!-- Tabla de resultados -->
+    <div class="report-table" v-if="datosReporte.length">
+      <div class="table-header"></div>
       <table>
         <thead>
           <tr>
-            <th>Fecha Emisión</th>
-            <th>RTN</th>
-            <th>Cliente</th>
+            <th>Fecha</th>
+            <th v-if="reporteSeleccionado === 'ventas_cliente'">Cliente</th>
+            <th v-if="reporteSeleccionado === 'ventas_caja'">Caja</th>
+            <th v-if="reporteSeleccionado === 'ventas_sucursal'">Sucursal</th>
+            <th v-if="reporteSeleccionado === 'ventas_empleado'">Empleado</th>
             <th>Factura</th>
-            <th>Tipo</th>
             <th>Valor Exonerado</th>
             <th>Valor Exento</th>
             <th>Valor Gravado</th>
             <th>ISV</th>
-            <th>Valor Neto</th>
-            <th>Descuento</th>
-            <th>Vendedor</th>
+            <th>Total</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(dato, index) in datosReporte" :key="index">
-            <td>{{ dato.fechaEmision }}</td>
-            <td>{{ dato.rtn }}</td>
-            <td>{{ dato.cliente }}</td>
+            <td>{{ formatearFecha(dato.fecha) }}</td>
+            <td v-if="reporteSeleccionado === 'ventas_cliente'">{{ dato.cliente }}</td>
+            <td v-if="reporteSeleccionado === 'ventas_caja'">{{ dato.caja }}</td>
+            <td v-if="reporteSeleccionado === 'ventas_sucursal'">{{ dato.sucursal }}</td>
+            <td v-if="reporteSeleccionado === 'ventas_empleado'">{{ dato.empleado }}</td>
             <td>{{ dato.factura }}</td>
-            <td>{{ dato.tipo }}</td>
-            <td>{{ dato.valorExonerado }}</td>
-            <td>{{ dato.valorExento }}</td>
-            <td>{{ dato.valorGravado }}</td>
-            <td>{{ dato.isv }}</td>
-            <td>{{ dato.valorNeto }}</td>
-            <td>{{ dato.descuento }}</td>
-            <td>{{ dato.vendedor }}</td>
+            <td>{{ formatearMoneda(dato.valorExonerado) }}</td>
+            <td>{{ formatearMoneda(dato.valorExento) }}</td>
+            <td>{{ formatearMoneda(dato.valorGravado) }}</td>
+            <td>{{ formatearMoneda(dato.isv) }}</td>
+            <td>{{ formatearMoneda(dato.total) }}</td>
           </tr>
         </tbody>
       </table>
-    </div>
 
-    <!-- Totales debajo de la tabla -->
-    <div class="totals">
-      <div><strong>Valor Exonerado:</strong> {{ totales.valorExonerado }}</div>
-      <div><strong>Valor Exento:</strong> {{ totales.valorExento }}</div>
-      <div><strong>Valor Gravado:</strong> {{ totales.valorGravado }}</div>
-      <div><strong>ISV:</strong> {{ totales.isv }}</div>
-      <div><strong>Total:</strong> {{ totales.total }}</div>
-      <div><strong>Descuento:</strong> {{ totales.descuento }}</div>
+      <!-- Totales -->
+      <div class="totals">
+        <div><strong>Total Exonerado:</strong> {{ formatearMoneda(totales.exonerado) }}</div>
+        <div><strong>Total Exento:</strong> {{ formatearMoneda(totales.exento) }}</div>
+        <div><strong>Total Gravado:</strong> {{ formatearMoneda(totales.gravado) }}</div>
+        <div><strong>Total ISV:</strong> {{ formatearMoneda(totales.isv) }}</div>
+        <div><strong>Total General:</strong> {{ formatearMoneda(totales.total) }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -97,74 +113,338 @@
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import solicitudes from "../../services/solicitudes.js";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default {
+  name: 'ReporteVentas',
   components: {
-    PageHeader,
+    PageHeader
   },
   data() {
     return {
-      titulo: 'Reporte de Ventas',
-      fechaInicio: '',
-      fechaFin: '',
-      clienteSeleccionado: '',
-      usuarioSeleccionado: '',
-      clientes: [],
-      usuarios: [], // Asegúrate de que los usuarios se obtengan correctamente
-      datosReporte: [],
-      totales: {},
-      id_usuario: null,
-    };
+      titulo: 'Reportería',
+      logoUrl: localStorage.getItem('logoEmpresa') || null,
+      reporteSeleccionado: 'ventas_cliente',
+      errorFecha: false,
+      maxLogoSize: 40,
+      filtros: {
+        cliente: '',
+        caja: '',
+        sucursal: '',
+        empleado: '',
+        fechaInicio: '',
+        fechaFin: ''
+      },
+      clientes: [
+        { id: 1, nombre: 'Cliente A' },
+        { id: 2, nombre: 'Cliente B' },
+        { id: 3, nombre: 'Cliente C' }
+      ],
+      cajas: [
+        { id: 1, nombre: 'Caja 1' },
+        { id: 2, nombre: 'Caja 2' },
+        { id: 3, nombre: 'Caja 3' }
+      ],
+      sucursales: [
+        { id: 1, nombre: 'Sucursal Central' },
+        { id: 2, nombre: 'Sucursal Norte' },
+        { id: 3, nombre: 'Sucursal Sur' }
+      ],
+      empleados: [
+        { id: 1, nombre: 'Juan Pérez' },
+        { id: 2, nombre: 'María López' },
+        { id: 3, nombre: 'Carlos Ruiz' }
+      ],
+      datosReporte: [
+        {
+          fecha: '2024-03-01',
+          cliente: 'Cliente A',
+          caja: 'Caja 1',
+          sucursal: 'Sucursal Central',
+          empleado: 'Juan Pérez',
+          factura: 'FAC-001',
+          valorExonerado: 1000,
+          valorExento: 500,
+          valorGravado: 2000,
+          isv: 300,
+          total: 3800
+        },
+        {
+          fecha: '2024-03-01',
+          cliente: 'Cliente B',
+          caja: 'Caja 2',
+          sucursal: 'Sucursal Norte',
+          empleado: 'María López',
+          factura: 'FAC-002',
+          valorExonerado: 1500,
+          valorExento: 800,
+          valorGravado: 2500,
+          isv: 375,
+          total: 5175
+        }
+      ],
+      totales: {
+        exonerado: 2500,
+        exento: 1300,
+        gravado: 4500,
+        isv: 675,
+        total: 8975
+      }
+    }
   },
-  async mounted() {
-    try {
-      const token = localStorage.getItem('auth');
-      if (token) {
-        // Decodificar el token para obtener el id_usuario
-        const decodedToken = JSON.parse(atob(token.split('.')[1]));
-        this.id_usuario = decodedToken.id_usuario;
+  computed: {
+    fechasValidas() {
+      return this.filtros.fechaInicio && this.filtros.fechaFin && !this.errorFecha;
+    }
+  },
+  methods: {
+    setHoy() {
+      const hoy = new Date().toISOString().split('T')[0];
+      this.filtros.fechaInicio = hoy;
+      this.filtros.fechaFin = hoy;
+      this.errorFecha = false;
+    },
 
-        const empresaId = this.id_usuario;
+    /* async handleLogoUpload(event) {
+       const file = event.target.files[0];
+       if (file) {
+         const reader = new FileReader();
+         reader.onload = (e) => {
+           this.logoUrl = e.target.result;
+           localStorage.setItem('logoEmpresa', this.logoUrl);
+         };
+         reader.readAsDataURL(file);
+       }
+     }, */
 
-        const response = await fetch(`http://localhost:3000/api/clientes/${empresaId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+    ajustarLogo() {
+      const img = this.$refs.logoImg;
+      if (!img) return;
 
-        if (!response.ok) {
-          throw new Error('Error en la respuesta del servidor');
+      const { naturalWidth, naturalHeight } = img;
+      const maxSize = 50;
+      const aspectRatio = naturalWidth / naturalHeight;
+
+      let newWidth, newHeight;
+
+      if (aspectRatio > 1) {
+        // Imagen más ancha que alta
+        newWidth = Math.min(maxSize, naturalWidth);
+        newHeight = newWidth / aspectRatio;
+      } else {
+        // Imagen más alta que ancha o cuadrada
+        newHeight = Math.min(maxSize, naturalHeight);
+        newWidth = newHeight * aspectRatio;
+      }
+
+      img.style.width = `${newWidth}px`;
+      img.style.height = `${newHeight}px`;
+    },
+
+    async cargarDatos() {
+      try {
+        const [clientes, cajas, sucursales, empleados] = await Promise.all([
+          solicitudes.get('/clientes'),
+          solicitudes.get('/cajas'),
+          solicitudes.get('/sucursales'),
+          solicitudes.get('/empleados')
+        ]);
+
+        this.clientes = clientes.data;
+        this.cajas = cajas.data;
+        this.sucursales = sucursales.data;
+        this.empleados = empleados.data;
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+      }
+    },
+
+    async generarReporte(formato = 'preview') {
+      if (!this.fechasValidas) {
+        alert('Por favor seleccione un intervalo de fechas válido');
+        return;
+      }
+
+      try {
+        if (formato === 'pdf') {
+          this.exportarPDF();
+          return;
         }
 
-        const data = await response.json();
-        this.clientes = data;
-      } else {
-        console.error('ID de Usuario no encontrado en localStorage');
+        const response = await solicitudes.post('/reportes/ventas', {
+          ...this.filtros,
+          tipo: this.reporteSeleccionado,
+          formato
+        });
+
+        if (formato === 'preview') {
+          this.datosReporte = response.data.datos;
+          this.totales = response.data.totales;
+        } else if (formato === 'excel') {
+          const blob = new Blob([response.data], {
+            type: 'application/vnd.ms-excel'
+          });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `reporte_ventas_${this.reporteSeleccionado}.xlsx`;
+          link.click();
+        }
+      } catch (error) {
+        console.error('Error al generar reporte:', error);
       }
-    } catch (error) {
-      console.error('Error al obtener los clientes:', error);
-    }
-
-    try {
-      this.usuarios = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
-    } catch (error) {
-      console.error('Error al obtener los usuarios:', error);
-    }
-
-    document.title = "Reportes";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
-  },
-
-  methods: {
-    changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
-      link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
     },
+
+    async handleLogoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          // Mantener dimensiones originales hasta cierto límite
+          const maxDimension = 200;
+          const ratio = img.width / img.height;
+
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDimension || height > maxDimension) {
+            if (ratio > 1) {
+              width = maxDimension;
+              height = width / ratio;
+            } else {
+              height = maxDimension;
+              width = height * ratio;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          // Mejor calidad de renderizado
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Menor compresión = mejor calidad
+          const resizedLogo = canvas.toDataURL('image/png', 1.0);
+
+          this.logoUrl = resizedLogo;
+          localStorage.setItem('logoEmpresa', resizedLogo);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    },
+
+    calculateLogoDimensions(originalWidth, originalHeight) {
+      const targetHeight = 25;
+      //const difference = Math.abs(originalWidth - originalHeight);
+      const ratio = originalWidth / originalHeight;
+      const newWidth = targetHeight * ratio;
+
+      return {
+        width: Math.round(newWidth),
+        height: targetHeight
+      };
+    },
+
+    exportarPDF() {
+      const doc = new jsPDF();
+      const margin = 10;
+
+      if (this.logoUrl) {
+        const img = new Image();
+        img.src = this.logoUrl;
+
+        const dimensions = this.calculateLogoDimensions(img.width, img.height);
+        doc.addImage(this.logoUrl, 'PNG', margin, margin, dimensions.width, dimensions.height);
+      }
+
+
+      // Add title
+      doc.setFontSize(18);
+      doc.text('Reporte de Ventas', 105, 20, { align: 'center' });
+
+      // Add filters information
+      doc.setFontSize(10);
+      doc.text(`Período: ${this.filtros.fechaInicio} al ${this.filtros.fechaFin}`, 15, 40);
+      doc.text(`Tipo de Reporte: ${this.reporteSeleccionado.replace('_', ' ').toUpperCase()}`, 15, 47);
+
+      // Create table
+      const headers = [['Fecha', 'Factura', 'Valor Exonerado', 'Valor Exento', 'Valor Gravado', 'ISV', 'Total']];
+
+      const data = this.datosReporte.map(item => [
+        this.formatearFecha(item.fecha),
+        item.factura,
+        this.formatearMoneda(item.valorExonerado),
+        this.formatearMoneda(item.valorExento),
+        this.formatearMoneda(item.valorGravado),
+        this.formatearMoneda(item.isv),
+        this.formatearMoneda(item.total)
+      ]);
+
+      doc.autoTable({
+        head: headers,
+        body: data,
+        startY: 55,
+        theme: 'grid',
+        styles: {
+          fontSize: 8,
+          cellPadding: 2,
+          overflow: 'linebreak'
+        },
+        headStyles: {
+          fillColor: [0, 123, 255],
+          textColor: [255, 255, 255]
+        }
+      });
+
+      // Add totals
+      const finalY = doc.previousAutoTable.finalY + 10;
+      doc.text(`Total Exonerado: ${this.formatearMoneda(this.totales.exonerado)}`, 15, finalY);
+      doc.text(`Total Exento: ${this.formatearMoneda(this.totales.exento)}`, 15, finalY + 7);
+      doc.text(`Total Gravado: ${this.formatearMoneda(this.totales.gravado)}`, 15, finalY + 14);
+      doc.text(`Total ISV: ${this.formatearMoneda(this.totales.isv)}`, 15, finalY + 21);
+      doc.text(`Total General: ${this.formatearMoneda(this.totales.total)}`, 15, finalY + 28);
+
+      // Save PDF
+      doc.save(`reporte_ventas_${this.reporteSeleccionado}.pdf`);
+    },
+
+    formatearFecha(fecha) {
+      return new Date(fecha).toLocaleDateString();
+    },
+
+    formatearMoneda(valor) {
+      return new Intl.NumberFormat('es-HN', {
+        style: 'currency',
+        currency: 'HNL'
+      }).format(valor);
+    }
   },
-};
+
+  validarFechas() {
+    if (this.filtros.fechaInicio && this.filtros.fechaFin) {
+      if (new Date(this.filtros.fechaFin) < new Date(this.filtros.fechaInicio)) {
+        this.errorFecha = true;
+        this.filtros.fechaFin = this.filtros.fechaInicio;
+      } else {
+        this.errorFecha = false;
+      }
+    }
+  },
+  mounted() {
+    this.cargarDatos();
+  }
+}
 </script>
 
 <style scoped>
@@ -179,12 +459,23 @@ export default {
 .report-container {
   background-color: #f5f5f5;
   color: #000;
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: 2rem;
   border-radius: 0;
   width: 100%;
-  max-width: none;
-  margin: 0;
+  max-width: 1200px;
+  margin: 0 auto;
   min-height: 100vh;
+}
+
+.report-header {
+  width: 100%;
+  padding: 20px 0;
+}
+
+.report-title {
+  font-size: 24px;
+  margin: 0;
+  margin-left: 20px;
 }
 
 .input-group {
@@ -310,6 +601,12 @@ tbody td {
   min-width: 250px;
   color: #000;
   font-size: clamp(0.875rem, 1.5vw, 1rem);
+}
+
+.report-wrapper {
+  padding: 16px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* Media Queries */
@@ -493,5 +790,243 @@ tbody td {
 .dark input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 30px #2d2d2d inset !important;
   -webkit-text-fill-color: #fff !important;
+}
+
+.logo-container {
+  width: 150px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.company-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logo-and-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.cambiar-logo-btn {
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filters-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.filter-row {
+  display: flex;
+  gap: 2rem;
+}
+
+.filter-group {
+  flex: 1;
+}
+
+.date-group {
+  width: 100%;
+}
+
+.date-field {
+  position: relative;
+}
+
+.date-inputs {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.date-field {
+  flex: 1;
+}
+
+
+.date-buttons {
+  margin-bottom: 8px;
+}
+
+.date-btn {
+  padding: 4px 12px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.date-btn:hover {
+  background-color: #5a6268;
+}
+
+.dark .date-btn {
+  background-color: #4a4a4a;
+}
+
+.dark .date-btn:hover {
+  background-color: #363636;
+}
+
+/* Deshabilitar botones */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-section {
+  margin-bottom: 2rem;
+}
+
+.hoy-btn {
+  padding: 0.5rem 1rem;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.upload-container {
+  display: flex;
+  align-items: center;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+
+.select-input,
+input[type="date"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.upload-label {
+  cursor: pointer;
+}
+
+.upload-button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.select-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+}
+
+/* Dark mode additions */
+/* Dark mode styles */
+.dark .cambiar-logo-btn {
+  background-color: #004c77;
+}
+
+.dark .hoy-btn {
+  background-color: #4a4a4a;
+}
+
+.dark .select-input,
+.dark input[type="date"] {
+  background-color: #2d2d2d;
+  color: white;
+  border-color: #404040;
+}
+
+.dark .upload-button {
+  background-color: #004c77;
+}
+
+.dark .select-input {
+  background-color: #2d2d2d;
+  color: white;
+  border-color: #404040;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.upload-container {
+  display: flex;
+  align-items: center;
+}
+
+.upload-label {
+  cursor: pointer;
+}
+
+.upload-button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.upload-button:hover {
+  background-color: #0056b3;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.select-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+}
+
+/* Dark mode styles */
+.dark .upload-button {
+  background-color: #004c77;
+}
+
+.dark .select-input {
+  background-color: #2d2d2d;
+  color: white;
+  border-color: #404040;
 }
 </style>
