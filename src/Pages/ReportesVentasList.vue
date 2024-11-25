@@ -7,12 +7,19 @@
         <div class="logo-container">
           <img v-if="logoUrl" :src="logoUrl" alt="Logo empresa" class="company-logo" />
         </div>
-        <label class="upload-label">
-          <input type="file" @change="handleLogoUpload" accept="image/*" class="hidden-input" />
-          <span class="upload-button">{{ logoUrl ? 'Cambiar Logo' : 'Subir Logo' }}</span>
-        </label>
+        <div class="buttons-container">
+          <label class="upload-label">
+            <input type="file" @change="handleLogoUpload" accept="image/*" class="hidden-input" />
+            <span class="upload-button">{{ logoUrl ? 'Cambiar Logo' : 'Subir Logo' }}</span>
+          </label>
+          <button @click="showHeaderFooterModal = true" class="header-footer-btn">
+            Configurar Header/Footer
+          </button>
+        </div>
       </div>
     </div>
+
+    <HeaderFooterDesigner v-model="showHeaderFooterModal" @save="handleHeaderFooterSave" />
 
     <!-- Filtros -->
     <div class="filters-section">
@@ -28,11 +35,11 @@
         </div>
 
         <div class="filter-group">
-          <label>Cliente</label>
-          <select v-model="filtros.cliente" class="select-input">
-            <option value="">Todos los clientes</option>
-            <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.id">
-              {{ cliente.nombre }}
+          <label>{{ labelFiltro }}</label>
+          <select v-model="valorFiltro" class="select-input">
+            <option value="">Todos</option>
+            <option v-for="opcion in opcionesFiltro" :key="opcion.id" :value="opcion.id">
+              {{ opcion.nombre }}
             </option>
           </select>
         </div>
@@ -113,16 +120,19 @@
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import solicitudes from "../../services/solicitudes.js";
+import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 export default {
   name: 'ReporteVentas',
   components: {
-    PageHeader
+    PageHeader,
+    HeaderFooterDesigner
   },
   data() {
     return {
+      showHeaderFooterModal: false, // Asegurarse que está definido en data
       titulo: 'Reportería',
       logoUrl: localStorage.getItem('logoEmpresa') || null,
       reporteSeleccionado: 'ventas_cliente',
@@ -196,7 +206,54 @@ export default {
   computed: {
     fechasValidas() {
       return this.filtros.fechaInicio && this.filtros.fechaFin && !this.errorFecha;
-    }
+    },
+
+    opcionesFiltro() {
+      switch (this.reporteSeleccionado) {
+        case 'ventas_cliente':
+          return this.clientes;
+        case 'ventas_caja':
+          return this.cajas;
+        case 'ventas_sucursal':
+          return this.sucursales;
+        case 'ventas_empleado':
+          return this.empleados;
+        default:
+          return [];
+      }
+    },
+
+    labelFiltro() {
+      switch (this.reporteSeleccionado) {
+        case 'ventas_cliente':
+          return 'Cliente';
+        case 'ventas_caja':
+          return 'Caja';
+        case 'ventas_sucursal':
+          return 'Sucursal';
+        case 'ventas_empleado':
+          return 'Empleado';
+        default:
+          return '';
+      }
+    },
+
+    valorFiltro: {
+      get() {
+        return this.filtros[this.reporteSeleccionado.split('_')[1]];
+      },
+      set(value) {
+        const tipo = this.reporteSeleccionado.split('_')[1];
+        this.filtros[tipo] = value;
+      }
+    },
+
+    watch: {
+      reporteSeleccionado() {
+        // Resetear el valor del filtro cuando cambia el tipo de reporte
+        this.valorFiltro = '';
+      }
+    },
   },
   methods: {
     setHoy() {
@@ -206,17 +263,15 @@ export default {
       this.errorFecha = false;
     },
 
-    /* async handleLogoUpload(event) {
-       const file = event.target.files[0];
-       if (file) {
-         const reader = new FileReader();
-         reader.onload = (e) => {
-           this.logoUrl = e.target.result;
-           localStorage.setItem('logoEmpresa', this.logoUrl);
-         };
-         reader.readAsDataURL(file);
-       }
-     }, */
+    handleHeaderFooterSave(config) {
+      // Guardar la configuración
+      console.log('Configuración guardada:', config);
+      // Aquí puedes implementar la lógica para guardar la configuración
+      // Por ejemplo, guardarla en el estado o enviarla al backend
+
+      // Cerrar el modal después de guardar
+      this.showHeaderFooterModal = false;
+    },
 
     ajustarLogo() {
       const img = this.$refs.logoImg;
@@ -441,6 +496,7 @@ export default {
       }
     }
   },
+
   mounted() {
     this.cargarDatos();
   }
@@ -518,6 +574,35 @@ label {
   gap: clamp(5px, 1.5vw, 10px);
   margin-top: clamp(1rem, 3vw, 1.5rem);
   margin-bottom: clamp(0.5rem, 2vw, 1rem);
+}
+
+.buttons-container {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.header-footer-btn {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.header-footer-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Dark mode */
+.dark .header-footer-btn {
+  background-color: #004c77;
+}
+
+.dark .header-footer-btn:hover {
+  background-color: #003658;
 }
 
 .btn {
