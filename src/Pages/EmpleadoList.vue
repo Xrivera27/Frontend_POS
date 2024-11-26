@@ -311,10 +311,13 @@ export default {
         telefono: form.telefono,
         direccion: form.direccion,
         sucursal: form.sucursal,
-        password: form.password,
-        confirmPassword: form.confirmPassword,
         rol: form.rol,
       };
+
+      if(this.isPassEdit){
+        campos.password = form.password;
+        campos.confirmPassword = form.confirmPassword;
+      }
 
       if (!validarCamposService.validarEmpty(campos)) {
         return false;
