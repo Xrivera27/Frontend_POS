@@ -98,108 +98,138 @@
 
     <!-- Modal para agregar o editar productos -->
     <div v-if="isModalOpen" class="modal">
-      <div id="modal-producto" class="modal-content">
-        <h2 class="h2-modal-content">
-          {{ isEditing ? "Editar Producto" : "Agregar Producto" }}
-        </h2>
-        <div class="form-group">
-          <label>Codigo unico del producto:</label>
-          <input v-model="productoForm.codigo_producto" type="text" required />
+      <div class="modal-content modal-producto">
+        <div class="modal-header">
+          <h2>{{ isEditing ? "Editar Producto" : "Agregar Producto" }}</h2>
         </div>
-        <div class="form-group">
-          <label>Nombre Producto:</label>
-          <input v-model="productoForm.nombre" type="text" required />
-        </div>
-        <div class="contenedor-principal">
-          <div class="contenedor contenedor-izquierdo">
 
-            <div class="form-group">
-              <label>Descripcion:</label>
-              <textarea id="textArea" v-model="productoForm.descripcion" type="text" required />
-            </div>
-            <div class="form-group">
-              <label for="impuesto">Impuesto:</label>
-              <select class="form-select" id="impuesto" name="impuesto" v-model="productoForm.impuesto">
-                <option v-for="(impuesto, index) in cargarImpuestos()" :key="index" :value="impuesto.id">
-                  {{ impuesto.nombre }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="impuesto" value="default">Proveedor:</label>
-              <select class="form-select" id="proveedor" name="mediproveedorda" v-model="productoForm.proveedor">
-                <option value="default" disabled>Selecciona un proveedor</option>
-                <option v-for="(proveedor, index) in proveedoresMostrar" :key="index" :value="proveedor.id">
-                  {{ proveedor.nombre }}
-                </option>
-              </select>
-            </div>
-
-          </div>
-          <div class="contenedor contenedor-derecho">
-            <div class="form-group">
-              <label>Precio por Unidad:</label>
-              <input v-model="productoForm.precio_unitario" type="text" required />
-            </div>
-
-            <div class="form-group">
-              <label>Precio por mayoreo:</label>
-              <input v-model="productoForm.precio_mayorista" type="text" required />
-            </div>
-            <div class="form-group">
-              <label>Cantidad activar mayoreo:</label>
-              <input v-model="productoForm.cantidad_activar_mayorista" type="text" required />
-            </div>
-
-            <div class="form-group">
-              <label for="impuesto" value="default">Unidad de medida:</label>
-              <select class="form-select" id="medida" name="medida" v-model="productoForm.unidad_medida">
-                <option value="default" disabled>Selecciona una unidad de medida</option>
-                <option v-for="(unidad, index) in unidadesMostrar" :key="index" :value="unidad.id_medida">
-                  {{ unidad.medida }}
-                </option>
-              </select>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>Código único del producto:</label>
+              <input v-model="productoForm.codigo_producto" type="text" placeholder="Ingrese el código del producto"
+                required />
             </div>
           </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>Nombre Producto:</label>
+              <input v-model="productoForm.nombre" type="text" placeholder="Ingrese el nombre del producto" required />
+            </div>
+          </div>
+
+          <div class="form-columns">
+            <div class="form-column">
+              <div class="form-group">
+                <label>Descripción:</label>
+                <textarea v-model="productoForm.descripcion" placeholder="Ingrese la descripción del producto"
+                  required />
+              </div>
+
+              <div class="form-group">
+                <label>Impuesto:</label>
+                <select class="form-select" v-model="productoForm.impuesto">
+                  <option value="" disabled>Seleccione un impuesto</option>
+                  <option v-for="(impuesto, index) in cargarImpuestos()" :key="index" :value="impuesto.id">
+                    {{ impuesto.nombre }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Proveedor:</label>
+                <select class="form-select" v-model="productoForm.proveedor">
+                  <option value="default" disabled>Seleccione un proveedor</option>
+                  <option v-for="(proveedor, index) in proveedoresMostrar" :key="index" :value="proveedor.id">
+                    {{ proveedor.nombre }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-column">
+              <div class="form-group">
+                <label>Precio por Unidad:</label>
+                <div class="input-icon">
+                  <span class="currency-symbol">L.</span>
+                  <input v-model="productoForm.precio_unitario" type="number" step="0.01" min="0" placeholder="0.00"
+                    required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Precio por mayoreo:</label>
+                <div class="input-icon">
+                  <span class="currency-symbol">L.</span>
+                  <input v-model="productoForm.precio_mayorista" type="number" step="0.01" min="0" placeholder="0.00"
+                    required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Cantidad activar mayoreo:</label>
+                <input v-model="productoForm.cantidad_activar_mayorista" type="number" min="0" placeholder="0"
+                  required />
+              </div>
+
+              <div class="form-group">
+                <label>Unidad de medida:</label>
+                <select class="form-select" v-model="productoForm.unidad_medida">
+                  <option value="default" disabled>Seleccione una unidad de medida</option>
+                  <option v-for="(unidad, index) in unidadesMostrar" :key="index" :value="unidad.id_medida">
+                    {{ unidad.medida }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
-        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Producto'" @click="guardarProducto">
-        </btnGuardarModal>
-        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
-        <button class="btn" @click="openModalCategoria">Agregar categorias</button>
+
+        <div class="modal-footer">
+          <button class="btn btn-categoria" @click="openModalCategoria">
+            <i class="bi bi-tags"></i>
+            Asignar categorías
+          </button>
+          <div class="action-buttons">
+            <button class="btn btn-secondary" @click="closeModal">
+              Cancelar
+            </button>
+            <button class="btn btn-primary" @click="guardarProducto">
+              {{ isEditing ? "Guardar Cambios" : "Agregar Producto" }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- modal para mostrar categorias -->
 
     <div v-if="isModalCategoriaOpen" class="modal">
-      <div class="modal-content modal-content-categoria">
-        <div class="categoria-encabezado">
-          <h3>Selecciona categorias del producto</h3>
-          <div class="search-bar form-group">
-            <input class="busqueda" type="text" v-model="searchCategoria" placeholder="Buscar categoria..." />
+      <div class="modal-content modal-categorias">
+        <div class="categoria-header">
+          <h3>Selecciona categorías del producto</h3>
+          <div class="search-container">
+            <input type="text" v-model="searchCategoria" placeholder="Buscar categoría..." class="search-input" />
           </div>
         </div>
 
-        <div class="categoria-contenedor">
-          <form class="form-form-categoria">
-
-            <label class="label-categoria" v-for="(categoria, index) in filteredCategorias" :key="index"
-              :class="{ 'primer-label': (index + 1) % 2 == 0 }">
-              <input type="checkbox" v-model="categoriasSeleccionadas" :value="categoria.id_categoria"
-                :name="categoria.nombre_categoria" :id="categoria.nombre_categoria">
-              {{ categoria.nombre_categoria }}
-              <br v-if="(index + 1) % 2 == 0" class="br-label">
+        <div class="categorias-container">
+          <div class="categorias-grid">
+            <label v-for="(categoria, index) in filteredCategorias" :key="index" class="categoria-checkbox">
+              <input type="checkbox" v-model="categoriasSeleccionadas" :value="categoria.id_categoria">
+              <span class="checkbox-text">{{ categoria.nombre_categoria }}</span>
             </label>
-          </form>
-        </div>
-        <div class="categoria-botones">
-
-          <btnGuardarModal @click="guardarCategorias">Guardar</btnGuardarModal>
-          <btnCerrarModal :texto="'Cerrar'" @click="closeModalCategoria"></btnCerrarModal>
+          </div>
         </div>
 
+        <div class="categoria-footer">
+          <btnCerrarModal :texto="'Cancelar'" @click="closeModalCategoria" />
+          <btnGuardarModal @click="guardarCategorias">
+            Guardar
+          </btnGuardarModal>
+        </div>
       </div>
-
     </div>
 
     <!-- modal para editar stocks min y max por sucursal -->
@@ -1036,6 +1066,367 @@ export default {
 
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #a38655;
+}
+
+/* Modal de Categorías */
+.modal-categorias {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  min-height: 400px;
+  max-height: 80vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.categoria-header {
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+}
+
+.categoria-header h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.search-container {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+}
+
+.categorias-container {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.categorias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  padding: 8px;
+}
+
+.categoria-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+}
+
+.categoria-checkbox:hover {
+  background-color: #edf2f7;
+  transform: translateY(-1px);
+}
+
+.categoria-checkbox input[type="checkbox"] {
+  margin-right: 12px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #c09d62;
+}
+
+.checkbox-text {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.categoria-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background-color: #f8f9fa;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Modo Oscuro */
+.dark .modal-categorias {
+  background-color: #2d2d2d;
+}
+
+.dark .categoria-header,
+.dark .categoria-footer {
+  background-color: #1e1e1e;
+  border-color: #404040;
+}
+
+.dark .categoria-header h3 {
+  color: #fff;
+}
+
+.dark .search-input {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .categoria-checkbox {
+  background-color: #383838;
+  border-color: #404040;
+}
+
+.dark .categoria-checkbox:hover {
+  background-color: #404040;
+}
+
+.dark .checkbox-text {
+  color: #fff;
+}
+
+/* Modal de Producto */
+.modal-producto {
+  background: white;
+  border-radius: 12px;
+  width: 95%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Form Layout */
+.form-row {
+  margin-bottom: 20px;
+}
+
+.form-columns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.form-group textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+.input-icon {
+  position: relative;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.input-icon input {
+  padding-left: 30px;
+}
+
+/* Select Styles */
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px;
+  padding-right: 40px;
+}
+
+/* Footer */
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Buttons */
+.btn-categoria {
+  background-color: #c09d62;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.btn-categoria:hover {
+  background-color: #a38655;
+}
+
+.btn-categoria i {
+  font-size: 1.2em;
+}
+
+/* Focus States */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+}
+
+/* Dark Mode */
+.dark .modal-producto {
+  background-color: #2d2d2d;
+}
+
+.dark .modal-header,
+.dark .modal-footer {
+  background-color: #1e1e1e;
+  border-color: #404040;
+}
+
+.dark .modal-header h2 {
+  color: #fff;
+}
+
+.dark .form-group label {
+  color: #fff;
+}
+
+.dark .form-group input,
+.dark .form-group textarea,
+.dark .form-group select {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .currency-symbol {
+  color: #aaa;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-columns {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .btn-categoria {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal-categorias {
+    width: 95%;
+    margin: 20px;
+    max-height: 90vh;
+  }
+
+  .categorias-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .categoria-header,
+  .categoria-footer {
+    padding: 16px;
+  }
+
+  .search-input {
+    padding: 10px 12px;
+  }
 }
 
 /* Media Queries */
