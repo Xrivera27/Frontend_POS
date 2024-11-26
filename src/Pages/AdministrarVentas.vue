@@ -3,19 +3,6 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select> registros
-        </span>
-      </div>
-
       <!-- Filtros de fecha -->
       <div class="date-filter">
         <label for="start-date">Desde: </label>
@@ -49,7 +36,7 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Código</th>
+            <th>Número Factura</th>
             <th>Empleado</th>
             <th>Cliente</th>
             <th>Subtotal</th>
@@ -62,7 +49,7 @@
         </thead>
         <tbody>
           <tr v-for="(venta, index) in paginatedVentas" :key="index">
-            <td>{{ index + 1 }}</td>
+            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
             <td>{{ venta.codigo }}</td>
             <td>{{ venta.nombre }}</td>
             <td>{{ venta.cliente }}</td>
@@ -72,13 +59,47 @@
             <td>{{ formatCurrency(venta.total) }}</td>
             <td>{{ formatDateTime(venta.fechaHora) }}</td>
             <td>
-              <button id="btnDetalles" class="btn btn-info" @click="showDetalles(index)">
+              <button id="btnDetalles" class="btn btn-info" @click="showDetalles(venta)">
                 <i class="bi bi-eye-fill"></i>
               </button>
             </td>
           </tr>
         </tbody>
       </table>
+
+      <!-- Nueva Paginación -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredVentas.length) }} de {{ filteredVentas.length }} registros
+        </div>
+        <div class="pagination-container">
+          <button 
+            class="pagination-button" 
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
+            Anterior
+          </button>
+          
+          <button 
+            v-for="page in pages" 
+            :key="page"
+            class="pagination-button"
+            :class="{ active: currentPage === page }"
+            @click="changePage(page)"
+          >
+            {{ page }}
+          </button>
+          
+          <button 
+            class="pagination-button" 
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal para mostrar detalles de venta -->
@@ -86,58 +107,44 @@
       <div class="modal-content">
         <h2 class="h2-modal-content">Detalles de Venta</h2>
 
-        <div class="detalles-grid">
-          <!-- Información Principal -->
-          <div class="detalles-seccion">
-            <h3>Información de Factura</h3>
-            <p><strong>Número de Factura:</strong> {{ ventaDetalles[0]?.numero_factura }}</p>
-            <p><strong>CAI:</strong> {{ ventaDetalles[0]?.cai }}</p>
-            <p><strong>Fecha y Hora:</strong> {{ ventaDetalles[0]?.fechaHora }}</p>
-          </div>
+        <!-- Información básica en una sola lista -->
+        <div class="detalles-lista">
+          <p><strong>Número de Factura:</strong> {{ ventaDetalles[0]?.numero_factura }}</p>
+          <p><strong>CAI:</strong> {{ ventaDetalles[0]?.cai }}</p>
+          <p><strong>Fecha y Hora:</strong> {{ formatDateTime(ventaDetalles[0]?.fechaHora) }}</p>
+          <p><strong>Cliente:</strong> {{ ventaDetalles[0]?.cliente }}</p>
+          <p><strong>RTN Cliente:</strong> {{ ventaDetalles[0]?.rtnCliente }}</p>
+          <p><strong>Atendido por:</strong> {{ ventaDetalles[0]?.nombre }}</p>
+        </div>
 
-          <!-- Información de Cliente y Empleado -->
-          <div class="detalles-seccion">
-            <h3>Información de Cliente y Empleado</h3>
-            <p><strong>Cliente:</strong> {{ ventaDetalles[0]?.cliente }}</p>
-            <p><strong>RTN Cliente:</strong> {{ ventaDetalles[0]?.rtnCliente }}</p>
-            <p><strong>Atendido por:</strong> {{ ventaDetalles[0]?.nombre }}</p>
-          </div>
+        <!-- Productos -->
+        <h3>Productos</h3>
+        <div class="tabla-productos">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="producto in ventaDetalles[0]?.productos" :key="producto.codigo">
+                <td>{{ producto.codigo }}</td>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.cantidad }}</td>
+                <td>{{ formatCurrency(producto.total) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-          <!-- Productos -->
-          <div class="detalles-seccion productos-tabla">
-            <h3>Productos</h3>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Producto</th>
-                  <th>Cantidad</th>
-                  <th>Precio Unit.</th>
-                  <th>Descuento</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="producto in ventaDetalles[0]?.productos" :key="producto.codigo">
-                  <td>{{ producto.codigo }}</td>
-                  <td>{{ producto.nombre }}</td>
-                  <td>{{ producto.cantidad }}</td>
-                  <td>{{ formatCurrency(producto.precio_unitario) }}</td>
-                  <td>{{ formatCurrency(producto.descuento) }}</td>
-                  <td>{{ formatCurrency(producto.total) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Resumen Financiero -->
-          <div class="detalles-seccion">
-            <h3>Resumen Financiero</h3>
-            <p><strong>Subtotal:</strong> {{ formatCurrency(ventaDetalles[0]?.subtotal) }}</p>
-            <p><strong>Descuento Total:</strong> {{ formatCurrency(ventaDetalles[0]?.descuento) }}</p>
-            <p><strong>ISV:</strong> {{ formatCurrency(ventaDetalles[0]?.total_impuesto) }}</p>
-            <p><strong>Total:</strong> {{ formatCurrency(ventaDetalles[0]?.total) }}</p>
-          </div>
+        <!-- Totales -->
+        <div class="totales">
+          <p><strong>Subtotal:</strong> {{ formatCurrency(ventaDetalles[0]?.subtotal) }}</p>
+          <p><strong>ISV:</strong> {{ formatCurrency(ventaDetalles[0]?.total_impuesto) }}</p>
+          <p><strong>Total:</strong> {{ formatCurrency(ventaDetalles[0]?.total) }}</p>
         </div>
 
         <div class="modal-footer">
@@ -149,6 +156,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
@@ -163,16 +171,17 @@ export default {
   data() {
     return {
       titulo: 'Administrar Ventas',
-      searchQuery: '', 
-      itemsPerPage: "", 
-      startDate: '', 
-      endDate: '', 
+      searchQuery: '',
+      startDate: '',
+      endDate: '',
       isDetallesModalOpen: false,
       ventaDetalles: [],
       ventas: [],
+      currentPage: 1,
+      pageSize: 10,
       columns: [
         { header: '#', dataKey: 'index' },
-        { header: 'Código', dataKey: 'codigo' },
+        { header: 'Número Factura', dataKey: 'codigo' },
         { header: 'Empleado', dataKey: 'nombre' },
         { header: 'Cliente', dataKey: 'cliente' },
         { header: 'Subtotal', dataKey: 'subtotal' },
@@ -205,15 +214,26 @@ export default {
     },
 
     paginatedVentas() {
-      if (!this.itemsPerPage) {
-        return this.filteredVentas;
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredVentas.slice(startIndex, endIndex);
+    },
+
+    totalPages() {
+      return Math.ceil(this.filteredVentas.length / this.pageSize);
+    },
+
+    pages() {
+      const pages = [];
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
       }
-      return this.filteredVentas.slice(0, parseInt(this.itemsPerPage));
+      return pages;
     },
 
     filteredRows() {
       return this.paginatedVentas.map((venta, index) => ({
-        index: index + 1,
+        index: ((this.currentPage - 1) * this.pageSize) + index + 1,
         codigo: venta.codigo,
         nombre: venta.nombre,
         cliente: venta.cliente,
@@ -239,7 +259,7 @@ export default {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
-      });
+      }).replace(',', '');
     },
 
     async loadVentas() {
@@ -257,20 +277,19 @@ export default {
       }
     },
 
-    async showDetalles(index) {
-    try {
-        console.log('Mostrando detalles de venta:', this.ventas[index]); // Debug
-        const idVenta = this.ventas[index].id_venta || this.ventas[index].codigo; // Usar cualquiera que esté disponible
-        console.log('ID de venta a consultar:', idVenta); // Debug
+    async showDetalles(venta) {
+      try {
+        const idVenta = venta.id_venta;
+        console.log('ID de venta a consultar:', idVenta);
         const detalleVenta = await AdminVentas.obtenerDetalleVenta(idVenta);
         
         this.ventaDetalles = [detalleVenta];
         this.isDetallesModalOpen = true;
-    } catch (error) {
+      } catch (error) {
         console.error('Error al cargar detalles de la venta:', error);
         alert('Error al cargar los detalles de la venta. Por favor, intente nuevamente.');
-    }
-},
+      }
+    },
 
     closeDetallesModal() {
       this.isDetallesModalOpen = false;
@@ -279,6 +298,24 @@ export default {
 
     generateRows() {
       this.rows = this.filteredRows;
+    },
+
+    changePage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
+    },
+
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
     },
 
     changeFavicon(iconPath) {
@@ -371,7 +408,7 @@ export default {
 /* Contenedor de la tabla */
 .table-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   width: 100%;
   overflow-x: auto;
 }
@@ -457,14 +494,6 @@ export default {
   background-color: #5a6268;
 }
 
-/* Select personalizado */
-.custom-select {
-  padding: 5px;
-  border-radius: 5px;
-  border: 1px solid #ced4da;
-  width: auto;
-}
-
 /* Filtro de fechas */
 .date-filter {
   display: flex;
@@ -485,20 +514,6 @@ export default {
   border: 1px solid #ced4da;
   margin-right: 20px;
   width: auto;
-}
-
-.date-filter button {
-  padding: 5px 10px;
-  border-radius: 5px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.date-filter button:hover {
-  background-color: #0056b3;
 }
 
 /* Scroll personalizado */
@@ -525,6 +540,166 @@ export default {
   background: #a38655;
 }
 
+/* Modal en modo oscuro */
+.dark .modal-content {
+  background-color: #2d2d2d;
+  color: #fff;
+}
+
+.dark .modal-content input,
+.dark .modal-content textarea {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+/* Tabla en modo oscuro */
+.dark .table-container {
+  border-color: #404040;
+  background-color: #2d2d2d;
+}
+
+.dark .table thead {
+  background-color: #2d2d2d;
+}
+
+.dark .table th {
+  background-color: #383838;
+  color: #fff;
+  border-color: #404040;
+}
+
+.dark .table td {
+  color: #fff;
+  border-color: #404040;
+}
+
+.dark .table tr:hover {
+  background-color: #383838;
+}
+
+/* Detalles de la venta */
+.detalles-lista {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.detalles-lista p {
+  margin: 8px 0;
+}
+
+.tabla-productos {
+  margin: 20px 0;
+  overflow-x: auto;
+}
+
+.totales {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.totales p {
+  margin: 8px 0;
+  font-size: 1.1em;
+}
+
+/* Nueva Paginación */
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  margin-top: auto;
+}
+
+.pagination-info {
+  color: #6c757d;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button.active {
+  background-color: #17a2b8;
+  color: white;
+  border-color: #17a2b8;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Modo oscuro para la paginación */
+.dark .pagination-wrapper {
+  border-top-color: #404040;
+}
+
+.dark .pagination-info {
+  color: #adb5bd;
+}
+
+.dark .pagination-button {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .pagination-button:hover:not(:disabled) {
+  background-color: #383838;
+}
+
+.dark .pagination-button.active {
+  background-color: #17a2b8;
+}
+
+.dark .detalles-lista,
+.dark .totales {
+  background-color: #2d2d2d;
+  color: #fff;
+}
+
+/* Loading y No Data */
+.loading-indicator,
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.no-data {
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.dark .loading-indicator,
+.dark .no-data {
+  color: #aaa;
+  background-color: #2d2d2d;
+}
+
 /* Media Queries */
 @media screen and (max-width: 768px) {
   .opciones {
@@ -533,7 +708,6 @@ export default {
   }
 
   .busqueda,
-  .custom-select,
   .export-button {
     width: 100%;
     margin: 8px 0;
@@ -552,10 +726,6 @@ export default {
     margin-bottom: 10px;
   }
 
-  .date-filter button {
-    width: 100%;
-  }
-
   #btnDetalles {
     width: 40px;
     height: 35px;
@@ -571,14 +741,18 @@ export default {
     padding: 15px;
   }
 
-  .btn {
-    width: 100%;
-    margin: 5px 0;
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .pagination-container {
+    justify-content: center;
+    flex-wrap: wrap;
   }
 }
 
 @media screen and (max-width: 480px) {
-
   .h2-modal-content {
     font-size: 20px;
     margin-bottom: 15px;
@@ -608,271 +782,10 @@ export default {
     margin-right: 0;
     margin-bottom: 5px;
   }
-}
-/* =======================================================
-   Modo Oscuro
-======================================================= */
-/* Contenedor principal */
-.dark .categorias-wrapper {
-  background-color: #1e1e1e;
-  color: #fff;
-}
 
-/* Inputs y búsqueda en modo oscuro */
-.dark .busqueda {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .custom-select {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .custom-select option {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
-/* Tabla en modo oscuro */
-.dark .table-container {
-  border-color: #404040;
-  background-color: #2d2d2d;
-}
-
-.dark .table thead {
-  background-color: #2d2d2d;
-}
-
-.dark .table th {
-  background-color: #383838;
-  color: #fff;
-  border-color: #404040;
-}
-
-.dark .table td {
-  color: #fff;
-  border-color: #404040;
-}
-
-.dark .table tr:hover {
-  background-color: #383838;
-}
-
-/* Modal en modo oscuro */
-.dark .modal-content {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
-.dark .modal-content input,
-.dark .modal-content textarea {
-  background-color: #383838;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .form-group label {
-  color: #fff;
-}
-
-/* Scroll personalizado en modo oscuro */
-.dark .table-container::-webkit-scrollbar-track {
-  background: #2d2d2d;
-}
-
-.dark .table-container::-webkit-scrollbar-thumb {
-  background: #c09d62;
-}
-
-.dark .table-container::-webkit-scrollbar-thumb:hover {
-  background: #a38655;
-}
-
-/* Botones en modo oscuro (manteniendo los colores originales) */
-.dark .button-promocion {
-  background-color: #4cafaf;
-  color: white;
-}
-
-.dark .button-unidad-medida {
-  background-color: #4caf4c;
-  color: #000;
-}
-
-.dark #btnAdd {
-  background-color: #c09d62;
-  color: black;
-}
-
-.dark #btnAdd:hover {
-  background-color: #a38655;
-}
-
-.dark #btnEditar {
-  background-color: #ffc107;
-  color: black;
-}
-
-.dark #btnEditar:hover {
-  background-color: #e8af06;
-}
-
-.dark #btnEliminar {
-  background-color: #dc3545;
-  color: black;
-}
-
-.dark #btnEliminar:hover {
-  background-color: #b72433;
-}
-
-.dark .modalShowConfirm-Si {
-  background-color: #dc3545;
-  color: white;
-}
-
-.dark .modalShowConfirm-no {
-  background-color: #6c757d;
-  color: white;
-}
-
-/* Añadir al final del <style> existente */
-.loading-indicator {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.1rem;
-  color: #666;
-}
-
-.no-data {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.1rem;
-  color: #666;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-}
-
-/* Para el modo oscuro */
-.dark .loading-indicator,
-.dark .no-data {
-  color: #aaa;
-  background-color: #2d2d2d;
-}
-
-.detalles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.detalles-seccion {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.detalles-seccion h3 {
-  margin-bottom: 15px;
-  color: #333;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.detalles-seccion p {
-  margin-bottom: 10px;
-  font-size: 0.95rem;
-}
-
-.detalles-seccion strong {
-  color: #555;
-  font-weight: 600;
-}
-
-.modal-footer {
-  margin-top: 20px;
-  text-align: right;
-  padding-top: 20px;
-  border-top: 1px solid #dee2e6;
-}
-
-.loading-indicator {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.1rem;
-  color: #666;
-}
-
-.no-data {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.1rem;
-  color: #666;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-}
-
-/* Modo Oscuro */
-.dark .detalles-seccion {
-  background-color: #2d2d2d;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.dark .detalles-seccion h3 {
-  color: #fff;
-}
-
-.dark .detalles-seccion strong {
-  color: #ddd;
-}
-
-.dark .modal-footer {
-  border-top-color: #404040;
-}
-
-.dark .loading-indicator,
-.dark .no-data {
-  color: #aaa;
-  background-color: #2d2d2d;
-}
-
-
-/* Añadir estilos específicos para la tabla de productos */
-.productos-tabla {
-  grid-column: 1 / -1;
-  margin-top: 1rem;
-}
-
-.productos-tabla .table {
-  width: 100%;
-  margin-top: 1rem;
-  border-collapse: collapse;
-}
-
-.productos-tabla th,
-.productos-tabla td {
-  text-align: left;
-  padding: 0.75rem;
-  border: 1px solid #dee2e6;
-}
-
-.productos-tabla th {
-  background-color: #f8f9fa;
-  font-weight: 600;
-}
-
-/* Modo oscuro para la tabla de productos */
-.dark .productos-tabla th {
-  background-color: #383838;
-  color: #fff;
-}
-
-.dark .productos-tabla td {
-  border-color: #404040;
+  .pagination-button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
 }
 </style>
