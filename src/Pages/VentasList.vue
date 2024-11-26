@@ -1,5 +1,6 @@
 <template>
   <div class="wrapper">
+    <AperturaCajaModal :isVisible="isAperturaCajaModalVisible" @confirmar="handleAperturaCaja" />
     <ModalLoading :isLoading="isModalLoading" />
     <PaymentAnimationModal :isVisible="isPaymentAnimationVisible" @complete="handlePaymentComplete" />
     <div class="main-container">
@@ -18,7 +19,7 @@
               </template>
             </div>
             <div class="buttons-header">
-              <button class="search-button" @click="openModal">
+              <button :disabled="!cajaAbierta" class="search-button" @click="openModal">
                 Buscar
               </button>
               <ClienteModal :isVisible="isModalVisible" :clientes="clientes" :id_usuario="id_usuario"
@@ -41,8 +42,6 @@
           <label for="numTicket" :class="sucursalActivaFactura ? 'facturando' : 'no-facturando'">
             {{ sucursalActivaFactura ? 'Sucursal facturando' : 'Datos SAR Sucursal desactualizados' }}
           </label>
-
-
           <br />
           <label>Fecha: <span>{{ info.fecha }}</span></label>
         </div>
@@ -100,53 +99,56 @@
         <!-- Teclado numérico -->
         <div class="numeric-keypad">
           <input name="codigo-producto" autocomplete="off0" ref="codigoRef" type="text" class="campo" v-model="addQuery"
-            tabindex="1" :disabled="isModalFocused || isModalVisible" required />
+            tabindex="1" :disabled="!cajaAbierta || isModalFocused || isModalVisible" required />
 
           <div class="keypad">
-            <button @click="agregarNumero(1)">1</button>
-            <button @click="agregarNumero(2)">2</button>
-            <button @click="agregarNumero(3)">3</button>
-            <button @click="agregarNumero(4)">4</button>
-            <button @click="agregarNumero(5)">5</button>
-            <button @click="agregarNumero(6)">6</button>
-            <button @click="agregarNumero(7)">7</button>
-            <button @click="agregarNumero(8)">8</button>
-            <button @click="agregarNumero(9)">9</button>
-            <button @click="agregarNumero(0)">0</button>
-            <button @click="agregarNumero('.')">.</button>
-            <button @click="agregarNumero('*')">*</button>
-            <button class="borrar" @click="borrarUltimo">←</button>
-            <button class="limpiar" @click="limpiar">Limpiar</button>
-            <button class="enter" @click="procesarEnter">Enter</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero(1)">1</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero(2)">2</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero(3)">3</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero(4)">4</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero(5)">5</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero(6)">6</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero(7)">7</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero(8)">8</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero(9)">9</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero(0)">0</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero('.')">.</button>
+            <button :disabled="!cajaAbierta" @click="agregarNumero('*')">*</button>
+            <button :disabled="!cajaAbierta" class="borrar" @click="borrarUltimo">←</button>
+            <button :disabled="!cajaAbierta" class="limpiar" @click="limpiar">Limpiar</button>
+            <button :disabled="!cajaAbierta" class="enter" @click="procesarEnter">Enter</button>
           </div>
         </div>
       </div>
 
+      <button v-if="!cajaAbierta" class="cajaButton" @click="abrirCaja" @modal-focused="handleModalFocus">Abrir
+        caja</button>
+
       <div class="footer-container">
-        <button @click="buscarProducto">Buscar producto [F2]</button>
+        <button :disabled="!cajaAbierta" @click="buscarProducto">Buscar producto [F2]</button>
         <BuscarProductoModal :isVisible="isBuscarProductoModalVisible" :productos="productos"
           @close="closeBuscarProductoModal" @product-selected="handleProductSelected"
           @modal-focused="handleModalFocus" />
-        <button @click="openModal">Buscar cliente [F3]</button>
-        <button @click="consultarAnular">Consultar anular [F4]</button>
-        <button @click="eliminarItem">Eliminar item [F5]</button>
+        <button :disabled="!cajaAbierta" @click="openModal">Buscar cliente [F3]</button>
+        <button :disabled="!cajaAbierta" @click="consultarAnular">Consultar anular [F4]</button>
+        <button :disabled="!cajaAbierta" @click="eliminarItem">Eliminar item [F5]</button>
         <EliminarItemsModal :isVisible="isEliminarModalVisible" :item="selectedItem" @close="closeEliminarModal"
           @confirm-delete="handleItemDelete" @modal-focused="handleModalFocus" />
-        <button @click="limpiarPantalla">Limpiar pantalla [F6]</button>
-        <button @click="guardarVenta">Guardar venta [F8]</button>
+        <button :disabled="!cajaAbierta" @click="limpiarPantalla">Limpiar pantalla [F6]</button>
+        <button :disabled="!cajaAbierta" @click="guardarVenta">Guardar venta [F8]</button>
         <GuardarVentaModal :isVisible="isGuardarVentaModalVisible" :isConsumidorFinal="!clienteSeleccionado"
           @close="isGuardarVentaModalVisible = false" @cliente-temporal="handleSaveVenta"
           @modal-focused="handleModalFocus" />
-        <button @click="recVenta">Rec. Venta [F9]</button>
+        <button :disabled="!cajaAbierta" @click="recVenta">Rec. Venta [F9]</button>
         <RecuperarVentaModal :isVisible="isRecuperarVentaModalVisible" :ventas="ventasGuardadas"
           @close="isRecuperarVentaModalVisible = false" @venta-selected="handleVentaSelected" />
-        <button @click="descuentoGeneral">Dscto. Gen. [F10]</button>
-        <button @click="descuentoIndividual">Dscto. Ind. [F11]</button>
-        <button @click="openPagoModal">Registrar Pago [F12]</button>
+        <button :disabled="!cajaAbierta" @click="descuentoGeneral">Dscto. Gen. [F10]</button>
+        <button :disabled="!cajaAbierta" @click="descuentoIndividual">Dscto. Ind. [F11]</button>
+        <button :disabled="!cajaAbierta" @click="openPagoModal">Registrar Pago [F12]</button>
         <RegistrarPagoModal :isVisible="isPagoModalVisible" :factura="factura" @close="closePagoModal"
           @confirm-payment="realizarPago" @modal-focused="handleModalFocus" />
-        <button @click="nuevoCliente">Nuevo Cliente [ALT] + [C]</button>
-        <button @click="salir">Salir [ALT] + [S]</button>
+        <button :disabled="!cajaAbierta" @click="nuevoCliente">Nuevo Cliente [ALT] + [C]</button>
+        <button :disabled="!cajaAbierta" @click="salir">Salir [ALT] + [S]</button>
       </div>
     </div>
   </div>
@@ -165,15 +167,17 @@ import GuardarVentaModal from '@/components/modalesCrearVenta/GuardarVentaModal.
 import RecuperarVentaModal from '@/components/modalesCrearVenta/RecuperarVentaModal.vue';
 import PaymentAnimationModal from '@/components/PaymentAnimationModal.vue';
 //import VentaPendienteModal from '@/components/modalesCrearVenta/VentaPendiente.vue';
-
+import AperturaCajaModal from '@/components/modalesCrearVenta/AperturaCajaModal.vue';
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, cajaUsuario, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
+//cajaUsuario
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
 
 export default {
   components: {
     ClienteModal,
+    AperturaCajaModal,
     PaymentAnimationModal,
     RegistrarPagoModal,
     EliminarItemsModal,
@@ -185,6 +189,8 @@ export default {
   },
   data() {
     return {
+      isAperturaCajaModalVisible: false,
+      cajaAbierta: false,
       minRows: 15,
       numTicket: '000-001-01-00000001',
       fecha: new Date().toLocaleDateString(),
@@ -208,7 +214,6 @@ export default {
       venta: [],
       factura: [],
       usaSAR: false,
-      cajaAbierta: false,
       isModalLoading: false,
       loadingMessage: '',
       recuperandoVenta: false,
@@ -255,13 +260,15 @@ export default {
       return total.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     },
 
+    // Actualizamos esta propiedad para que dependa de cajaAbierta
     sucursalActivaFactura() {
-      return this.usaSAR;
+      return this.usaSAR && this.cajaAbierta;
     },
 
+    // Movemos isCajaAbierta a computed properties
     isCajaAbierta() {
       return this.cajaAbierta;
-    },
+    }
 
   },
 
@@ -272,6 +279,34 @@ export default {
   methods: {
     async salir() {
       this.logout();
+    },
+
+    abrirCaja() {
+      this.isAperturaCajaModalVisible = true;
+      this.pauseMainKeyboardEvents();
+    },
+
+    async handleAperturaCaja(monto) {
+      try {
+        this.isModalLoading = true;
+        this.loadingMessage = 'Abriendo caja...';
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Actualizamos el estado de la caja
+        this.cajaAbierta = true;
+
+        this.isAperturaCajaModalVisible = false;
+        this.resumeMainKeyboardEvents();
+
+        const toast = useToast();
+        toast.success(`Caja abierta con monto inicial de L. ${monto}`);
+      } catch (error) {
+        const toast = useToast();
+        toast.error("Error al abrir la caja");
+      } finally {
+        this.isModalLoading = false;
+      }
     },
 
     async buscarProducto() {
@@ -807,16 +842,16 @@ export default {
       this.usaSAR = await sucursalSar(this.id_usuario);
       this.info = await getInfoBasic(this.id_usuario);
       this.productos = await getProductos(this.id_usuario);
-      this.cajaAbierta = await cajaUsuario(this.id_usuario);
+      // Removemos esta línea que estaba causando el problema
+      // this.cajaAbierta = await cajaUsuario(this.id_usuario);
+
       ventaRecuperada = await getVentaPendiente(this.id_usuario);
-      console.log(ventaRecuperada.resultado);
       if (ventaRecuperada.resultado) {
         await this.RecventaPendiente(ventaRecuperada.productos);
       }
     } catch (error) {
       notificaciones('error', error.message);
     }
-
   },
 
   beforeUnmount() {
@@ -1395,4 +1430,14 @@ button {
   transition: background-color 5000s ease-in-out 0s;
 }
 
+.cajaButton {
+  background-color: #2d2d2d;
+  width: 25%;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 </style>
