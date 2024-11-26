@@ -84,7 +84,7 @@ export default {
         { title: "Ventas", value: "L. 21,324", icon: "bi bi-cash", link: "/administrar-ventas" },
         { title: "Compras Pendientes", value: "35", icon: "bi bi-wallet", link: "/administrar-compras" },
         { title: "Clientes", value: "2,703", icon: "bi bi-people", link: "/clientes" },
-        { title: "Categorías", value: "7", icon: "bi bi-tags", link: "/categorias" },
+        { title: "Alertas", value: "3", icon: "bi bi-tags", link: "/admin-invenario" },
       ],
       // Datos para el gráfico de líneas (Ventas por mes)
       lineChartData: {

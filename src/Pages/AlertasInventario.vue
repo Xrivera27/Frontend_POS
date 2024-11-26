@@ -10,7 +10,7 @@
         :class="getEstadoClass(product.puntaje)"
       >
         <div class="product-name">{{ product.name }}</div>
-        <div class="product-description">Descripción: {{ product.description }}</div>
+        <div class="product-descripcion">Descripción: {{ product.descripcion }}</div>
         <div class="product-status">Estado: {{ getEstadoLabel(product.puntaje) }}</div>
       </div>
     </div>
@@ -19,6 +19,8 @@
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
+import { getAlerts } from '../../services/alertasSolicitudes.js';
+import solicitudes from "../../services/solicitudes.js";
 
 export default {
   components: {
@@ -28,57 +30,40 @@ export default {
   data() {
     return {
       titulo: "Alertas de Inventario",
-      products: [
-        { name: "Leche", description: "Entera 1L", puntaje: 90 },
-        { name: "Pan", description: "Integral 500g", puntaje: 60 },
-        { name: "Huevos", description: "Docena", puntaje: 10 },
-        { name: "Manzanas", description: "Rojas 1kg", puntaje: 60 },
-        { name: "Cereal", description: "Avena 250g", puntaje: 10 },
-        { name: "Yogur", description: "Natural 150g", puntaje: 90 },
-        { name: "Arroz", description: "Blanco 1kg", puntaje: 10 },
-        { name: "Pasta", description: "Spaghetti 500g", puntaje: 60 },
-        { name: "Tomate", description: "Fresco 1kg", puntaje: 10 },
-        { name: "Aceite", description: "Oliva 500ml", puntaje: 90 },
-        { name: "Queso", description: "Cheddar 200g", puntaje: 60 },
-        { name: "Pollo", description: "Pechuga 500g", puntaje: 90 },
-        { name: "Carne", description: "Molida 1kg", puntaje: 10 },
-        { name: "Pescado", description: "Salmón 300g", puntaje: 60 },
-        { name: "Jugo", description: "Naranja 1L", puntaje: 10 },
-        { name: "Azúcar", description: "Morena 1kg", puntaje: 90 },
-        { name: "Sal", description: "Gruesa 500g", puntaje: 10 },
-        { name: "Café", description: "Molido 250g", puntaje: 60 },
-        { name: "Té", description: "Negro 100g", puntaje: 10 },
-        { name: "Galletas", description: "Con chispas de chocolate 300g", puntaje: 90 },
-        { name: "Refresco", description: "Cola 2L", puntaje: 60 },
-        { name: "Mantequilla", description: "Sin sal 250g", puntaje: 10 },
-        { name: "Harina", description: "De trigo 1kg", puntaje: 90 },
-        { name: "Lechuga", description: "Orgánica 500g", puntaje: 60 },
-        { name: "Zanahorias", description: "Frescas 1kg", puntaje: 10 },
-        { name: "Cebolla", description: "Blanca 1kg", puntaje: 60 },
-        { name: "Salsa", description: "Tomate 500ml", puntaje: 10 },
-        { name: "Helado", description: "Vainilla 1L", puntaje: 60 },
+      alertas: [
       ],
+      id_usuario: '',
     };
   },
 
   computed: {
     sortedProducts() {
-      return this.products.slice().sort((a, b) => b.puntaje - a.puntaje);
+      return this.alertas.slice().sort((a, b) => b.puntaje - a.puntaje);
     },
   },
 
   methods: {
     getEstadoLabel(puntaje) {
-      if (puntaje === 90) return "URGENTE";
-      if (puntaje === 60) return "ATENCION";
-      if (puntaje === 10) return "NORMAL";
+      if (puntaje >= 85) return "URGENTE";
+      if (puntaje >= 50  || puntaje < 85) return "ATENCION";
+      if (puntaje < 50) return "NORMAL";
     },
     getEstadoClass(puntaje) {
-      if (puntaje === 90) return "urgente";
-      if (puntaje === 60) return "atencion";
-      if (puntaje === 10) return "normal";
+      if (puntaje >= 85) return "urgente";
+      if (puntaje >= 50  && puntaje < 85) return "atencion";
+      if (puntaje < 50) return "normal";
     },
   },
+  async mounted() {
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+    this.alertas = await getAlerts(this.id_usuario);
+    console.log(this.alertas);
+    } catch (error) {
+      alert(error);
+    }
+   
+  }
 };
 </script>
 
@@ -147,9 +132,14 @@ body {
   color: #333;
 }
 
-.product-description {
+.product-descripcion {
   font-size: 0.9em;
   color: #555;
+  display: -webkit-box;
+    -webkit-line-clamp: 2; /* Número de líneas de texto que quieres mostrar */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .product-status {
@@ -223,7 +213,7 @@ body {
   color: #fff;
 }
 
-.dark .product-description {
+.dark .product-descripcion {
   color: #b0b0b0;
 }
 
