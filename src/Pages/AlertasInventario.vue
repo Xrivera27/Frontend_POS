@@ -5,7 +5,7 @@
     <div class="categories-container">
       <div 
         class="category-box" 
-        v-for="(product, index) in products" 
+        v-for="(product, index) in sortedProducts" 
         :key="index"
         :class="getEstadoClass(product.puntaje)"
       >
@@ -22,44 +22,50 @@ import PageHeader from "@/components/PageHeader.vue";
 
 export default {
   components: {
-    PageHeader
+    PageHeader,
   },
 
   data() {
-  return {
-    titulo: 'Alertas de Inventario',
-    products: [
-      { name: 'Leche', description: 'Entera 1L', puntaje: 90 },
-      { name: 'Pan', description: 'Integral 500g', puntaje: 60 },
-      { name: 'Huevos', description: 'Docena', puntaje: 10 },
-      { name: 'Manzanas', description: 'Rojas 1kg', puntaje: 60 },
-      { name: 'Cereal', description: 'Avena 250g', puntaje: 10 },
-      { name: 'Yogur', description: 'Natural 150g', puntaje: 90 },
-      { name: 'Arroz', description: 'Blanco 1kg', puntaje: 10 },
-      { name: 'Pasta', description: 'Spaghetti 500g', puntaje: 60 },
-      { name: 'Tomate', description: 'Fresco 1kg', puntaje: 10 },
-      { name: 'Aceite', description: 'Oliva 500ml', puntaje: 90 },
-      { name: 'Queso', description: 'Cheddar 200g', puntaje: 60 },
-      { name: 'Pollo', description: 'Pechuga 500g', puntaje: 90 },
-      { name: 'Carne', description: 'Molida 1kg', puntaje: 10 },
-      { name: 'Pescado', description: 'Salmón 300g', puntaje: 60 },
-      { name: 'Jugo', description: 'Naranja 1L', puntaje: 10 },
-      { name: 'Azúcar', description: 'Morena 1kg', puntaje: 90 },
-      { name: 'Sal', description: 'Gruesa 500g', puntaje: 10 },
-      { name: 'Café', description: 'Molido 250g', puntaje: 60 },
-      { name: 'Té', description: 'Negro 100g', puntaje: 10 },
-      { name: 'Galletas', description: 'Con chispas de chocolate 300g', puntaje: 90 },
-      { name: 'Refresco', description: 'Cola 2L', puntaje: 60 },
-      { name: 'Mantequilla', description: 'Sin sal 250g', puntaje: 10 },
-      { name: 'Harina', description: 'De trigo 1kg', puntaje: 90 },
-      { name: 'Lechuga', description: 'Orgánica 500g', puntaje: 60 },
-      { name: 'Zanahorias', description: 'Frescas 1kg', puntaje: 10 },
-      { name: 'Cebolla', description: 'Blanca 1kg', puntaje: 60 },
-      { name: 'Salsa', description: 'Tomate 500ml', puntaje: 10 },
-      { name: 'Helado', description: 'Vainilla 1L', puntaje: 60 }
-    ]
-  };
-},
+    return {
+      titulo: "Alertas de Inventario",
+      products: [
+        { name: "Leche", description: "Entera 1L", puntaje: 90 },
+        { name: "Pan", description: "Integral 500g", puntaje: 60 },
+        { name: "Huevos", description: "Docena", puntaje: 10 },
+        { name: "Manzanas", description: "Rojas 1kg", puntaje: 60 },
+        { name: "Cereal", description: "Avena 250g", puntaje: 10 },
+        { name: "Yogur", description: "Natural 150g", puntaje: 90 },
+        { name: "Arroz", description: "Blanco 1kg", puntaje: 10 },
+        { name: "Pasta", description: "Spaghetti 500g", puntaje: 60 },
+        { name: "Tomate", description: "Fresco 1kg", puntaje: 10 },
+        { name: "Aceite", description: "Oliva 500ml", puntaje: 90 },
+        { name: "Queso", description: "Cheddar 200g", puntaje: 60 },
+        { name: "Pollo", description: "Pechuga 500g", puntaje: 90 },
+        { name: "Carne", description: "Molida 1kg", puntaje: 10 },
+        { name: "Pescado", description: "Salmón 300g", puntaje: 60 },
+        { name: "Jugo", description: "Naranja 1L", puntaje: 10 },
+        { name: "Azúcar", description: "Morena 1kg", puntaje: 90 },
+        { name: "Sal", description: "Gruesa 500g", puntaje: 10 },
+        { name: "Café", description: "Molido 250g", puntaje: 60 },
+        { name: "Té", description: "Negro 100g", puntaje: 10 },
+        { name: "Galletas", description: "Con chispas de chocolate 300g", puntaje: 90 },
+        { name: "Refresco", description: "Cola 2L", puntaje: 60 },
+        { name: "Mantequilla", description: "Sin sal 250g", puntaje: 10 },
+        { name: "Harina", description: "De trigo 1kg", puntaje: 90 },
+        { name: "Lechuga", description: "Orgánica 500g", puntaje: 60 },
+        { name: "Zanahorias", description: "Frescas 1kg", puntaje: 10 },
+        { name: "Cebolla", description: "Blanca 1kg", puntaje: 60 },
+        { name: "Salsa", description: "Tomate 500ml", puntaje: 10 },
+        { name: "Helado", description: "Vainilla 1L", puntaje: 60 },
+      ],
+    };
+  },
+
+  computed: {
+    sortedProducts() {
+      return this.products.slice().sort((a, b) => b.puntaje - a.puntaje);
+    },
+  },
 
   methods: {
     getEstadoLabel(puntaje) {
@@ -71,8 +77,8 @@ export default {
       if (puntaje === 90) return "urgente";
       if (puntaje === 60) return "atencion";
       if (puntaje === 10) return "normal";
-    }
-  }
+    },
+  },
 };
 </script>
 
