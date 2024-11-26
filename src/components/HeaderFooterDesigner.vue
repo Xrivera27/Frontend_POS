@@ -1,7 +1,7 @@
 <template>
     <div v-if="modelValue" class="modal-overlay">
         <div class="modal-container">
-            <!-- Header del modal -->
+            <!-- Encabezado del modal -->
             <div class="modal-header">
                 <h2>Diseñador de Encabezado y Pie</h2>
                 <button @click="$emit('update:modelValue', false)" class="close-button">
@@ -51,7 +51,8 @@
                             </p>
                             <div v-else class="dropped-elements">
                                 <div v-for="(element, index) in sections[activeSection].elements" :key="index"
-                                    class="dropped-element">
+                                    class="dropped-element" @click="handleElementClick(element)"
+                                    :class="{ 'active-element': activeElement === element }">
                                     <span class="element-icon">{{ element.icon }}</span>
                                     <span class="element-label">{{ element.label }}</span>
                                 </div>
@@ -59,29 +60,50 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Panel de propiedades -->
-                <div class="properties-panel">
-                    <h3>Propiedades</h3>
-                    <p class="properties-placeholder">Selecciona un elemento para editar sus propiedades</p>
-                </div>
             </div>
 
-            <!-- Footer del modal -->
+            <!-- Pie del modal -->
             <div class="modal-footer">
-                <button @click="$emit('update:modelValue', false)" class="cancel-button">
-                    Cancelar
-                </button>
-                <button @click="handleSave" class="save-button">
-                    Guardar
-                </button>
+                <div class="properties-container" v-if="activeElement">
+                    <div class="properties-header">
+                        <h3>Propiedades</h3>
+                        <button class="close-button" @click="activeElement = null">
+                            <span class="icon">×</span>
+                        </button>
+                    </div>
+                    <div class="properties-content">
+                        <template v-if="activeElement.type === 'text'">
+                            <div class="property-group">
+                                <label>Propiedades del Texto</label>
+                                <div>
+                                    <input type="text" class="property-input" :value="activeElement.text"
+                                        @input="handlePropertyChange({ model: 'text', value: $event.target.value })" />
+                                </div>
+                            </div>
+                        </template>
+                        <template v-else-if="activeElement.type === 'image'">
+                            <div class="property-group">
+                                <label>Propiedades de la Imagen</label>
+                                <div>
+                                    <input type="file" class="property-input" @change="handleImageUpload($event)" />
+                                    <span class="element-preview">
+                                        <img :src="activeElement.imageUrl" class="element-image-preview" />
+                                    </span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="footer-buttons">
+                        <button @click="handleRemoveElement" class="cancel-button">Eliminar</button>
+                        <button @click="handleSave" class="save-button">Guardar</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-// Script se mantiene igual que en la versión anterior
 export default {
     name: 'HeaderFooterDesigner',
     props: {
@@ -91,17 +113,17 @@ export default {
             default: false
         }
     },
+    emits: ['update:modelValue', 'save'],
     data() {
         return {
             activeSection: 'reportHeader',
+            activeElement: null,
             elementTypes: [
-                { id: 'text', label: 'Texto', icon: '📝' },
-                { id: 'image', label: 'Imagen', icon: '🖼️' },
-                { id: 'date', label: 'Fecha', icon: '📅' },
-                { id: 'pageNumber', label: 'Número de Página', icon: '🔢' },
-                { id: 'table', label: 'Tabla', icon: '🗃️' },
-                { id: 'line', label: 'Línea', icon: '➖' },
-                { id: 'signature', label: 'Firma', icon: '✍️' },
+                { id: 'text', type: 'text', label: 'Texto', icon: '📝' },
+                { id: 'image', type: 'image', label: 'Imagen', icon: '🖼️' },
+                { id: 'date', type: 'date', label: 'Fecha', icon: '📅' },
+                { id: 'pageNumber', type: 'pageNumber', label: 'Número de Página', icon: '🔢' },
+                { id: 'line', type: 'line', label: 'Línea', icon: '➖' },
             ],
             sectionButtons: [
                 { id: 'reportHeader', label: 'Encabezado de Informe' },
@@ -146,7 +168,26 @@ export default {
         },
         handleDrop(event) {
             const type = JSON.parse(event.dataTransfer.getData('text/plain'))
-            this.sections[this.activeSection].elements.push(type)
+            this.sections[this.activeSection].elements.push({ ...type, id: Math.random().toString(36).substr(2, 9), type: type.type })
+        },
+        handleElementClick(element) {
+            this.activeElement = element
+        },
+        handlePropertyChange(property) {
+            // Actualiza la propiedad del elemento activo
+            this.activeElement[property.model] = property.value
+        },
+        handleImageUpload(event) {
+            const file = event.target.files[0]
+            this.activeElement.imageUrl = URL.createObjectURL(file)
+        },
+        handleRemoveElement() {
+            // Elimina el elemento activo de la sección
+            const index = this.sections[this.activeSection].elements.indexOf(this.activeElement)
+            if (index !== -1) {
+                this.sections[this.activeSection].elements.splice(index, 1)
+            }
+            this.activeElement = null
         },
         handleSave() {
             this.$emit('save', this.sections)
@@ -608,5 +649,156 @@ export default {
 /* Ocultar input del switch */
 .enable-switch input {
     display: none;
+}
+
+.active-element {
+    background-color: #e5e7eb;
+}
+
+.properties-panel {
+    background-color: #f9fafb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    margin-top: 1rem;
+}
+
+.properties-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.property-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.property-item label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.property-item input {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    color: #1f2937;
+}
+
+
+.modal-footer.with-properties {
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.properties-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #f3f4f6;
+    border-radius: 0.5rem;
+    width: 100%;
+}
+
+.properties-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.properties-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.properties-content {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.property-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 200px;
+}
+
+.property-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.property-input {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    width: 100%;
+    background-color: white;
+}
+
+.property-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    ring: 2px;
+    ring-color: #93c5fd;
+}
+
+.footer-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.element-preview {
+    margin-left: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.element-image-preview {
+    max-height: 2rem;
+    max-width: 4rem;
+    object-fit: contain;
+    margin-left: 0.5rem;
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+    .properties-container {
+        background-color: #1f2937;
+    }
+
+    .properties-header h3 {
+        color: #e5e7eb;
+    }
+
+    .property-group label {
+        color: #9ca3af;
+    }
+
+    .property-input {
+        background-color: #111827;
+        border-color: #374151;
+        color: #e5e7eb;
+    }
+
+    .property-input:focus {
+        border-color: #60a5fa;
+    }
+
+    .element-preview {
+        color: #9ca3af;
+    }
 }
 </style>

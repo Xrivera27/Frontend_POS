@@ -28,7 +28,7 @@
           <label>Tipo de Reporte</label>
           <select v-model="reporteSeleccionado" class="select-input">
             <option value="ventas_cliente">Ventas por Cliente</option>
-            <option value="ventas_caja">Ventas por Caja</option>
+            <option value="ventas_cajero">Ventas por Cajero</option>
             <option value="ventas_sucursal">Ventas por Sucursal</option>
             <option value="ventas_empleado">Ventas por Empleado</option>
           </select>
@@ -77,7 +77,7 @@
           <tr>
             <th>Fecha</th>
             <th v-if="reporteSeleccionado === 'ventas_cliente'">Cliente</th>
-            <th v-if="reporteSeleccionado === 'ventas_caja'">Caja</th>
+            <th v-if="reporteSeleccionado === 'ventas_cajero'">Cajero</th>
             <th v-if="reporteSeleccionado === 'ventas_sucursal'">Sucursal</th>
             <th v-if="reporteSeleccionado === 'ventas_empleado'">Empleado</th>
             <th>Factura</th>
@@ -92,7 +92,7 @@
           <tr v-for="(dato, index) in datosReporte" :key="index">
             <td>{{ formatearFecha(dato.fecha) }}</td>
             <td v-if="reporteSeleccionado === 'ventas_cliente'">{{ dato.cliente }}</td>
-            <td v-if="reporteSeleccionado === 'ventas_caja'">{{ dato.caja }}</td>
+            <td v-if="reporteSeleccionado === 'ventas_cajero'">{{ dato.cajero }}</td>
             <td v-if="reporteSeleccionado === 'ventas_sucursal'">{{ dato.sucursal }}</td>
             <td v-if="reporteSeleccionado === 'ventas_empleado'">{{ dato.empleado }}</td>
             <td>{{ dato.factura }}</td>
@@ -140,21 +140,33 @@ export default {
       maxLogoSize: 40,
       filtros: {
         cliente: '',
-        caja: '',
+        cajero: '',
         sucursal: '',
         empleado: '',
         fechaInicio: '',
         fechaFin: ''
       },
+
+      headerFooterConfig: {
+        header: {
+          enabled: true,
+          text: 'Reporte de Ventas'
+        },
+        footer: {
+          enabled: true,
+          text: 'Generado el {FECHA}'
+        }
+      },
+
       clientes: [
         { id: 1, nombre: 'Cliente A' },
         { id: 2, nombre: 'Cliente B' },
         { id: 3, nombre: 'Cliente C' }
       ],
-      cajas: [
-        { id: 1, nombre: 'Caja 1' },
-        { id: 2, nombre: 'Caja 2' },
-        { id: 3, nombre: 'Caja 3' }
+      cajeros: [
+        { id: 1, nombre: 'Cajero 1' },
+        { id: 2, nombre: 'Cajero 2' },
+        { id: 3, nombre: 'Cajero 3' }
       ],
       sucursales: [
         { id: 1, nombre: 'Sucursal Central' },
@@ -170,7 +182,7 @@ export default {
         {
           fecha: '2024-03-01',
           cliente: 'Cliente A',
-          caja: 'Caja 1',
+          cajero: 'Cajero 1',
           sucursal: 'Sucursal Central',
           empleado: 'Juan Pérez',
           factura: 'FAC-001',
@@ -183,7 +195,7 @@ export default {
         {
           fecha: '2024-03-01',
           cliente: 'Cliente B',
-          caja: 'Caja 2',
+          cajero: 'Cajero 2',
           sucursal: 'Sucursal Norte',
           empleado: 'María López',
           factura: 'FAC-002',
@@ -212,8 +224,8 @@ export default {
       switch (this.reporteSeleccionado) {
         case 'ventas_cliente':
           return this.clientes;
-        case 'ventas_caja':
-          return this.cajas;
+        case 'ventas_cajero':
+          return this.cajeros;
         case 'ventas_sucursal':
           return this.sucursales;
         case 'ventas_empleado':
@@ -227,8 +239,8 @@ export default {
       switch (this.reporteSeleccionado) {
         case 'ventas_cliente':
           return 'Cliente';
-        case 'ventas_caja':
-          return 'Caja';
+        case 'ventas_cajero':
+          return 'Cajero';
         case 'ventas_sucursal':
           return 'Sucursal';
         case 'ventas_empleado':
@@ -264,12 +276,8 @@ export default {
     },
 
     handleHeaderFooterSave(config) {
-      // Guardar la configuración
+      this.headerFooterConfig = config;
       console.log('Configuración guardada:', config);
-      // Aquí puedes implementar la lógica para guardar la configuración
-      // Por ejemplo, guardarla en el estado o enviarla al backend
-
-      // Cerrar el modal después de guardar
       this.showHeaderFooterModal = false;
     },
 
@@ -299,15 +307,15 @@ export default {
 
     async cargarDatos() {
       try {
-        const [clientes, cajas, sucursales, empleados] = await Promise.all([
+        const [clientes, cajeros, sucursales, empleados] = await Promise.all([
           solicitudes.get('/clientes'),
-          solicitudes.get('/cajas'),
+          solicitudes.get('/cajeros'),
           solicitudes.get('/sucursales'),
           solicitudes.get('/empleados')
         ]);
 
         this.clientes = clientes.data;
-        this.cajas = cajas.data;
+        this.cajeros = cajeros.data;
         this.sucursales = sucursales.data;
         this.empleados = empleados.data;
       } catch (error) {
@@ -400,7 +408,7 @@ export default {
     },
 
     calculateLogoDimensions(originalWidth, originalHeight) {
-      const targetHeight = 25;
+      const targetHeight = 20;
       //const difference = Math.abs(originalWidth - originalHeight);
       const ratio = originalWidth / originalHeight;
       const newWidth = targetHeight * ratio;
@@ -412,9 +420,15 @@ export default {
     },
 
     exportarPDF() {
+      if (!this.datosReporte.length) {
+        console.error('No hay datos disponibles para generar el reporte PDF.');
+        return;
+      }
+
       const doc = new jsPDF();
       const margin = 10;
 
+      // Agregar logo
       if (this.logoUrl) {
         const img = new Image();
         img.src = this.logoUrl;
@@ -423,17 +437,20 @@ export default {
         doc.addImage(this.logoUrl, 'PNG', margin, margin, dimensions.width, dimensions.height);
       }
 
+      // Agregar encabezado
+      if (this.headerFooterConfig.header.enabled) {
+        doc.setFontSize(14);
+        doc.text(this.headerFooterConfig.header.text, 105, 20, { align: 'center' });
+      }
 
-      // Add title
-      doc.setFontSize(18);
-      doc.text('Reporte de Ventas', 105, 20, { align: 'center' });
-
-      // Add filters information
+      // Agregar filtros
       doc.setFontSize(10);
-      doc.text(`Período: ${this.filtros.fechaInicio} al ${this.filtros.fechaFin}`, 15, 40);
-      doc.text(`Tipo de Reporte: ${this.reporteSeleccionado.replace('_', ' ').toUpperCase()}`, 15, 47);
+      let y = this.headerFooterConfig.header.enabled ? 30 : 20;
+      doc.text(`Período: ${this.filtros.fechaInicio} al ${this.filtros.fechaFin}`, 15, y);
+      y += 7;
+      doc.text(`Tipo de Reporte: ${this.reporteSeleccionado.replace('_', ' ').toUpperCase()}`, 15, y);
 
-      // Create table
+      // Crear tabla
       const headers = [['Fecha', 'Factura', 'Valor Exonerado', 'Valor Exento', 'Valor Gravado', 'ISV', 'Total']];
 
       const data = this.datosReporte.map(item => [
@@ -449,7 +466,7 @@ export default {
       doc.autoTable({
         head: headers,
         body: data,
-        startY: 55,
+        startY: this.headerFooterConfig.header.enabled ? 50 : 40,
         theme: 'grid',
         styles: {
           fontSize: 8,
@@ -462,15 +479,16 @@ export default {
         }
       });
 
-      // Add totals
-      const finalY = doc.previousAutoTable.finalY + 10;
-      doc.text(`Total Exonerado: ${this.formatearMoneda(this.totales.exonerado)}`, 15, finalY);
-      doc.text(`Total Exento: ${this.formatearMoneda(this.totales.exento)}`, 15, finalY + 7);
-      doc.text(`Total Gravado: ${this.formatearMoneda(this.totales.gravado)}`, 15, finalY + 14);
-      doc.text(`Total ISV: ${this.formatearMoneda(this.totales.isv)}`, 15, finalY + 21);
-      doc.text(`Total General: ${this.formatearMoneda(this.totales.total)}`, 15, finalY + 28);
+      // Agregar pie de página
+      if (this.headerFooterConfig.footer.enabled) {
+        const finalY = doc.previousAutoTable.finalY + 10;
+        const fecha = new Date().toLocaleDateString();
+        const footerText = this.headerFooterConfig.footer.text.replace('{FECHA}', fecha);
+        doc.setFontSize(10);
+        doc.text(footerText, 15, finalY, { maxWidth: 180 });
+      }
 
-      // Save PDF
+      // Guardar PDF
       doc.save(`reporte_ventas_${this.reporteSeleccionado}.pdf`);
     },
 
