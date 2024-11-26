@@ -594,11 +594,11 @@ export default {
 
 /* Layout Principal */
 .wrapper {
-  padding: 16px;
+  padding: 8px; /* Reducido el padding */
   display: flex;
-  height: 80%;
+  height: 90%; /* Aumentado ligeramente */
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start; /* Alineación hacia arriba */
 }
 
 /* Contenedores de Input */
@@ -606,7 +606,7 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin: 10px;
+  margin: 5px; /* Reducido el margen */
 }
 
 .input-container label {
@@ -618,7 +618,7 @@ export default {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 1%;
+  margin-bottom: 0.5%; /* Reducido el margen inferior */
 }
 
 .input-container-exterior {
@@ -629,18 +629,18 @@ export default {
 
 #div_nombre {
   width: 80%;
-  padding-left: 20px;
+  padding-left: 10px; /* Reducido el padding */
 }
 
 /* Campos de entrada */
 .campo {
-  padding: 0px 10px;
+  padding: 5px 8px; /* Reducido el padding */
   width: 100%;
   font-size: 14px;
-  min-height: 30px;
-  border-radius: 10px;
+  min-height: 28px; /* Reducido ligeramente */
+  border-radius: 8px; /* Más compacto */
   border: 1px solid #ddd;
-  width: 200px;
+  width: 180px; /* Reducido el ancho */
 }
 
 .label-input {

@@ -22,7 +22,6 @@
         <input type="date" id="start-date" v-model="startDate">
         <label for="end-date">Hasta: </label>
         <input type="date" id="end-date" v-model="endDate">
-
       </div>
 
       <!-- Botón de exportación PDF -->
@@ -36,15 +35,26 @@
 
     <!-- Tabla exportable -->
     <div class="table-container" v-pdf-export ref="table">
-      <table class="table">
+      <!-- Indicador de carga -->
+      <div v-if="loading" class="loading-indicator">
+        Cargando ventas...
+      </div>
+
+      <!-- Mensaje si no hay datos -->
+      <div v-else-if="paginatedVentas.length === 0" class="no-data">
+        No se encontraron ventas para mostrar.
+      </div>
+
+      <table v-else class="table">
         <thead>
           <tr>
             <th>#</th>
-            <th>Codigo</th>
-            <th>Nombre</th>
-            <th>Cantidad</th>
-            <th>Precio Unitario</th>
+            <th>Código</th>
+            <th>Empleado</th>
+            <th>Cliente</th>
+            <th>Subtotal</th>
             <th>Descuento</th>
+            <th>Total Impuesto</th>
             <th>Total</th>
             <th>Fecha y Hora</th>
             <th>Acciones</th>
@@ -55,11 +65,12 @@
             <td>{{ index + 1 }}</td>
             <td>{{ venta.codigo }}</td>
             <td>{{ venta.nombre }}</td>
-            <td>{{ venta.cantidad }}</td>
-            <td>{{ venta.preciounitario }}</td>
-            <td>{{ venta.descuento }}</td>
-            <td>{{ venta.total }}</td>
-            <td>{{ venta.fechaHora }}</td>
+            <td>{{ venta.cliente }}</td>
+            <td>{{ formatCurrency(venta.subtotal) }}</td>
+            <td>{{ formatCurrency(venta.descuento) }}</td>
+            <td>{{ formatCurrency(venta.total_impuesto) }}</td>
+            <td>{{ formatCurrency(venta.total) }}</td>
+            <td>{{ formatDateTime(venta.fechaHora) }}</td>
             <td>
               <button id="btnDetalles" class="btn btn-info" @click="showDetalles(index)">
                 <i class="bi bi-eye-fill"></i>
@@ -75,47 +86,74 @@
       <div class="modal-content">
         <h2 class="h2-modal-content">Detalles de Venta</h2>
 
-        <table class="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Codigo</th>
-              <th>Nombre</th>
-              <th>Cantidad</th>
-              <th>Precio Unitario</th>
-              <th>Descuento</th>
-              <th>RTN Cliente</th>
-              <th>Subtotal</th>
-              <th>Total</th>
-              <th>Fecha y Hora</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(detalle, index) in ventaDetalles" :key="index">
-              <td>{{ index + 1 }}</td>
-              <td>{{ detalle.codigo }}</td>
-              <td>{{ detalle.nombre }}</td>
-              <td>{{ detalle.cantidad }}</td>
-              <td>{{ detalle.preciounitario }}</td>
-              <td>{{ detalle.descuento }}</td>
-              <td>{{ detalle.rtnCliente }}</td>
-              <td>{{ detalle.subtotal }}</td>
-              <td>{{ detalle.total }}</td>
-              <td>{{ detalle.fechaHora }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="detalles-grid">
+          <!-- Información Principal -->
+          <div class="detalles-seccion">
+            <h3>Información de Factura</h3>
+            <p><strong>Número de Factura:</strong> {{ ventaDetalles[0]?.numero_factura }}</p>
+            <p><strong>CAI:</strong> {{ ventaDetalles[0]?.cai }}</p>
+            <p><strong>Fecha y Hora:</strong> {{ ventaDetalles[0]?.fechaHora }}</p>
+          </div>
 
-        <button id="BtnCerrarDetalles" class="btn btn-secondary" @click="closeDetallesModal">Cerrar</button>
+          <!-- Información de Cliente y Empleado -->
+          <div class="detalles-seccion">
+            <h3>Información de Cliente y Empleado</h3>
+            <p><strong>Cliente:</strong> {{ ventaDetalles[0]?.cliente }}</p>
+            <p><strong>RTN Cliente:</strong> {{ ventaDetalles[0]?.rtnCliente }}</p>
+            <p><strong>Atendido por:</strong> {{ ventaDetalles[0]?.nombre }}</p>
+          </div>
+
+          <!-- Productos -->
+          <div class="detalles-seccion productos-tabla">
+            <h3>Productos</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unit.</th>
+                  <th>Descuento</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="producto in ventaDetalles[0]?.productos" :key="producto.codigo">
+                  <td>{{ producto.codigo }}</td>
+                  <td>{{ producto.nombre }}</td>
+                  <td>{{ producto.cantidad }}</td>
+                  <td>{{ formatCurrency(producto.precio_unitario) }}</td>
+                  <td>{{ formatCurrency(producto.descuento) }}</td>
+                  <td>{{ formatCurrency(producto.total) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Resumen Financiero -->
+          <div class="detalles-seccion">
+            <h3>Resumen Financiero</h3>
+            <p><strong>Subtotal:</strong> {{ formatCurrency(ventaDetalles[0]?.subtotal) }}</p>
+            <p><strong>Descuento Total:</strong> {{ formatCurrency(ventaDetalles[0]?.descuento) }}</p>
+            <p><strong>ISV:</strong> {{ formatCurrency(ventaDetalles[0]?.total_impuesto) }}</p>
+            <p><strong>Total:</strong> {{ formatCurrency(ventaDetalles[0]?.total) }}</p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="BtnCerrarDetalles" class="btn btn-secondary" @click="closeDetallesModal">
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
+import AdminVentas from '../../services/Soliadminventa';
 
 export default {
   components: {
@@ -125,110 +163,124 @@ export default {
   data() {
     return {
       titulo: 'Administrar Ventas',
-      searchQuery: '', // Para la búsqueda de texto
-      itemsPerPage: "", // Control de paginación
-      startDate: '', // Fecha de inicio para el filtro
-      endDate: '', // Fecha de fin para el filtro
-      isDetallesModalOpen: false, // Modal de detalles
-      ventaDetalles: [], // Detalles de la venta seleccionada
-      ventas: [
-        { codigo: '1504', nombre: 'Mortal Kombat X', cantidad: 1, preciounitario: 'L. 450.00', descuento: 'L. 50.00', total: 'L. 400.00', fechaHora: '2017-12-11 14:30' },
-        { codigo: '1505', nombre: 'Call of Duty: Modern Warfare', cantidad: 2, preciounitario: 'L. 600.00', descuento: 'L. 60.00', total: 'L. 1140.00', fechaHora: '2020-05-21 09:15' },
-        { codigo: '1506', nombre: 'God of War', cantidad: 1, preciounitario: 'L. 700.00', descuento: 'L. 70.00', total: 'L. 630.00', fechaHora: '2018-04-15 11:45' },
-        { codigo: '1507', nombre: 'The Last of Us Part II', cantidad: 3, preciounitario: 'L. 800.00', descuento: 'L. 80.00', total: 'L. 2240.00', fechaHora: '2020-06-19 16:20' },
-        // Más datos de ventas aquí...
-      ],
+      searchQuery: '', 
+      itemsPerPage: "", 
+      startDate: '', 
+      endDate: '', 
+      isDetallesModalOpen: false,
+      ventaDetalles: [],
+      ventas: [],
       columns: [
         { header: '#', dataKey: 'index' },
         { header: 'Código', dataKey: 'codigo' },
-        { header: 'Nombre', dataKey: 'nombre' },
-        { header: 'Cantidad', dataKey: 'cantidad' },
-        { header: 'Precio Unitario', dataKey: 'preciounitario' },
+        { header: 'Empleado', dataKey: 'nombre' },
+        { header: 'Cliente', dataKey: 'cliente' },
+        { header: 'Subtotal', dataKey: 'subtotal' },
         { header: 'Descuento', dataKey: 'descuento' },
+        { header: 'Total Impuesto', dataKey: 'total_impuesto' },
         { header: 'Total', dataKey: 'total' },
         { header: 'Fecha y Hora', dataKey: 'fechaHora' }
       ],
-      rows: [] // Aquí se almacenarán las filas generadas para la tabla
+      rows: [],
+      loading: false,
+      error: null
     };
   },
   computed: {
-    // Filtro de ventas basado en búsqueda y fechas
     filteredVentas() {
       return this.ventas.filter(venta => {
-        const ventaFecha = new Date(venta.fechaHora); // Convierte la fecha de la venta a un objeto Date
-        const matchesSearchQuery =
-          venta.codigo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          venta.nombre.toLowerCase().includes(this.searchQuery.toLowerCase());
-        const matchesDateRange =
-          (!this.startDate || ventaFecha >= new Date(this.startDate)) &&
-          (!this.endDate || ventaFecha <= new Date(this.endDate));
+        const ventaFecha = new Date(venta.fechaHora);
+        
+        const matchesSearchQuery = 
+          String(venta.codigo).toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          venta.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          venta.cliente.toLowerCase().includes(this.searchQuery.toLowerCase());
+
+        const matchesDateRange = 
+          (!this.startDate || ventaFecha >= new Date(this.startDate + 'T00:00:00')) &&
+          (!this.endDate || ventaFecha <= new Date(this.endDate + 'T23:59:59'));
 
         return matchesSearchQuery && matchesDateRange;
       });
     },
-    // Paginación de ventas
+
     paginatedVentas() {
-      if (this.itemsPerPage === "" || this.itemsPerPage === null) {
-        return this.filteredVentas; // Si no hay paginación, muestra todas las ventas filtradas
-      } else {
-        return this.filteredVentas.slice(0, parseInt(this.itemsPerPage)); // Limita el número de ventas según la paginación
+      if (!this.itemsPerPage) {
+        return this.filteredVentas;
       }
+      return this.filteredVentas.slice(0, parseInt(this.itemsPerPage));
     },
-    // Genera las filas que se mostrarán en la tabla
+
     filteredRows() {
       return this.paginatedVentas.map((venta, index) => ({
         index: index + 1,
         codigo: venta.codigo,
         nombre: venta.nombre,
-        cantidad: venta.cantidad,
-        preciounitario: venta.preciounitario,
-        descuento: venta.descuento,
-        total: venta.total,
-        fechaHora: venta.fechaHora
+        cliente: venta.cliente,
+        subtotal: this.formatCurrency(venta.subtotal),
+        descuento: this.formatCurrency(venta.descuento),
+        total: this.formatCurrency(venta.total),
+        total_impuesto: this.formatCurrency(venta.total_impuesto),
+        fechaHora: this.formatDateTime(venta.fechaHora)
       }));
     }
   },
   methods: {
-    // Mostrar detalles de la venta seleccionada
-    showDetalles(index) {
-      this.ventaDetalles = [
-        {
-          codigo: this.ventas[index].codigo,
-          nombre: this.ventas[index].nombre,
-          cantidad: this.ventas[index].cantidad,
-          preciounitario: this.ventas[index].preciounitario,
-          descuento: this.ventas[index].descuento,
-          rtnCliente: '12345678901234',
-          subtotal: this.ventas[index].cantidad * parseFloat(this.ventas[index].preciounitario.replace('L. ', '')),
-          total: this.ventas[index].total,
-          fechaHora: this.ventas[index].fechaHora
-        }
-      ];
-      this.isDetallesModalOpen = true;
+    formatCurrency(value) {
+      return `L. ${Number(value).toFixed(2)}`;
     },
-    // Cerrar el modal de detalles
+
+    formatDateTime(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleString('es-HN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    },
+
+    async loadVentas() {
+      this.loading = true;
+      this.error = null;
+      try {
+        const ventasData = await AdminVentas.obtenerVentas();
+        this.ventas = ventasData;
+        this.generateRows();
+      } catch (error) {
+        console.error('Error al cargar ventas:', error);
+        this.error = 'Error al cargar las ventas. Por favor, intente nuevamente.';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async showDetalles(index) {
+    try {
+        console.log('Mostrando detalles de venta:', this.ventas[index]); // Debug
+        const idVenta = this.ventas[index].id_venta || this.ventas[index].codigo; // Usar cualquiera que esté disponible
+        console.log('ID de venta a consultar:', idVenta); // Debug
+        const detalleVenta = await AdminVentas.obtenerDetalleVenta(idVenta);
+        
+        this.ventaDetalles = [detalleVenta];
+        this.isDetallesModalOpen = true;
+    } catch (error) {
+        console.error('Error al cargar detalles de la venta:', error);
+        alert('Error al cargar los detalles de la venta. Por favor, intente nuevamente.');
+    }
+},
+
     closeDetallesModal() {
       this.isDetallesModalOpen = false;
       this.ventaDetalles = [];
     },
-    // Generar las filas para mostrar en la tabla
+
     generateRows() {
-      this.rows = this.paginatedVentas.map((venta, index) => ({
-        index: index + 1,
-        codigo: venta.codigo,
-        nombre: venta.nombre,
-        cantidad: venta.cantidad,
-        preciounitario: venta.preciounitario,
-        descuento: venta.descuento,
-        total: venta.total,
-        fechaHora: venta.fechaHora
-      }));
-      console.log('Filas generadas:', this.rows);
+      this.rows = this.filteredRows;
     },
-    // Aplicar el filtro por fechas y regenerar las filas
-    applyDateFilter() {
-      this.generateRows(); // Regenerar las filas después de aplicar el filtro de fechas
-    },
+
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
@@ -238,16 +290,17 @@ export default {
     }
   },
   watch: {
-    // Cuando cambie la paginación o el filtro, actualiza las filas
-    paginatedVentas() {
-      this.generateRows();
+    paginatedVentas: {
+      handler() {
+        this.generateRows();
+      },
+      deep: true
     }
   },
-  mounted() {
-    // Genera las filas al cargar el componente
-    this.generateRows();
+  async mounted() {
+    await this.loadVentas();
     document.title = "Administrar Ventas";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    this.changeFavicon('/img/spiderman.ico');
   }
 };
 </script>
@@ -684,5 +737,142 @@ export default {
 .dark .modalShowConfirm-no {
   background-color: #6c757d;
   color: white;
+}
+
+/* Añadir al final del <style> existente */
+.loading-indicator {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+/* Para el modo oscuro */
+.dark .loading-indicator,
+.dark .no-data {
+  color: #aaa;
+  background-color: #2d2d2d;
+}
+
+.detalles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.detalles-seccion {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.detalles-seccion h3 {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.detalles-seccion p {
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.detalles-seccion strong {
+  color: #555;
+  font-weight: 600;
+}
+
+.modal-footer {
+  margin-top: 20px;
+  text-align: right;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+/* Modo Oscuro */
+.dark .detalles-seccion {
+  background-color: #2d2d2d;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.dark .detalles-seccion h3 {
+  color: #fff;
+}
+
+.dark .detalles-seccion strong {
+  color: #ddd;
+}
+
+.dark .modal-footer {
+  border-top-color: #404040;
+}
+
+.dark .loading-indicator,
+.dark .no-data {
+  color: #aaa;
+  background-color: #2d2d2d;
+}
+
+
+/* Añadir estilos específicos para la tabla de productos */
+.productos-tabla {
+  grid-column: 1 / -1;
+  margin-top: 1rem;
+}
+
+.productos-tabla .table {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+}
+
+.productos-tabla th,
+.productos-tabla td {
+  text-align: left;
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+}
+
+.productos-tabla th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* Modo oscuro para la tabla de productos */
+.dark .productos-tabla th {
+  background-color: #383838;
+  color: #fff;
+}
+
+.dark .productos-tabla td {
+  border-color: #404040;
 }
 </style>

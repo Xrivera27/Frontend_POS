@@ -119,4 +119,34 @@ export default {
     font-weight: bold;
     color: #a38655;
 }
+
+/* Contenedor y botón */
+.dark .btn-config {
+    background-color: #2d2d2d;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.dark .btn-config:hover {
+    background-color: #383838;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Textos */
+.dark .id_usuario {
+    color: #c09d62;
+}
+
+.dark .rol {
+    color: #808080;
+}
+
+/* Icono */
+.dark #campana {
+    color: #c09d62;
+}
+
+/* Estado activo */
+.dark .router-link-active {
+    color: #c09d62;
+}
 </style>
