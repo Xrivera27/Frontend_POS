@@ -292,16 +292,10 @@ export default {
       });
     },
 
-    handleProductSelected(product) {
-      const existingProduct = this.productosLista.find(p => p.codigo_producto === product.codigo_producto);
-
-      if (existingProduct) {
-        existingProduct.cantidad += 1;
-      } else {
-        this.productosLista.push({
-          ...product,
-        });
-      }
+    async handleProductSelected(product) {
+      this.addQuery = product.codigo_producto;
+      this.totalCantidad = product.cantidad;
+      await this.agregarProducto();
 
       this.closeBuscarProductoModal();
     },
