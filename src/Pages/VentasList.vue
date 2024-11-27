@@ -3,6 +3,12 @@
     <AperturaCajaModal :isVisible="isAperturaCajaModalVisible" @confirmar="handleAperturaCaja" />
     <ModalLoading :isLoading="isModalLoading" />
     <PaymentAnimationModal :isVisible="isPaymentAnimationVisible" @complete="handlePaymentComplete" />
+    <FacturaModal 
+  :isVisible="isFacturaModalVisible"
+  :idVenta="venta?.id_venta"
+  :idUsuario="id_usuario"
+  @close="closeFacturaModal"
+/>
     <div class="main-container">
       <div class="header-container">
         <!-- Aquí estaba el error, había un div y template anidados innecesariamente -->
@@ -171,6 +177,7 @@ import AperturaCajaModal from '@/components/modalesCrearVenta/AperturaCajaModal.
 import solicitudes from "../../services/solicitudes.js";
 import { getInfoBasic, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
 //cajaUsuario
+import FacturaModal from '@/components/FacturaModal.vue'; // Nuevo
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
 
@@ -185,11 +192,13 @@ export default {
     ModalLoading,
     GuardarVentaModal,
     RecuperarVentaModal,
-    // VentaPendienteModal
+    FacturaModal
   },
   data() {
     return {
       isAperturaCajaModalVisible: false,
+      isFacturaModalVisible: false,  // Agregado para el modal de factura
+      facturaActual: '',
       cajaAbierta: false,
       minRows: 15,
       numTicket: '000-001-01-00000001',
@@ -222,10 +231,21 @@ export default {
       ventaPendiente: false,
       isPaymentAnimationVisible: false,
     };
+
   },
 
   watch: {
     // Observadores para mantener sincronizado el estado de los modales
+
+    isFacturaModalVisible(newVal) {
+      this.isAnyModalOpen = newVal;
+      if (newVal) {
+        this.pauseMainKeyboardEvents();
+      } else {
+        this.resumeMainKeyboardEvents();
+      }
+    },
+    
     isModalVisible(newVal) {
       this.isAnyModalOpen = newVal;
       if (newVal) {
@@ -277,6 +297,15 @@ export default {
   },
 
   methods: {
+
+    closeFacturaModal() {
+      this.isFacturaModalVisible = false;
+      this.$nextTick(() => {
+        this.$refs.codigoRef?.focus();
+      });
+    },
+
+
     async salir() {
       this.logout();
     },
@@ -462,16 +491,26 @@ export default {
         if (!pagando) {
           throw 'No se realizo el pago';
         }
+
+        // Guardar el número de factura
+        this.facturaActual = this.venta?.facturas?.[0]?.factura_SAR?.[0]?.numero_factura_SAR || pagando.numero_factura || '';
+        
+        // Cerrar el modal de pago y mostrar factura
         this.isPagoModalVisible = false;
+        this.isFacturaModalVisible = true;
+        
+        // La animación de pago se mostrará después de cerrar la factura
         this.isPaymentAnimationVisible = true;
       } catch (error) {
         notificaciones('error', error.message);
       }
     },
 
+
     handlePaymentComplete() {
       this.isPaymentAnimationVisible = false;
       this.limpiarPagado();
+      this.facturaActual = '';
     },
 
     async openPagoModal() {
@@ -619,6 +658,7 @@ export default {
       this.venta = [];
       this.factura = [];
       this.clienteSeleccionado = null;
+      this.facturaActual = '';
     },
 
     procesarEnter() {
@@ -857,6 +897,8 @@ export default {
   beforeUnmount() {
     window.removeEventListener("keydown", this.handleKeyPress);
   },
+
+  
 };
 </script>
 

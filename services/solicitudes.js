@@ -5,6 +5,8 @@ import axios from 'axios';
  
 
   export default  {
+    homeUrl,
+    
     async solicitarUsuario (parametros)  {
         try {
             const url = `${homeUrl}${parametros}`;
@@ -190,3 +192,6 @@ import axios from 'axios';
         }
       }
   }
+
+
+
