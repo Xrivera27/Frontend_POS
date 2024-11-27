@@ -2,71 +2,103 @@
   <div class="report-wrapper">
     <PageHeader :titulo="titulo" />
 
-    <div class="report-header">
-      <div class="logo-and-title">
-        <div class="logo-container">
-          <img v-if="logoUrl" :src="logoUrl" alt="Logo empresa" class="company-logo" />
-        </div>
-        <div class="buttons-container">
-          <label class="upload-label">
-            <input type="file" @change="handleLogoUpload" accept="image/*" class="hidden-input" />
-            <span class="upload-button">{{ logoUrl ? 'Cambiar Logo' : 'Subir Logo' }}</span>
-          </label>
-          <button @click="showHeaderFooterModal = true" class="header-footer-btn">
-            Configurar Header/Footer
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <HeaderFooterDesigner v-model="showHeaderFooterModal" :config="headerFooterConfig" @save="handleHeaderFooterSave" />
-
-    <!-- Filtros -->
-    <div class="filters-section">
-      <div class="filter-row">
-        <div class="filter-group">
-          <label>Tipo de Reporte</label>
-          <select v-model="reporteSeleccionado" class="select-input">
-            <option value="ventas_cliente">Ventas por Cliente</option>
-            <option value="ventas_cajero">Ventas por Cajero</option>
-            <option value="ventas_sucursal">Ventas por Sucursal</option>
-            <option value="ventas_empleado">Ventas por Empleado</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label>{{ labelFiltro }}</label>
-          <select v-model="valorFiltro" class="select-input">
-            <option value="">Todos</option>
-            <option v-for="opcion in opcionesFiltro" :key="opcion.id" :value="opcion.id">
-              {{ opcion.nombre }}
-            </option>
-          </select>
-        </div>
-      </div>
-
-      <div class="filter-row dates">
-        <div class="date-group">
-          <button @click="setHoy" class="hoy-btn">Hoy</button>
-          <div class="date-inputs">
-            <div class="date-field">
-              <label>Fecha Inicio</label>
-              <input type="date" v-model="filtros.fechaInicio" @change="validarFechas" />
+    <div class="report-body">
+      <!-- Create a flex container for the main content -->
+      <div class="main-content">
+        <!-- Left side - Filters -->
+        <div class="filters-section">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label>Tipo de Reporte</label>
+              <select v-model="reporteSeleccionado" class="select-input">
+                <option value="ventas_cliente">Ventas por Cliente</option>
+                <option value="ventas_cajero">Ventas por Cajero</option>
+                <option value="ventas_sucursal">Ventas por Sucursal</option>
+                <option value="ventas_empleado">Ventas por Empleado</option>
+              </select>
             </div>
-            <div class="date-field">
-              <label>Fecha Fin</label>
-              <input type="date" v-model="filtros.fechaFin" @change="validarFechas" :min="filtros.fechaInicio" />
+
+            <div class="filter-group">
+              <label>{{ labelFiltro }}</label>
+              <select v-model="valorFiltro" class="select-input">
+                <option value="">Todos</option>
+                <option v-for="opcion in opcionesFiltro" :key="opcion.id" :value="opcion.id">
+                  {{ opcion.nombre }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-row dates">
+            <div class="date-group">
+              <button @click="setHoy" class="hoy-btn">Hoy</button>
+              <div class="date-inputs">
+                <div class="date-field">
+                  <label>Fecha Inicio</label>
+                  <input type="date" v-model="filtros.fechaInicio" @change="validarFechas" />
+                </div>
+                <div class="date-field">
+                  <label>Fecha Fin</label>
+                  <input type="date" v-model="filtros.fechaFin" @change="validarFechas" :min="filtros.fechaInicio" />
+                </div>
+              </div>
+              <button @click="showHeaderFooterModal = true" class="header-footer-btn">
+                Configurar Header/Footer
+              </button>
+              <!-- Botones -->
+              <div class="button-group">
+                <button @click="generarReporte('pdf')" class="btn pdf-btn" :disabled="!fechasValidas">PDF</button>
+                <button @click="generarReporte('excel')" class="btn excel-btn" :disabled="!fechasValidas">EXCEL</button>
+                <button @click="generarReporte('preview')" class="btn generate-btn"
+                  :disabled="!fechasValidas">Generar</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Botones -->
-    <div class="button-group">
-      <button @click="generarReporte('pdf')" class="btn pdf-btn" :disabled="!fechasValidas">PDF</button>
-      <button @click="generarReporte('excel')" class="btn excel-btn" :disabled="!fechasValidas">EXCEL</button>
-      <button @click="generarReporte('preview')" class="btn generate-btn" :disabled="!fechasValidas">Generar</button>
+
+        <div class="controls-section">
+          <div class="buttons-container">
+          </div>
+          <div class="image-upload-wrapper">
+            <div class="image-drop-area" :class="{ 'dragging': isDragging, 'has-image': logoUrl }"
+              @dragenter.prevent="isDragging = true" @dragleave.prevent="onDragLeave" @dragover.prevent
+              @drop.prevent="handleDrop">
+              <div v-if="isDragging" class="drag-overlay">
+                <span>Suelta aquí</span>
+              </div>
+
+              <div v-else-if="!logoUrl" class="upload-content">
+                <div class="upload-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                </div>
+                <h3>Arrastra y suelta una imagen</h3>
+                <p class="separator">o</p>
+                <button class="upload-button" @click="triggerFileInput">Sube una foto</button>
+                <p class="upload-info">El archivo debe ser un JPEG, JPG, PNG o WebP de hasta 40 MB</p>
+              </div>
+
+              <div v-else class="preview-content">
+                <img v-if="logoUrl" :src="logoUrl" alt="Logo preview" class="preview-image" />
+                <div class="image-actions">
+                  <button class="remove-button" @click="removeImage">Eliminar imagen</button>
+                  <button class="change-button" @click="triggerFileInput">Cambiar imagen</button>
+                </div>
+              </div>
+            </div>
+            <input type="file" ref="fileInput" @change="handleFileChange" accept="image/jpeg,image/jpg,image/webp"
+              class="hidden-input" />
+          </div>
+        </div>
+      </div>
+      <HeaderFooterDesigner v-model="showHeaderFooterModal" :config="headerFooterConfig"
+        @save="handleHeaderFooterSave" />
+      <!-- Rest of the content remains the same -->
     </div>
 
     <!-- Tabla de resultados -->
@@ -126,6 +158,13 @@ import 'jspdf-autotable';
 
 export default {
   name: 'ReporteVentas',
+  props: {
+    modelValue: {
+      type: String,
+      default: ''
+    }
+  },
+  emits: ['update:modelValue'],
   components: {
     PageHeader,
     HeaderFooterDesigner
@@ -134,7 +173,8 @@ export default {
     return {
       showHeaderFooterModal: false, // Asegurarse que está definido en data
       titulo: 'Reportería',
-      logoUrl: localStorage.getItem('logoEmpresa') || null,
+      isDragging: false,
+      logoUrl: null,
       reporteSeleccionado: 'ventas_cliente',
       errorFecha: false,
       maxLogoSize: 40,
@@ -309,6 +349,56 @@ export default {
 
       img.style.width = `${newWidth}px`;
       img.style.height = `${newHeight}px`;
+    },
+
+    triggerFileInput() {
+      this.$refs.fileInput.click();
+    },
+
+    handleDrop(e) {
+      this.isDragging = false;
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        this.processFile(file);
+      }
+    },
+
+    handleFileChange(e) {
+      const file = e.target.files[0];
+      if (file) {
+        this.processFile(file);
+      }
+    },
+
+    processFile(file) {
+      if (!file.type.match('image/jpeg|image/jpg|image/webp|image/png')) {
+        alert('Por favor selecciona un archivo JPEG, JPG o WebP');
+        return;
+      }
+
+      if (file.size > 40 * 1024 * 1024) {
+        alert('El archivo debe ser menor a 40 MB');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.logoUrl = e.target.result; // Asignar directamente a logoUrl
+        localStorage.setItem('logoEmpresa', e.target.result);
+      };
+      reader.readAsDataURL(file);
+    },
+
+    removeImage() {
+      this.logoUrl = null;
+      localStorage.removeItem('logoEmpresa');
+    },
+
+    onDragLeave(e) {
+      // Verifica si el cursor salió realmente del contenedor
+      if (!e.relatedTarget || !this.$el.contains(e.relatedTarget)) {
+        this.isDragging = false;
+      }
     },
 
     async cargarDatos() {
@@ -726,6 +816,19 @@ export default {
   box-sizing: border-box;
 }
 
+.main-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  margin: 2rem 0;
+  min-height: 300px;
+}
+
+.filters-section,
+.controls-section {
+  width: 45%;
+}
+
 .report-container {
   background-color: #f5f5f5;
   color: #000;
@@ -740,6 +843,8 @@ export default {
 .report-header {
   width: 100%;
   padding: 20px 0;
+  flex-direction: column;
+  align-items: center;
 }
 
 .report-title {
@@ -790,14 +895,9 @@ label {
   margin-bottom: clamp(0.5rem, 2vw, 1rem);
 }
 
-.buttons-container {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
 .header-footer-btn {
-  padding: 8px 16px;
+  padding: 0.5rem 1rem;
+  margin-top: 1rem;
   background-color: #007bff;
   color: white;
   border: none;
@@ -906,6 +1006,10 @@ tbody td {
   padding: 16px;
   width: 100%;
   overflow-x: hidden;
+}
+
+.report-body {
+  margin-top: 2rem;
 }
 
 /* Media Queries */
@@ -1091,14 +1195,41 @@ tbody td {
   -webkit-text-fill-color: #fff !important;
 }
 
+.controls-section {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Update existing styles */
+.filters-section {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .logo-container {
-  width: 150px;
-  height: 60px;
+  margin-top: 1rem;
+  width: 100%;
+  height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 20px;
-  flex-shrink: 0;
+  border: 1px dashed #ddd;
+  border-radius: 4px;
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.upload-button,
+.header-footer-btn {
+  width: 100%;
+  text-align: center;
 }
 
 .company-logo {
@@ -1126,6 +1257,7 @@ tbody td {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  width: 45%;
 }
 
 .filter-row {
@@ -1232,11 +1364,14 @@ input[type="date"] {
 }
 
 .upload-button {
-  padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #4a90e2;
   color: white;
-  border-radius: 4px;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 25px;
   cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
 }
 
 .hidden-input {
@@ -1327,5 +1462,157 @@ input[type="date"] {
   background-color: #2d2d2d;
   color: white;
   border-color: #404040;
+}
+
+.image-upload-wrapper {
+  height: 100%;
+  margin-top: 2rem;
+}
+
+.image-drop-area {
+  height: 100%;
+  min-height: 200px;
+  padding: 1rem;
+  border: 2px dashed #ccc;
+  position: relative;
+  display: flex;
+  align-items: top;
+  justify-content: center;
+  border-radius: 8px;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.image-drop-area:hover {
+  border-color: #4a90e2;
+  background: #f0f4f8;
+}
+
+.drag-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(74, 144, 226, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.upload-icon {
+  color: #666;
+}
+
+.upload-button {
+  background-color: #4a90e2;
+  color: white;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.upload-button:hover {
+  background-color: #357abd;
+}
+
+.upload-info {
+  color: #666;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.separator {
+  margin: 0.25rem 0;
+  color: #666;
+}
+
+.benefits {
+  display: flex;
+  gap: 1.5rem;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.benefits span {
+  color: #4a90e2;
+}
+
+.preview-content {
+  position: relative;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  align-items: center;
+}
+
+.image-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.remove-button,
+.change-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.3s;
+}
+
+.remove-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.change-button {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.remove-button:hover {
+  background-color: #c82333;
+}
+
+.change-button:hover {
+  background-color: #357abd;
+}
+
+.hidden-input {
+  display: none;
+}
+
+/* Dark mode */
+.dark .image-drop-area {
+  background: #2d2d2d;
+  border-color: #404040;
+}
+
+.dark .upload-icon,
+.dark .separator,
+.dark .upload-info {
+  color: #999;
 }
 </style>
