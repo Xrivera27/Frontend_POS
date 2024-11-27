@@ -1,103 +1,110 @@
+// HeaderFooterDesigner.vue
 <template>
-    <div v-if="modelValue" class="modal-overlay">
-        <div class="modal-container">
-            <!-- Encabezado del modal -->
-            <div class="modal-header">
-                <h2>Diseñador de Encabezado y Pie</h2>
-                <button @click="$emit('update:modelValue', false)" class="close-button">
-                    <span class="icon">×</span>
-                </button>
-            </div>
+    <div v-if="isOpen" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">Configurar Encabezado y Pie de Página</h2>
 
-            <!-- Contenido del modal -->
-            <div class="modal-content">
-                <!-- Selector de sección -->
-                <div class="section-selector">
-                    <button v-for="section in sectionButtons" :key="section.id" @click="activeSection = section.id"
-                        :class="['section-button', { active: activeSection === section.id }]">
-                        {{ section.label }}
-                    </button>
+            <!-- Encabezado -->
+            <div class="section">
+                <div class="section-header">
+                    <h3>Encabezado</h3>
+                    <label class="switch">
+                        <input type="checkbox" v-model="localConfig.header.enabled">
+                        <span class="slider"></span>
+                    </label>
                 </div>
 
-                <!-- Área de diseño -->
-                <div class="design-area">
-                    <!-- Panel de elementos disponibles -->
-                    <div class="elements-panel">
-                        <h3>Elementos Disponibles</h3>
-                        <div class="elements-list">
-                            <div v-for="type in elementTypes" :key="type.id" class="element-item" draggable="true"
-                                @dragstart="handleDragStart($event, type)">
-                                <span class="element-icon">{{ type.icon }}</span>
-                                <span class="element-label">{{ type.label }}</span>
-                            </div>
-                        </div>
+                <div v-if="localConfig.header.enabled" class="form-group">
+                    <div class="input-group">
+                        <label>Título del Reporte</label>
+                        <input type="text" v-model="localConfig.header.text" placeholder="Ej: Reporte de Ventas">
                     </div>
 
-                    <!-- Área de edición -->
-                    <div class="editing-area">
-                        <div class="editing-header">
-                            <h3>{{ getSectionTitle }}</h3>
-                            <label class="enable-switch">
-                                <input type="checkbox" v-model="sections[activeSection].enabled" />
-                                <span class="switch-slider"></span>
-                                <span class="switch-label">Habilitar</span>
-                            </label>
-                        </div>
+                    <div class="input-group">
+                        <label>Nombre de la Empresa</label>
+                        <input type="text" v-model="localConfig.header.companyName" placeholder="Nombre de la Empresa">
+                    </div>
 
-                        <!-- Área donde se arrastran los elementos -->
-                        <div class="drop-zone" @dragover.prevent @drop="handleDrop($event)">
-                            <p v-if="!sections[activeSection].elements.length" class="drop-placeholder">
-                                Arrastra elementos aquí para diseñar esta sección
-                            </p>
-                            <div v-else class="dropped-elements">
-                                <div v-for="(element, index) in sections[activeSection].elements" :key="index"
-                                    class="dropped-element" @click="handleElementClick(element)"
-                                    :class="{ 'active-element': activeElement === element }">
-                                    <span class="element-icon">{{ element.icon }}</span>
-                                    <span class="element-label">{{ element.label }}</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="input-group">
+                        <label>Dirección</label>
+                        <input type="text" v-model="localConfig.header.address" placeholder="Dirección">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Teléfono</label>
+                        <input type="text" v-model="localConfig.header.phone" placeholder="Teléfono">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Correo Electrónico</label>
+                        <input type="text" v-model="localConfig.header.email" placeholder="Correo Electrónico">
                     </div>
                 </div>
             </div>
 
-            <!-- Pie del modal -->
+            <div class="divider"></div>
+
+            <!-- Pie de Página -->
+            <div class="section">
+                <div class="section-header">
+                    <h3>Pie de Página</h3>
+                    <label class="switch">
+                        <input type="checkbox" v-model="localConfig.footer.enabled">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div v-if="localConfig.footer.enabled" class="form-group">
+                    <div class="input-group">
+                        <label>Tipo de Pie de Página</label>
+                        <select v-model="localConfig.footer.template">
+                            <option value="basic">Básico (solo fecha)</option>
+                            <option value="detailed">Detallado (fecha y hora)</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+
+                    <div v-if="localConfig.footer.template === 'custom'" class="input-group">
+                        <label>Texto Personalizado</label>
+                        <input type="text" v-model="localConfig.footer.customText"
+                            placeholder="Usar {FECHA} para fecha actual">
+                        <small class="help-text">
+                            Variables disponibles: {FECHA}, {HORA}, {PAGINA}, {TOTAL_PAGINAS}
+                        </small>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Alineación</label>
+                        <select v-model="localConfig.footer.alignment">
+                            <option value="left">Izquierda</option>
+                            <option value="center">Centro</option>
+                            <option value="right">Derecha</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vista Previa -->
+            <div class="preview-section">
+                <h4>Vista Previa</h4>
+                <div class="preview-content">
+                    <div v-if="localConfig.header.enabled" class="preview-header">
+                        <p class="preview-company">{{ localConfig.header.companyName }}</p>
+                        <p>{{ localConfig.header.address }}</p>
+                        <p>Tel: {{ localConfig.header.phone }}</p>
+                        <p>{{ localConfig.header.email }}</p>
+                        <p class="preview-title">{{ localConfig.header.text }}</p>
+                    </div>
+
+                    <div v-if="localConfig.footer.enabled" class="preview-footer" :class="localConfig.footer.alignment">
+                        {{ getPreviewFooterText() }}
+                    </div>
+                </div>
+            </div>
+
             <div class="modal-footer">
-                <div class="properties-container" v-if="activeElement">
-                    <div class="properties-header">
-                        <h3>Propiedades</h3>
-                        <button class="close-button" @click="activeElement = null">
-                            <span class="icon">×</span>
-                        </button>
-                    </div>
-                    <div class="properties-content">
-                        <template v-if="activeElement.type === 'text'">
-                            <div class="property-group">
-                                <label>Propiedades del Texto</label>
-                                <div>
-                                    <input type="text" class="property-input" :value="activeElement.text"
-                                        @input="handlePropertyChange({ model: 'text', value: $event.target.value })" />
-                                </div>
-                            </div>
-                        </template>
-                        <template v-else-if="activeElement.type === 'image'">
-                            <div class="property-group">
-                                <label>Propiedades de la Imagen</label>
-                                <div>
-                                    <input type="file" class="property-input" @change="handleImageUpload($event)" />
-                                    <span class="element-preview">
-                                        <img :src="activeElement.imageUrl" class="element-image-preview" />
-                                    </span>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                    <div class="footer-buttons">
-                        <button @click="handleRemoveElement" class="cancel-button">Eliminar</button>
-                        <button @click="handleSave" class="save-button">Guardar</button>
-                    </div>
-                </div>
+                <button class="btn btn-secondary" @click="closeModal">Cancelar</button>
+                <button class="btn btn-primary" @click="saveChanges">Guardar Cambios</button>
             </div>
         </div>
     </div>
@@ -105,700 +112,385 @@
 
 <script>
 export default {
-    name: 'HeaderFooterDesigner',
     props: {
-        modelValue: {
-            type: Boolean,
-            required: true,
-            default: false
-        }
-    },
-    emits: ['update:modelValue', 'save'],
-    data() {
-        return {
-            activeSection: 'reportHeader',
-            activeElement: null,
-            elementTypes: [
-                { id: 'text', type: 'text', label: 'Texto', icon: '📝' },
-                { id: 'image', type: 'image', label: 'Imagen', icon: '🖼️' },
-                { id: 'date', type: 'date', label: 'Fecha', icon: '📅' },
-                { id: 'pageNumber', type: 'pageNumber', label: 'Número de Página', icon: '🔢' },
-                { id: 'line', type: 'line', label: 'Línea', icon: '➖' },
-            ],
-            sectionButtons: [
-                { id: 'reportHeader', label: 'Encabezado de Informe' },
-                { id: 'reportFooter', label: 'Pie de Informe' },
-                { id: 'pageHeader', label: 'Encabezado de Página' },
-                { id: 'pageFooter', label: 'Pie de Página' }
-            ],
-            sections: {
-                reportHeader: {
+        modelValue: Boolean,
+        config: {
+            type: Object,
+            default: () => ({
+                header: {
                     enabled: true,
-                    elements: []
+                    text: 'Reporte de Ventas',
+                    companyName: '',
+                    address: '',
+                    phone: '',
+                    email: ''
                 },
-                reportFooter: {
+                footer: {
                     enabled: true,
-                    elements: []
-                },
-                pageHeader: {
-                    enabled: true,
-                    elements: []
-                },
-                pageFooter: {
-                    enabled: true,
-                    elements: []
+                    template: 'basic',
+                    customText: 'Generado el {FECHA}',
+                    alignment: 'center'
                 }
-            }
+            })
         }
     },
+
+    emits: ['update:modelValue', 'save'],
+
+    data() {
+        // Asegurarnos de que todas las propiedades estén inicializadas
+        const defaultConfig = {
+            header: {
+                enabled: true,
+                text: 'Reporte de Ventas',
+                companyName: '',
+                address: '',
+                phone: '',
+                email: ''
+            },
+            footer: {
+                enabled: true,
+                template: 'basic',
+                customText: 'Generado el {FECHA}',
+                alignment: 'center'
+            }
+        };
+
+        // Combinar la configuración proporcionada con los valores por defecto
+        const mergedConfig = {
+            header: { ...defaultConfig.header, ...this.config?.header },
+            footer: { ...defaultConfig.footer, ...this.config?.footer }
+        };
+
+        return {
+            localConfig: mergedConfig
+        };
+    },
+
     computed: {
-        getSectionTitle() {
-            const sectionMap = {
-                reportHeader: 'Encabezado de Informe',
-                reportFooter: 'Pie de Informe',
-                pageHeader: 'Encabezado de Página',
-                pageFooter: 'Pie de Página'
+        isOpen: {
+            get() {
+                return this.modelValue;
+            },
+            set(value) {
+                this.$emit('update:modelValue', value);
             }
-            return sectionMap[this.activeSection]
         }
     },
+
     methods: {
-        handleDragStart(event, type) {
-            event.dataTransfer.setData('text/plain', JSON.stringify(type))
-        },
-        handleDrop(event) {
-            const type = JSON.parse(event.dataTransfer.getData('text/plain'))
-            this.sections[this.activeSection].elements.push({ ...type, id: Math.random().toString(36).substr(2, 9), type: type.type })
-        },
-        handleElementClick(element) {
-            this.activeElement = element
-        },
-        handlePropertyChange(property) {
-            // Actualiza la propiedad del elemento activo
-            this.activeElement[property.model] = property.value
-        },
-        handleImageUpload(event) {
-            const file = event.target.files[0]
-            this.activeElement.imageUrl = URL.createObjectURL(file)
-        },
-        handleRemoveElement() {
-            // Elimina el elemento activo de la sección
-            const index = this.sections[this.activeSection].elements.indexOf(this.activeElement)
-            if (index !== -1) {
-                this.sections[this.activeSection].elements.splice(index, 1)
+        getPreviewFooterText() {
+            if (!this.localConfig?.footer?.enabled) return '';
+
+            const now = new Date();
+            const fecha = now.toLocaleDateString();
+            const hora = now.toLocaleTimeString();
+
+            switch (this.localConfig.footer.template) {
+                case 'basic':
+                    return `Generado el ${fecha}`;
+                case 'detailed':
+                    return `Generado el ${fecha} a las ${hora}`;
+                case 'custom':
+                    return (this.localConfig.footer.customText || 'Generado el {FECHA}')
+                        .replace('{FECHA}', fecha)
+                        .replace('{HORA}', hora)
+                        .replace('{PAGINA}', '1')
+                        .replace('{TOTAL_PAGINAS}', '1');
+                default:
+                    return `Generado el ${fecha}`;
             }
-            this.activeElement = null
         },
-        handleSave() {
-            this.$emit('save', this.sections)
-            this.$emit('update:modelValue', false)
+
+        closeModal() {
+            this.isOpen = false;
+        },
+
+        saveChanges() {
+            // Asegurarnos de que todos los campos necesarios existan
+            const configToSave = {
+                header: {
+                    enabled: this.localConfig.header.enabled,
+                    text: this.localConfig.header.text || 'Reporte de Ventas',
+                    companyName: this.localConfig.header.companyName || '',
+                    address: this.localConfig.header.address || '',
+                    phone: this.localConfig.header.phone || '',
+                    email: this.localConfig.header.email || ''
+                },
+                footer: {
+                    enabled: this.localConfig.footer.enabled,
+                    template: this.localConfig.footer.template || 'basic',
+                    customText: this.localConfig.footer.customText || 'Generado el {FECHA}',
+                    alignment: this.localConfig.footer.alignment || 'center'
+                }
+            };
+
+            this.$emit('save', configToSave);
+            this.closeModal();
+        },
+
+        // Método para manejar cambios en la configuración
+        updateConfig() {
+            // Asegurarnos de que las propiedades requeridas existan
+            if (!this.localConfig.header) {
+                this.localConfig.header = {
+                    enabled: true,
+                    text: 'Reporte de Ventas',
+                    companyName: '',
+                    address: '',
+                    phone: '',
+                    email: ''
+                };
+            }
+
+            if (!this.localConfig.footer) {
+                this.localConfig.footer = {
+                    enabled: true,
+                    template: 'basic',
+                    customText: 'Generado el {FECHA}',
+                    alignment: 'center'
+                };
+            }
         }
+    },
+
+    watch: {
+        config: {
+            handler(newConfig) {
+                // Actualizar la configuración local cuando cambie la prop
+                this.localConfig = {
+                    header: { ...this.localConfig.header, ...newConfig?.header },
+                    footer: { ...this.localConfig.footer, ...newConfig?.footer }
+                };
+                this.updateConfig();
+            },
+            deep: true
+        }
+    },
+
+    created() {
+        // Asegurarnos de que la configuración esté correctamente inicializada
+        this.updateConfig();
     }
 }
 </script>
 
 <style scoped>
-/* Estilos base y contenedor del modal */
 .modal-overlay {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
-    align-items: center;
     justify-content: center;
-    z-index: 50;
-    backdrop-filter: blur(4px);
-    animation: fadeIn 0.2s ease-out;
-}
-
-.modal-container {
-    background-color: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    width: 90%;
-    max-width: 72rem;
-    max-height: 90vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    animation: slideIn 0.3s ease-out;
-}
-
-/* Header del modal */
-.modal-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
-    background: linear-gradient(to right, #3b82f6, #2563eb);
+    z-index: 1000;
 }
 
-.modal-header h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: white;
-}
-
-.close-button {
-    border-radius: 9999px;
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    transition: background-color 0.2s;
-}
-
-.close-button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.close-button .icon {
-    font-size: 1.5rem;
-    line-height: 1;
-}
-
-/* Contenido del modal */
 .modal-content {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
     overflow-y: auto;
 }
 
-/* Selector de sección */
-.section-selector {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+.modal-title {
+    margin: 0 0 1.5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
 }
 
-.section-button {
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s;
-    font-size: 0.875rem;
-    font-weight: 500;
-    background-color: #f3f4f6;
+.section {
+    margin-bottom: 1.5rem;
 }
 
-.section-button:hover {
-    background-color: #e5e7eb;
-}
-
-.section-button.active {
-    background-color: #3b82f6;
-    color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Área de diseño */
-.design-area {
-    display: flex;
-    gap: 1.5rem;
-    min-height: 400px;
-}
-
-/* Panel de elementos */
-.elements-panel {
-    width: 16rem;
-    background-color: #f9fafb;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
-}
-
-.elements-panel h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #1f2937;
-}
-
-.elements-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.element-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    background-color: white;
-    border-radius: 0.5rem;
-    cursor: move;
-    transition: all 0.2s;
-    border: 1px solid #f3f4f6;
-}
-
-.element-item:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transform: scale(1.02);
-    border-color: #bfdbfe;
-}
-
-.element-icon {
-    font-size: 1.25rem;
-}
-
-.element-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-}
-
-/* Área de edición */
-.editing-area {
-    flex: 1;
-    border: 2px dashed #e5e7eb;
-    border-radius: 0.5rem;
-    padding: 1rem;
-}
-
-.editing-header {
+.section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
 }
 
-.editing-header h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1f2937;
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-/* Switch personalizado */
-.enable-switch {
+.input-group {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 0.5rem;
+}
+
+.input-group label {
+    font-weight: 500;
+}
+
+input,
+select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.divider {
+    height: 1px;
+    background-color: #ddd;
+    margin: 1.5rem 0;
+}
+
+.preview-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.preview-content {
+    background-color: #f8f8f8;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.preview-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.preview-company {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.preview-title {
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+.preview-footer {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.preview-footer.left {
+    text-align: left;
+}
+
+.preview-footer.center {
+    text-align: center;
+}
+
+.preview-footer.right {
+    text-align: right;
+}
+
+.modal-footer {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: none;
     cursor: pointer;
 }
 
-.switch-slider {
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.help-text {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+/* Switch styles */
+.switch {
     position: relative;
     display: inline-block;
-    width: 2.5rem;
-    height: 1.25rem;
-    background-color: #e5e7eb;
-    border-radius: 9999px;
-    transition: background-color 0.2s;
+    width: 50px;
+    height: 24px;
 }
 
-.enable-switch input:checked+.switch-slider {
-    background-color: #3b82f6;
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
-.switch-slider:before {
-    content: '';
+.slider {
     position: absolute;
-    left: 0.25rem;
-    top: 0.25rem;
-    width: 0.75rem;
-    height: 0.75rem;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
     background-color: white;
-    border-radius: 9999px;
-    transition: transform 0.2s;
+    transition: .4s;
+    border-radius: 50%;
 }
 
-.enable-switch input:checked+.switch-slider:before {
-    transform: translateX(1.25rem);
+input:checked+.slider {
+    background-color: #007bff;
 }
 
-.switch-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #6b7280;
+input:checked+.slider:before {
+    transform: translateX(26px);
 }
 
-/* Zona de drop */
-.drop-zone {
-    background-color: #f9fafb;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    min-height: 300px;
-    border: 2px dashed #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-
-.drop-zone:hover {
-    border-color: #3b82f6;
-    background-color: #eff6ff;
-}
-
-.drop-placeholder {
-    color: #6b7280;
-    text-align: center;
-    font-weight: 500;
-}
-
-.dropped-elements {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.dropped-element {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    background-color: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s;
-}
-
-.dropped-element:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transform: scale(1.01);
-}
-
-/* Panel de propiedades */
-.properties-panel {
-    background-color: #f9fafb;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
-}
-
-.properties-panel h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #1f2937;
-}
-
-.properties-placeholder {
-    font-size: 0.875rem;
-    color: #6b7280;
-}
-
-/* Footer del modal */
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    padding: 1.5rem;
-    border-top: 1px solid #e5e7eb;
-    background-color: #f9fafb;
-}
-
-.cancel-button {
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    color: #374151;
-    font-weight: 500;
-    background-color: #f3f4f6;
-    transition: background-color 0.2s;
-}
-
-.cancel-button:hover {
-    background-color: #e5e7eb;
-}
-
-.save-button {
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
+/* Dark mode styles */
+:root[class~="dark"] .modal-content {
+    background-color: #1a1a1a;
     color: white;
-    font-weight: 500;
-    background-color: #3b82f6;
-    transition: background-color 0.2s;
 }
 
-.save-button:hover {
-    background-color: #2563eb;
+:root[class~="dark"] input,
+:root[class~="dark"] select {
+    background-color: #333;
+    border-color: #444;
+    color: white;
 }
 
-/* Animaciones */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+:root[class~="dark"] .preview-content {
+    background-color: #2a2a2a;
 }
 
-@keyframes slideIn {
-    from {
-        transform: translateY(-20px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+:root[class~="dark"] .divider {
+    background-color: #444;
 }
 
-/* Modo oscuro */
-@media (prefers-color-scheme: dark) {
-    .modal-container {
-        background-color: #1f2937;
-    }
-
-    .modal-header {
-        border-bottom-color: #374151;
-    }
-
-    .elements-panel {
-        background-color: #111827;
-        border-color: #374151;
-    }
-
-    .elements-panel h3,
-    .editing-header h3,
-    .properties-panel h3 {
-        color: #e5e7eb;
-    }
-
-    .element-item {
-        background-color: #1f2937;
-        border-color: #374151;
-    }
-
-    .element-item:hover {
-        border-color: #1e40af;
-    }
-
-    .element-label {
-        color: #d1d5db;
-    }
-
-    .editing-area {
-        border-color: #374151;
-    }
-
-    .drop-zone {
-        background-color: #111827;
-        border-color: #374151;
-    }
-
-    .drop-zone:hover {
-        background-color: rgba(59, 130, 246, 0.1);
-    }
-
-    .dropped-element {
-        background-color: #1f2937;
-    }
-
-    .switch-slider {
-        background-color: #4b5563;
-    }
-
-    .switch-label {
-        color: #9ca3af;
-    }
-
-    .properties-panel {
-        background-color: #111827;
-        border-color: #374151;
-    }
-
-    .properties-placeholder {
-        color: #9ca3af;
-    }
-
-    .modal-footer {
-        background-color: #111827;
-        border-top-color: #374151;
-    }
-
-    .cancel-button {
-        background-color: #374151;
-        color: #e5e7eb;
-    }
-
-    .cancel-button:hover {
-        background-color: #4b5563;
-    }
+:root[class~="dark"] .preview-footer {
+    color: #999;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .design-area {
-        flex-direction: column;
-    }
-
-    .elements-panel {
-        width: 100%;
-    }
-
-    .section-selector {
-        overflow-x: auto;
-        padding: 0.5rem 0;
-    }
-
-    .section-button {
-        white-space: nowrap;
-    }
-}
-
-/* Ocultar input del switch */
-.enable-switch input {
-    display: none;
-}
-
-.active-element {
-    background-color: #e5e7eb;
-}
-
-.properties-panel {
-    background-color: #f9fafb;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
-    margin-top: 1rem;
-}
-
-.properties-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.property-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.property-item label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #1f2937;
-}
-
-.property-item input {
-    padding: 0.5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-    color: #1f2937;
-}
-
-
-.modal-footer.with-properties {
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.properties-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-    background-color: #f3f4f6;
-    border-radius: 0.5rem;
-    width: 100%;
-}
-
-.properties-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.properties-header h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #374151;
-    margin: 0;
-}
-
-.properties-content {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.property-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    min-width: 200px;
-}
-
-.property-group label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #4b5563;
-}
-
-.property-input {
-    padding: 0.5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    width: 100%;
-    background-color: white;
-}
-
-.property-input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    ring: 2px;
-    ring-color: #93c5fd;
-}
-
-.footer-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    width: 100%;
-}
-
-.element-preview {
-    margin-left: 0.5rem;
-    font-size: 0.875rem;
-    color: #6b7280;
-}
-
-.element-image-preview {
-    max-height: 2rem;
-    max-width: 4rem;
-    object-fit: contain;
-    margin-left: 0.5rem;
-}
-
-/* Modo oscuro */
-@media (prefers-color-scheme: dark) {
-    .properties-container {
-        background-color: #1f2937;
-    }
-
-    .properties-header h3 {
-        color: #e5e7eb;
-    }
-
-    .property-group label {
-        color: #9ca3af;
-    }
-
-    .property-input {
-        background-color: #111827;
-        border-color: #374151;
-        color: #e5e7eb;
-    }
-
-    .property-input:focus {
-        border-color: #60a5fa;
-    }
-
-    .element-preview {
-        color: #9ca3af;
-    }
+:root[class~="dark"] .help-text {
+    color: #999;
 }
 </style>

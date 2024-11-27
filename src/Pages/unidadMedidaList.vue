@@ -1,7 +1,7 @@
 <template>
-  <PageHeader :titulo="titulo" />
 
   <div class="categorias-wrapper">
+    <PageHeader :titulo="titulo" />
     <div class="opciones">
       <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
         Unidad</button>

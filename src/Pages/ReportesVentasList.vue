@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <HeaderFooterDesigner v-model="showHeaderFooterModal" @save="handleHeaderFooterSave" />
+    <HeaderFooterDesigner v-model="showHeaderFooterModal" :config="headerFooterConfig" @save="handleHeaderFooterSave" />
 
     <!-- Filtros -->
     <div class="filters-section">
@@ -150,11 +150,17 @@ export default {
       headerFooterConfig: {
         header: {
           enabled: true,
-          text: 'Reporte de Ventas'
+          text: 'Reporte de Ventas',
+          companyName: '',
+          address: '',
+          phone: '',
+          email: ''
         },
         footer: {
           enabled: true,
-          text: 'Generado el {FECHA}'
+          template: 'basic',
+          customText: 'Generado el {FECHA}',
+          alignment: 'center'
         }
       },
 
@@ -286,7 +292,7 @@ export default {
       if (!img) return;
 
       const { naturalWidth, naturalHeight } = img;
-      const maxSize = 50;
+      const maxSize = 30;
       const aspectRatio = naturalWidth / naturalHeight;
 
       let newWidth, newHeight;
@@ -407,50 +413,171 @@ export default {
       reader.readAsDataURL(file);
     },
 
-    calculateLogoDimensions(originalWidth, originalHeight) {
-      const targetHeight = 20;
-      //const difference = Math.abs(originalWidth - originalHeight);
+    calculateDimensions(originalWidth, originalHeight, maxWidth, maxHeight) {
+      if (!originalWidth || !originalHeight) {
+        return {
+          width: maxWidth || 30,
+          height: maxHeight || 30
+        };
+      }
+
       const ratio = originalWidth / originalHeight;
-      const newWidth = targetHeight * ratio;
+      let newWidth = originalWidth;
+      let newHeight = originalHeight;
+
+      if (ratio > 1) {
+        newWidth = maxWidth;
+        newHeight = maxWidth / ratio;
+
+        if (newHeight > maxHeight) {
+          newHeight = maxHeight;
+          newWidth = maxHeight * ratio;
+        }
+      } else {
+        newHeight = maxHeight;
+        newWidth = maxHeight * ratio;
+
+        if (newWidth > maxWidth) {
+          newWidth = maxWidth;
+          newHeight = maxWidth / ratio;
+        }
+      }
 
       return {
-        width: Math.round(newWidth),
-        height: targetHeight
+        width: newWidth,
+        height: newHeight
       };
     },
 
-    exportarPDF() {
+    // Función para obtener las dimensiones reales de la imagen
+    async getImageDimensions(imageUrl) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          resolve({
+            width: img.width,
+            height: img.height
+          });
+        };
+        img.src = imageUrl;
+      });
+    },
+
+    // Función modificada para exportar PDF
+    async exportarPDF() {
       if (!this.datosReporte.length) {
         console.error('No hay datos disponibles para generar el reporte PDF.');
         return;
       }
 
-      const doc = new jsPDF();
-      const margin = 10;
+      // Configuración inicial del documento
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
 
-      // Agregar logo
+      // Definir márgenes y dimensiones
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
+      const margin = {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 20
+      };
+
+      let currentY = margin.top;
+
+      // Agregar logo con dimensiones calculadas
       if (this.logoUrl) {
-        const img = new Image();
-        img.src = this.logoUrl;
+        try {
+          const maxLogoWidth = 30;
+          const maxLogoHeight = 30;
 
-        const dimensions = this.calculateLogoDimensions(img.width, img.height);
-        doc.addImage(this.logoUrl, 'PNG', margin, margin, dimensions.width, dimensions.height);
+          const originalDimensions = await this.getImageDimensions(this.logoUrl);
+          const dimensions = this.calculateDimensions(
+            originalDimensions.width,
+            originalDimensions.height,
+            maxLogoWidth,
+            maxLogoHeight
+          );
+
+          // Logo a la izquierda
+          doc.addImage(
+            this.logoUrl,
+            'PNG',
+            margin.left,
+            currentY,
+            dimensions.width,
+            dimensions.height
+          );
+
+          // Ajustar el espacio para el texto del encabezado
+          const logoOffset = dimensions.width + 10;
+
+          // Nombre de la empresa y datos centrados a la derecha del logo
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          const companyName = this.headerFooterConfig.header.companyName || 'Nombre de la Empresa';
+          doc.text(companyName, (pageWidth + logoOffset) / 2, currentY + 8, { align: 'center' });
+
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          const address = this.headerFooterConfig.header.address || 'Dirección de la empresa';
+          doc.text(address, (pageWidth + logoOffset) / 2, currentY + 14, { align: 'center' });
+
+          const phone = this.headerFooterConfig.header.phone || 'Teléfono: (XXX)XXX-XXXX';
+          doc.text(phone, (pageWidth + logoOffset) / 2, currentY + 20, { align: 'center' });
+
+          currentY += dimensions.height + 15;
+        } catch (error) {
+          console.error('Error al procesar el logo:', error);
+          currentY += 30; // Espacio por si falla el logo
+        }
       }
 
-      // Agregar encabezado
-      if (this.headerFooterConfig.header.enabled) {
-        doc.setFontSize(14);
-        doc.text(this.headerFooterConfig.header.text, 105, 20, { align: 'center' });
+      // Dibujar marco para el título
+      const titleText = this.headerFooterConfig.header.text || 'Reporte de Ventas';
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.5);
+
+      // Calcular dimensiones del marco
+      doc.setFontSize(14);
+      const titleWidth = doc.getTextWidth(titleText);
+      const frameWidth = titleWidth + 20;
+      const frameHeight = 10;
+      const frameX = (pageWidth - frameWidth) / 2;
+
+      // Dibujar el marco
+      doc.rect(frameX, currentY, frameWidth, frameHeight);
+
+      // Agregar el título centrado dentro del marco
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text(titleText, pageWidth / 2, currentY + 7, { align: 'center' });
+
+      currentY += frameHeight + 10;
+
+      // Metadata del reporte
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+
+      // Información del filtro (similar al "Empleado:" en tu ejemplo)
+      const filterLabel = this.getFilterLabel();
+      const filterValue = this.getFilterValue();
+      if (filterLabel && filterValue) {
+        doc.text(`${filterLabel}: ${filterValue}`, margin.left, currentY);
+        currentY += 7;
       }
 
-      // Agregar filtros
-      doc.setFontSize(10);
-      let y = this.headerFooterConfig.header.enabled ? 30 : 20;
-      doc.text(`Período: ${this.filtros.fechaInicio} al ${this.filtros.fechaFin}`, 15, y);
-      y += 7;
-      doc.text(`Tipo de Reporte: ${this.reporteSeleccionado.replace('_', ' ').toUpperCase()}`, 15, y);
+      // Agregar línea separadora
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.1);
+      doc.line(margin.left, currentY, pageWidth - margin.right, currentY);
+      currentY += 5;
 
-      // Crear tabla
+      // Configurar tabla con estilo más simple
       const headers = [['Fecha', 'Factura', 'Valor Exonerado', 'Valor Exento', 'Valor Gravado', 'ISV', 'Total']];
 
       const data = this.datosReporte.map(item => [
@@ -466,30 +593,99 @@ export default {
       doc.autoTable({
         head: headers,
         body: data,
-        startY: this.headerFooterConfig.header.enabled ? 50 : 40,
-        theme: 'grid',
+        startY: currentY,
+        margin: { left: margin.left, right: margin.right },
+        theme: 'plain',
         styles: {
-          fontSize: 8,
+          fontSize: 10,
           cellPadding: 2,
-          overflow: 'linebreak'
+          lineColor: [200, 200, 200],
+          lineWidth: 0.1
         },
         headStyles: {
-          fillColor: [0, 123, 255],
-          textColor: [255, 255, 255]
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontSize: 10,
+          fontStyle: 'bold',
+          halign: 'left'
+        },
+        columnStyles: {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 25 },
+          2: { cellWidth: 28, halign: 'right' },
+          3: { cellWidth: 28, halign: 'right' },
+          4: { cellWidth: 28, halign: 'right' },
+          5: { cellWidth: 25, halign: 'right' },
+          6: { cellWidth: 25, halign: 'right' }
+        },
+
+        didDrawPage: (data) => {
+          if (this.headerFooterConfig?.footer?.enabled) {
+            const footerY = pageHeight - 15;
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+
+            let footerText = '';
+            const now = new Date();
+            const fecha = now.toLocaleDateString();
+            const totalPages = doc.internal.getNumberOfPages();
+
+            // Usar el texto personalizado si está en modo personalizado
+            if (this.headerFooterConfig.footer.template === 'custom') {
+              footerText = this.headerFooterConfig.footer.customText
+                .replace('{FECHA}', fecha)
+                .replace('{TOTAL_PAGINAS}', totalPages)
+                .replace('{PAGINA}', data.pageNumber);
+            } else if (this.headerFooterConfig.footer.template === 'basic') {
+              footerText = `Generado el ${fecha}`;
+            } else if (this.headerFooterConfig.footer.template === 'detailed') {
+              const hora = now.toLocaleTimeString();
+              footerText = `Generado el ${fecha} a las ${hora}`;
+            }
+
+            // Determinar la posición X según la alineación
+            let x;
+            const alignment = this.headerFooterConfig.footer.alignment;
+
+            switch (alignment) {
+              case 'left':
+                x = margin.left;
+                break;
+              case 'right':
+                x = pageWidth - margin.right;
+                break;
+              case 'center':
+              default:
+                x = pageWidth / 2;
+                break;
+            }
+
+            // Añadir el texto del pie de página con la alineación correspondiente
+            doc.text(footerText, x, footerY, { align: alignment });
+          }
         }
+
       });
 
-      // Agregar pie de página
-      if (this.headerFooterConfig.footer.enabled) {
-        const finalY = doc.previousAutoTable.finalY + 10;
-        const fecha = new Date().toLocaleDateString();
-        const footerText = this.headerFooterConfig.footer.text.replace('{FECHA}', fecha);
-        doc.setFontSize(10);
-        doc.text(footerText, 15, finalY, { maxWidth: 180 });
-      }
-
       // Guardar PDF
-      doc.save(`reporte_ventas_${this.reporteSeleccionado}.pdf`);
+      const fileName = `reporte_${this.reporteSeleccionado}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+    },
+
+    // Métodos auxiliares
+    getFilterLabel() {
+      switch (this.reporteSeleccionado) {
+        case 'ventas_cliente': return 'Cliente';
+        case 'ventas_cajero': return 'Cajero';
+        case 'ventas_sucursal': return 'Sucursal';
+        case 'ventas_empleado': return 'Empleado';
+        default: return '';
+      }
+    },
+
+    getFilterValue() {
+      const tipo = this.reporteSeleccionado.split('_')[1];
+      return this.filtros[tipo] || 'Todos';
     },
 
     formatearFecha(fecha) {
