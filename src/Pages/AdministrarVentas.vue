@@ -69,37 +69,27 @@
 
       <!-- Nueva Paginación -->
       <div class="pagination-wrapper">
-        <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredVentas.length) }} de {{ filteredVentas.length }} registros
-        </div>
-        <div class="pagination-container">
-          <button 
-            class="pagination-button" 
-            :disabled="currentPage === 1"
-            @click="previousPage"
-          >
-            Anterior
-          </button>
-          
-          <button 
-            v-for="page in pages" 
-            :key="page"
-            class="pagination-button"
-            :class="{ active: currentPage === page }"
-            @click="changePage(page)"
-          >
-            {{ page }}
-          </button>
-          
-          <button 
-            class="pagination-button" 
-            :disabled="currentPage === totalPages"
-            @click="nextPage"
-          >
-            Siguiente
-          </button>
-        </div>
-      </div>
+  <div class="pagination-info">
+    Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredVentas.length) }} de {{ filteredVentas.length }} registros
+  </div>
+  <div class="pagination-container">
+    <button 
+      class="pagination-button" 
+      :disabled="currentPage === 1"
+      @click="previousPage"
+    >
+      Anterior
+    </button>
+    
+    <button 
+      class="pagination-button" 
+      :disabled="currentPage === totalPages"
+      @click="nextPage"
+    >
+      Siguiente
+    </button>
+  </div>
+</div>
     </div>
 
     <!-- Modal para mostrar detalles de venta -->

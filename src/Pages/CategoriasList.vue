@@ -14,24 +14,12 @@
         <button class="button-unidad-medida">U. Medida</button>
       </RouterLink>
 
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select> registros
-        </span>
-      </div>
-
       <!-- Barra de búsqueda -->
       <div class="search-bar">
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar categoría..." />
       </div>
     </div>
+
     <div class="table-container">
       <table class="table">
         <thead>
@@ -45,7 +33,7 @@
         </thead>
         <tbody>
           <tr v-for="(categoria, index) in paginatedCategorias" :key="index">
-            <td>{{ index + 1 }}</td>
+            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
             <td>{{ categoria.nombre_categoria }}</td>
             <td>{{ categoria.descripcion }}</td>
             <td>{{ categoria.totalProd }}</td>
@@ -58,6 +46,31 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Paginación -->
+   
+<div class="pagination-wrapper">
+  <div class="pagination-info">
+    Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredCategorias.length) }} de {{ filteredCategorias.length }} registros
+  </div>
+  <div class="pagination-container">
+    <button 
+      class="pagination-button" 
+      :disabled="currentPage === 1"
+      @click="previousPage"
+    >
+      Anterior
+    </button>
+    
+    <button 
+      class="pagination-button" 
+      :disabled="currentPage === totalPages"
+      @click="nextPage"
+    >
+      Siguiente
+    </button>
+  </div>
+</div>
     </div>
 
     <div class="modal" v-if="showConfirmModal">
@@ -85,7 +98,6 @@
           <input v-model="categoriaForm.nombre_categoria" type="text" required>
         </div>
 
-        <!-- Campo de descripción estilizado como textarea -->
         <div class="form-group">
           <label>Descripción:</label>
           <textarea v-model="categoriaForm.descripcion" class="descriptionForm" required rows="4"></textarea>
@@ -102,22 +114,17 @@
 </template>
 
 <script>
-//componentes
 import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
 import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
 import { useToast } from "vue-toastification";
-
-// importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
-
 const { deleteCategoria } = require('../../services/categoriaSolicitudes');
 
 export default {
-  components:
-  {
+  components: {
     btnGuardarModal,
     btnCerrarModal,
     PageHeader
@@ -125,50 +132,42 @@ export default {
   data() {
     return {
       titulo: 'Categorías',
-      showConfirmModal: false, // Agregar esto
+      showConfirmModal: false,
       categoriaToDelete: null,
-      searchQuery: '', // Almacena el texto de búsqueda
-      itemsPerPage: "",
-      id_usuario: '', // Valor por defecto para mostrar todos los registros
-      categorias: [
-      ],
-      isModalOpen: false, // Estado para controlar si el modal está abierto o cerrado
-      isEditing: false, // Estado para verificar si estamos editando una categoría
-      categoriaForm: { nombre_categoria: '', descripcion: '' }, // Objeto para el formulario de categorías
+      searchQuery: '',
+      currentPage: 1,
+      pageSize: 10,
+      id_usuario: '',
+      categorias: [],
+      isModalOpen: false,
+      isEditing: false,
+      editIndex: -1,
+      categoriaForm: { 
+        nombre_categoria: '', 
+        descripcion: '' 
+      },
     };
-  },
-
-  async mounted() {
-    document.title = "Categorías";
-    this.changeFavicon('/img/spiderman.ico');
-
-
-    try {
-      this.id_usuario = await solicitudes.solicitarUsuarioToken();
-
-
-      this.categorias = await solicitudes.fetchRegistros(
-        `/categoria-producto/${this.id_usuario}`
-      );
-
-    } catch (error) {
-      console.log(error); //modal error pendiente
-    }
-
-
   },
   computed: {
     filteredCategorias() {
-      // Filtra las categorías basados en el texto de búsqueda
       return this.categorias.filter(categoria =>
         categoria.nombre_categoria.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
     paginatedCategorias() {
-      // Si itemsPerPage es 0, mostramos todos los registros, de lo contrario aplicamos la paginación
-      return this.itemsPerPage === "" || this.itemsPerPage === null
-        ? this.filteredCategorias
-        : this.filteredCategorias.slice(0, this.itemsPerPage);
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredCategorias.slice(startIndex, endIndex);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredCategorias.length / this.pageSize);
+    },
+    pages() {
+      const pages = [];
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+      return pages;
     }
   },
   methods: {
@@ -177,41 +176,32 @@ export default {
         Nombre: categoriaForm.nombre_categoria,
         Descripcion: categoriaForm.descripcion,
       };
-
       if (!validarCamposService.validarEmpty(campos)) {
         return false;
       }
-
       return true;
     },
-
     openModal() {
-      // Resetea el formulario y abre el modal
       this.isModalOpen = true;
       this.isEditing = false;
-      this.categoriaForm = { nombre_categoria: '', descripcion: '' }; // Resetea el formulario
+      this.categoriaForm = { nombre_categoria: '', descripcion: '' };
     },
     closeModal() {
-      // Cierra el modal
       this.isModalOpen = false;
     },
     editCategoria(categoria) {
-      // Implementa la lógica para editar una categoría
       this.isModalOpen = true;
       this.isEditing = true;
       this.categoriaForm = { ...categoria };
       this.editIndex = this.categorias.findIndex(item => item.id_categoria === categoria.id_categoria);
     },
-
     async deleteCategoria(categoria) {
       if (!this.showConfirmModal) {
-        // Si hay productos, mostrar error directamente sin modal de confirmación
         if (categoria.totalProd > 0) {
           const toast = useToast();
           toast.error('Productos existentes dentro de esta categoría');
           return;
         }
-        // Si no hay productos, mostrar modal de confirmación
         this.categoriaToDelete = categoria;
         this.showConfirmModal = true;
         return;
@@ -219,7 +209,6 @@ export default {
 
       try {
         const response = await deleteCategoria(this.categoriaToDelete.id_categoria);
-
         if (response == true) {
           this.categorias = this.categorias.filter(
             item => item.id_categoria !== this.categoriaToDelete.id_categoria
@@ -233,12 +222,10 @@ export default {
         this.categoriaToDelete = null;
       }
     },
-
     cancelDelete() {
       this.showConfirmModal = false;
       this.categoriaToDelete = null;
     },
-
     async guardarCategoria() {
       if (!this.validarCampos(this.categoriaForm)) {
         return;
@@ -248,19 +235,13 @@ export default {
       let response;
       let parametros;
       this.categoriaForm.id_usuario = this.id_usuario;
+      
       if (this.isEditing) {
         try {
-
-          parametros = `/categoria-producto/actualizar-categoria/${this.categorias[this.editIndex].id_categoria
-            }`;
-          response = await solicitudes.patchRegistro(
-            parametros,
-            this.categoriaForm
-          );
-
+          parametros = `/categoria-producto/actualizar-categoria/${this.categorias[this.editIndex].id_categoria}`;
+          response = await solicitudes.patchRegistro(parametros, this.categoriaForm);
 
           if (response == true) {
-
             Object.assign(this.categorias[this.editIndex], this.categoriaForm);
           } else notificaciones('error', response.message);
         } catch (error) {
@@ -269,15 +250,10 @@ export default {
       } else {
         parametros = `/categoria-producto/crear-categoria`;
         try {
-          response = await solicitudes.postRegistro(
-            parametros,
-            this.categoriaForm
-          );
+          response = await solicitudes.postRegistro(parametros, this.categoriaForm);
 
           if (response.length > 0) {
-
             this.categorias.push(response[0]);
-
           } else {
             throw response;
           }
@@ -287,16 +263,46 @@ export default {
       }
       this.closeModal();
     },
-
-
+    changePage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
+    },
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
       link.rel = 'icon';
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
-    },
+    }
+  },
+  async mounted() {
+    document.title = "Categorías";
+    this.changeFavicon('/img/spiderman.ico');
 
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      this.categorias = await solicitudes.fetchRegistros(
+        `/categoria-producto/${this.id_usuario}`
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    }
   }
 };
 </script>
@@ -313,7 +319,6 @@ export default {
 .categorias-wrapper {
   padding: 16px;
 }
-
 
 .button-promocion {
   background-color: #4cafaf;
@@ -351,13 +356,6 @@ export default {
   max-width: 300px;
 }
 
-.registros {
-  height: 100%;
-  padding-bottom: 1%;
-  flex-grow: 1;
-  min-width: 200px;
-}
-
 /* Botones */
 #btnAdd {
   background-color: #c09d62;
@@ -375,10 +373,6 @@ export default {
   background-color: #a38655;
   transform: scale(1.05);
   transition: all 0.3s ease;
-}
-
-.export-button {
-  margin: 0;
 }
 
 #btnEditar,
@@ -409,25 +403,6 @@ export default {
   background-color: #b72433;
   transform: scale(1.05);
   transition: all 0.3s ease;
-}
-
-#AddClienteModal,
-#BtnCerrar {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-#AddClienteModal {
-  background-color: #007bff;
-}
-
-#BtnCerrar {
-  background-color: rgb(93, 100, 104);
 }
 
 .col-id {
@@ -488,21 +463,9 @@ export default {
 }
 
 /* Tabla */
-.clientes-wrapper {
-  padding: 16px;
-  width: 100%;
-  overflow-x: hidden;
-}
-
 .table-container {
   width: 100%;
-  border-radius: 10px;
-  border: 1px solid #ddd;
   margin-top: 16px;
-  height: auto;
-  max-height: 480px;
-  overflow-x: auto;
-  overflow-y: auto;
 }
 
 .table {
@@ -534,22 +497,6 @@ export default {
   border-top: 1px solid #ddd;
 }
 
-.table thead th:first-child {
-  border-top-left-radius: 10px;
-}
-
-.table thead th:last-child {
-  border-top-right-radius: 10px;
-}
-
-.table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: 10px;
-}
-
-.table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 10px;
-}
-
 /* Formulario */
 .form-group {
   margin-bottom: 16px;
@@ -568,32 +515,6 @@ export default {
   border-radius: 4px;
 }
 
-#form-tel {
-  width: 100%;
-  max-width: 300px;
-}
-
-/* Selección personalizada */
-.custom-select {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  height: 35px;
-  font-size: 16px;
-  padding: 5px;
-  background-color: #fff;
-  cursor: pointer;
-  width: 80px;
-}
-
-.custom-select:focus {
-  outline: none;
-  border-color: #a38655;
-}
-
-.custom-select option {
-  font-size: 16px;
-}
-
 /* Estilos generales */
 .btn {
   padding: 8px 16px;
@@ -607,22 +528,6 @@ export default {
   color: white;
 }
 
-.rol {
-  color: #969696;
-  font-size: 14px;
-}
-
-#campana {
-  margin-right: 10px;
-  font-size: 18px;
-  color: #a38655;
-}
-
-.container-top {
-  width: 100%;
-  text-align: right;
-}
-
 /* Media Queries */
 @media screen and (max-width: 768px) {
   .opciones {
@@ -631,16 +536,9 @@ export default {
   }
 
   .busqueda,
-  .registros,
-  #btnAdd,
-  .export-button {
+  #btnAdd {
     width: 100%;
     margin: 8px 0;
-  }
-
-  .custom-select {
-    width: 100%;
-    max-width: none;
   }
 
   #btnEditar,
@@ -657,7 +555,6 @@ export default {
 }
 
 @media screen and (max-width: 480px) {
-
   .modal-content {
     width: 95%;
     padding: 15px;
@@ -677,66 +574,21 @@ export default {
     font-size: 20px;
   }
 
-  #form-tel {
-    max-width: 100%;
-  }
-
   .busqueda {
     max-width: 100%;
   }
 }
 
-/* Estilo para scroll personalizado */
-.table-container::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: #c09d62;
-  border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: #a38655;
-}
-
-/* =======================================================
-   Modo Oscuro
-======================================================= */
-/* Contenedor principal */
+/* Modo Oscuro */
 .dark .categorias-wrapper {
   background-color: #1e1e1e;
   color: #fff;
 }
 
-/* Inputs y búsqueda en modo oscuro */
 .dark .busqueda {
   background-color: #2d2d2d;
   border-color: #404040;
   color: #fff;
-}
-
-.dark .custom-select {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .custom-select option {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
-/* Tabla en modo oscuro */
-.dark .table-container {
-  border-color: #404040;
-  background-color: #2d2d2d;
 }
 
 .dark .table thead {
@@ -758,7 +610,6 @@ export default {
   background-color: #383838;
 }
 
-/* Modal en modo oscuro */
 .dark .modal-content {
   background-color: #2d2d2d;
   color: #fff;
@@ -775,20 +626,7 @@ export default {
   color: #fff;
 }
 
-/* Scroll personalizado en modo oscuro */
-.dark .table-container::-webkit-scrollbar-track {
-  background: #2d2d2d;
-}
-
-.dark .table-container::-webkit-scrollbar-thumb {
-  background: #c09d62;
-}
-
-.dark .table-container::-webkit-scrollbar-thumb:hover {
-  background: #a38655;
-}
-
-/* Botones en modo oscuro (manteniendo los colores originales) */
+/* Botones en modo oscuro */
 .dark .button-promocion {
   background-color: #4cafaf;
   color: white;
@@ -834,5 +672,92 @@ export default {
 .dark .modalShowConfirm-no {
   background-color: #6c757d;
   color: white;
+}
+
+/* Paginación */
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  margin-top: auto;
+}
+
+.pagination-info {
+  color: #6c757d;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button.active {
+  background-color: #17a2b8;
+  color: white;
+  border-color: #17a2b8;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Paginación en modo oscuro */
+.dark .pagination-wrapper {
+  border-top-color: #404040;
+}
+
+.dark .pagination-info {
+  color: #adb5bd;
+}
+
+.dark .pagination-button {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .pagination-button:hover:not(:disabled) {
+  background-color: #383838;
+}
+
+.dark .pagination-button.active {
+  background-color: #17a2b8;
+}
+
+/* Media Queries para la paginación */
+@media screen and (max-width: 768px) {
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .pagination-container {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .pagination-button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
 }
 </style>

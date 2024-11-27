@@ -5,28 +5,14 @@
     <div v-if="role === 1">
       <!-- Secciones visibles solo para Administrador -->
       <BarChart />
-      <div class="box">
-        <div class="box-header"></div>
-        <!-- Contenido de gestión de usuarios -->
-      </div>
+      
     </div>
 
     <div v-if="role === 2">
       <!-- Secciones visibles solo para Gerente -->
       <h3>Panel de Gerente</h3>
       <BarChart />
-      <div class="box">
-        <div class="box-header">
-          <h3>Gestión de Inventario</h3>
-        </div>
-        <p>Aquí puedes gestionar el inventario y visualizar reportes.</p>
-      </div>
-      <div class="box">
-        <div class="box-header">
-          <h3>Reportes de Ventas</h3>
-        </div>
-        <p>Aquí puedes ver los reportes de ventas.</p>
-      </div>
+     
     </div>
 
     <div v-if="role === 4">
