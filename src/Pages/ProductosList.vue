@@ -886,7 +886,7 @@ export default {
 .table thead {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 0;
   background-color: white;
 }
 

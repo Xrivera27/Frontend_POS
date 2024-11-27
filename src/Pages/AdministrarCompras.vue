@@ -292,7 +292,7 @@ export default {
   position: sticky;
   top: 0;
   background-color: white;
-  z-index: 1;
+  z-index: 0;
 }
 
 .modal {
