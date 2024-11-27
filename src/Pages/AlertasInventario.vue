@@ -44,14 +44,14 @@ export default {
 
   methods: {
     getEstadoLabel(puntaje) {
-      if (puntaje >= 85) return "URGENTE";
-      if (puntaje >= 50  || puntaje < 85) return "ATENCION";
-      if (puntaje < 50) return "NORMAL";
+      if (puntaje >= 80) return "URGENTE";
+      if (puntaje >= 45  || puntaje < 80) return "ATENCION";
+      if (puntaje < 45) return "NORMAL";
     },
     getEstadoClass(puntaje) {
-      if (puntaje >= 85) return "urgente";
-      if (puntaje >= 50  && puntaje < 85) return "atencion";
-      if (puntaje < 50) return "normal";
+      if (puntaje >= 80) return "urgente";
+      if (puntaje >= 45  && puntaje < 80) return "atencion";
+      if (puntaje < 45) return "normal";
     },
   },
   async mounted() {
