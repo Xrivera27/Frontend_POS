@@ -104,9 +104,9 @@
           <input v-model="clienteForm.rtn" type="text" required>
         </div>
 
-        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Cliente'" @click="guardarCliente">
+        <btnGuardarModal id="btnAggCli" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Cliente'" @click="guardarCliente">
         </btnGuardarModal>
-        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+        <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
       </div>
     </div>
   </div>
@@ -341,6 +341,17 @@ export default {
 }
 
 /* Botones */
+
+#btnAggCli{
+  background-color: #a38655;
+  border-radius: 8px;
+}
+
+#btnCerrarM{
+  margin-left: 14rem;
+  border-radius: 8px;
+}
+
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;

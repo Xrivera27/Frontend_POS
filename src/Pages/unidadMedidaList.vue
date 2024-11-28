@@ -67,9 +67,9 @@
           <input v-model="unidadForm.medida" type="text" required>
         </div>
         <div class="contenedor-botones">
-          <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'" @click="guardarUnidad">
+          <btnGuardarModal id="AggUnid" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'" @click="guardarUnidad">
           </btnGuardarModal>
-          <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+          <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
 
 
@@ -335,6 +335,16 @@ export default {
 .btn-danger {
   background-color: #dc3545;
   color: white;
+}
+
+#AggUnid{
+  background-color: #a38655;
+  border-radius: 8px;
+}
+
+#btnCerrarM{
+  border-radius: 8px;
+  margin-left: 8rem
 }
 
 #btnAdd {

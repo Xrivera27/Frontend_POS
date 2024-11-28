@@ -148,11 +148,13 @@
           </div>
         </div>
         <div>
-          <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario"
+          <btnGuardarModal id="btnGuardarM" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario"
             type="submit">
           </btnGuardarModal>
-          <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+          
           <button class="btn editar-password" :disabled="!isEditing" @click="editarPassword">Editar Contraseña</button>
+
+          <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
       </div>
     </div>
@@ -626,12 +628,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #007bff;
-  color: white;
+  background-color: #a38655;
+  color: black;
 }
 
 .btn-primary:hover {
-  background-color: #066bd8;
+  background-color: #a38655;
   color: white;
 }
 
@@ -744,6 +746,11 @@ export default {
   background-color: #a38655;
   transform: scale(1.05);
   transition: all 0.3s ease;
+}
+
+/* ALTERA LOS BOTONES DE LOS MODALES */
+#btnCerrarM{
+  margin-left: 28rem;
 }
 
 #btnEditar {
