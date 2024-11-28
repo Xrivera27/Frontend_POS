@@ -191,11 +191,11 @@
             <i class="bi bi-tags"></i>
             Asignar categorías
           </button>
-          <div class="action-buttons">
+          <div id="btnCanc" class="action-buttons">
             <button class="btn btn-secondary" @click="closeModal">
               Cancelar
             </button>
-            <button class="btn btn-primary" @click="guardarProducto">
+            <button id="btnAggProd" class="btn btn-primary" @click="guardarProducto">
               {{ isEditing ? "Guardar Cambios" : "Agregar Producto" }}
             </button>
           </div>
@@ -824,6 +824,15 @@ export default {
 
 .export-button {
   margin: 0;
+}
+
+#btnAggProd{
+  background-color: #a38655;
+  border-radius: 8px;
+}
+
+#btnCanc{
+  border-radius: 8px;
 }
 
 #btnAdd:hover {

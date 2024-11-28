@@ -60,7 +60,7 @@
                   <th class="col-descripcion">Descripción</th>
                   <th class="col-cantidad">Cantidad</th>
                   <th class="col-precio">Precio</th>
-                  <th class="col-importe">Importe</th>
+                  <th class="col-importe">Total</th>
                 </tr>
               </thead>
               <tbody>
