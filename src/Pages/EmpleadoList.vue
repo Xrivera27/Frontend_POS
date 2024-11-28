@@ -171,6 +171,7 @@ import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import PageHeader from "@/components/PageHeader.vue";
+import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
 
 export default {
   components: {
@@ -223,11 +224,12 @@ export default {
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.esCeo = await esCeo(this.id_usuario);
-      console.log(this.esCeo);
+      this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
 
-      this.sucursales = await solicitudes.fetchRegistros(
-        `/sucursales/empresa/${this.id_usuario}`
-      );
+
+      // this.sucursales = await solicitudes.fetchRegistros(
+      //   `/sucursales/empresa/${this.id_usuario}`
+      // );
 
       this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
 
