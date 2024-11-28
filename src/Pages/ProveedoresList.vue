@@ -94,9 +94,9 @@
           <input v-model="proveedorForm.direccion" type="text" required>
         </div>
 
-        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Proveedor'" @click="guardarProveedor">
+        <btnGuardarModal id="btnAggProv" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Proveedor'" @click="guardarProveedor">
         </btnGuardarModal>
-        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+        <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
 
       </div>
     </div>
@@ -357,6 +357,17 @@ export default {
 }
 
 /* Botones */
+
+#btnAggProv{
+  background-color: #a38655;
+  border-radius: 8px;
+}
+
+#btnCerrarM{
+  border-radius: 8px;
+  margin-left: 13.4rem;
+}
+
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;

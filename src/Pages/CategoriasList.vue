@@ -104,9 +104,9 @@
         </div>
 
         <div class="contenedor-botones">
-          <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Categoría'" @click="guardarCategoria">
+          <btnGuardarModal id="btnAggC" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Categoría'" @click="guardarCategoria">
           </btnGuardarModal>
-          <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+          <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
       </div>
     </div>
@@ -357,6 +357,17 @@ export default {
 }
 
 /* Botones */
+#btnAggC{
+  background-color: #a38655;
+  border-radius: 8px;
+  color: black;
+}
+
+#btnCerrarM{
+  margin-left: 13.8rem;
+  border-radius: 8px;
+}
+
 #btnAdd {
   background-color: #c09d62;
   font-size: 16px;
@@ -500,6 +511,10 @@ export default {
 /* Formulario */
 .form-group {
   margin-bottom: 16px;
+  width: 100%;
+}
+
+.descriptionForm{
   width: 100%;
 }
 
