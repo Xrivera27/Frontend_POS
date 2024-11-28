@@ -76,7 +76,7 @@
               <td>{{ p.porcentaje_descuento }}</td>
               <td>{{ formatDate(p.fecha_inicio) }}</td>
               <td>{{ formatDate(p.fecha_final) }}</td>
-              <td>{{ p.manejo_automatico ? 'Activo' : 'Inactivo' }}</td>
+              <td>{{ p.manejo_automatico ? 'Se aplicará' : 'No se aplicará' }}</td>
               <td class="td-botones">
                 <button id="btnEditar" class="btn btn-warning" @click="editarPromocion(index)">
                   <i class="bi bi-pencil-fill"></i>
