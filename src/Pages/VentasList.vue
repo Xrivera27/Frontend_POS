@@ -3,12 +3,8 @@
     <AperturaCajaModal :isVisible="isAperturaCajaModalVisible" @confirmar="handleAperturaCaja" />
     <ModalLoading :isLoading="isModalLoading" />
     <PaymentAnimationModal :isVisible="isPaymentAnimationVisible" @complete="handlePaymentComplete" />
-    <FacturaModal 
-  :isVisible="isFacturaModalVisible"
-  :idVenta="venta?.id_venta"
-  :idUsuario="id_usuario"
-  @close="closeFacturaModal"
-/>
+    <FacturaModal :isVisible="isFacturaModalVisible" :idVenta="venta?.id_venta" :idUsuario="id_usuario"
+      @close="closeFacturaModal" />
     <div class="main-container">
       <div class="header-container">
         <!-- Aquí estaba el error, había un div y template anidados innecesariamente -->
@@ -245,7 +241,7 @@ export default {
         this.resumeMainKeyboardEvents();
       }
     },
-    
+
     isModalVisible(newVal) {
       this.isAnyModalOpen = newVal;
       if (newVal) {
@@ -494,11 +490,11 @@ export default {
 
         // Guardar el número de factura
         this.facturaActual = this.venta?.facturas?.[0]?.factura_SAR?.[0]?.numero_factura_SAR || pagando.numero_factura || '';
-        
+
         // Cerrar el modal de pago y mostrar factura
         this.isPagoModalVisible = false;
         this.isFacturaModalVisible = true;
-        
+
         // La animación de pago se mostrará después de cerrar la factura
         this.isPaymentAnimationVisible = true;
       } catch (error) {
@@ -587,6 +583,17 @@ export default {
     },
 
     handleKeyPress(event) {
+      // Si la caja no está abierta, solo permite la tecla para abrir caja
+      if (!this.cajaAbierta && event.altKey && event.key === "s") {
+        event.preventDefault();
+        this.logout();
+        return;
+      }
+
+      if (!this.cajaAbierta) {
+        return; // No procesar ninguna otra tecla si la caja está cerrada
+      }
+
       if (this.isAnyModalOpen || this.isModalFocused) {
         return;
       }
@@ -898,7 +905,7 @@ export default {
     window.removeEventListener("keydown", this.handleKeyPress);
   },
 
-  
+
 };
 </script>
 

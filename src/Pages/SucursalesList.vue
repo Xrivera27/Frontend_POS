@@ -76,7 +76,16 @@
 
         <div class="form-group">
           <label>Teléfono:</label>
-          <input v-model="sucursalForm.telefono" type="text" required />
+          <div class="phone-input-container">
+            <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+              <option value="">País</option>
+              <option v-for="(country, code) in countryData" :key="code" :value="code">
+                {{ country.emoji }} {{ country.code }}
+              </option>
+            </select>
+            <input v-model="sucursalForm.telefono" type="text" class="input-phone"
+              :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+          </div>
         </div>
 
         <div class="form-group">
@@ -99,6 +108,7 @@ import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
 import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
 import PageHeader from "@/components/PageHeader.vue";
+import { COUNTRY_CODES } from "../../services/countrySelector.js";
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -120,6 +130,9 @@ export default {
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
+      selectedCountry: 'HN', // Honduras por defecto
+      countryData: COUNTRY_CODES,
+      phoneLength: 8, // Longitud por defecto para Honduras
 
       sucursalForm: {
         id_sucursal: 0,
@@ -159,41 +172,56 @@ export default {
   },
   methods: {
 
+    updatePhoneValidation() {
+      if (this.selectedCountry) {
+        this.phoneLength = this.countryData[this.selectedCountry].length;
+      }
+    },
+
     validarCampos(sucursalForm) {
+      // Primero validamos que el formulario no sea null o undefined
+      if (!sucursalForm) {
+        notificaciones("error", "Formulario inválido");
+        return false;
+      }
+
       const campos = {
-        Nombre: sucursalForm.nombre_administrativo,
-        Correo: sucursalForm.correo,
-        Telefono: sucursalForm.telefono,
-        Direccion: sucursalForm.direccion,
+        Nombre: sucursalForm.nombre_administrativo || '',
+        Correo: sucursalForm.correo || '',
+        Telefono: sucursalForm.telefono || '',
+        Direccion: sucursalForm.direccion || '',
       };
 
       if (!validarCamposService.validarEmpty(campos)) {
         return false;
       }
 
-      if (!validarCamposService.validarEmail(campos.correo)) {
+      // Solo validamos el email si no está vacío
+      if (campos.Correo && !validarCamposService.validarEmail(campos.Correo)) {
         return false;
       }
 
-      if (!validarCamposService.validarTelefono(campos.telefono)) {
+      if (!validarCamposService.validarTelefono(campos.Telefono, this.selectedCountry)) {
         return false;
       }
 
       return true;
     },
 
-    openModal() {
-      this.isModalOpen = true;
-    },
     closeModal() {
       this.isModalOpen = false;
       this.isEditing = false;
+      this.selectedCountry = 'HN'; // Reset al país por defecto
       this.sucursalForm = {
         nombre_administrativo: "",
         correo: "",
         telefono: "",
         direccion: "",
       };
+    },
+
+    openModal() {
+      this.isModalOpen = true;
     },
 
     async guardarSucursal() {
@@ -441,16 +469,10 @@ export default {
   width: 15%;
 }
 
-select {
-  border: 1px solid #ccc;
-  margin: 10px 5px 0 5px;
-  width: 60px;
-  height: 35px;
-  border-radius: 5px;
-}
-
 .custom-select {
   border: 1px solid #ccc;
+  border-radius: 5px;
+  margin: 10px 5px 0 5px;
   border-radius: 5px;
   height: 35px;
   font-size: 16px;
@@ -487,7 +509,7 @@ select {
 .table thead {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 0;
   background-color: white;
 }
 
@@ -586,8 +608,17 @@ select {
 }
 
 .form-group label {
-  margin-bottom: 8px;
   display: block;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.form-group input,
+.form-group select {
+  height: 35px;
+  /* Altura consistente para todos los inputs */
+  box-sizing: border-box;
+  /* Para que el padding no afecte el tamaño */
 }
 
 .form-group input {
@@ -687,6 +718,39 @@ select {
     margin-top: 8px;
   }
 }
+
+.phone-input-container {
+  display: flex;
+  gap: 8px;
+}
+
+.phone-input-container select {
+  width: 110px;
+  margin: 0;
+  /* Importante: sin márgenes */
+  height: 35px;
+  padding: 0 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.phone-input-container input {
+  flex: 1;
+  height: 35px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+
+/* Estilos para modo oscuro */
+.dark .country-code-select,
+.dark .phone-input {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
 
 /* =======================================================
    Modo Oscuro
