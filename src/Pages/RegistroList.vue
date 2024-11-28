@@ -67,7 +67,7 @@ import { reactive, ref, onMounted } from 'vue';
 
 const form = reactive({
   nombre: '',
-  id_categoria: '', // Aquí se almacenará el ID de la categoría seleccionada
+  id_categoria: '',
   correo_principal: '',
   telefono_principal: '',
   nombre_usuario: '',
@@ -75,6 +75,17 @@ const form = reactive({
   direccion: '',
   usa_SAR: false,
 });
+
+function limpiarForm (){
+  form.apellido_usuario ='';
+  form.id_categoria ='';
+  form.correo_principal ='';
+  form.telefono_principal ='';
+  form.nombre_usuario ='';
+  form.nombre ='';
+  form.direccion ='';
+  form.usa_SAR = false;
+}
 
 // Estado para almacenar las categorías
 const categorias = ref([]);
@@ -108,10 +119,15 @@ const handleSubmit = async () => {
 
     if (response.ok) {
       const data = await response.json();
+
       console.log('Formulario enviado correctamente:', data);
+      alert('Registro enviado.');
+      limpiarForm();
+
     } else {
       const errorData = await response.json();
       console.error('Error al enviar el formulario:', errorData);
+      
     }
   } catch (error) {
     console.error('Error en la solicitud:', error);
