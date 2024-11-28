@@ -188,7 +188,7 @@ export default {
       showTooltip: false,
       searchQuery: '',
       searchSucursal: 'default',
-      id_usuario: 0, // Almacena el texto de búsqueda
+      id_usuario: 0,
       isModalOpen: false,
       isEditing: false,
       isPassEdit: true,
@@ -198,7 +198,6 @@ export default {
       sucursales: [],
       esCeo: false,
       roles: [],
-
       usuarioForm: {
         id_usuario: 0,
         nombre: '',
@@ -212,38 +211,28 @@ export default {
         confirmPassword: '',
         rol: ''
       },
-      empleados: [
-      ]
+      empleados: []
     };
   },
+
   async mounted() {
     document.title = "Usuarios";
     this.changeFavicon('/img/spiderman.ico');
-    this.loadEmpleados(); // Llama a la función para cargar empleados al montar el componente
+    await this.loadEmpleados();
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.esCeo = await esCeo(this.id_usuario);
       this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
-
-
-      // this.sucursales = await solicitudes.fetchRegistros(
-      //   `/sucursales/empresa/${this.id_usuario}`
-      // );
-
       this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
-
       this.roles = await solicitudes.fetchRegistros('/roles');
-
-
     } catch (error) {
-      notificaciones('error', error.message); //modal error pendiente
+      notificaciones('error', error.message);
     }
-
   },
+
   computed: {
     filteredEmpleados() {
-      // Filtra los empleados basados en el texto de búsqueda
       return this.empleados
         .filter(empleado => empleado.sucursales == this.searchSucursal || this.searchSucursal === 'default')
         .filter(empleado =>
@@ -251,41 +240,39 @@ export default {
           empleado.apellido.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           empleado.nombre_usuario.toLowerCase().includes(this.searchQuery.toLowerCase())
         );
-
     },
 
     paginatedEmpleados() {
-      // Si itemsPerPage es vacío, mostramos todos los registros, de lo contrario aplicamos la paginación
-
       if (this.itemsPerPage === "" || this.itemsPerPage === null) {
         return this.filteredEmpleados;
       } else {
         return this.filteredEmpleados.slice(0, parseInt(this.itemsPerPage));
       }
-
     },
   },
+
   methods: {
     async loadEmpleados() {
-      this.isLoading = true; // Comienza a cargar
+      this.isLoading = true;
       try {
         const id_usuario = await solicitudes.solicitarUsuarioToken();
         this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${id_usuario}`);
-
       } catch (error) {
         notificaciones('error', error.message);
       } finally {
-        this.isLoading = false; // Termina la carga
+        this.isLoading = false;
       }
     },
 
     openModal() {
       this.isModalOpen = true;
     },
+
     closeModal() {
       this.isModalOpen = false;
       this.clearForm();
     },
+
     clearForm() {
       this.usuarioForm = {
         id_usuario: '',
@@ -300,9 +287,9 @@ export default {
         confirmPassword: '',
         rol: ''
       };
-
       this.isEditing = false;
       this.editIndex = null;
+      this.isPassEdit = true;
     },
 
     getRol(id_rol) {
@@ -311,22 +298,25 @@ export default {
     },
 
     validarCampos(form) {
+      // Convertimos todos los valores a string antes de validar
       const campos = {
-        nombre: form.nombre,
-        apellido: form.apellido,
-        nombre_usuario: form.nombre_usuario,
-        correo: form.correo,
-        telefono: form.telefono,
-        direccion: form.direccion,
-        sucursal: form.sucursal,
-        rol: form.rol,
+        nombre: String(form.nombre || ''),
+        apellido: String(form.apellido || ''),
+        nombre_usuario: String(form.nombre_usuario || ''),
+        correo: String(form.correo || ''),
+        telefono: String(form.telefono || ''),
+        direccion: String(form.direccion || ''),
+        sucursal: String(form.sucursal || ''),
+        rol: String(form.rol || ''),
       };
 
+      // Solo incluimos password y confirmPassword si estamos editando la contraseña
       if(this.isPassEdit){
-        campos.password = form.password;
-        campos.confirmPassword = form.confirmPassword;
+        campos.password = String(form.password || '');
+        campos.confirmPassword = String(form.confirmPassword || '');
       }
 
+      // Validaciones
       if (!validarCamposService.validarEmpty(campos)) {
         return false;
       }
@@ -339,6 +329,7 @@ export default {
           return false;
         }
       }
+
       if (!validarCamposService.validarTelefono(campos.telefono)) {
         return false;
       }
@@ -355,55 +346,44 @@ export default {
     },
 
     async guardarUsuario() {
-      let response;
-      let parametros;
-
       if (!this.validarCampos(this.usuarioForm)) {
         return;
       }
 
       validarCamposService.formSuccess();
+      let response;
+      let parametros;
 
-      if (this.isEditing) {
-        try {
-
-          parametros = `/usuario/actualizar/${this.empleados[this.editIndex].id_usuario
-            }`;
+      try {
+        if (this.isEditing) {
+          parametros = `/usuario/actualizar/${this.empleados[this.editIndex].id_usuario}`;
           response = await solicitudes.patchRegistro(
             parametros,
             this.limpiarForm(this.usuarioForm)
           );
 
-          if (response == true) {
-
+          if (response === true) {
             Object.assign(this.empleados[this.editIndex], this.usuarioForm);
-          } else notificaciones('error', response);
-        } catch (error) {
-          notificaciones('error', error.message);
-        }
-
-      } else {
-        // const respuesta = await fetch(`http://localhost:3000/api/sucursales/crear-sucursal/${this.id_usuario}/${this.id_empresa}`,
-        parametros = `/usuario/crear`;
-        try {
+          } else {
+            notificaciones('error', response);
+          }
+        } else {
+          parametros = `/usuario/crear`;
           response = await solicitudes.postRegistro(
             parametros,
             this.limpiarForm(this.usuarioForm)
           );
 
           if (response.length > 0) {
-
             this.empleados.push(response[0]);
-
           } else {
             throw response;
           }
-        } catch (error) {
-          notificaciones('error', error.message);
         }
-
+        this.closeModal();
+      } catch (error) {
+        notificaciones('error', error.message);
       }
-      this.closeModal();
     },
 
     async deleteUsuariol(empleado) {
@@ -413,20 +393,14 @@ export default {
         return;
       }
 
-      let response;
-      const datosActualizados = {
-        estado: false,
-      };
-
-      const parametros = `/usuario/desactivar/${this.empleadoToDelete.id_usuario}`;
-
       try {
-        response = await solicitudes.desactivarRegistro(
+        const parametros = `/usuario/desactivar/${this.empleadoToDelete.id_usuario}`;
+        const response = await solicitudes.desactivarRegistro(
           parametros,
-          datosActualizados
+          { estado: false }
         );
 
-        if (response == true) {
+        if (response === true) {
           const index = this.empleados.findIndex(e => e.id_usuario === this.empleadoToDelete.id_usuario);
           if (index !== -1) {
             this.empleados.splice(index, 1);
@@ -455,15 +429,9 @@ export default {
       this.isPassEdit = false;
       this.openModal();
     },
-    deleteEmpleado(index) {
-      this.empleados.splice(index, 1);
-    },
-    togglePasswordVisibility() {
-      this.showPassword = !this.showPassword;
-    },
 
     limpiarForm(formulario) {
-      const formLimpio = {
+      return {
         nombre: formulario.nombre,
         apellido: formulario.apellido,
         nombre_usuario: formulario.nombre_usuario,
@@ -473,9 +441,9 @@ export default {
         id_sucursal: formulario.sucursal,
         contraseña: formulario.password,
         id_rol: formulario.rol,
-      }
-      return formLimpio;
+      };
     },
+
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
