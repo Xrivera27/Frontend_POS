@@ -21,7 +21,7 @@
     </div>
 
     <!-- Tabla exportable -->
-    <div class="table-container" v-pdf-export ref="table">
+    <div class="table-container" ref="table">
       <!-- Indicador de carga -->
       <div v-if="loading" class="loading-indicator">
         Cargando ventas...
@@ -43,6 +43,7 @@
             <th>Descuento</th>
             <th>Total Impuesto</th>
             <th>Total</th>
+            <th>Estado</th>
             <th>Fecha y Hora</th>
             <th>Acciones</th>
           </tr>
@@ -57,106 +58,99 @@
             <td>{{ formatCurrency(venta.descuento) }}</td>
             <td>{{ formatCurrency(venta.total_impuesto) }}</td>
             <td>{{ formatCurrency(venta.total) }}</td>
-            <td>{{ formatDateTime(venta.fechaHora) }}</td>
             <td>
-              <button id="btnDetalles" class="btn btn-info" @click="showDetalles(venta)">
-                <i class="bi bi-eye-fill"></i>
+              <span 
+                :class="{
+                  'estado-badge': true,
+                  'estado-pagada': venta.estado === 'Pagada',
+                  'estado-cancelada': venta.estado === 'Cancelada'
+                }"
+              >
+                {{ venta.estado || 'Pagada' }}
+              </span>
+            </td>
+            <td>{{ formatDateTime(venta.fechaHora) }}</td>
+            <td class="actions-column">
+              <button id="btnFactura" class="btn btn-primary" @click="showFactura(venta)" title="Ver Factura">
+                <i class="bi bi-file-text-fill"></i>
+              </button>
+              <button 
+                class="btn btn-danger ms-2" 
+                @click="showCancelModal(venta)"
+                :title="venta.estado === 'Cancelada' ? 'Venta ya cancelada' : 'Cancelar Venta'"
+                :disabled="venta.estado === 'Cancelada'"
+                :style="venta.estado === 'Cancelada' ? { opacity: '0.5', cursor: 'not-allowed' } : {}"
+              >
+                <i class="bi bi-x-circle-fill"></i>
               </button>
             </td>
           </tr>
         </tbody>
       </table>
 
-      <!-- Nueva Paginación -->
+      <!-- Paginación -->
       <div class="pagination-wrapper">
-  <div class="pagination-info">
-    Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredVentas.length) }} de {{ filteredVentas.length }} registros
-  </div>
-  <div class="pagination-container">
-    <button 
-      class="pagination-button" 
-      :disabled="currentPage === 1"
-      @click="previousPage"
-    >
-      Anterior
-    </button>
-    
-    <button 
-      class="pagination-button" 
-      :disabled="currentPage === totalPages"
-      @click="nextPage"
-    >
-      Siguiente
-    </button>
-  </div>
-</div>
-    </div>
-
-    <!-- Modal para mostrar detalles de venta -->
-    <div v-if="isDetallesModalOpen" class="modal">
-      <div class="modal-content">
-        <h2 class="h2-modal-content">Detalles de Venta</h2>
-
-        <!-- Información básica en una sola lista -->
-        <div class="detalles-lista">
-          <p><strong>Número de Factura:</strong> {{ ventaDetalles[0]?.numero_factura }}</p>
-          <p><strong>CAI:</strong> {{ ventaDetalles[0]?.cai }}</p>
-          <p><strong>Fecha y Hora:</strong> {{ formatDateTime(ventaDetalles[0]?.fechaHora) }}</p>
-          <p><strong>Cliente:</strong> {{ ventaDetalles[0]?.cliente }}</p>
-          <p><strong>RTN Cliente:</strong> {{ ventaDetalles[0]?.rtnCliente }}</p>
-          <p><strong>Atendido por:</strong> {{ ventaDetalles[0]?.nombre }}</p>
+        <div class="pagination-info">
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredVentas.length) }} de {{ filteredVentas.length }} registros
         </div>
-
-        <!-- Productos -->
-        <h3>Productos</h3>
-        <div class="tabla-productos">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="producto in ventaDetalles[0]?.productos" :key="producto.codigo">
-                <td>{{ producto.codigo }}</td>
-                <td>{{ producto.nombre }}</td>
-                <td>{{ producto.cantidad }}</td>
-                <td>{{ formatCurrency(producto.total) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Totales -->
-        <div class="totales">
-          <p><strong>Subtotal:</strong> {{ formatCurrency(ventaDetalles[0]?.subtotal) }}</p>
-          <p><strong>ISV:</strong> {{ formatCurrency(ventaDetalles[0]?.total_impuesto) }}</p>
-          <p><strong>Total:</strong> {{ formatCurrency(ventaDetalles[0]?.total) }}</p>
-        </div>
-
-        <div class="modal-footer">
-          <button id="BtnCerrarDetalles" class="btn btn-secondary" @click="closeDetallesModal">
-            Cerrar
+        <div class="pagination-container">
+          <button 
+            class="pagination-button" 
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
+            Anterior
+          </button>
+          
+          <button 
+            class="pagination-button" 
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
+            Siguiente
           </button>
         </div>
       </div>
     </div>
+
+    <!-- Modal de Factura -->
+    <AdminFacturaModal 
+      v-if="isFacturaModalOpen"
+      :isVisible="isFacturaModalOpen"
+      :venta="selectedVenta"
+      @close="closeFacturaModal"
+    />
+
+    <!-- Modal de Cancelación -->
+    <CancelSaleModal 
+      v-if="isCancelModalOpen"
+      :isVisible="isCancelModalOpen"
+      :venta="selectedVentaForCancel"
+      @close="closeCancelModal"
+      @confirm="handleCancelSale"
+    />
   </div>
 </template>
 
-
 <script>
+import { useToast } from "vue-toastification";
 import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
+import AdminFacturaModal from '../components/AdminFacturasModal.vue';
+import CancelSaleModal from '../components/CancelarVentaModal.vue';
 import AdminVentas from '../../services/Soliadminventa';
 
 export default {
+  name: 'AdministrarVentas',
   components: {
     PageHeader,
-    ExportButton
+    ExportButton,
+    AdminFacturaModal,
+    CancelSaleModal
+  },
+  setup() {
+    const toast = useToast();
+    return { toast };
   },
   data() {
     return {
@@ -164,8 +158,10 @@ export default {
       searchQuery: '',
       startDate: '',
       endDate: '',
-      isDetallesModalOpen: false,
-      ventaDetalles: [],
+      selectedVenta: null,
+      selectedVentaForCancel: null,
+      isFacturaModalOpen: false,
+      isCancelModalOpen: false,
       ventas: [],
       currentPage: 1,
       pageSize: 10,
@@ -178,6 +174,7 @@ export default {
         { header: 'Descuento', dataKey: 'descuento' },
         { header: 'Total Impuesto', dataKey: 'total_impuesto' },
         { header: 'Total', dataKey: 'total' },
+        { header: 'Estado', dataKey: 'estado' },
         { header: 'Fecha y Hora', dataKey: 'fechaHora' }
       ],
       rows: [],
@@ -202,25 +199,14 @@ export default {
         return matchesSearchQuery && matchesDateRange;
       });
     },
-
     paginatedVentas() {
       const startIndex = (this.currentPage - 1) * this.pageSize;
       const endIndex = startIndex + this.pageSize;
       return this.filteredVentas.slice(startIndex, endIndex);
     },
-
     totalPages() {
       return Math.ceil(this.filteredVentas.length / this.pageSize);
     },
-
-    pages() {
-      const pages = [];
-      for (let i = 1; i <= this.totalPages; i++) {
-        pages.push(i);
-      }
-      return pages;
-    },
-
     filteredRows() {
       return this.paginatedVentas.map((venta, index) => ({
         index: ((this.currentPage - 1) * this.pageSize) + index + 1,
@@ -231,6 +217,7 @@ export default {
         descuento: this.formatCurrency(venta.descuento),
         total: this.formatCurrency(venta.total),
         total_impuesto: this.formatCurrency(venta.total_impuesto),
+        estado: venta.estado || 'Pagada',
         fechaHora: this.formatDateTime(venta.fechaHora)
       }));
     }
@@ -256,44 +243,71 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const ventasData = await AdminVentas.obtenerVentas();
-        this.ventas = ventasData;
-        this.generateRows();
+        console.log('Iniciando carga de ventas...');
+        const response = await AdminVentas.obtenerVentas();
+        console.log('Respuesta del servidor:', response);
+        
+        const ventasData = response.data || response;
+        if (ventasData) {
+          this.ventas = ventasData.map(venta => ({
+            ...venta,
+            id_venta: venta.id_venta || venta.idVenta,
+            id_usuario: venta.id_usuario || venta.idUsuario,
+            estado: venta.estado || 'Pagada'
+          }));
+          console.log('Ventas procesadas:', this.ventas);
+          this.generateRows();
+        } else {
+          throw new Error('No se pudieron obtener las ventas');
+        }
       } catch (error) {
         console.error('Error al cargar ventas:', error);
         this.error = 'Error al cargar las ventas. Por favor, intente nuevamente.';
+        this.toast.error(this.error);
       } finally {
         this.loading = false;
       }
     },
 
-    async showDetalles(venta) {
-      try {
-        const idVenta = venta.id_venta;
-        console.log('ID de venta a consultar:', idVenta);
-        const detalleVenta = await AdminVentas.obtenerDetalleVenta(idVenta);
-        
-        this.ventaDetalles = [detalleVenta];
-        this.isDetallesModalOpen = true;
-      } catch (error) {
-        console.error('Error al cargar detalles de la venta:', error);
-        alert('Error al cargar los detalles de la venta. Por favor, intente nuevamente.');
-      }
+    showFactura(venta) {
+      console.log('Mostrando factura para:', venta);
+      this.selectedVenta = venta;
+      this.isFacturaModalOpen = true;
     },
 
-    closeDetallesModal() {
-      this.isDetallesModalOpen = false;
-      this.ventaDetalles = [];
+    closeFacturaModal() {
+      this.isFacturaModalOpen = false;
+      this.selectedVenta = null;
+    },
+
+    showCancelModal(venta) {
+      this.selectedVentaForCancel = venta;
+      this.isCancelModalOpen = true;
+    },
+
+    closeCancelModal() {
+      this.isCancelModalOpen = false;
+      this.selectedVentaForCancel = null;
+    },
+
+    async handleCancelSale(ventaId, description) {
+      try {
+        const response = await AdminVentas.cancelarVenta(ventaId, description);
+        if (response.success) {
+          this.toast.success('Venta cancelada exitosamente');
+          await this.loadVentas();
+        } else {
+          throw new Error(response.message || 'Error al cancelar la venta');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        this.toast.error('Error al cancelar la venta: ' + error.message);
+        throw error;
+      }
     },
 
     generateRows() {
       this.rows = this.filteredRows;
-    },
-
-    changePage(page) {
-      if (page >= 1 && page <= this.totalPages) {
-        this.currentPage = page;
-      }
     },
 
     previousPage() {
@@ -356,8 +370,8 @@ export default {
   margin: 0;
 }
 
-/* Botón de detalles */
-#btnDetalles {
+/* Botones de acción */
+.btn {
   font-size: 18px;
   width: 50px;
   height: 40px;
@@ -368,12 +382,59 @@ export default {
   justify-content: center;
   padding: 0;
   border: none;
+  transition: all 0.3s ease;
 }
 
-#btnDetalles:hover {
-  background-color: #17a2b8;
+.btn:hover {
   transform: scale(1.05);
-  transition: all 0.3s ease;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #bb2d3b;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+/* Nuevo estilo para botones deshabilitados */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn:disabled:hover {
+  transform: none !important;
+  background-color: #dc3545;
+}
+
+/* Estado badges */
+.estado-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.estado-pagada {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.estado-cancelada {
+  background-color: #f8d7da;
+  color: #842029;
+}
+
+.actions-column {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
 }
 
 .ventas-wrapper {
@@ -382,7 +443,7 @@ export default {
   overflow-x: hidden;
 }
 
-/* Ajustar las opciones igual que en categorías */
+/* Ajustar las opciones */
 .opciones {
   display: flex;
   align-items: center;
@@ -391,7 +452,8 @@ export default {
   margin-bottom: 16px;
 }
 
-.bi-eye-fill {
+.bi-file-text-fill,
+.bi-x-circle-fill {
   font-size: 20px;
 }
 
@@ -426,64 +488,6 @@ export default {
   z-index: 1;
 }
 
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 1500px;
-  width: 90%;
-  margin: 20px;
-  overflow-y: auto;
-  max-height: 90vh;
-}
-
-.h2-modal-content {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-/* Botones */
-.btn {
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.btn-info {
-  background-color: #17a2b8;
-  color: white;
-}
-
-.btn-info:hover {
-  background-color: #138496;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-}
-
 /* Filtro de fechas */
 .date-filter {
   display: flex;
@@ -507,94 +511,23 @@ export default {
 }
 
 /* Scroll personalizado */
-.table-container::-webkit-scrollbar,
-.modal-content::-webkit-scrollbar {
+.table-container::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.table-container::-webkit-scrollbar-track,
-.modal-content::-webkit-scrollbar-track {
+.table-container::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 4px;
 }
 
-.table-container::-webkit-scrollbar-thumb,
-.modal-content::-webkit-scrollbar-thumb {
+.table-container::-webkit-scrollbar-thumb {
   background: #c09d62;
   border-radius: 4px;
 }
 
-.table-container::-webkit-scrollbar-thumb:hover,
-.modal-content::-webkit-scrollbar-thumb:hover {
+.table-container::-webkit-scrollbar-thumb:hover {
   background: #a38655;
-}
-
-/* Modal en modo oscuro */
-.dark .modal-content {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
-.dark .modal-content input,
-.dark .modal-content textarea {
-  background-color: #383838;
-  border-color: #404040;
-  color: #fff;
-}
-
-/* Tabla en modo oscuro */
-.dark .table-container {
-  border-color: #404040;
-  background-color: #2d2d2d;
-}
-
-.dark .table thead {
-  background-color: #2d2d2d;
-}
-
-.dark .table th {
-  background-color: #383838;
-  color: #fff;
-  border-color: #404040;
-}
-
-.dark .table td {
-  color: #fff;
-  border-color: #404040;
-}
-
-.dark .table tr:hover {
-  background-color: #383838;
-}
-
-/* Detalles de la venta */
-.detalles-lista {
-  margin-bottom: 20px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.detalles-lista p {
-  margin: 8px 0;
-}
-
-.tabla-productos {
-  margin: 20px 0;
-  overflow-x: auto;
-}
-
-.totales {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.totales p {
-  margin: 8px 0;
-  font-size: 1.1em;
 }
 
 /* Nueva Paginación */
@@ -641,35 +574,6 @@ export default {
   opacity: 0.6;
 }
 
-/* Modo oscuro para la paginación */
-.dark .pagination-wrapper {
-  border-top-color: #404040;
-}
-
-.dark .pagination-info {
-  color: #adb5bd;
-}
-
-.dark .pagination-button {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .pagination-button:hover:not(:disabled) {
-  background-color: #383838;
-}
-
-.dark .pagination-button.active {
-  background-color: #17a2b8;
-}
-
-.dark .detalles-lista,
-.dark .totales {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
 /* Loading y No Data */
 .loading-indicator,
 .no-data {
@@ -682,6 +586,23 @@ export default {
 .no-data {
   background-color: #f8f9fa;
   border-radius: 4px;
+}
+
+/* Modo oscuro */
+.dark .table-container {
+  border-color: #404040;
+  background-color: #2d2d2d;
+}
+
+.dark .table th {
+  background-color: #383838;
+  color: #fff;
+  border-color: #404040;
+}
+
+.dark .table td {
+  color: #fff;
+  border-color: #404040;
 }
 
 .dark .loading-indicator,
@@ -716,19 +637,15 @@ export default {
     margin-bottom: 10px;
   }
 
-  #btnDetalles {
+  .btn {
     width: 40px;
     height: 35px;
     font-size: 14px;
   }
 
-  .bi-eye-fill {
+  .bi-file-text-fill,
+  .bi-x-circle-fill {
     font-size: 16px;
-  }
-
-  .modal-content {
-    width: 95%;
-    padding: 15px;
   }
 
   .pagination-wrapper {
@@ -740,14 +657,14 @@ export default {
     justify-content: center;
     flex-wrap: wrap;
   }
+
+  .estado-badge {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
 }
 
 @media screen and (max-width: 480px) {
-  .h2-modal-content {
-    font-size: 20px;
-    margin-bottom: 15px;
-  }
-
   .table th,
   .table td {
     padding: 6px;
@@ -756,21 +673,6 @@ export default {
 
   .busqueda {
     max-width: 100%;
-  }
-
-  .modal-content {
-    margin: 10px;
-    padding: 10px;
-  }
-
-  .btn {
-    padding: 8px 16px;
-    font-size: 14px;
-  }
-
-  .date-filter label {
-    margin-right: 0;
-    margin-bottom: 5px;
   }
 
   .pagination-button {

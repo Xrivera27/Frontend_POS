@@ -100,7 +100,7 @@
                     <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': openDropdowns.compras }"></i>
                 </a>
                 <ul class="dropdown-menu" :class="{ 'show': openDropdowns.compras }">
-                    <li><router-link @click="handleRouteChange" to="/administrar-compras"
+                    <li><router-link @click="handleRouteChange" to="/registro"
                             class="dropdown-item">Administrar compras</router-link></li>
                     <li><router-link @click="handleRouteChange" to="/compras" class="dropdown-item">Crear
                             compra</router-link></li>
