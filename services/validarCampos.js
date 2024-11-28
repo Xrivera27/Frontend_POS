@@ -1,69 +1,67 @@
 import { notificaciones } from "./notificaciones.js";
+import validator from "validator";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 export default {
   // Valida que un campo no esté vacío
   validarEmpty(form) {
-    console.log("Validando formulario:", form); // Ver el objeto completo
     for (const [key, value] of Object.entries(form)) {
-      console.log(`Validando campo: ${key}, valor: ${value}`); // Ver cada campo y su valor
-      if (
-        value === "" || // Campo vacío
-        value === undefined || // Campo indefinido
-        value === null || // Campo nulo
-        value === "default" || // Valor por defecto de un select
-        !value // Cualquier valor falsy
-      ) {
-        notificaciones("empty-campo", key); // Notifica el error
-        return false; // Retorna false si hay un campo vacío
+      if (validator.isEmpty(value || "", { ignore_whitespace: true })) {
+        notificaciones("empty-campo", key);
+        return false;
       }
     }
-    return true; // Retorna true si todos los campos son válidos
+    return true;
   },
 
   // Valida que dos contraseñas coincidan
   validarPass(password1, password2) {
     if (password1 !== password2) {
       notificaciones("diferent-password");
+      return false;
     }
-
-    return password1 === password2;
+    return true;
   },
 
-  // Valida que el email pertenezca a un dominio aceptado
+  // Valida que el email pertenezca a dominios específicos
   validarEmail(email) {
-    const emailPattern =
-      /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|hotmail\.com)$/;
-
-    if (!emailPattern.test(email)) {
+    if (!validator.isEmail(email)) {
       notificaciones("invalid-email");
+      return false;
     }
-    return emailPattern.test(email);
+    return true;
   },
 
-  // Valida que la contraseña tenga números, mayúsculas, minúsculas y caracteres especiales
+  // Valida que la contraseña sea segura
   validarPasswordSegura(password) {
-    const passwordPattern =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    const strongPasswordOptions = {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
 
-    if (!passwordPattern.test(password)) {
+      minSymbols: 1,
+    };
+    if (!validator.isStrongPassword(password, strongPasswordOptions)) {
       notificaciones("invalid-password");
+      return false;
     }
-
-    return passwordPattern.test(password);
+    return true;
   },
 
-  // Valida que el teléfono tenga 8 dígitos y sea numérico
-  validarTelefono(telefono) {
-    const phonePattern = /^(?:\d{8}|\d{4}-\d{4})$/;
-    if (!phonePattern.test(telefono)) {
+  // Valida el teléfono con libphonenumber-js
+  validarTelefono(telefono, codigoPais) {
+    const numero = parsePhoneNumberFromString(telefono, codigoPais);
+    if (!numero || !numero.isValid()) {
       notificaciones("invalid-phone");
+      return false;
     }
-    return phonePattern.test(telefono);
+    return true;
   },
 
+  // Valida que un campo no contenga letras
   validarSinLetras(campo, nombreCampo) {
-    const soloNumerosPattern = /^\d+$/; // Expresión regular que permite solo dígitos
-    if (!soloNumerosPattern.test(campo)) {
+    if (!validator.isNumeric(campo, { no_symbols: true })) {
       notificaciones("campo-no-numerico", nombreCampo);
       return false;
     }
@@ -72,27 +70,32 @@ export default {
 
   // Valida que el campo contenga al menos un número
   validarContieneNumeros(campo, nombreCampo) {
-    const contieneNumerosPattern = /\d/; // Expresión regular que busca al menos un dígito
-    if (!contieneNumerosPattern.test(campo)) {
-      notificaciones("sin-numeros", nombreCampo); // Envía el nombre del campo
-      return false; // Retorna false si no contiene números
+    if (!/\d/.test(campo)) {
+      notificaciones("sin-numeros", nombreCampo);
+      return false;
     }
-    return true; // Retorna true si contiene números
+    return true;
   },
 
+  // Valida que el RTN contenga solo números, espacios o guiones
   validarRTN(rtn) {
-    const rtnPattern = /^[\d\s-]+$/; // Permite solo números, espacios y guiones
-    if (!rtnPattern.test(rtn)) {
+    if (!/^[\d\s-]+$/.test(rtn)) {
       notificaciones("invalid-rtn");
+      return false;
     }
-    return rtnPattern.test(rtn);
+    return true;
   },
 
   formSuccess() {
     notificaciones("form-success");
   },
 
+  // Valida si el campo es un número (enteros o decimales)
   validarSiNumero(campo) {
-    return /^[+-]?\d+(\.\d+)?$/.test(campo);
+    if (!validator.isNumeric(campo.toString(), { no_symbols: false })) {
+      notificaciones("invalid-number");
+      return false;
+    }
+    return true;
   },
 };

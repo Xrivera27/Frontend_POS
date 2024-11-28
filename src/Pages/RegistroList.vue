@@ -30,12 +30,12 @@
 
          <!-- Encargado -->
          <div class="form-group">
-          <input id="encargado" v-model="form.encargado" type="text" placeholder="Nombre" required />
+          <input id="encargado" v-model="form.nombre_usuario" type="text" placeholder="Nombre" required />
         </div>
 
           <!-- Encargado -->
           <div class="form-group">
-          <input id="apellido" v-model="form.encargado" type="text" placeholder="Apellido" required />
+          <input id="apellido" v-model="form.apellido_usuario" type="text" placeholder="Apellido" required />
         </div>
 
           <!-- Direccion -->
@@ -51,8 +51,6 @@
         </div>
 
         <!-- Campos adicionales de SAR (solo se muestran si usa_SAR es true) -->
-       
-
         <!-- Botón de envío -->
         <div class="form-group button-container">
           <button type="submit" class="submit-btn">
@@ -69,12 +67,25 @@ import { reactive, ref, onMounted } from 'vue';
 
 const form = reactive({
   nombre: '',
-  created_at: '',
-  id_categoria: '', // Aquí se almacenará el ID de la categoría seleccionada
+  id_categoria: '',
   correo_principal: '',
   telefono_principal: '',
+  nombre_usuario: '',
+  apellido_usuario: '',
+  direccion: '',
   usa_SAR: false,
 });
+
+function limpiarForm (){
+  form.apellido_usuario ='';
+  form.id_categoria ='';
+  form.correo_principal ='';
+  form.telefono_principal ='';
+  form.nombre_usuario ='';
+  form.nombre ='';
+  form.direccion ='';
+  form.usa_SAR = false;
+}
 
 // Estado para almacenar las categorías
 const categorias = ref([]);
@@ -108,10 +119,15 @@ const handleSubmit = async () => {
 
     if (response.ok) {
       const data = await response.json();
+
       console.log('Formulario enviado correctamente:', data);
+      alert('Registro enviado.');
+      limpiarForm();
+
     } else {
       const errorData = await response.json();
       console.error('Error al enviar el formulario:', errorData);
+      
     }
   } catch (error) {
     console.error('Error en la solicitud:', error);
