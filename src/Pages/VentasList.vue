@@ -154,7 +154,7 @@
         <RegistrarPagoModal :isVisible="isPagoModalVisible" :factura="factura" @close="closePagoModal"
           @confirm-payment="realizarPago" @modal-focused="handleModalFocus" />
         <button :disabled="!cajaAbierta" @click="nuevoCliente">Nuevo Cliente [ALT] + [C]</button>
-        <button :disabled="!cajaAbierta" @click="salir">Salir [ALT] + [S]</button>
+        <button @click="salir">Salir [ALT] + [S]</button>
       </div>
     </div>
   </div>
@@ -175,7 +175,7 @@ import PaymentAnimationModal from '@/components/PaymentAnimationModal.vue';
 //import VentaPendienteModal from '@/components/modalesCrearVenta/VentaPendiente.vue';
 import AperturaCajaModal from '@/components/modalesCrearVenta/AperturaCajaModal.vue';
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, pagar } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, cajaUsuario, createCaja, pagar } from '../../services/ventasSolicitudes.js';
 //cajaUsuario
 import FacturaModal from '@/components/FacturaModal.vue'; // Nuevo
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
@@ -321,6 +321,7 @@ export default {
         this.loadingMessage = 'Abriendo caja...';
 
         await new Promise(resolve => setTimeout(resolve, 1000));
+        await createCaja(this.id_usuario, monto);
 
         // Actualizamos el estado de la caja
         this.cajaAbierta = true;
@@ -883,7 +884,7 @@ export default {
       this.info = await getInfoBasic(this.id_usuario);
       this.productos = await getProductos(this.id_usuario);
       // Removemos esta línea que estaba causando el problema
-      // this.cajaAbierta = await cajaUsuario(this.id_usuario);
+       this.cajaAbierta = await cajaUsuario(this.id_usuario);
 
       ventaRecuperada = await getVentaPendiente(this.id_usuario);
       if (ventaRecuperada.resultado) {
