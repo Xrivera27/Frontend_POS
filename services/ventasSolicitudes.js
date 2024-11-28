@@ -85,6 +85,27 @@ export const cajaUsuario = async (id_usuario) => {
     }
 }
 
+export const createCaja = async (id_usuario, valor_inicial) => {
+
+    const datos = {
+        id_usuario: id_usuario,
+        valor_inicial: valor_inicial
+    }
+
+    const parametros = `/ventas/crear-caja`;
+    try {
+
+        const response = await solicitudes.postRegistro(parametros, datos);
+        console.log(response);
+
+            return response; 
+
+    } catch (error) {
+        console.error('Error al crear caja:', error); 
+        throw error;
+    }
+}
+
 export const agregarProductoCodigo = async (cantidad, codigo, id_usuario) => {
 
     const datos = {
