@@ -43,6 +43,7 @@
             <th>Descuento</th>
             <th>Total Impuesto</th>
             <th>Total</th>
+            <th>Estado</th>
             <th>Fecha y Hora</th>
             <th>Acciones</th>
           </tr>
@@ -57,13 +58,30 @@
             <td>{{ formatCurrency(venta.descuento) }}</td>
             <td>{{ formatCurrency(venta.total_impuesto) }}</td>
             <td>{{ formatCurrency(venta.total) }}</td>
+            <td>
+              <span 
+                :class="{
+                  'estado-badge': true,
+                  'estado-pagada': venta.estado === 'Pagada',
+                  'estado-cancelada': venta.estado === 'Cancelada'
+                }"
+              >
+                {{ venta.estado || 'Pagada' }}
+              </span>
+            </td>
             <td>{{ formatDateTime(venta.fechaHora) }}</td>
             <td class="actions-column">
-              <button id="btnDetalles" class="btn btn-info me-2" @click="showDetalles(venta)">
-                <i class="bi bi-eye-fill"></i>
-              </button>
-              <button id="btnFactura" class="btn btn-primary" @click="showFactura(venta)">
+              <button id="btnFactura" class="btn btn-primary" @click="showFactura(venta)" title="Ver Factura">
                 <i class="bi bi-file-text-fill"></i>
+              </button>
+              <button 
+                class="btn btn-danger ms-2" 
+                @click="showCancelModal(venta)"
+                :title="venta.estado === 'Cancelada' ? 'Venta ya cancelada' : 'Cancelar Venta'"
+                :disabled="venta.estado === 'Cancelada'"
+                :style="venta.estado === 'Cancelada' ? { opacity: '0.5', cursor: 'not-allowed' } : {}"
+              >
+                <i class="bi bi-x-circle-fill"></i>
               </button>
             </td>
           </tr>
@@ -95,63 +113,22 @@
       </div>
     </div>
 
-    <!-- Modal para mostrar detalles de venta -->
-    <div v-if="isDetallesModalOpen" class="modal">
-      <div class="modal-content">
-        <h2 class="h2-modal-content">Detalles de Venta</h2>
-
-        <div class="detalles-lista">
-          <p><strong>Número de Factura:</strong> {{ ventaDetalles[0]?.numero_factura }}</p>
-          <p><strong>CAI:</strong> {{ ventaDetalles[0]?.cai }}</p>
-          <p><strong>Fecha y Hora:</strong> {{ formatDateTime(ventaDetalles[0]?.fechaHora) }}</p>
-          <p><strong>Cliente:</strong> {{ ventaDetalles[0]?.cliente }}</p>
-          <p><strong>RTN Cliente:</strong> {{ ventaDetalles[0]?.rtnCliente }}</p>
-          <p><strong>Atendido por:</strong> {{ ventaDetalles[0]?.nombre }}</p>
-        </div>
-
-        <h3>Productos</h3>
-        <div class="tabla-productos">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="producto in ventaDetalles[0]?.productos" :key="producto.codigo">
-                <td>{{ producto.codigo }}</td>
-                <td>{{ producto.nombre }}</td>
-                <td>{{ producto.cantidad }}</td>
-                <td>{{ formatCurrency(producto.total) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="totales">
-          <p><strong>Subtotal:</strong> {{ formatCurrency(ventaDetalles[0]?.subtotal) }}</p>
-          <p><strong>ISV:</strong> {{ formatCurrency(ventaDetalles[0]?.total_impuesto) }}</p>
-          <p><strong>Total:</strong> {{ formatCurrency(ventaDetalles[0]?.total) }}</p>
-        </div>
-
-        <div class="modal-footer">
-          <button id="BtnCerrarDetalles" class="btn btn-secondary" @click="closeDetallesModal">
-            Cerrar
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Modal de Factura -->
     <AdminFacturaModal 
-  v-if="isFacturaModalOpen"
-  :isVisible="isFacturaModalOpen"
-  :venta="selectedVenta"
-  @close="closeFacturaModal"
-/>
+      v-if="isFacturaModalOpen"
+      :isVisible="isFacturaModalOpen"
+      :venta="selectedVenta"
+      @close="closeFacturaModal"
+    />
+
+    <!-- Modal de Cancelación -->
+    <CancelSaleModal 
+      v-if="isCancelModalOpen"
+      :isVisible="isCancelModalOpen"
+      :venta="selectedVentaForCancel"
+      @close="closeCancelModal"
+      @confirm="handleCancelSale"
+    />
   </div>
 </template>
 
@@ -160,15 +137,16 @@ import { useToast } from "vue-toastification";
 import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
 import AdminFacturaModal from '../components/AdminFacturasModal.vue';
+import CancelSaleModal from '../components/CancelarVentaModal.vue';
 import AdminVentas from '../../services/Soliadminventa';
-
 
 export default {
   name: 'AdministrarVentas',
   components: {
     PageHeader,
     ExportButton,
-    AdminFacturaModal
+    AdminFacturaModal,
+    CancelSaleModal
   },
   setup() {
     const toast = useToast();
@@ -180,12 +158,10 @@ export default {
       searchQuery: '',
       startDate: '',
       endDate: '',
-      selectedVenta: null, // En lugar de selectedVentaId y currentUserId
+      selectedVenta: null,
+      selectedVentaForCancel: null,
       isFacturaModalOpen: false,
-      isDetallesModalOpen: false,
-      ventaDetalles: [],
-      selectedVentaId: null,
-      currentUserId: null,
+      isCancelModalOpen: false,
       ventas: [],
       currentPage: 1,
       pageSize: 10,
@@ -198,6 +174,7 @@ export default {
         { header: 'Descuento', dataKey: 'descuento' },
         { header: 'Total Impuesto', dataKey: 'total_impuesto' },
         { header: 'Total', dataKey: 'total' },
+        { header: 'Estado', dataKey: 'estado' },
         { header: 'Fecha y Hora', dataKey: 'fechaHora' }
       ],
       rows: [],
@@ -240,6 +217,7 @@ export default {
         descuento: this.formatCurrency(venta.descuento),
         total: this.formatCurrency(venta.total),
         total_impuesto: this.formatCurrency(venta.total_impuesto),
+        estado: venta.estado || 'Pagada',
         fechaHora: this.formatDateTime(venta.fechaHora)
       }));
     }
@@ -265,13 +243,23 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const ventasData = await AdminVentas.obtenerVentas();
-        this.ventas = ventasData.map(venta => ({
-          ...venta,
-          id_venta: venta.id_venta || venta.idVenta,
-          id_usuario: venta.id_usuario || venta.idUsuario
-        }));
-        this.generateRows();
+        console.log('Iniciando carga de ventas...');
+        const response = await AdminVentas.obtenerVentas();
+        console.log('Respuesta del servidor:', response);
+        
+        const ventasData = response.data || response;
+        if (ventasData) {
+          this.ventas = ventasData.map(venta => ({
+            ...venta,
+            id_venta: venta.id_venta || venta.idVenta,
+            id_usuario: venta.id_usuario || venta.idUsuario,
+            estado: venta.estado || 'Pagada'
+          }));
+          console.log('Ventas procesadas:', this.ventas);
+          this.generateRows();
+        } else {
+          throw new Error('No se pudieron obtener las ventas');
+        }
       } catch (error) {
         console.error('Error al cargar ventas:', error);
         this.error = 'Error al cargar las ventas. Por favor, intente nuevamente.';
@@ -281,35 +269,42 @@ export default {
       }
     },
 
-    async showDetalles(venta) {
-      try {
-        const idVenta = venta.id_venta;
-        console.log('ID de venta a consultar:', idVenta);
-        const detalleVenta = await AdminVentas.obtenerDetalleVenta(idVenta);
-        
-        this.ventaDetalles = [detalleVenta];
-        this.isDetallesModalOpen = true;
-      } catch (error) {
-        console.error('Error al cargar detalles de la venta:', error);
-        this.toast.error('Error al cargar los detalles de la venta. Por favor, intente nuevamente.');
-      }
-    },
-
     showFactura(venta) {
-  console.log('Mostrando factura para:', venta);
-  this.selectedVenta = venta; // Guardamos la venta completa
-  this.isFacturaModalOpen = true;
-},
-
-    closeDetallesModal() {
-      this.isDetallesModalOpen = false;
-      this.ventaDetalles = [];
+      console.log('Mostrando factura para:', venta);
+      this.selectedVenta = venta;
+      this.isFacturaModalOpen = true;
     },
 
     closeFacturaModal() {
-  this.isFacturaModalOpen = false;
-  this.selectedVenta = null;
-},
+      this.isFacturaModalOpen = false;
+      this.selectedVenta = null;
+    },
+
+    showCancelModal(venta) {
+      this.selectedVentaForCancel = venta;
+      this.isCancelModalOpen = true;
+    },
+
+    closeCancelModal() {
+      this.isCancelModalOpen = false;
+      this.selectedVentaForCancel = null;
+    },
+
+    async handleCancelSale(ventaId, description) {
+      try {
+        const response = await AdminVentas.cancelarVenta(ventaId, description);
+        if (response.success) {
+          this.toast.success('Venta cancelada exitosamente');
+          await this.loadVentas();
+        } else {
+          throw new Error(response.message || 'Error al cancelar la venta');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        this.toast.error('Error al cancelar la venta: ' + error.message);
+        throw error;
+      }
+    },
 
     generateRows() {
       this.rows = this.filteredRows;
@@ -351,7 +346,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
@@ -377,8 +371,7 @@ export default {
 }
 
 /* Botones de acción */
-#btnDetalles,
-#btnFactura {
+.btn {
   font-size: 18px;
   width: 50px;
   height: 40px;
@@ -392,14 +385,50 @@ export default {
   transition: all 0.3s ease;
 }
 
-#btnDetalles:hover {
-  background-color: #17a2b8;
+.btn:hover {
   transform: scale(1.05);
 }
 
-#btnFactura:hover {
+.btn-danger {
+  background-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #bb2d3b;
+}
+
+.btn-primary:hover {
   background-color: #0056b3;
-  transform: scale(1.05);
+}
+
+/* Nuevo estilo para botones deshabilitados */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn:disabled:hover {
+  transform: none !important;
+  background-color: #dc3545;
+}
+
+/* Estado badges */
+.estado-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.estado-pagada {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.estado-cancelada {
+  background-color: #f8d7da;
+  color: #842029;
 }
 
 .actions-column {
@@ -414,7 +443,7 @@ export default {
   overflow-x: hidden;
 }
 
-/* Ajustar las opciones igual que en categorías */
+/* Ajustar las opciones */
 .opciones {
   display: flex;
   align-items: center;
@@ -423,8 +452,8 @@ export default {
   margin-bottom: 16px;
 }
 
-.bi-eye-fill,
-.bi-file-text-fill {
+.bi-file-text-fill,
+.bi-x-circle-fill {
   font-size: 20px;
 }
 
@@ -459,36 +488,6 @@ export default {
   z-index: 1;
 }
 
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 1500px;
-  width: 90%;
-  margin: 20px;
-  overflow-y: auto;
-  max-height: 90vh;
-}
-
-.h2-modal-content {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
 /* Filtro de fechas */
 .date-filter {
   display: flex;
@@ -512,56 +511,23 @@ export default {
 }
 
 /* Scroll personalizado */
-.table-container::-webkit-scrollbar,
-.modal-content::-webkit-scrollbar {
+.table-container::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.table-container::-webkit-scrollbar-track,
-.modal-content::-webkit-scrollbar-track {
+.table-container::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 4px;
 }
 
-.table-container::-webkit-scrollbar-thumb,
-.modal-content::-webkit-scrollbar-thumb {
+.table-container::-webkit-scrollbar-thumb {
   background: #c09d62;
   border-radius: 4px;
 }
 
-.table-container::-webkit-scrollbar-thumb:hover,
-.modal-content::-webkit-scrollbar-thumb:hover {
+.table-container::-webkit-scrollbar-thumb:hover {
   background: #a38655;
-}
-
-/* Detalles de la venta */
-.detalles-lista {
-  margin-bottom: 20px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.detalles-lista p {
-  margin: 8px 0;
-}
-
-.tabla-productos {
-  margin: 20px 0;
-  overflow-x: auto;
-}
-
-.totales {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.totales p {
-  margin: 8px 0;
-  font-size: 1.1em;
 }
 
 /* Nueva Paginación */
@@ -639,13 +605,6 @@ export default {
   border-color: #404040;
 }
 
-.dark .modal-content,
-.dark .detalles-lista,
-.dark .totales {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
 .dark .loading-indicator,
 .dark .no-data {
   color: #aaa;
@@ -678,21 +637,15 @@ export default {
     margin-bottom: 10px;
   }
 
-  #btnDetalles,
-  #btnFactura {
+  .btn {
     width: 40px;
     height: 35px;
     font-size: 14px;
   }
 
-  .bi-eye-fill,
-  .bi-file-text-fill {
+  .bi-file-text-fill,
+  .bi-x-circle-fill {
     font-size: 16px;
-  }
-
-  .modal-content {
-    width: 95%;
-    padding: 15px;
   }
 
   .pagination-wrapper {
@@ -704,14 +657,14 @@ export default {
     justify-content: center;
     flex-wrap: wrap;
   }
+
+  .estado-badge {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
 }
 
 @media screen and (max-width: 480px) {
-  .h2-modal-content {
-    font-size: 20px;
-    margin-bottom: 15px;
-  }
-
   .table th,
   .table td {
     padding: 6px;
@@ -720,11 +673,6 @@ export default {
 
   .busqueda {
     max-width: 100%;
-  }
-
-  .modal-content {
-    margin: 10px;
-    padding: 10px;
   }
 
   .pagination-button {

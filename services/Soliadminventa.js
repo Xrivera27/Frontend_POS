@@ -15,8 +15,8 @@ const getAuthHeaders = () => {
 };
 
 export default {
-
     homeUrl,
+    
     async obtenerVentas() {
         try {
             const headers = getAuthHeaders();
@@ -34,7 +34,6 @@ export default {
             }
     
             const data = await response.json();
-            // Asegurarnos de que el id_usuario esté en los datos
             console.log('Datos recibidos:', data);
             return data.data;
         } catch (error) {
@@ -103,6 +102,41 @@ export default {
             return blob;
         } catch (error) {
             console.error('Error en generarFactura:', error);
+            throw error;
+        }
+    },
+
+    async cancelarVenta(ventaId, description) {  // Mantenemos description como viene del frontend
+        try {
+            console.log('Iniciando cancelación de venta:', { ventaId, description });
+            const url = `${homeUrl}/AdminVentas/ventas/${ventaId}/cancel`;
+            
+            const headers = getAuthHeaders();
+            
+            // Mapeamos description a descripcion para el backend
+            const body = {
+                descripcion: description  // Ya está haciendo la conversión correctamente
+            };
+    
+            console.log('Enviando datos:', body);
+    
+            const response = await fetch(url, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(body)
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error response:', errorData);
+                throw new Error(errorData.message || `Error: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            console.log('Respuesta de cancelación:', data);
+            return data;
+        } catch (error) {
+            console.error('Error al cancelar venta:', error);
             throw error;
         }
     }
