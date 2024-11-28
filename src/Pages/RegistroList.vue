@@ -30,12 +30,12 @@
 
          <!-- Encargado -->
          <div class="form-group">
-          <input id="encargado" v-model="form.encargado" type="text" placeholder="Nombre" required />
+          <input id="encargado" v-model="form.nombre_usuario" type="text" placeholder="Nombre" required />
         </div>
 
           <!-- Encargado -->
           <div class="form-group">
-          <input id="apellido" v-model="form.encargado" type="text" placeholder="Apellido" required />
+          <input id="apellido" v-model="form.apellido_usuario" type="text" placeholder="Apellido" required />
         </div>
 
           <!-- Direccion -->
@@ -51,8 +51,6 @@
         </div>
 
         <!-- Campos adicionales de SAR (solo se muestran si usa_SAR es true) -->
-       
-
         <!-- Botón de envío -->
         <div class="form-group button-container">
           <button type="submit" class="submit-btn">
@@ -69,10 +67,12 @@ import { reactive, ref, onMounted } from 'vue';
 
 const form = reactive({
   nombre: '',
-  created_at: '',
   id_categoria: '', // Aquí se almacenará el ID de la categoría seleccionada
   correo_principal: '',
   telefono_principal: '',
+  nombre_usuario: '',
+  apellido_usuario: '',
+  direccion: '',
   usa_SAR: false,
 });
 
