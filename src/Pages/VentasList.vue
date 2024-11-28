@@ -123,8 +123,11 @@
         </div>
       </div>
 
-      <button v-if="!cajaAbierta" class="cajaButton" @click="abrirCaja" @modal-focused="handleModalFocus">Abrir
-        caja</button>
+      <div v-if="estadoCajaValidado">
+        <button v-if="!cajaAbierta" class="cajaButton" @click="abrirCaja">
+          Abrir caja
+        </button>
+      </div>
 
       <div class="footer-container">
         <button :disabled="!cajaAbierta" @click="buscarProducto">Buscar producto [F2]</button>
@@ -188,11 +191,12 @@ export default {
     ModalLoading,
     GuardarVentaModal,
     RecuperarVentaModal,
-    FacturaModal
+    FacturaModal,
   },
   data() {
     return {
       isAperturaCajaModalVisible: false,
+      estadoCajaValidado: false,
       isFacturaModalVisible: false,  // Agregado para el modal de factura
       facturaActual: '',
       cajaAbierta: false,
@@ -251,6 +255,7 @@ export default {
         this.resumeMainKeyboardEvents();
       }
     },
+
     isPagoModalVisible(newVal) {
       this.isAnyModalOpen = newVal;
       if (newVal) {
@@ -260,6 +265,7 @@ export default {
         this.resumeMainKeyboardEvents();
       }
     },
+
     isBuscarProductoModalVisible(newVal) {
       this.isAnyModalOpen = newVal;
       if (newVal) {
@@ -713,7 +719,6 @@ export default {
           productoReducir = newProduct.codigo_producto;
 
         }
-        
 
       } catch (error) {
         console.log(error);
@@ -891,8 +896,9 @@ export default {
       this.usaSAR = await sucursalSar(this.id_usuario);
       this.info = await getInfoBasic(this.id_usuario);
       this.productos = await getProductos(this.id_usuario);
-      // Removemos esta línea que estaba causando el problema
-       this.cajaAbierta = await cajaUsuario(this.id_usuario);
+      this.cajaAbierta = await cajaUsuario(this.id_usuario);
+
+      this.estadoCajaValidado = true; // Marcar como validado
 
       ventaRecuperada = await getVentaPendiente(this.id_usuario);
       if (ventaRecuperada.resultado) {
@@ -900,6 +906,7 @@ export default {
       }
     } catch (error) {
       notificaciones('error', error.message);
+      this.estadoCajaValidado = true; 
     }
   },
 
