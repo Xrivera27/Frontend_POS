@@ -228,12 +228,13 @@ export const eliminarVenta = async (id_venta, id_factura) => {
     }
 }
 
-export const pagar = async (pago, id_venta, id_usuario) => {
+export const pagar = async (pago, id_venta, descripcion, id_usuario) => {
 
     const datos = {
         id_venta: id_venta,
         pago: pago,
-        id_usuario: id_usuario
+        id_usuario: id_usuario,
+        descripcion: descripcion
     }
 
     const parametros = `/ventas/pagar-efectivo`;
