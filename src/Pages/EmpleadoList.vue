@@ -169,6 +169,7 @@ import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 import solicitudes from "../../services/solicitudes.js";
 import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
+const { esCeo } = require('../../services/usuariosSolicitudes');
 import PageHeader from "@/components/PageHeader.vue";
 
 export default {
@@ -194,6 +195,7 @@ export default {
       editIndex: null,
       itemsPerPage: "",
       sucursales: [],
+      esCeo: false,
       roles: [],
 
       usuarioForm: {
@@ -220,6 +222,8 @@ export default {
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      this.esCeo = await esCeo(this.id_usuario);
+      console.log(this.esCeo);
 
       this.sucursales = await solicitudes.fetchRegistros(
         `/sucursales/empresa/${this.id_usuario}`
