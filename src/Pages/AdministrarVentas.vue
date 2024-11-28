@@ -21,7 +21,7 @@
     </div>
 
     <!-- Tabla exportable -->
-    <div class="table-container" v-pdf-export ref="table">
+    <div class="table-container" ref="table">
       <!-- Indicador de carga -->
       <div v-if="loading" class="loading-indicator">
         Cargando ventas...
@@ -58,38 +58,41 @@
             <td>{{ formatCurrency(venta.total_impuesto) }}</td>
             <td>{{ formatCurrency(venta.total) }}</td>
             <td>{{ formatDateTime(venta.fechaHora) }}</td>
-            <td>
-              <button id="btnDetalles" class="btn btn-info" @click="showDetalles(venta)">
+            <td class="actions-column">
+              <button id="btnDetalles" class="btn btn-info me-2" @click="showDetalles(venta)">
                 <i class="bi bi-eye-fill"></i>
+              </button>
+              <button id="btnFactura" class="btn btn-primary" @click="showFactura(venta)">
+                <i class="bi bi-file-text-fill"></i>
               </button>
             </td>
           </tr>
         </tbody>
       </table>
 
-      <!-- Nueva Paginación -->
+      <!-- Paginación -->
       <div class="pagination-wrapper">
-  <div class="pagination-info">
-    Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredVentas.length) }} de {{ filteredVentas.length }} registros
-  </div>
-  <div class="pagination-container">
-    <button 
-      class="pagination-button" 
-      :disabled="currentPage === 1"
-      @click="previousPage"
-    >
-      Anterior
-    </button>
-    
-    <button 
-      class="pagination-button" 
-      :disabled="currentPage === totalPages"
-      @click="nextPage"
-    >
-      Siguiente
-    </button>
-  </div>
-</div>
+        <div class="pagination-info">
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredVentas.length) }} de {{ filteredVentas.length }} registros
+        </div>
+        <div class="pagination-container">
+          <button 
+            class="pagination-button" 
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
+            Anterior
+          </button>
+          
+          <button 
+            class="pagination-button" 
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal para mostrar detalles de venta -->
@@ -97,7 +100,6 @@
       <div class="modal-content">
         <h2 class="h2-modal-content">Detalles de Venta</h2>
 
-        <!-- Información básica en una sola lista -->
         <div class="detalles-lista">
           <p><strong>Número de Factura:</strong> {{ ventaDetalles[0]?.numero_factura }}</p>
           <p><strong>CAI:</strong> {{ ventaDetalles[0]?.cai }}</p>
@@ -107,7 +109,6 @@
           <p><strong>Atendido por:</strong> {{ ventaDetalles[0]?.nombre }}</p>
         </div>
 
-        <!-- Productos -->
         <h3>Productos</h3>
         <div class="tabla-productos">
           <table class="table">
@@ -130,7 +131,6 @@
           </table>
         </div>
 
-        <!-- Totales -->
         <div class="totales">
           <p><strong>Subtotal:</strong> {{ formatCurrency(ventaDetalles[0]?.subtotal) }}</p>
           <p><strong>ISV:</strong> {{ formatCurrency(ventaDetalles[0]?.total_impuesto) }}</p>
@@ -144,19 +144,35 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Factura -->
+    <AdminFacturaModal 
+  v-if="isFacturaModalOpen"
+  :isVisible="isFacturaModalOpen"
+  :venta="selectedVenta"
+  @close="closeFacturaModal"
+/>
   </div>
 </template>
 
-
 <script>
+import { useToast } from "vue-toastification";
 import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
+import AdminFacturaModal from '../components/AdminFacturasModal.vue';
 import AdminVentas from '../../services/Soliadminventa';
 
+
 export default {
+  name: 'AdministrarVentas',
   components: {
     PageHeader,
-    ExportButton
+    ExportButton,
+    AdminFacturaModal
+  },
+  setup() {
+    const toast = useToast();
+    return { toast };
   },
   data() {
     return {
@@ -164,8 +180,12 @@ export default {
       searchQuery: '',
       startDate: '',
       endDate: '',
+      selectedVenta: null, // En lugar de selectedVentaId y currentUserId
+      isFacturaModalOpen: false,
       isDetallesModalOpen: false,
       ventaDetalles: [],
+      selectedVentaId: null,
+      currentUserId: null,
       ventas: [],
       currentPage: 1,
       pageSize: 10,
@@ -202,25 +222,14 @@ export default {
         return matchesSearchQuery && matchesDateRange;
       });
     },
-
     paginatedVentas() {
       const startIndex = (this.currentPage - 1) * this.pageSize;
       const endIndex = startIndex + this.pageSize;
       return this.filteredVentas.slice(startIndex, endIndex);
     },
-
     totalPages() {
       return Math.ceil(this.filteredVentas.length / this.pageSize);
     },
-
-    pages() {
-      const pages = [];
-      for (let i = 1; i <= this.totalPages; i++) {
-        pages.push(i);
-      }
-      return pages;
-    },
-
     filteredRows() {
       return this.paginatedVentas.map((venta, index) => ({
         index: ((this.currentPage - 1) * this.pageSize) + index + 1,
@@ -257,11 +266,16 @@ export default {
       this.error = null;
       try {
         const ventasData = await AdminVentas.obtenerVentas();
-        this.ventas = ventasData;
+        this.ventas = ventasData.map(venta => ({
+          ...venta,
+          id_venta: venta.id_venta || venta.idVenta,
+          id_usuario: venta.id_usuario || venta.idUsuario
+        }));
         this.generateRows();
       } catch (error) {
         console.error('Error al cargar ventas:', error);
         this.error = 'Error al cargar las ventas. Por favor, intente nuevamente.';
+        this.toast.error(this.error);
       } finally {
         this.loading = false;
       }
@@ -277,23 +291,28 @@ export default {
         this.isDetallesModalOpen = true;
       } catch (error) {
         console.error('Error al cargar detalles de la venta:', error);
-        alert('Error al cargar los detalles de la venta. Por favor, intente nuevamente.');
+        this.toast.error('Error al cargar los detalles de la venta. Por favor, intente nuevamente.');
       }
     },
+
+    showFactura(venta) {
+  console.log('Mostrando factura para:', venta);
+  this.selectedVenta = venta; // Guardamos la venta completa
+  this.isFacturaModalOpen = true;
+},
 
     closeDetallesModal() {
       this.isDetallesModalOpen = false;
       this.ventaDetalles = [];
     },
 
+    closeFacturaModal() {
+  this.isFacturaModalOpen = false;
+  this.selectedVenta = null;
+},
+
     generateRows() {
       this.rows = this.filteredRows;
-    },
-
-    changePage(page) {
-      if (page >= 1 && page <= this.totalPages) {
-        this.currentPage = page;
-      }
     },
 
     previousPage() {
@@ -332,6 +351,7 @@ export default {
 };
 </script>
 
+
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
@@ -356,8 +376,9 @@ export default {
   margin: 0;
 }
 
-/* Botón de detalles */
-#btnDetalles {
+/* Botones de acción */
+#btnDetalles,
+#btnFactura {
   font-size: 18px;
   width: 50px;
   height: 40px;
@@ -368,12 +389,23 @@ export default {
   justify-content: center;
   padding: 0;
   border: none;
+  transition: all 0.3s ease;
 }
 
 #btnDetalles:hover {
   background-color: #17a2b8;
   transform: scale(1.05);
-  transition: all 0.3s ease;
+}
+
+#btnFactura:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.actions-column {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
 }
 
 .ventas-wrapper {
@@ -391,7 +423,8 @@ export default {
   margin-bottom: 16px;
 }
 
-.bi-eye-fill {
+.bi-eye-fill,
+.bi-file-text-fill {
   font-size: 20px;
 }
 
@@ -456,34 +489,6 @@ export default {
   margin-bottom: 20px;
 }
 
-/* Botones */
-.btn {
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.btn-info {
-  background-color: #17a2b8;
-  color: white;
-}
-
-.btn-info:hover {
-  background-color: #138496;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-}
-
 /* Filtro de fechas */
 .date-filter {
   display: flex;
@@ -528,44 +533,6 @@ export default {
 .table-container::-webkit-scrollbar-thumb:hover,
 .modal-content::-webkit-scrollbar-thumb:hover {
   background: #a38655;
-}
-
-/* Modal en modo oscuro */
-.dark .modal-content {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
-.dark .modal-content input,
-.dark .modal-content textarea {
-  background-color: #383838;
-  border-color: #404040;
-  color: #fff;
-}
-
-/* Tabla en modo oscuro */
-.dark .table-container {
-  border-color: #404040;
-  background-color: #2d2d2d;
-}
-
-.dark .table thead {
-  background-color: #2d2d2d;
-}
-
-.dark .table th {
-  background-color: #383838;
-  color: #fff;
-  border-color: #404040;
-}
-
-.dark .table td {
-  color: #fff;
-  border-color: #404040;
-}
-
-.dark .table tr:hover {
-  background-color: #383838;
 }
 
 /* Detalles de la venta */
@@ -641,35 +608,6 @@ export default {
   opacity: 0.6;
 }
 
-/* Modo oscuro para la paginación */
-.dark .pagination-wrapper {
-  border-top-color: #404040;
-}
-
-.dark .pagination-info {
-  color: #adb5bd;
-}
-
-.dark .pagination-button {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .pagination-button:hover:not(:disabled) {
-  background-color: #383838;
-}
-
-.dark .pagination-button.active {
-  background-color: #17a2b8;
-}
-
-.dark .detalles-lista,
-.dark .totales {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
 /* Loading y No Data */
 .loading-indicator,
 .no-data {
@@ -682,6 +620,30 @@ export default {
 .no-data {
   background-color: #f8f9fa;
   border-radius: 4px;
+}
+
+/* Modo oscuro */
+.dark .table-container {
+  border-color: #404040;
+  background-color: #2d2d2d;
+}
+
+.dark .table th {
+  background-color: #383838;
+  color: #fff;
+  border-color: #404040;
+}
+
+.dark .table td {
+  color: #fff;
+  border-color: #404040;
+}
+
+.dark .modal-content,
+.dark .detalles-lista,
+.dark .totales {
+  background-color: #2d2d2d;
+  color: #fff;
 }
 
 .dark .loading-indicator,
@@ -716,13 +678,15 @@ export default {
     margin-bottom: 10px;
   }
 
-  #btnDetalles {
+  #btnDetalles,
+  #btnFactura {
     width: 40px;
     height: 35px;
     font-size: 14px;
   }
 
-  .bi-eye-fill {
+  .bi-eye-fill,
+  .bi-file-text-fill {
     font-size: 16px;
   }
 
@@ -761,16 +725,6 @@ export default {
   .modal-content {
     margin: 10px;
     padding: 10px;
-  }
-
-  .btn {
-    padding: 8px 16px;
-    font-size: 14px;
-  }
-
-  .date-filter label {
-    margin-right: 0;
-    margin-bottom: 5px;
   }
 
   .pagination-button {
