@@ -22,12 +22,12 @@ export default {
             if (newVal) {
                 this.stage = 0;
                 this.timers = [
-                    setTimeout(() => this.stage = 1, 1500),
-                    setTimeout(() => this.stage = 2, 3000),
+                    setTimeout(() => this.stage = 1, 500),  // Reducido de 1500 a 500ms
+                    setTimeout(() => this.stage = 2, 1000), // Reducido de 3000 a 1000ms
                     setTimeout(() => {
                         this.stage = 3;
-                        setTimeout(() => this.$emit('complete'), 1000);
-                    }, 4000)
+                        setTimeout(() => this.$emit('complete'), 500); // Reducido de 1000 a 500ms
+                    }, 1500) // Reducido de 4000 a 1500ms
                 ];
             }
         }
