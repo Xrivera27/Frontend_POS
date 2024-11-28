@@ -689,6 +689,11 @@ export default {
 
       try {
         this.limpiar();
+        if (!this.recuperandoVenta) {
+          //  alert(nuevaCantidad);
+          await agregarProductoCodigo(nuevaCantidad, productoReducir, this.id_usuario);
+
+        }
         const newProduct = this.productos.find((p) => p.codigo_producto === codigoValidar);
         if (!newProduct) {
           const toast = useToast();
@@ -708,11 +713,7 @@ export default {
           productoReducir = newProduct.codigo_producto;
 
         }
-        if (!this.recuperandoVenta) {
-          //  alert(nuevaCantidad);
-          await agregarProductoCodigo(nuevaCantidad, productoReducir, this.id_usuario);
-
-        }
+        
 
       } catch (error) {
         console.log(error);
