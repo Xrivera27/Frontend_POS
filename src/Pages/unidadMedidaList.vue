@@ -3,7 +3,7 @@
   <div class="categorias-wrapper">
     <PageHeader :titulo="titulo" />
     <div class="opciones">
-      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
         Unidad</button>
 
       <RouterLink to="categorias">
@@ -35,7 +35,7 @@
             <th>#</th>
             <th>Nombre unidad Inventario</th>
             <th>Productos usados</th>
-            <th>Acciones</th>
+            <th v-if="esCeo" >Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -46,7 +46,7 @@
               <button class="btn mostrar-producto" @click="mostrarModalProductos(unidad.id_medida)">Mostrar
                 Prod.</button>
             </td>
-            <td>
+            <td v-if="esCeo" >
               <button id="btnEditar" class="btn btn-warning" @click="editUnidad(unidad)"><i
                   class="bi bi-pencil-fill"></i></button>
               <button id="btnEliminar" class="btn btn-danger" @click="deleteUnidad(unidad)"><b><i
@@ -118,6 +118,7 @@ import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
 import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
 import { useToast } from "vue-toastification";
+const { esCeo } = require('../../services/usuariosSolicitudes');
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -140,6 +141,7 @@ export default {
       unidadesMedida: [],
       mostrarProductos: [],
       isModalOpen: false,
+      esCeo: false,
       isModalProductosOpen: false, // Estado para controlar si el modal está abierto o cerrado
       isEditing: false, // Estado para verificar si estamos editando una categoría
       unidadForm: { medida: '' }, // Objeto para el formulario de categorías
@@ -151,6 +153,7 @@ export default {
     this.changeFavicon('/img/spiderman.ico');
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      this.esCeo = await esCeo(this.id_usuario);
 
 
       this.unidadesMedida = await getUnidadMedidaEmpresas(this.id_usuario);

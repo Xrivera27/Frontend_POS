@@ -36,7 +36,7 @@
             <th>Dirección</th>
             <th>Teléfono</th>
             <th>RTN</th>
-            <th>Acciones</th>
+            <th v-if="esCeo" >Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -47,7 +47,7 @@
             <td>{{ cliente.direccion }}</td>
             <td>{{ cliente.telefono }}</td>
             <td>{{ cliente.rtn }}</td>
-            <td>
+            <td v-if="esCeo" >
               <button id="btnEditar" class="btn btn-warning" @click="editCliente(cliente)">
                 <i class="bi bi-pencil-fill"></i>
               </button>
@@ -121,6 +121,7 @@ import solicitudes from "../../services/solicitudes";
 import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
 const { getClientesbyEmpresa, postCliente, patchCliente, desactivarCliente } = require('../../services/clienteSolicitudes.js');
+const { esCeo } = require('../../services/usuariosSolicitudes');
 
 export default {
   components: {
@@ -140,6 +141,7 @@ export default {
       isEditing: false,
       editIndex: null,
       id_usuario: 0,
+      esCeo: false,
       clienteForm: {
         id: null,
         nombre_completo: '',
@@ -158,6 +160,7 @@ export default {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
 
       this.clientes = await getClientesbyEmpresa(this.id_usuario);
+      this.esCeo = await esCeo(this.id_usuario);
 
 
     } catch (error) {

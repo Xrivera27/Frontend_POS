@@ -4,7 +4,7 @@
 
     <div class="opciones">
       <div class="action-bar">
-        <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">
+        <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">
           Agregar Producto
         </button>
       </div>
@@ -56,7 +56,7 @@
             <th>Stock</th>
             <th>Precio Unitario</th>
             <th>Promocion Activa</th>
-            <th>Acciones</th>
+            <th v-if="esCeo" >Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -68,7 +68,7 @@
                   class="bi bi-pencil-square"></i></button> </td>
             <td>{{ producto.precio_unitario }}</td>
             <td>Inactivo</td>
-            <td>
+            <td v-if="esCeo" >
               <button id="btnEditar" class="btn btn-warning" @click="editProducto(producto, index)">
                 <i class="bi bi-pencil-fill"></i>
               </button>
@@ -304,6 +304,7 @@ import { getProveedoresEmpresa } from '../../services/proveedoresSolicitud.js';
 import { getInfoExtra, getProductoSucursal, postProducto, patchProducto, desactivarProducto, getProductosEmpresa, getStockMinMax, PostStockMinMax } from '../../services/productosSolicitudes.js';
 import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
 import { getCategoriaProductosEmpresa } from '../../services/categoriaSolicitudes.js';
+const { esCeo } = require('../../services/usuariosSolicitudes');
 
 
 //recursos
@@ -337,6 +338,7 @@ export default {
       id_usuario: '',
       unidadesMostrar: [],
       proveedoresMostrar: [],
+      esCeo: false,
       productoForm: {
         codigo_producto: '',
         nombre: '',
@@ -694,6 +696,7 @@ export default {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
 
       this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
+      this.esCeo = await esCeo(this.id_usuario);
 
 
       this.mostrarRegistros(this.searchSucursal);

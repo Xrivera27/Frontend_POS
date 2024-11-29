@@ -47,7 +47,7 @@
     <div class="tabla-busqueda" v-if="!activeForm">
       <div>
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar promoción..." />
-        <button class="btn activar-form" @click="activarForm">Nueva promocion</button>
+        <button v-if="esCeo" class="btn activar-form" @click="activarForm">Nueva promocion</button>
       </div>
       <div class="table-container" v-pdf-export ref="table">
         <table class="table">
@@ -60,7 +60,7 @@
               <th>Fechas inicio</th>
               <th>Fecha final</th>
               <th>Estado</th>
-              <th id="opciones">Opciones</th>
+              <th v-if="esCeo" id="opciones">Opciones</th>
             </tr>
           </thead>
           <tbody>
@@ -72,7 +72,7 @@
               <td>{{ formatDate(p.fecha_inicio) }}</td>
               <td>{{ formatDate(p.fecha_final) }}</td>
               <td>{{ p.manejo_automatico ? 'Se aplicará' : 'No se aplicará' }}</td>
-              <td class="td-botones">
+              <td v-if="esCeo" class="td-botones">
                 <button id="btnEditar" class="btn btn-warning" @click="editarPromocion(index)">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
@@ -200,6 +200,7 @@
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import solicitudes from "../../services/soli";
+const { esCeo } = require('../../services/usuariosSolicitudes');
 
 export default {
   name: 'PromocionesProducto',
@@ -221,6 +222,7 @@ export default {
       isLoading: false,
       error: null,
       productos: [],
+      esCeo: false,
 
       promForm: {
         producto_id: "",
@@ -254,6 +256,7 @@ export default {
       this.cargarPromociones(),
       this.cargarProductos()
     ]);
+    this.esCeo = await esCeo(this.id_usuario);
   },
 
   computed: {
