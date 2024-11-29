@@ -3,16 +3,14 @@
     <PageHeader :titulo="titulo" />
 
     <div class="report-body">
-      <!-- Create a flex container for the main content -->
       <div class="main-content">
-        <!-- Left side - Filters -->
+        <!-- Sección de filtros -->
         <div class="filters-section">
           <div class="filter-row">
             <div class="filter-group">
               <label>Tipo de Reporte</label>
               <select v-model="reporteSeleccionado" class="select-input">
                 <option value="ventas_cliente">Ventas por Cliente</option>
-                <option value="ventas_cajero">Ventas por Cajero</option>
                 <option value="ventas_sucursal">Ventas por Sucursal</option>
                 <option value="ventas_empleado">Ventas por Empleado</option>
               </select>
@@ -45,21 +43,19 @@
               <button @click="showHeaderFooterModal = true" class="header-footer-btn">
                 Configurar Header/Footer
               </button>
-              <!-- Botones -->
               <div class="button-group">
-                <button @click="generarReporte('pdf')" class="btn pdf-btn" :disabled="!fechasValidas">PDF</button>
-                <button @click="generarReporte('excel')" class="btn excel-btn" :disabled="!fechasValidas">EXCEL</button>
-                <button @click="generarReporte('preview')" class="btn generate-btn"
-                  :disabled="!fechasValidas">Generar</button>
+                <button @click="generarReporte('pdf')" class="btn pdf-btn" :disabled="!fechasValidas || cargando">PDF</button>
+                <button @click="generarReporte('excel')" class="btn excel-btn" :disabled="!fechasValidas || cargando">EXCEL</button>
+                <button @click="generarReporte('preview')" class="btn generate-btn" :disabled="!fechasValidas || cargando">
+                  {{ cargando ? 'Generando...' : 'Generar' }}
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-
+        <!-- Sección de control de logo -->
         <div class="controls-section">
-          <div class="buttons-container">
-          </div>
           <div class="image-upload-wrapper">
             <div class="image-drop-area" :class="{ 'dragging': isDragging, 'has-image': logoUrl }"
               @dragenter.prevent="isDragging = true" @dragleave.prevent="onDragLeave" @dragover.prevent
@@ -91,59 +87,68 @@
                 </div>
               </div>
             </div>
-            <input type="file" ref="fileInput" @change="handleFileChange" accept="image/jpeg,image/jpg,image/webp"
+            <input type="file" ref="fileInput" @change="handleFileChange" accept="image/jpeg,image/jpg,image/png,image/webp"
               class="hidden-input" />
           </div>
         </div>
       </div>
+
+      <!-- Mensaje de error si existe -->
+      <div v-if="error" class="error-message">
+        {{ error }}
+      </div>
+
+      <!-- Modal de Header/Footer -->
       <HeaderFooterDesigner v-model="showHeaderFooterModal" :config="headerFooterConfig"
         @save="handleHeaderFooterSave" />
-      <!-- Rest of the content remains the same -->
-    </div>
 
-    <!-- Tabla de resultados -->
-    <div class="report-table" v-if="datosReporte.length">
-      <div class="table-header"></div>
-      <table>
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th v-if="reporteSeleccionado === 'ventas_cliente'">Cliente</th>
-            <th v-if="reporteSeleccionado === 'ventas_cajero'">Cajero</th>
-            <th v-if="reporteSeleccionado === 'ventas_sucursal'">Sucursal</th>
-            <th v-if="reporteSeleccionado === 'ventas_empleado'">Empleado</th>
-            <th>Factura</th>
-            <th>Valor Exonerado</th>
-            <th>Valor Exento</th>
-            <th>Valor Gravado</th>
-            <th>ISV</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(dato, index) in datosReporte" :key="index">
-            <td>{{ formatearFecha(dato.fecha) }}</td>
-            <td v-if="reporteSeleccionado === 'ventas_cliente'">{{ dato.cliente }}</td>
-            <td v-if="reporteSeleccionado === 'ventas_cajero'">{{ dato.cajero }}</td>
-            <td v-if="reporteSeleccionado === 'ventas_sucursal'">{{ dato.sucursal }}</td>
-            <td v-if="reporteSeleccionado === 'ventas_empleado'">{{ dato.empleado }}</td>
-            <td>{{ dato.factura }}</td>
-            <td>{{ formatearMoneda(dato.valorExonerado) }}</td>
-            <td>{{ formatearMoneda(dato.valorExento) }}</td>
-            <td>{{ formatearMoneda(dato.valorGravado) }}</td>
-            <td>{{ formatearMoneda(dato.isv) }}</td>
-            <td>{{ formatearMoneda(dato.total) }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- Tabla de resultados -->
+      <div v-if="!cargando && datosReporte.length" class="report-table">
+        <div class="table-header"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th v-if="reporteSeleccionado === 'ventas_cliente'">Cliente</th>
+              <th v-if="reporteSeleccionado === 'ventas_sucursal'">Sucursal</th>
+              <th v-if="reporteSeleccionado === 'ventas_empleado'">Empleado</th>
+              <th>Factura</th>
+              <th>Valor Exonerado</th>
+              <th>Valor Exento</th>
+              <th>Valor Gravado</th>
+              <th>ISV</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(dato, index) in datosReporte" :key="index">
+              <td>{{ formatearFecha(dato.fecha) }}</td>
+              <td v-if="reporteSeleccionado === 'ventas_cliente'">{{ dato.cliente }}</td>
+              <td v-if="reporteSeleccionado === 'ventas_sucursal'">{{ dato.sucursal }}</td>
+              <td v-if="reporteSeleccionado === 'ventas_empleado'">{{ dato.empleado }}</td>
+              <td>{{ dato.numero_factura_sar }}</td>
+              <td>{{ formatearMoneda(dato.valor_exonerado) }}</td>
+              <td>{{ formatearMoneda(dato.valor_exento) }}</td>
+              <td>{{ formatearMoneda(dato.valor_gravado) }}</td>
+              <td>{{ formatearMoneda(dato.isv) }}</td>
+              <td>{{ formatearMoneda(dato.total) }}</td>
+            </tr>
+          </tbody>
+        </table>
 
-      <!-- Totales -->
-      <div class="totals">
-        <div><strong>Total Exonerado:</strong> {{ formatearMoneda(totales.exonerado) }}</div>
-        <div><strong>Total Exento:</strong> {{ formatearMoneda(totales.exento) }}</div>
-        <div><strong>Total Gravado:</strong> {{ formatearMoneda(totales.gravado) }}</div>
-        <div><strong>Total ISV:</strong> {{ formatearMoneda(totales.isv) }}</div>
-        <div><strong>Total General:</strong> {{ formatearMoneda(totales.total) }}</div>
+        <!-- Totales -->
+        <div class="totals">
+          <div><strong>Total Exonerado:</strong> {{ formatearMoneda(totales.exonerado) }}</div>
+          <div><strong>Total Exento:</strong> {{ formatearMoneda(totales.exento) }}</div>
+          <div><strong>Total Gravado:</strong> {{ formatearMoneda(totales.gravado) }}</div>
+          <div><strong>Total ISV:</strong> {{ formatearMoneda(totales.isv) }}</div>
+          <div><strong>Total General:</strong> {{ formatearMoneda(totales.total) }}</div>
+        </div>
+      </div>
+
+      <!-- Mensaje cuando no hay datos -->
+      <div v-else-if="!cargando && fechasValidas" class="no-data-message">
+        No se encontraron datos para el período seleccionado
       </div>
     </div>
   </div>
@@ -151,42 +156,31 @@
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
-import solicitudes from "../../services/solicitudes.js";
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
+import solicitudes from "../../services/solicitudes.js";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 export default {
   name: 'ReporteVentas',
-  props: {
-    modelValue: {
-      type: String,
-      default: ''
-    }
-  },
-  emits: ['update:modelValue'],
   components: {
     PageHeader,
     HeaderFooterDesigner
   },
   data() {
     return {
-      showHeaderFooterModal: false, // Asegurarse que está definido en data
       titulo: 'Reportería',
+      cargando: false,
+      error: null,
       isDragging: false,
       logoUrl: null,
       reporteSeleccionado: 'ventas_cliente',
-      errorFecha: false,
-      maxLogoSize: 40,
+      showHeaderFooterModal: false,
       filtros: {
-        cliente: '',
-        cajero: '',
-        sucursal: '',
-        empleado: '',
         fechaInicio: '',
-        fechaFin: ''
+        fechaFin: '',
+        valorFiltro: ''
       },
-
       headerFooterConfig: {
         header: {
           enabled: true,
@@ -203,75 +197,30 @@ export default {
           alignment: 'center'
         }
       },
-
-      clientes: [
-        { id: 1, nombre: 'Cliente A' },
-        { id: 2, nombre: 'Cliente B' },
-        { id: 3, nombre: 'Cliente C' }
-      ],
-      cajeros: [
-        { id: 1, nombre: 'Cajero 1' },
-        { id: 2, nombre: 'Cajero 2' },
-        { id: 3, nombre: 'Cajero 3' }
-      ],
-      sucursales: [
-        { id: 1, nombre: 'Sucursal Central' },
-        { id: 2, nombre: 'Sucursal Norte' },
-        { id: 3, nombre: 'Sucursal Sur' }
-      ],
-      empleados: [
-        { id: 1, nombre: 'Juan Pérez' },
-        { id: 2, nombre: 'María López' },
-        { id: 3, nombre: 'Carlos Ruiz' }
-      ],
-      datosReporte: [
-        {
-          fecha: '2024-03-01',
-          cliente: 'Cliente A',
-          cajero: 'Cajero 1',
-          sucursal: 'Sucursal Central',
-          empleado: 'Juan Pérez',
-          factura: 'FAC-001',
-          valorExonerado: 1000,
-          valorExento: 500,
-          valorGravado: 2000,
-          isv: 300,
-          total: 3800
-        },
-        {
-          fecha: '2024-03-01',
-          cliente: 'Cliente B',
-          cajero: 'Cajero 2',
-          sucursal: 'Sucursal Norte',
-          empleado: 'María López',
-          factura: 'FAC-002',
-          valorExonerado: 1500,
-          valorExento: 800,
-          valorGravado: 2500,
-          isv: 375,
-          total: 5175
-        }
-      ],
+      clientes: [],
+      sucursales: [],
+      empleados: [],
+      datosReporte: [],
       totales: {
-        exonerado: 2500,
-        exento: 1300,
-        gravado: 4500,
-        isv: 675,
-        total: 8975
+        exonerado: 0,
+        exento: 0,
+        gravado: 0,
+        isv: 0,
+        total: 0
       }
     }
   },
+
   computed: {
     fechasValidas() {
-      return this.filtros.fechaInicio && this.filtros.fechaFin && !this.errorFecha;
+      return this.filtros.fechaInicio && this.filtros.fechaFin && 
+             new Date(this.filtros.fechaFin) >= new Date(this.filtros.fechaInicio);
     },
 
     opcionesFiltro() {
       switch (this.reporteSeleccionado) {
         case 'ventas_cliente':
           return this.clientes;
-        case 'ventas_cajero':
-          return this.cajeros;
         case 'ventas_sucursal':
           return this.sucursales;
         case 'ventas_empleado':
@@ -285,8 +234,6 @@ export default {
       switch (this.reporteSeleccionado) {
         case 'ventas_cliente':
           return 'Cliente';
-        case 'ventas_cajero':
-          return 'Cajero';
         case 'ventas_sucursal':
           return 'Sucursal';
         case 'ventas_empleado':
@@ -298,61 +245,103 @@ export default {
 
     valorFiltro: {
       get() {
-        return this.filtros[this.reporteSeleccionado.split('_')[1]];
+        return this.filtros.valorFiltro;
       },
       set(value) {
-        const tipo = this.reporteSeleccionado.split('_')[1];
-        this.filtros[tipo] = value;
+        this.filtros.valorFiltro = value;
+      }
+    }
+  },
+
+  methods: {
+    async cargarDatos() {
+      try {
+        this.cargando = true;
+        const [clientes, sucursales, empleados] = await Promise.all([
+          solicitudes.obtenerClientesReporte(),
+          solicitudes.obtenerSucursalesReporte(),
+          solicitudes.obtenerEmpleadosReporte()
+        ]);
+
+        this.clientes = clientes;
+        this.sucursales = sucursales;
+        this.empleados = empleados;
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+        this.error = 'Error al cargar los datos de filtros';
+      } finally {
+        this.cargando = false;
       }
     },
 
-    watch: {
-      reporteSeleccionado() {
-        // Resetear el valor del filtro cuando cambia el tipo de reporte
-        this.valorFiltro = '';
+    async generarReporte(formato = 'preview') {
+      if (!this.fechasValidas) {
+        alert('Por favor seleccione un intervalo de fechas válido');
+        return;
+      }
+
+      this.cargando = true;
+      this.error = null;
+
+      try {
+        if (formato === 'preview') {
+          const response = await solicitudes.obtenerReporteVentas({
+            reporteSeleccionado: this.reporteSeleccionado,
+            fechaInicio: this.filtros.fechaInicio,
+            fechaFin: this.filtros.fechaFin,
+            valorFiltro: this.valorFiltro
+          });
+
+          this.datosReporte = response.datos;
+          this.totales = response.totales;
+        } else if (formato === 'pdf') {
+          await this.exportarPDF();
+        } else if (formato === 'excel') {
+          await this.exportarExcel();
+        }
+      } catch (error) {
+        console.error('Error al generar reporte:', error);
+        this.error = 'Error al generar el reporte';
+      } finally {
+        this.cargando = false;
       }
     },
-  },
-  methods: {
+
     setHoy() {
       const hoy = new Date().toISOString().split('T')[0];
       this.filtros.fechaInicio = hoy;
       this.filtros.fechaFin = hoy;
-      this.errorFecha = false;
     },
 
-    handleHeaderFooterSave(config) {
-      this.headerFooterConfig = config;
-      console.log('Configuración guardada:', config);
-      this.showHeaderFooterModal = false;
-    },
-
-    ajustarLogo() {
-      const img = this.$refs.logoImg;
-      if (!img) return;
-
-      const { naturalWidth, naturalHeight } = img;
-      const maxSize = 30;
-      const aspectRatio = naturalWidth / naturalHeight;
-
-      let newWidth, newHeight;
-
-      if (aspectRatio > 1) {
-        // Imagen más ancha que alta
-        newWidth = Math.min(maxSize, naturalWidth);
-        newHeight = newWidth / aspectRatio;
-      } else {
-        // Imagen más alta que ancha o cuadrada
-        newHeight = Math.min(maxSize, naturalHeight);
-        newWidth = newHeight * aspectRatio;
+    validarFechas() {
+      if (this.filtros.fechaInicio && this.filtros.fechaFin) {
+        if (new Date(this.filtros.fechaFin) < new Date(this.filtros.fechaInicio)) {
+          this.filtros.fechaFin = this.filtros.fechaInicio;
+        }
       }
-
-      img.style.width = `${newWidth}px`;
-      img.style.height = `${newHeight}px`;
     },
 
+    formatearFecha(fecha) {
+      return new Date(fecha).toLocaleDateString('es-HN');
+    },
+
+    formatearMoneda(valor) {
+      return new Intl.NumberFormat('es-HN', {
+        style: 'currency',
+        currency: 'HNL'
+      }).format(valor || 0);
+    },
+
+    // Métodos para manejo de imagen
     triggerFileInput() {
       this.$refs.fileInput.click();
+    },
+
+    handleFileChange(e) {
+      const file = e.target.files[0];
+      if (file) {
+        this.processFile(file);
+      }
     },
 
     handleDrop(e) {
@@ -363,16 +352,9 @@ export default {
       }
     },
 
-    handleFileChange(e) {
-      const file = e.target.files[0];
-      if (file) {
-        this.processFile(file);
-      }
-    },
-
     processFile(file) {
-      if (!file.type.match('image/jpeg|image/jpg|image/webp|image/png')) {
-        alert('Por favor selecciona un archivo JPEG, JPG o WebP');
+      if (!file.type.match('image/jpeg|image/jpg|image/png|image/webp')) {
+        alert('Por favor selecciona un archivo JPEG, JPG, PNG o WebP');
         return;
       }
 
@@ -383,7 +365,7 @@ export default {
 
       const reader = new FileReader();
       reader.onload = (e) => {
-        this.logoUrl = e.target.result; // Asignar directamente a logoUrl
+        this.logoUrl = e.target.result;
         localStorage.setItem('logoEmpresa', e.target.result);
       };
       reader.readAsDataURL(file);
@@ -395,112 +377,29 @@ export default {
     },
 
     onDragLeave(e) {
-      // Verifica si el cursor salió realmente del contenedor
       if (!e.relatedTarget || !this.$el.contains(e.relatedTarget)) {
         this.isDragging = false;
       }
     },
 
-    async cargarDatos() {
-      try {
-        const [clientes, cajeros, sucursales, empleados] = await Promise.all([
-          solicitudes.get('/clientes'),
-          solicitudes.get('/cajeros'),
-          solicitudes.get('/sucursales'),
-          solicitudes.get('/empleados')
-        ]);
+    // ... continuación de los métodos
 
-        this.clientes = clientes.data;
-        this.cajeros = cajeros.data;
-        this.sucursales = sucursales.data;
-        this.empleados = empleados.data;
-      } catch (error) {
-        console.error('Error al cargar datos:', error);
-      }
+    handleHeaderFooterSave(config) {
+      this.headerFooterConfig = config;
+      this.showHeaderFooterModal = false;
     },
 
-    async generarReporte(formato = 'preview') {
-      if (!this.fechasValidas) {
-        alert('Por favor seleccione un intervalo de fechas válido');
-        return;
-      }
-
-      try {
-        if (formato === 'pdf') {
-          this.exportarPDF();
-          return;
-        }
-
-        const response = await solicitudes.post('/reportes/ventas', {
-          ...this.filtros,
-          tipo: this.reporteSeleccionado,
-          formato
-        });
-
-        if (formato === 'preview') {
-          this.datosReporte = response.data.datos;
-          this.totales = response.data.totales;
-        } else if (formato === 'excel') {
-          const blob = new Blob([response.data], {
-            type: 'application/vnd.ms-excel'
-          });
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `reporte_ventas_${this.reporteSeleccionado}.xlsx`;
-          link.click();
-        }
-      } catch (error) {
-        console.error('Error al generar reporte:', error);
-      }
-    },
-
-    async handleLogoUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
+    async getImageDimensions(imageUrl) {
+      return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-
-          // Mantener dimensiones originales hasta cierto límite
-          const maxDimension = 200;
-          const ratio = img.width / img.height;
-
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxDimension || height > maxDimension) {
-            if (ratio > 1) {
-              width = maxDimension;
-              height = width / ratio;
-            } else {
-              height = maxDimension;
-              width = height * ratio;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-
-          // Mejor calidad de renderizado
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // Menor compresión = mejor calidad
-          const resizedLogo = canvas.toDataURL('image/png', 1.0);
-
-          this.logoUrl = resizedLogo;
-          localStorage.setItem('logoEmpresa', resizedLogo);
+          resolve({
+            width: img.width,
+            height: img.height
+          });
         };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
+        img.src = imageUrl;
+      });
     },
 
     calculateDimensions(originalWidth, originalHeight, maxWidth, maxHeight) {
@@ -539,35 +438,18 @@ export default {
       };
     },
 
-    // Función para obtener las dimensiones reales de la imagen
-    async getImageDimensions(imageUrl) {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          resolve({
-            width: img.width,
-            height: img.height
-          });
-        };
-        img.src = imageUrl;
-      });
-    },
-
-    // Función modificada para exportar PDF
     async exportarPDF() {
       if (!this.datosReporte.length) {
-        console.error('No hay datos disponibles para generar el reporte PDF.');
+        this.error = 'No hay datos disponibles para generar el reporte PDF.';
         return;
       }
 
-      // Configuración inicial del documento
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
 
-      // Definir márgenes y dimensiones
       const pageWidth = doc.internal.pageSize.width;
       const pageHeight = doc.internal.pageSize.height;
       const margin = {
@@ -579,7 +461,7 @@ export default {
 
       let currentY = margin.top;
 
-      // Agregar logo con dimensiones calculadas
+      // Agregar logo si existe
       if (this.logoUrl) {
         try {
           const maxLogoWidth = 30;
@@ -593,7 +475,6 @@ export default {
             maxLogoHeight
           );
 
-          // Logo a la izquierda
           doc.addImage(
             this.logoUrl,
             'PNG',
@@ -603,10 +484,9 @@ export default {
             dimensions.height
           );
 
-          // Ajustar el espacio para el texto del encabezado
           const logoOffset = dimensions.width + 10;
 
-          // Nombre de la empresa y datos centrados a la derecha del logo
+          // Información de la empresa
           doc.setFontSize(14);
           doc.setFont('helvetica', 'bold');
           const companyName = this.headerFooterConfig.header.companyName || 'Nombre de la Empresa';
@@ -623,59 +503,46 @@ export default {
           currentY += dimensions.height + 15;
         } catch (error) {
           console.error('Error al procesar el logo:', error);
-          currentY += 30; // Espacio por si falla el logo
+          currentY += 30;
         }
       }
 
-      // Dibujar marco para el título
+      // Título del reporte
       const titleText = this.headerFooterConfig.header.text || 'Reporte de Ventas';
       doc.setDrawColor(0);
       doc.setLineWidth(0.5);
-
-      // Calcular dimensiones del marco
       doc.setFontSize(14);
       const titleWidth = doc.getTextWidth(titleText);
       const frameWidth = titleWidth + 20;
       const frameHeight = 10;
       const frameX = (pageWidth - frameWidth) / 2;
 
-      // Dibujar el marco
       doc.rect(frameX, currentY, frameWidth, frameHeight);
-
-      // Agregar el título centrado dentro del marco
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
       doc.text(titleText, pageWidth / 2, currentY + 7, { align: 'center' });
 
       currentY += frameHeight + 10;
 
-      // Metadata del reporte
+      // Información del filtro actual
       doc.setFontSize(11);
-      doc.setFont('helvetica', 'normal');
+      doc.text(`${this.labelFiltro}: ${this.valorFiltro || 'Todos'}`, margin.left, currentY);
+      currentY += 7;
 
-      // Información del filtro (similar al "Empleado:" en tu ejemplo)
-      const filterLabel = this.getFilterLabel();
-      const filterValue = this.getFilterValue();
-      if (filterLabel && filterValue) {
-        doc.text(`${filterLabel}: ${filterValue}`, margin.left, currentY);
-        currentY += 7;
-      }
+      // Fechas del reporte
+      doc.text(`Período: ${this.formatearFecha(this.filtros.fechaInicio)} - ${this.formatearFecha(this.filtros.fechaFin)}`, 
+               margin.left, currentY);
+      currentY += 10;
 
-      // Agregar línea separadora
-      doc.setDrawColor(0);
-      doc.setLineWidth(0.1);
-      doc.line(margin.left, currentY, pageWidth - margin.right, currentY);
-      currentY += 5;
-
-      // Configurar tabla con estilo más simple
-      const headers = [['Fecha', 'Factura', 'Valor Exonerado', 'Valor Exento', 'Valor Gravado', 'ISV', 'Total']];
+      // Configuración de la tabla
+      const headers = [
+        ['Fecha', 'Factura', 'Valor Exonerado', 'Valor Exento', 'Valor Gravado', 'ISV', 'Total']
+      ];
 
       const data = this.datosReporte.map(item => [
         this.formatearFecha(item.fecha),
-        item.factura,
-        this.formatearMoneda(item.valorExonerado),
-        this.formatearMoneda(item.valorExento),
-        this.formatearMoneda(item.valorGravado),
+        item.numero_factura_sar,
+        this.formatearMoneda(item.valor_exonerado),
+        this.formatearMoneda(item.valor_exento),
+        this.formatearMoneda(item.valor_gravado),
         this.formatearMoneda(item.isv),
         this.formatearMoneda(item.total)
       ]);
@@ -684,20 +551,17 @@ export default {
         head: headers,
         body: data,
         startY: currentY,
-        margin: { left: margin.left, right: margin.right },
-        theme: 'plain',
+        margin,
+        theme: 'grid',
         styles: {
-          fontSize: 10,
-          cellPadding: 2,
-          lineColor: [200, 200, 200],
-          lineWidth: 0.1
+          fontSize: 8,
+          cellPadding: 2
         },
         headStyles: {
-          fillColor: [255, 255, 255],
-          textColor: [0, 0, 0],
-          fontSize: 10,
-          fontStyle: 'bold',
-          halign: 'left'
+          fillColor: [71, 71, 71],
+          textColor: [255, 255, 255],
+          fontSize: 8,
+          fontStyle: 'bold'
         },
         columnStyles: {
           0: { cellWidth: 25 },
@@ -708,8 +572,8 @@ export default {
           5: { cellWidth: 25, halign: 'right' },
           6: { cellWidth: 25, halign: 'right' }
         },
-
         didDrawPage: (data) => {
+          // Agregar pie de página
           if (this.headerFooterConfig?.footer?.enabled) {
             const footerY = pageHeight - 15;
             doc.setFontSize(8);
@@ -720,92 +584,79 @@ export default {
             const fecha = now.toLocaleDateString();
             const totalPages = doc.internal.getNumberOfPages();
 
-            // Usar el texto personalizado si está en modo personalizado
-            if (this.headerFooterConfig.footer.template === 'custom') {
-              footerText = this.headerFooterConfig.footer.customText
-                .replace('{FECHA}', fecha)
-                .replace('{TOTAL_PAGINAS}', totalPages)
-                .replace('{PAGINA}', data.pageNumber);
-            } else if (this.headerFooterConfig.footer.template === 'basic') {
-              footerText = `Generado el ${fecha}`;
-            } else if (this.headerFooterConfig.footer.template === 'detailed') {
-              const hora = now.toLocaleTimeString();
-              footerText = `Generado el ${fecha} a las ${hora}`;
+            switch (this.headerFooterConfig.footer.template) {
+              case 'custom':
+                footerText = this.headerFooterConfig.footer.customText
+                  .replace('{FECHA}', fecha)
+                  .replace('{TOTAL_PAGINAS}', totalPages)
+                  .replace('{PAGINA}', data.pageNumber);
+                break;
+              case 'basic':
+                footerText = `Generado el ${fecha}`;
+                break;
+              case 'detailed':
+                footerText = `Generado el ${fecha} a las ${now.toLocaleTimeString()}`;
+                break;
             }
 
-            // Determinar la posición X según la alineación
             let x;
-            const alignment = this.headerFooterConfig.footer.alignment;
-
-            switch (alignment) {
+            switch (this.headerFooterConfig.footer.alignment) {
               case 'left':
                 x = margin.left;
                 break;
               case 'right':
                 x = pageWidth - margin.right;
                 break;
-              case 'center':
               default:
                 x = pageWidth / 2;
-                break;
             }
 
-            // Añadir el texto del pie de página con la alineación correspondiente
-            doc.text(footerText, x, footerY, { align: alignment });
+            doc.text(footerText, x, footerY, { 
+              align: this.headerFooterConfig.footer.alignment 
+            });
           }
         }
-
       });
 
-      // Guardar PDF
-      const fileName = `reporte_${this.reporteSeleccionado}_${new Date().toISOString().split('T')[0]}.pdf`;
+      // Guardar el PDF
+      const fileName = `reporte_${this.reporteSeleccionado}_${this.filtros.fechaInicio}.pdf`;
       doc.save(fileName);
     },
 
-    // Métodos auxiliares
-    getFilterLabel() {
-      switch (this.reporteSeleccionado) {
-        case 'ventas_cliente': return 'Cliente';
-        case 'ventas_cajero': return 'Cajero';
-        case 'ventas_sucursal': return 'Sucursal';
-        case 'ventas_empleado': return 'Empleado';
-        default: return '';
-      }
-    },
-
-    getFilterValue() {
-      const tipo = this.reporteSeleccionado.split('_')[1];
-      return this.filtros[tipo] || 'Todos';
-    },
-
-    formatearFecha(fecha) {
-      return new Date(fecha).toLocaleDateString();
-    },
-
-    formatearMoneda(valor) {
-      return new Intl.NumberFormat('es-HN', {
-        style: 'currency',
-        currency: 'HNL'
-      }).format(valor);
+    async exportarExcel() {
+      // Esta función se implementaría si se requiere exportar a Excel
+      // Por ahora usa la función del backend que devuelve el archivo Excel
     }
   },
 
-  validarFechas() {
-    if (this.filtros.fechaInicio && this.filtros.fechaFin) {
-      if (new Date(this.filtros.fechaFin) < new Date(this.filtros.fechaInicio)) {
-        this.errorFecha = true;
-        this.filtros.fechaFin = this.filtros.fechaInicio;
-      } else {
-        this.errorFecha = false;
-      }
+  async mounted() {
+    // Cargar logo guardado si existe
+    const savedLogo = localStorage.getItem('logoEmpresa');
+    if (savedLogo) {
+      this.logoUrl = savedLogo;
+    }
+    
+    // Cargar datos iniciales
+    await this.cargarDatos();
+    
+    // Si hay fechas por defecto, generar el reporte
+    if (this.fechasValidas) {
+      await this.generarReporte('preview');
     }
   },
 
-  mounted() {
-    this.cargarDatos();
+  watch: {
+    reporteSeleccionado() {
+      this.valorFiltro = '';
+      if (this.fechasValidas) {
+        this.generarReporte('preview');
+      }
+    }
   }
 }
 </script>
+
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');

@@ -3,7 +3,7 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
         Categoría</button>
 
       <RouterLink to="promociones-categorias">
@@ -28,7 +28,7 @@
             <th class="col-nombre">Nombre</th>
             <th class="col-descripcion">Descripción</th>
             <th class="col-productos-usados">Productos Usados</th>
-            <th class="col-acciones">Acciones</th>
+            <th v-if="esCeo" class="col-acciones">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -37,7 +37,7 @@
             <td>{{ categoria.nombre_categoria }}</td>
             <td>{{ categoria.descripcion }}</td>
             <td>{{ categoria.totalProd }}</td>
-            <td>
+            <td v-if="esCeo">
               <button id="btnEditar" class="btn btn-warning" @click="editCategoria(categoria)"><i
                   class="bi bi-pencil-fill"></i></button>
               <button id="btnEliminar" class="btn btn-danger" @click="deleteCategoria(categoria)"><b><i
@@ -116,6 +116,7 @@ import { notificaciones } from '../../services/notificaciones.js';
 import { useToast } from "vue-toastification";
 import solicitudes from "../../services/solicitudes.js";
 const { deleteCategoria } = require('../../services/categoriaSolicitudes');
+const { esCeo } = require('../../services/usuariosSolicitudes');
 
 export default {
   components: {
@@ -136,6 +137,7 @@ export default {
       isModalOpen: false,
       isEditing: false,
       editIndex: -1,
+      esCeo: false,
       categoriaForm: {
         nombre_categoria: '',
         descripcion: ''
@@ -291,6 +293,8 @@ export default {
       this.categorias = await solicitudes.fetchRegistros(
         `/categoria-producto/${this.id_usuario}`
       );
+      this.esCeo = await esCeo(this.id_usuario);
+      
     } catch (error) {
       console.log(error);
     }

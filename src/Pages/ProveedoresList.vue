@@ -3,7 +3,7 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
         Proveedor</button>
 
       <div class="registros">
@@ -33,7 +33,7 @@
             <th class="col-telefono">Teléfono</th>
             <th class="col-email">Email</th>
             <th class="col-direccion">Direccion</th>
-            <th class="col-acciones">Acciones</th>
+            <th v-if="esCeo" class="col-acciones">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -43,7 +43,7 @@
             <td>{{ proveedor.telefono }}</td>
             <td>{{ proveedor.correo }}</td>
             <td>{{ proveedor.direccion }}</td>
-            <td>
+            <td v-if="esCeo" >
               <button id="btnEditar" class="btn btn-warning" @click="editProveedor(proveedor)"><i
                   class="bi bi-pencil-fill"></i></button>
               <button id="btnEliminar" class="btn btn-danger" @click="deleteProveedor(proveedor)"><b><i
@@ -109,6 +109,7 @@ import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
+const { esCeo } = require('../../services/usuariosSolicitudes');
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -129,6 +130,7 @@ export default {
       editIndex: null,
       id_usuario: 0,
       itemsPerPage: "",
+      esCeo: false,
       proveedorForm: {
         nombre: '',
         telefono: '',
@@ -147,6 +149,7 @@ export default {
       this.proveedores = await solicitudes.fetchRegistros(
         `/proveedores/${this.id_usuario}`
       );
+      this.esCeo = await esCeo(this.id_usuario);
 
     } catch (error) {
       console.log(error); //modal error pendiente

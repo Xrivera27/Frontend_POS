@@ -226,7 +226,6 @@ const validacionesProductos = {
       "Precio Unitario": form.precio_unitario,
       "Precio Mayorista": form.precio_mayorista,
       "Cantidad Mayoreo": form.cantidad_activar_mayorista,
-      Categoría: form.categoria,
     };
 
     // Validar campos vacíos
@@ -264,10 +263,7 @@ const validacionesProductos = {
 
     // Validar descripción (longitud)
     if (form.descripcion.length < 10 || form.descripcion.length > 200) {
-      notificaciones(
-        "descripcion-length",
-        "La descripción debe tener entre 10 y 200 caracteres"
-      );
+      notificaciones("descripcion-length");
       return false;
     }
 

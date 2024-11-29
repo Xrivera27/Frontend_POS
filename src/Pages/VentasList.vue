@@ -60,7 +60,7 @@
                   <th class="col-descripcion">Descripción</th>
                   <th class="col-cantidad">Cantidad</th>
                   <th class="col-precio">Precio</th>
-                  <th class="col-importe">Importe</th>
+                  <th class="col-importe">Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -680,52 +680,52 @@ export default {
     },
 
     async agregarProducto() {
-      let nuevaCantidad = this.totalCantidad;
-      let productoReducir;
-      const codigoValidar = this.addQuery;
-      if (!codigoValidar) {
-        const toast = useToast();
-        toast.warning("Ingresa un código");
-        return;
-      }
-
-      if (!nuevaCantidad || nuevaCantidad === 0 || nuevaCantidad === "") {
-        nuevaCantidad = 1;
-      }
-
-      try {
-        this.limpiar();
-        if (!this.recuperandoVenta) {
-          //  alert(nuevaCantidad);
-          await agregarProductoCodigo(nuevaCantidad, productoReducir, this.id_usuario);
-
-        }
-        const newProduct = this.productos.find((p) => p.codigo_producto === codigoValidar);
-        if (!newProduct) {
+        let nuevaCantidad = this.totalCantidad;
+        let productoReducir;
+        const codigoValidar = this.addQuery;
+        if (!codigoValidar) {
           const toast = useToast();
-          toast.warning("No existe el producto");
-
+          toast.warning("Ingresa un código");
           return;
         }
-
-        const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
-        if (existingProduct) {
-          existingProduct.cantidad += nuevaCantidad;
-          productoReducir = existingProduct.codigo_producto;
-
-        } else {
-          newProduct.cantidad = nuevaCantidad;
-          this.productosLista.push({ ...newProduct });
-          productoReducir = newProduct.codigo_producto;
-
+  
+        if (!nuevaCantidad || nuevaCantidad === 0 || nuevaCantidad === "") {
+          nuevaCantidad = 1;
         }
-
-      } catch (error) {
-        console.log(error);
-        notificaciones('error', error.message);
-      }
-    },
-
+  
+        try {
+          this.limpiar();
+          const newProduct = this.productos.find((p) => p.codigo_producto === codigoValidar);
+          if (!newProduct) {
+            const toast = useToast();
+            toast.warning("No existe el producto");
+  
+            return;
+          }
+  
+          const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
+          if (existingProduct) {
+            existingProduct.cantidad += nuevaCantidad;
+            productoReducir = existingProduct.codigo_producto;
+  
+          } else {
+            newProduct.cantidad = nuevaCantidad;
+            this.productosLista.push({ ...newProduct });
+            productoReducir = newProduct.codigo_producto;
+  
+          }
+          if (!this.recuperandoVenta) {
+            //  alert(nuevaCantidad);
+            await agregarProductoCodigo(nuevaCantidad, productoReducir, this.id_usuario);
+  
+          }
+  
+        } catch (error) {
+          console.log(error);
+          notificaciones('error', error.message);
+        }
+      },
+      
     async guardarVenta() {
       if (this.productosLista.length === 0) {
         const toast = useToast();

@@ -47,7 +47,6 @@
   </div>
 </template>
 
-
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import axios from 'axios';

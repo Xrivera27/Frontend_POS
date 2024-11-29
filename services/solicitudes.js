@@ -190,8 +190,108 @@ import axios from 'axios';
           console.log(error);
           return error;
         }
+      },
+
+      async obtenerReporteVentas(filtros) {
+        try {
+          const token = localStorage.getItem('auth');
+          const queryParams = new URLSearchParams({
+            tipo_reporte: filtros.reporteSeleccionado,
+            fecha_inicio: filtros.fechaInicio,
+            fecha_fin: filtros.fechaFin,
+            ...(filtros.valorFiltro && { 
+              [`id_${filtros.reporteSeleccionado.split('_')[1]}`]: filtros.valorFiltro 
+            })
+          }).toString();
+    
+          const url = `${this.homeUrl}/reporte/reporte?${queryParams}`;
+          const response = await fetch(url, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+    
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+          }
+    
+          return await response.json();
+        } catch (error) {
+          console.error('Error al obtener reporte:', error);
+          throw error;
+        }
+      },
+    
+      // Obtener lista de clientes para el filtro
+      async obtenerClientesReporte() {
+        try {
+          const token = localStorage.getItem('auth');
+          const url = `${this.homeUrl}/reporte/clientes`;
+          const response = await fetch(url, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+    
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+          }
+    
+          return await response.json();
+        } catch (error) {
+          console.error('Error al obtener clientes:', error);
+          throw error;
+        }
+      },
+    
+      // Obtener lista de sucursales para el filtro
+      async obtenerSucursalesReporte() {
+        try {
+          const token = localStorage.getItem('auth');
+          const url = `${this.homeUrl}/reporte/sucursales`;
+          const response = await fetch(url, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+    
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+          }
+    
+          return await response.json();
+        } catch (error) {
+          console.error('Error al obtener sucursales:', error);
+          throw error;
+        }
+      },
+    
+      // Obtener lista de empleados para el filtro
+      async obtenerEmpleadosReporte() {
+        try {
+          const token = localStorage.getItem('auth');
+          const url = `${this.homeUrl}/reporte/empleados`;
+          const response = await fetch(url, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+    
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+          }
+    
+          return await response.json();
+        } catch (error) {
+          console.error('Error al obtener empleados:', error);
+          throw error;
+        }
       }
-  }
+    };
+  
+
+
+  
 
 
 

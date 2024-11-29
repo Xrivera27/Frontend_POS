@@ -68,9 +68,7 @@ function notificaciones(tipo, objeto = "") {
       break;
 
     case "descripcion-length":
-      mensaje =
-        "La cantidad de mínima de caracteres es 10 y la máxima es 200 para el campo " +
-        objeto;
+       mensaje =  "La descripción debe tener entre 10 y 200 caracteres";
       break;
 
     case "form-success":
