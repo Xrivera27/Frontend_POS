@@ -42,6 +42,14 @@
       
       <div class="modal-footer">
         <button 
+          class="btn btn-copia" 
+          @click="generarCopia"
+          :disabled="loading"
+        >
+          <i class="bi bi-files"></i>
+          {{ esCopia ? 'Facura Original' : 'Factura Copia' }}
+        </button>
+        <button 
           class="btn btn-descargar" 
           @click="descargarPDF"
           :disabled="!lastResponse || loading"
@@ -69,8 +77,6 @@
   </div>
 </template>
 
-
-
 <script>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
@@ -78,7 +84,7 @@ import { useToast } from "vue-toastification";
 import solicitudes from "../../services/Soliadminventa.js";
 
 export default {
-  name: 'FacturaModal',
+  name: 'AdminFacturasModal',
   
   props: {
     isVisible: {
@@ -102,6 +108,7 @@ export default {
     const retryCount = ref(0);
     const MAX_RETRIES = 3;
     const pdfLoadTimeout = ref(null);
+    const esCopia = ref(false);
 
     const handlePdfLoad = () => {
       if (pdfLoadTimeout.value) {
@@ -143,6 +150,15 @@ export default {
       await generarPDF();
     };
 
+    const generarCopia = async () => {
+      esCopia.value = !esCopia.value;
+      if (pdfUrl.value) {
+        URL.revokeObjectURL(pdfUrl.value);
+        pdfUrl.value = null;
+      }
+      await generarPDF();
+    };
+
     const generarPDF = async () => {
       if (!props.venta?.id_venta || !props.venta?.id_usuario) {
         error.value = true;
@@ -157,22 +173,20 @@ export default {
         
         console.log('Generando factura para:', {
           ventaId: props.venta.id_venta,
-          userId: props.venta.id_usuario
+          userId: props.venta.id_usuario,
+          esCopia: esCopia.value
         });
         
         const response = await axios({
           method: 'get',
           url: `${solicitudes.homeUrl}/AdminVentas/ventas/factura/${props.venta.id_venta}/${props.venta.id_usuario}`,
+          params: {
+            esCopia: esCopia.value
+          },
           responseType: 'blob',
           timeout: 30000
         });
         
-        console.log('Respuesta del servidor:', {
-          status: response.status,
-          type: response.data.type,
-          size: response.data.size
-        });
-
         if (response.data) {
           if (response.data.type !== 'application/pdf') {
             throw new Error(`Tipo de respuesta inválido: ${response.data.type}`);
@@ -183,19 +197,14 @@ export default {
             URL.revokeObjectURL(pdfUrl.value);
           }
           pdfUrl.value = URL.createObjectURL(response.data);
-          toast.success("Factura generada exitosamente");
+          toast.success(esCopia.value ? "Copia de factura generada" : "Factura generada exitosamente");
           retryCount.value = 0;
         }
       } catch (err) {
-        console.error('Error al generar PDF:', {
-          message: err.message,
-          status: err.response?.status,
-          data: err.response?.data
-        });
-        
+        console.error('Error al generar PDF:', err);
         error.value = true;
         errorMessage.value = err.response?.data?.message || 
-                           "Error al generar la factura. Por favor, intente nuevamente.";
+                         "Error al generar la factura. Por favor, intente nuevamente.";
         toast.error(errorMessage.value);
       } finally {
         loading.value = false;
@@ -223,7 +232,7 @@ export default {
         const url = URL.createObjectURL(lastResponse.value);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Factura_${props.venta.codigo}.pdf`;
+        link.download = `Factura_${props.venta.codigo}${esCopia.value ? '_copia' : ''}.pdf`;
         
         document.body.appendChild(link);
         link.click();
@@ -251,6 +260,7 @@ export default {
       error.value = false;
       errorMessage.value = '';
       retryCount.value = 0;
+      esCopia.value = false;
       emit('close');
     };
 
@@ -260,6 +270,7 @@ export default {
         errorMessage.value = '';
         lastResponse.value = null;
         retryCount.value = 0;
+        esCopia.value = false;
         if (pdfUrl.value) {
           URL.revokeObjectURL(pdfUrl.value);
           pdfUrl.value = null;
@@ -290,7 +301,9 @@ export default {
       lastResponse,
       pdfUrl,
       pdfIframe,
+      esCopia,
       generarPDF,
+      generarCopia,
       imprimirPDF,
       descargarPDF,
       handleClose,
@@ -304,139 +317,195 @@ export default {
 
 <style scoped>
 .modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  width: 98vw;
+  height: 98vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #dc3545;
+}
+
+.modal-body {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+}
+
+.pdf-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.pdf-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+}
+
+.modal-footer {
+  padding: 1rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  background: white;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.btn i {
+  font-size: 1.1rem;
+}
+
+.btn-copia {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-descargar {
+  background: #28a745;
+  color: white;
+}
+
+.btn-imprimir {
+  background: #007bff;
+  color: white;
+}
+
+.btn-cerrar {
+  background: #dc3545;
+  color: white;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545;
+  padding: 1rem;
+  background: #f8d7da;
+  border-radius: 4px;
+  margin: 1rem;
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.btn-retry {
+  background: #6c757d;
+  color: white;
+  margin-top: 0.5rem;
+}
+
+@media print {
+  .modal-header,
+  .modal-footer {
+    display: none;
   }
   
   .modal-content {
-    background: white;
-    width: 98vw;
-    height: 98vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
   }
-  
-  .modal-header {
-    padding: 1rem;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: white;
-  }
-  
-  .modal-header h3 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
-  
-  .close-button {
-    background: transparent;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 4px;
-  }
-  
-  .modal-body {
-    flex: 1;
-    overflow: hidden;
-    padding: 0;
-    position: relative;
-  }
-  
+
   .pdf-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
+    position: static;
   }
-  
-  .pdf-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: white;
-  }
-  
-  .modal-footer {
-    padding: 1rem;
-    border-top: 1px solid #eee;
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    background: white;
-  }
-  
-  .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-  }
-  
-  .btn-descargar {
-    background: #28a745;
-    color: white;
-  }
-  
-  .btn-imprimir {
-    background: #007bff;
-    color: white;
-  }
-  
-  .btn-cerrar {
-    background: #dc3545;
-    color: white;
-  }
-  
-  .btn:hover:not(:disabled) {
-    opacity: 0.9;
-  }
-  
-  .btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-  
-  .error-message {
-    color: #dc3545;
-    padding: 1rem;
-    background: #f8d7da;
-    border-radius: 4px;
-    margin: 1rem;
-  }
-  
-  .loading-spinner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-  }
-  
-  @media print {
-    .modal-header,
-    .modal-footer {
-      display: none;
-    }
-    
-    .modal-content {
-      box-shadow: none;
-    }
-  }
+}
 </style>
