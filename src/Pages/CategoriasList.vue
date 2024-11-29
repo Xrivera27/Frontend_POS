@@ -48,29 +48,22 @@
       </table>
 
       <!-- Paginación -->
-   
-<div class="pagination-wrapper">
-  <div class="pagination-info">
-    Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredCategorias.length) }} de {{ filteredCategorias.length }} registros
-  </div>
-  <div class="pagination-container">
-    <button 
-      class="pagination-button" 
-      :disabled="currentPage === 1"
-      @click="previousPage"
-    >
-      Anterior
-    </button>
-    
-    <button 
-      class="pagination-button" 
-      :disabled="currentPage === totalPages"
-      @click="nextPage"
-    >
-      Siguiente
-    </button>
-  </div>
-</div>
+
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize,
+            filteredCategorias.length) }} de {{ filteredCategorias.length }} registros
+        </div>
+        <div class="pagination-container">
+          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+            Anterior
+          </button>
+
+          <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="modal" v-if="showConfirmModal">
@@ -104,7 +97,8 @@
         </div>
 
         <div class="contenedor-botones">
-          <btnGuardarModal id="btnAggC" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Categoría'" @click="guardarCategoria">
+          <btnGuardarModal id="btnAggC" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Categoría'"
+            @click="guardarCategoria">
           </btnGuardarModal>
           <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
@@ -117,7 +111,7 @@
 import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
-import validarCamposService from '../../services/validarCampos.js';
+import { validacionesCategorias } from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
 import { useToast } from "vue-toastification";
 import solicitudes from "../../services/solicitudes.js";
@@ -142,9 +136,9 @@ export default {
       isModalOpen: false,
       isEditing: false,
       editIndex: -1,
-      categoriaForm: { 
-        nombre_categoria: '', 
-        descripcion: '' 
+      categoriaForm: {
+        nombre_categoria: '',
+        descripcion: ''
       },
     };
   },
@@ -171,16 +165,7 @@ export default {
     }
   },
   methods: {
-    validarCampos(categoriaForm) {
-      const campos = {
-        Nombre: categoriaForm.nombre_categoria,
-        Descripcion: categoriaForm.descripcion,
-      };
-      if (!validarCamposService.validarEmpty(campos)) {
-        return false;
-      }
-      return true;
-    },
+
     openModal() {
       this.isModalOpen = true;
       this.isEditing = false;
@@ -226,43 +211,54 @@ export default {
       this.showConfirmModal = false;
       this.categoriaToDelete = null;
     },
-    async guardarCategoria() {
-      if (!this.validarCampos(this.categoriaForm)) {
-        return;
-      }
-      validarCamposService.formSuccess();
 
-      let response;
-      let parametros;
-      this.categoriaForm.id_usuario = this.id_usuario;
-      
-      if (this.isEditing) {
-        try {
+    async guardarCategoria() {
+      try {
+        console.log("Iniciando guardado de categoría");
+        console.log("Form antes de validar:", this.categoriaForm);
+
+        if (!validacionesCategorias.validarCampos(this.categoriaForm)) {
+          console.log("Falló la validación");
+          return;
+        }
+
+        console.log("Pasó validación");
+
+        let response;
+        let parametros;
+        this.categoriaForm.id_usuario = this.id_usuario;
+
+        if (this.isEditing) {
           parametros = `/categoria-producto/actualizar-categoria/${this.categorias[this.editIndex].id_categoria}`;
+          console.log("Actualizando categoría:", parametros);
           response = await solicitudes.patchRegistro(parametros, this.categoriaForm);
 
-          if (response == true) {
+          if (response === true) {
             Object.assign(this.categorias[this.editIndex], this.categoriaForm);
-          } else notificaciones('error', response.message);
-        } catch (error) {
-          notificaciones('error', error.message);
-        }
-      } else {
-        parametros = `/categoria-producto/crear-categoria`;
-        try {
+            notificaciones('success');
+            this.closeModal();
+          } else {
+            throw new Error(response.message || 'Error al actualizar la categoría');
+          }
+        } else {
+          parametros = `/categoria-producto/crear-categoria`;
+          console.log("Creando nueva categoría");
           response = await solicitudes.postRegistro(parametros, this.categoriaForm);
 
-          if (response.length > 0) {
+          if (response && response.length > 0) {
             this.categorias.push(response[0]);
+            notificaciones('form-success');
+            this.closeModal();
           } else {
-            throw response;
+            throw new Error('Error al crear la categoría');
           }
-        } catch (error) {
-          notificaciones('error', error.message);
         }
+      } catch (error) {
+        console.error("Error en guardarCategoria:", error);
+        notificaciones('error', error.message);
       }
-      this.closeModal();
     },
+
     changePage(page) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
@@ -357,13 +353,13 @@ export default {
 }
 
 /* Botones */
-#btnAggC{
+#btnAggC {
   background-color: #a38655;
   border-radius: 8px;
   color: black;
 }
 
-#btnCerrarM{
+#btnCerrarM {
   margin-left: 13.8rem;
   border-radius: 8px;
 }
@@ -514,7 +510,7 @@ export default {
   width: 100%;
 }
 
-.descriptionForm{
+.descriptionForm {
   width: 100%;
 }
 

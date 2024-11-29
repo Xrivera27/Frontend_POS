@@ -117,7 +117,7 @@
                 <span class="info-icon" @mouseover="showTooltip = true" @mouseleave="showTooltip = false">ℹ️</span>
                 Contraseña:
               </label>
-              <input v-model="usuarioForm.password" type="password" required :disabled="!isPassEdit" />
+              <input v-model="usuarioForm.password" type="text" required :disabled="!isPassEdit" />
               <div v-if="showTooltip" class="tooltip">
                 La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un
                 número y un símbolo.
@@ -125,12 +125,23 @@
             </div>
             <div class="form-group">
               <label>Confirmar contraseña:</label>
-              <input v-model="usuarioForm.confirmPassword" type="password" required :disabled="!isPassEdit" />
+              <input v-model="usuarioForm.confirmPassword" type="text" required :disabled="!isPassEdit" />
             </div>
+
             <div class="form-group">
-              <label>Telefono:</label>
-              <input v-model="usuarioForm.telefono" type="text" required />
+              <label>Teléfono:</label>
+              <div class="phone-input-container">
+                <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+                  <option value="">País</option>
+                  <option v-for="(country, code) in countryData" :key="code" :value="code">
+                    {{ country.emoji }} {{ country.code }}
+                  </option>
+                </select>
+                <input v-model="usuarioForm.telefono" type="text" class="input-phone"
+                  :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+              </div>
             </div>
+
             <div class="form-group">
               <label>Direccion:</label>
               <input v-model="usuarioForm.direccion" type="text" required />
@@ -148,10 +159,10 @@
           </div>
         </div>
         <div>
-          <btnGuardarModal id="btnGuardarM" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario"
-            type="submit">
+          <btnGuardarModal id="btnGuardarM" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'"
+            @click="guardarUsuario" type="submit">
           </btnGuardarModal>
-          
+
           <button class="btn editar-password" :disabled="!isEditing" @click="editarPassword">Editar Contraseña</button>
 
           <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
@@ -167,9 +178,10 @@
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 import solicitudes from "../../services/solicitudes.js";
-import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
 import PageHeader from "@/components/PageHeader.vue";
+import { COUNTRY_CODES } from "../../services/countrySelector.js";
+import { validacionesUsuario } from '../../services/validarCampos.js';
 
 export default {
   components: {
@@ -191,6 +203,9 @@ export default {
       isEditing: false,
       isPassEdit: true,
       showPassword: false,
+      selectedCountry: 'HN',
+      countryData: COUNTRY_CODES,
+      phoneLength: 8,
       editIndex: null,
       itemsPerPage: "",
       sucursales: [],
@@ -260,6 +275,12 @@ export default {
     },
   },
   methods: {
+    updatePhoneValidation() {
+      if (this.selectedCountry && this.countryData[this.selectedCountry]) {
+        this.phoneLength = this.countryData[this.selectedCountry].length;
+      }
+    },
+
     async loadEmpleados() {
       this.isLoading = true; // Comienza a cargar
       try {
@@ -304,59 +325,17 @@ export default {
       return rol ? rol.cargo : 'Desconocido';
     },
 
-    validarCampos(form) {
-      const campos = {
-        nombre: form.nombre,
-        apellido: form.apellido,
-        nombre_usuario: form.nombre_usuario,
-        correo: form.correo,
-        telefono: form.telefono,
-        direccion: form.direccion,
-        sucursal: form.sucursal,
-        rol: form.rol,
-      };
-
-      if(this.isPassEdit){
-        campos.password = form.password;
-        campos.confirmPassword = form.confirmPassword;
-      }
-
-      if (!validarCamposService.validarEmpty(campos)) {
-        return false;
-      }
-
-      if (this.isPassEdit) {
-        if (!validarCamposService.validarPass(campos.password, campos.confirmPassword)) {
-          return false;
-        }
-        if (!validarCamposService.validarPasswordSegura(campos.password)) {
-          return false;
-        }
-      }
-      if (!validarCamposService.validarTelefono(campos.telefono)) {
-        return false;
-      }
-
-      if (!validarCamposService.validarEmail(campos.correo)) {
-        return false;
-      }
-
-      return true;
-    },
-
     editarPassword() {
       this.isPassEdit = true;
     },
 
     async guardarUsuario() {
-      let response;
-      let parametros;
-
-      if (!this.validarCampos(this.usuarioForm)) {
+      if (!validacionesUsuario.validarCampos(this.usuarioForm, this.isPassEdit, this.selectedCountry)) {
         return;
       }
 
-      validarCamposService.formSuccess();
+      let response;
+      let parametros;
 
       if (this.isEditing) {
         try {
@@ -369,7 +348,7 @@ export default {
           );
 
           if (response == true) {
-
+            notificaciones('success')
             Object.assign(this.empleados[this.editIndex], this.usuarioForm);
           } else notificaciones('error', response);
         } catch (error) {
@@ -386,9 +365,8 @@ export default {
           );
 
           if (response.length > 0) {
-
+            notificaciones('form-success')
             this.empleados.push(response[0]);
-
           } else {
             throw response;
           }
@@ -749,7 +727,7 @@ export default {
 }
 
 /* ALTERA LOS BOTONES DE LOS MODALES */
-#btnCerrarM{
+#btnCerrarM {
   margin-left: 28rem;
 }
 
@@ -1042,6 +1020,38 @@ button {
 
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #a38655;
+}
+
+.phone-input-container {
+  display: flex;
+  gap: 8px;
+}
+
+.phone-input-container select {
+  width: 110px;
+  margin: 0;
+  /* Importante: sin márgenes */
+  height: 35px;
+  padding: 0 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.phone-input-container input {
+  flex: 1;
+  height: 35px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+
+/* Estilos para modo oscuro */
+.dark .country-code-select,
+.dark .phone-input {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
 }
 
 /* =======================================================

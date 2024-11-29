@@ -9,8 +9,38 @@ function notificaciones(tipo, objeto = "") {
       mensaje = "El campo " + objeto + " está vacío.";
       break;
 
+    case "empty-campo-select":
+      mensaje = "Escoja una opción en: " + objeto;
+      break;
+
     case "invalid-password":
       mensaje = "La contraseña no cumple con los requisitos de seguridad";
+      break;
+
+    case "invalid-name":
+      mensaje = "El nombre debe tener entre 3 y 50 caracteres";
+      break;
+
+    case "invalid-username":
+      mensaje =
+        "El nombre de usuario debe tener entre 4 y 20 caracteres y solo puede contener letras, números y guiones bajos";
+      break;
+
+    case "invalid-price":
+      mensaje = objeto + " debe ser un número positivo mayor a cero";
+      break;
+
+    case "invalid-quantity":
+      mensaje =
+        "La cantidad para activar precio mayorista debe ser un número entero positivo";
+      break;
+
+    case "invalid-price-may-uni":
+      mensaje = "El precio mayorista debe ser menor que el precio unitario";
+      break;
+
+    case "invalid-price-decimal":
+      mensaje = objeto + " debe tener máximo 2 decimales";
       break;
 
     case "diferent-password":
@@ -37,15 +67,21 @@ function notificaciones(tipo, objeto = "") {
       mensaje = "El campo " + objeto + " tiene que ser numérico";
       break;
 
+    case "descripcion-length":
+      mensaje =
+        "La cantidad de mínima de caracteres es 10 y la máxima es 200 para el campo " +
+        objeto;
+      break;
+
     case "form-success":
       mensaje = "Procesando guardado...";
       break;
 
-      case "success":
+    case "success":
       mensaje = "Actualizando datos...";
       break;
 
-      case "venta-guardada":
+    case "venta-guardada":
       mensaje = "Guardando Venta...";
       break;
 
@@ -57,7 +93,11 @@ function notificaciones(tipo, objeto = "") {
       mensaje = "Ocurrio un error desconocido";
   }
 
-  if (tipo === "form-success" || tipo === "success" || tipo === "venta-guardada") {
+  if (
+    tipo === "form-success" ||
+    tipo === "success" ||
+    tipo === "venta-guardada"
+  ) {
     toast.success(mensaje, { timeout: 5000 });
   } else {
     toast.error(mensaje, { timeout: 5000 });

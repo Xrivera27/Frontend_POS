@@ -67,7 +67,8 @@
           <input v-model="unidadForm.medida" type="text" required>
         </div>
         <div class="contenedor-botones">
-          <btnGuardarModal id="AggUnid" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'" @click="guardarUnidad">
+          <btnGuardarModal id="AggUnid" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'"
+            @click="guardarUnidad">
           </btnGuardarModal>
           <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
@@ -115,10 +116,9 @@
 import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
-import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
 import { useToast } from "vue-toastification";
-
+import { validacionesComunes } from '../../services/validarCampos.js';
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
 import { getUnidadMedidaEmpresas, postUnidad, patchUnidad, getProductosUnidad, eliminarUnidad } from "../../services/unidadMedidaSolicitud.js";
@@ -177,23 +177,13 @@ export default {
     },
   },
   methods: {
-    validarCampos(unidadForm) {
-      const campos = {
-        Medida: unidadForm.medida,
-      };
 
-      if (!validarCamposService.validarEmpty(campos)) {
-        return false;
-      }
-
-      return true;
-    },
 
     openModal() {
       // Resetea el formulario y abre el modal
       this.isModalOpen = true;
       this.isEditing = false;
-      this.unidadForm = { medida: '', descripcion: '' }; // Resetea el formulario
+      this.unidadForm = { medida: '' }; // Resetea el formulario
     },
     closeModal() {
       // Cierra el modal
@@ -243,18 +233,17 @@ export default {
     },
 
     async guardarUnidad() {
-      if (!this.validarCampos(this.unidadForm)) {
+      if (!validacionesComunes.validarEmpty(this.unidadForm)) {
         return;
       }
 
-      validarCamposService.formSuccess();
       this.unidadForm.id_usuario = this.id_usuario;
       if (this.isEditing) {
         try {
 
           const nuevoRegistro = await patchUnidad(this.unidadForm, this.unidadesMedida[this.editIndex].id_medida);
           if (nuevoRegistro == true) {
-
+            notificaciones('form-success');
             Object.assign(this.unidadesMedida[this.editIndex], this.unidadForm);
 
           }
@@ -337,12 +326,12 @@ export default {
   color: white;
 }
 
-#AggUnid{
+#AggUnid {
   background-color: #a38655;
   border-radius: 8px;
 }
 
-#btnCerrarM{
+#btnCerrarM {
   border-radius: 8px;
   margin-left: 8rem
 }

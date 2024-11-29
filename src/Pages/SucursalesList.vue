@@ -20,7 +20,6 @@
           registros
         </span>
       </div>
-      <!-- Barra de búsqueda -->
       <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar sucursal..." />
     </div>
 
@@ -43,7 +42,6 @@
             <td>{{ sucursal.correo }}</td>
             <td>{{ sucursal.telefono }}</td>
             <td>{{ sucursal.direccion }}</td>
-
             <td>
               <button id="btnEditar" class="btn btn-warning" @click="editSucursal(sucursal)">
                 <i class="bi bi-pencil-fill"></i>
@@ -105,12 +103,10 @@
 import ExportButton from "../components/ExportButton.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
-import validarCamposService from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
 import PageHeader from "@/components/PageHeader.vue";
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
-
-// importando solicitudes
+import { validacionesSucursal } from '../../services/validarCampos.js';
 import solicitudes from "../../services/solicitudes.js";
 
 export default {
@@ -124,15 +120,15 @@ export default {
     return {
       titulo: "Administración de Sucursales",
       id_usuario: 1,
-      id_empresa: 11, //esto es provisional, cuando se cree el controller empresa el sistema sera capaz de reconocer automaitcamente a que empresa pertenece cada usuario
-      searchQuery: "", // Almacena el texto de búsqueda
-      itemsPerPage: "", // Valor por defecto para mostrar todos los registros
+      id_empresa: 11,
+      searchQuery: "",
+      itemsPerPage: "",
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
-      selectedCountry: 'HN', // Honduras por defecto
+      selectedCountry: 'HN',
       countryData: COUNTRY_CODES,
-      phoneLength: 8, // Longitud por defecto para Honduras
+      phoneLength: 8,
 
       sucursalForm: {
         id_sucursal: 0,
@@ -142,7 +138,6 @@ export default {
         direccion: "",
       },
       sucursales: [],
-      // Define tus columnas para la exportación a PDF
       columns: [
         { header: "#", dataKey: "index" },
         { header: "Nombre", dataKey: "nombre" },
@@ -150,69 +145,38 @@ export default {
         { header: "Direccion", dataKey: "direccion" },
         { header: "Teléfono", dataKey: "telefono" },
       ],
-      rows: [], // Inicialmente vacío, se llena después
+      rows: [],
     };
   },
   computed: {
     filteredSucursales() {
-      // Filtra los sucursales basados en el texto de búsqueda
       return this.sucursales.filter(
         (sucursal) =>
           sucursal.nombre_administrativo
             .toLowerCase()
             .includes(this.searchQuery.toLowerCase()) ||
-          sucursal.direccion.includes(this.searchQuery)
+          sucursal.direccion.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
     paginatedSucursales() {
       return this.itemsPerPage === "" || this.itemsPerPage === null
         ? this.filteredSucursales
-        : this.filteredSucursales.slice(0, this.itemsPerPage);
+        : this.filteredSucursales.slice(0, parseInt(this.itemsPerPage));
     },
   },
   methods: {
-
     updatePhoneValidation() {
-      if (this.selectedCountry) {
+      if (this.selectedCountry && this.countryData[this.selectedCountry]) {
         this.phoneLength = this.countryData[this.selectedCountry].length;
       }
-    },
-
-    validarCampos(sucursalForm) {
-      // Primero validamos que el formulario no sea null o undefined
-      if (!sucursalForm) {
-        notificaciones("error", "Formulario inválido");
-        return false;
-      }
-
-      const campos = {
-        Nombre: sucursalForm.nombre_administrativo || '',
-        Correo: sucursalForm.correo || '',
-        Telefono: sucursalForm.telefono || '',
-        Direccion: sucursalForm.direccion || '',
-      };
-
-      if (!validarCamposService.validarEmpty(campos)) {
-        return false;
-      }
-
-      // Solo validamos el email si no está vacío
-      if (campos.Correo && !validarCamposService.validarEmail(campos.Correo)) {
-        return false;
-      }
-
-      if (!validarCamposService.validarTelefono(campos.Telefono, this.selectedCountry)) {
-        return false;
-      }
-
-      return true;
     },
 
     closeModal() {
       this.isModalOpen = false;
       this.isEditing = false;
-      this.selectedCountry = 'HN'; // Reset al país por defecto
+      this.selectedCountry = 'HN';
       this.sucursalForm = {
+        id_sucursal: 0,
         nombre_administrativo: "",
         correo: "",
         telefono: "",
@@ -225,76 +189,72 @@ export default {
     },
 
     async guardarSucursal() {
-      // Validamos los campos sin importar si es edición o creación
-      if (!this.validarCampos(this.sucursalForm)) {
-        return;
-      }
-      validarCamposService.formSuccess();
-
-      let response;
-      let parametros;
-
       try {
+        // Validar los campos usando el servicio de validaciones
+        if (!validacionesSucursal.validarCampos(this.sucursalForm, this.selectedCountry)) {
+          return;
+        }
+
+        let response;
+        let parametros;
+
         if (this.isEditing) {
           parametros = `/sucursales/actualizar-sucursal/${this.sucursales[this.editIndex].id_sucursal}`;
           response = await solicitudes.patchRegistro(parametros, this.sucursalForm);
 
-          if (response == true) {
+          if (response === true) {
             Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
-            notificaciones('success', 'Sucursal actualizada correctamente');
+            notificaciones('success');
           } else {
-            notificaciones('error', response.message);
+            throw new Error(response.message || 'Error al actualizar la sucursal');
           }
         } else {
           parametros = `/sucursales/crear-sucursal/${this.id_usuario}`;
           response = await solicitudes.postRegistro(parametros, this.sucursalForm);
 
-          if (response.length > 0) {
+          if (response && response.length > 0) {
             this.sucursales.push(response[0]);
-            notificaciones('success', 'Sucursal creada correctamente');
+            notificaciones('form-success');
           } else {
-            throw response;
+            throw new Error('Error al crear la sucursal');
           }
         }
+
         this.closeModal();
+        this.generateRows();
       } catch (error) {
-        notificaciones('error', error.message);
+        //notificaciones('error', error.message);
       }
     },
 
     editSucursal(sucursal) {
-      // Primero cargamos los datos en el formulario
       this.isModalOpen = true;
       this.isEditing = true;
       this.editIndex = this.sucursales.findIndex(item => item.id_sucursal === sucursal.id_sucursal);
       this.sucursalForm = { ...sucursal };
-      // Quitamos la validación de aquí ya que se hará al guardar
+
+      // Extraer código de país del número de teléfono si es necesario
+      // Aquí puedes agregar lógica para determinar el país basado en el número
     },
 
     async deleteSucursal(sucursal) {
-      let response;
-
-      const datosActualizados = {
-        estado: false,
-      };
-
-      const parametros = `/sucursales/desactivar-sucursal/${sucursal.id_sucursal}`;
-
       try {
-        response = await solicitudes.desactivarRegistro(
-          parametros,
-          datosActualizados
-        );
+        const parametros = `/sucursales/desactivar-sucursal/${sucursal.id_sucursal}`;
+        const response = await solicitudes.desactivarRegistro(parametros, { estado: false });
 
-        if (response == true) {
+        if (response === true) {
           this.sucursales = this.sucursales.filter(item => item.id_sucursal !== sucursal.id_sucursal);
+          //notificaciones('success', 'Sucursal eliminada correctamente');
+          this.generateRows();
+        } else {
+          throw new Error('Error al eliminar la sucursal');
         }
       } catch (error) {
-        notificaciones('error', new Error(response).message);
+        //notificaciones('error', error.message);
       }
     },
+
     generateRows() {
-      // Genera las filas basadas en los sucursales paginados
       this.rows = this.paginatedSucursales.map((sucursal, index) => ({
         index: index + 1,
         nombre: sucursal.nombre_administrativo,
@@ -302,45 +262,35 @@ export default {
         telefono: sucursal.telefono,
         correo: sucursal.correo,
       }));
-
     },
+
     changeFavicon(iconPath) {
-      const link =
-        document.querySelector("link[rel*='icon']") ||
-        document.createElement("link");
+      const link = document.querySelector("link[rel*='icon']") || document.createElement("link");
       link.type = "image/x-icon";
       link.rel = "icon";
       link.href = iconPath;
       document.getElementsByTagName("head")[0].appendChild(link);
     },
-
   },
   watch: {
-    // Cuando cambie la paginación o el filtro, actualiza las filas
-    paginatedSucursales() {
-      this.generateRows();
-    },
+    paginatedSucursales: {
+      handler() {
+        this.generateRows();
+      },
+      deep: true
+    }
   },
   async mounted() {
-    // Genera las filas al cargar el componente
-    this.generateRows();
-    document.title = "Sucursales";
-    this.changeFavicon("/img/spiderman.ico"); // Usar la ruta correcta
-
-    this.id_usuario = await solicitudes.solicitarUsuarioToken();
-    console.log(this.id_usuario);
-
-    // this.fetchUsuario();
-
-    // this.id_usuario = await solicitudes.solicitarUsuario("/sesion-user");
     try {
-      this.sucursales = await solicitudes.fetchRegistros(
-        `/sucursales/empresa/${this.id_usuario}`
-      );
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      this.sucursales = await solicitudes.fetchRegistros(`/sucursales/empresa/${this.id_usuario}`);
+      this.generateRows();
 
-
+      document.title = "Sucursales";
+      this.changeFavicon("/img/spiderman.ico");
     } catch (error) {
-      console.log(error); //modal error pendiente
+      //notificaciones('error', 'Error al cargar las sucursales');
+      console.error(error);
     }
   },
 };
@@ -750,8 +700,6 @@ export default {
   border-color: #404040;
   color: #fff;
 }
-
-
 /* =======================================================
    Modo Oscuro
 ======================================================= */

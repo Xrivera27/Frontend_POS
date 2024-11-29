@@ -288,8 +288,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
-
-import validarCamposService from '../../services/validarCampos.js';
+import { validacionesProductos } from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
 import { useToast } from "vue-toastification";
 
@@ -474,10 +473,6 @@ export default {
 
 
     async guardarStock(sucursal) {
-      if (!validarCamposService.validarSiNumero(this.inputStockMin) || !validarCamposService.validarSiNumero(this.inputStockMax)) {
-        notificaciones('error', 'Datos invalidos: Un campo no es numero');
-        return;
-      }
 
       const stock_min = Number(this.inputStockMin);
       const stock_max = Number(this.inputStockMax);
@@ -535,44 +530,10 @@ export default {
       this.proveedoresMostrar = await getProveedoresEmpresa(this.id_usuario);
     },
 
-    validarCampos(productoForm) {
-      const campos = {
-        codigo_producto: productoForm.codigo_producto,
-        nombre: productoForm.nombre,
-        descripcion: productoForm.descripcion,
-        impuesto: productoForm.impuesto,
-        unidad_medida: productoForm.unidad_medida,
-        proveedor: productoForm.proveedor,
-        precio_unitario: productoForm.precio_unitario,
-        precio_mayorista: productoForm.precio_mayorista,
-        cantidad_activar_mayorista: productoForm.cantidad_activar_mayorista
-      };
-
-      if (!validarCamposService.validarEmpty(campos)) {
-        return false;
-      }
-
-      if (!validarCamposService.validarSinLetras(campos.precio_mayorista, "precio por mayor")) {
-        return false;
-      }
-
-
-      if (!validarCamposService.validarSinLetras(campos.precio_unitario, "precio por unidad")) {
-        return false;
-      }
-
-      if (!validarCamposService.validarSinLetras(campos.cantidad_activar_mayorista, "cantidad activar mayorista")) {
-        return false;
-      }
-
-      return true;
-    },
-
     async guardarProducto() {
-      if (!this.validarCampos(this.productoForm)) {
+      if (!validacionesProductos.validarCampos(this.productoForm)) {
         return;
       }
-      validarCamposService.formSuccess();
 
       this.productoForm.id_usuario = this.id_usuario;
 
