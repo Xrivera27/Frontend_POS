@@ -49,15 +49,16 @@ export default {
                 headers,
                 body: JSON.stringify({
                     productosLista: datosCompra.productosLista,
-                    total: datosCompra.total
+                    total: datosCompra.total,
+                    referenciaPago: datosCompra.referenciaPago  // Añadimos esto
                 })
             });
-
+    
             if (!response.ok) {
                 const data = await response.json();
                 throw new Error(data.message || 'Error al registrar la compra');
             }
-
+    
             return await response.json();
         } catch (error) {
             console.error('Error al registrar compra:', error);

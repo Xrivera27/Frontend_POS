@@ -4,7 +4,19 @@
 
     <div class="main-container">
       <form @submit.prevent="agregarProducto" autocomplete="off">
+
+        
         <div class="input-container input-superior">
+          <div class="div-modal-resumen">
+            <label for="referencia" class="label-input">Referencia de Compra:</label>
+  <input 
+    type="text" 
+    id="referencia"
+    class="campo"
+    v-model="referenciaPago"
+    placeholder="Ingrese referencia de compra"
+  />
+</div>
           <div class="input-container" id="div_codigo">
             <label for="codigo-busqueda" class="label-input">Código del producto:</label>
             <input 
@@ -88,6 +100,8 @@
               min="0.01"
             />
           </div>
+
+          
 
           <div class="boton-container">
             <button class="btn btn-success agregar-producto" type="submit">
@@ -250,6 +264,7 @@ export default {
       payModal: false,
       subtotal: "",
       total: "",
+      referenciaPago: "",
       confirmModal: false,
       showConfirmModal: false,
       showProveedores: false,
@@ -341,8 +356,11 @@ export default {
     },
 
     async agregarProducto() {
-      try {
+    try {
         this.validarDatos();
+
+        // Guardar la referencia actual antes de limpiar
+        const referenciaActual = this.referenciaPago;
 
         const cantidad = this.addQuantity || "1";
         const cantidadPaquetes = this.addQuantityPackage || "1";
@@ -350,39 +368,44 @@ export default {
         const productoExistente = this.productos.find(p => p.codigo_producto === this.addQuery);
         
         if (!productoExistente) {
-          throw new Error('Producto no encontrado');
+            throw new Error('Producto no encontrado');
         }
 
         const productoEnLista = this.productosLista.find(p => p.codigo === this.addQuery);
 
         if (!this.isEditing) {
-          if (productoEnLista) {
+            if (productoEnLista) {
+                productoEnLista.cantidad = Number(cantidad);
+                productoEnLista.paquetes = Number(cantidadPaquetes);
+                productoEnLista.total_compra = Number(this.addtotalPrice);
+            } else {
+                this.productosLista.push({
+                    codigo: productoExistente.codigo_producto,
+                    nombre: productoExistente.nombre,
+                    cantidad: Number(cantidad),
+                    paquetes: Number(cantidadPaquetes),
+                    proveedor: productoExistente.proveedor,
+                    total_compra: Number(this.addtotalPrice)
+                });
+            }
+        } else {
             productoEnLista.cantidad = Number(cantidad);
             productoEnLista.paquetes = Number(cantidadPaquetes);
             productoEnLista.total_compra = Number(this.addtotalPrice);
-          } else {
-            this.productosLista.push({
-              codigo: productoExistente.codigo_producto,
-              nombre: productoExistente.nombre,
-              cantidad: Number(cantidad),
-              paquetes: Number(cantidadPaquetes),
-              proveedor: productoExistente.proveedor,
-              total_compra: Number(this.addtotalPrice)
-            });
-          }
-        } else {
-          productoEnLista.cantidad = Number(cantidad);
-          productoEnLista.paquetes = Number(cantidadPaquetes);
-          productoEnLista.total_compra = Number(this.addtotalPrice);
-          this.isEditing = false;
+            this.isEditing = false;
         }
 
         this.reiniciarInputs();
+        // Restaurar la referencia
+        this.$nextTick(() => {
+            this.referenciaPago = referenciaActual;
+        });
+        
         this.$refs.codigo.focus();
-      } catch (error) {
+    } catch (error) {
         alert(error.message);
-      }
-    },
+    }
+},
 
     isEditingTrue(index) {
       const producto = this.productosLista[index];
@@ -424,26 +447,44 @@ export default {
       this.addQuantityPackage = "";
       this.isEditing = false;
     },
+    limpiarTodo() {
+    this.addQuery = "";
+    this.searchQuery = "";
+    this.addQuantity = "";
+    this.addtotalPrice = "";
+    this.addQuantityPackage = "";
+    this.referenciaPago = "";
+    this.isEditing = false;
+},
 
-    async confirmPayment() {
-      try {
+async confirmPayment() {
+    if (!this.referenciaPago) {
+        alert('Por favor ingrese una referencia de compra');
+        return;
+    }
+
+    try {
         this.loading = true;
-        await solicompras.registrarCompra({
-          productosLista: this.productosLista,
-          total: this.calcularTotal
-        });
+        const datosCompra = {
+            productosLista: this.productosLista,
+            total: this.calcularTotal,
+            referenciaPago: this.referenciaPago.trim() // Aseguramos que se envíe
+        };
+
+        console.log('Enviando compra:', datosCompra);
+        await solicompras.registrarCompra(datosCompra);
         
         this.confirmModal = true;
         this.payModal = false;
         this.productosLista = [];
-        this.reiniciarInputs();
-      } catch (error) {
+        this.limpiarTodo();
+    } catch (error) {
         console.error('Error al confirmar la compra:', error);
         alert(error.message);
-      } finally {
+    } finally {
         this.loading = false;
-      }
-    },
+    }
+},
 
     payModalOpen() {
       if (this.productosLista.length > 0) {
@@ -483,12 +524,11 @@ export default {
     },
 
     confirmCancel() {
-      this.productosLista = [];
-      this.showConfirmModal = false;
-      this.reiniciarInputs();
-      this.$refs.codigo.focus();
-    },
-
+    this.productosLista = [];
+    this.showConfirmModal = false;
+    this.limpiarTodo(); // Usamos el nuevo método aquí también
+    this.$refs.codigo.focus();
+},
     cancelCancel() {
       this.showConfirmModal = false;
     },
@@ -1117,5 +1157,39 @@ export default {
 .dark .modalShowConfirm-no {
   background-color: #6c757d;
   color: white;
+}
+
+/* Estilo para los div-modal-resumen */
+.div-modal-resumen {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.div-modal-resumen label {
+  font-size: 14px;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #000;
+}
+
+.div-modal-resumen input {
+  padding: 5px 8px;
+  width: 100%;
+  font-size: 14px;
+  min-height: 28px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Para el modo oscuro */
+.dark .div-modal-resumen label {
+  color: #fff;
+}
+
+.dark .div-modal-resumen input {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
 }
 </style>

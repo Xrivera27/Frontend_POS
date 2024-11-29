@@ -3,205 +3,411 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select> registros
-        </span>
+      <!-- Filtros de fecha -->
+      <div class="date-filter">
+        <label for="start-date">Desde: </label>
+        <input type="date" id="start-date" v-model="startDate">
+        <label for="end-date">Hasta: </label>
+        <input type="date" id="end-date" v-model="endDate">
       </div>
 
-      <!-- Botón de exportación PDF -->
-      <ExportButton :columns="columns" :rows="rows" fileName="Compras.pdf" class="export-button" />
+      <!-- Botones de exportación -->
+      <ExportButton 
+        :columns="columns" 
+        :rows="filteredRows" 
+        fileName="Compras.pdf" 
+        class="export-button" 
+      />
+
+      <!-- Botón generar reporte -->
+     
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar compra..." />
+        <input 
+          class="busqueda" 
+          type="text" 
+          v-model="searchQuery" 
+          placeholder="Buscar compra..." 
+        />
       </div>
     </div>
 
     <!-- Tabla exportable -->
-    <div class="table-container" v-pdf-export ref="table">
-      <table class="table">
+    <div class="table-container" ref="table">
+      <!-- Indicador de carga -->
+      <div v-if="loading" class="loading-indicator">
+        Cargando compras...
+      </div>
+
+      <!-- Mensaje si no hay datos -->
+      <div v-else-if="paginatedCompras.length === 0" class="no-data">
+        No se encontraron compras para mostrar.
+      </div>
+
+      <table v-else class="table">
         <thead>
           <tr>
             <th>#</th>
-            <th>Codigo</th>
-            <th>Nombre</th>
+            <th>Código</th>
+            <th>Empleado</th>
+            <th>Proveedor</th>
             <th>Cantidad</th>
-            <th>Precio Unitario</th>
-            <th>Descuento</th>
             <th>Total</th>
+            <th>Estado</th>
+            <th>Método de Pago</th>
             <th>Fecha y Hora</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(compra, index) in paginatedCompras" :key="index">
-            <td>{{ index + 1 }}</td>
+            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
             <td>{{ compra.codigo }}</td>
             <td>{{ compra.nombre }}</td>
+            <td>{{ compra.proveedor }}</td>
             <td>{{ compra.cantidad }}</td>
-            <td>{{ compra.preciounitario }}</td>
-            <td>{{ compra.descuento }}</td>
-            <td>{{ compra.total }}</td>
-            <td>{{ compra.fechaHora }}</td>
-            <td class="actions-cell">
-              <button id="btnDetalles" class="btn btn-info" @click="showDetalles(index)">
+            <td>{{ formatCurrency(compra.total) }}</td>
+            <td>
+              <span 
+                :class="{
+                  'estado-badge': true,
+                  'estado-completado': compra.estado === 'Completado',
+                  'estado-pendiente': compra.estado === 'Pendiente',
+                  'estado-cancelado': compra.estado === 'Cancelado'
+                }"
+              >
+                {{ compra.estado }}
+              </span>
+            </td>
+            <td>{{ compra.metodo_pago }}</td>
+            <td>{{ formatDateTime(compra.fechaHora) }}</td>
+            <td class="actions-column">
+              <button 
+                id="btnDetalles" 
+                class="btn btn-info" 
+                @click="showDetalles(compra)" 
+                title="Ver Detalles"
+              >
                 <i class="bi bi-eye-fill"></i>
               </button>
             </td>
           </tr>
         </tbody>
       </table>
-    </div>
 
-    <!-- Modal para mostrar detalles de compra -->
-    <div v-if="isDetallesModalOpen" class="modal">
-      <div class="modal-content">
-        <h2 class="h2-modal-content">Detalles de Compra</h2>
-
-        <table class="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Codigo</th>
-              <th>Nombre</th>
-              <th>Cantidad</th>
-              <th>Precio Unitario</th>
-              <th>Descuento</th>
-              <th>RTN Proveedor</th>
-              <th>Subtotal</th>
-              <th>Total</th>
-              <th>Fecha y Hora</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(detalle, index) in compraDetalles" :key="index">
-              <td>{{ index + 1 }}</td>
-              <td>{{ detalle.codigo }}</td>
-              <td>{{ detalle.nombre }}</td>
-              <td>{{ detalle.cantidad }}</td>
-              <td>{{ detalle.preciounitario }}</td>
-              <td>{{ detalle.descuento }}</td>
-              <td>{{ detalle.rtnProveedor }}</td>
-              <td>{{ detalle.subtotal }}</td>
-              <td>{{ detalle.total }}</td>
-              <td>{{ detalle.fechaHora }}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <btnCerrarModal :texto="'Cerrar'" @click="closeDetallesModal"></btnCerrarModal>
+      <!-- Paginación -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredCompras.length) }} de {{ filteredCompras.length }} registros
+        </div>
+        <div class="pagination-container">
+          <button 
+            class="pagination-button" 
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
+            Anterior
+          </button>
+          
+          <button 
+            class="pagination-button" 
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
+            Siguiente
+          </button>
+        </div>
       </div>
     </div>
 
+    <!-- Modal de Detalles -->
+    <div v-if="isDetallesModalOpen" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">Detalles de Compra</h2>
+          <button class="btn-close" @click="closeDetallesModal">&times;</button>
+        </div>
+
+        <div class="detalles-info">
+          <div class="info-section">
+            <div class="info-item">
+              <strong>Proveedor:</strong>
+              <span>{{ selectedCompra?.proveedor }}</span>
+            </div>
+            <div class="info-item">
+              <strong>Teléfono:</strong>
+              <span>{{ selectedCompra?.telefono_proveedor }}</span>
+            </div>
+            <div class="info-item">
+              <strong>Correo:</strong>
+              <span>{{ selectedCompra?.correo_proveedor }}</span>
+            </div>
+            <div class="info-item">
+              <strong>Método de Pago:</strong>
+              <span>{{ selectedCompra?.metodo_pago }}</span>
+            </div>
+            <div class="info-item">
+              <strong>Fecha:</strong>
+              <span>{{ formatDateTime(selectedCompra?.fechaHora) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(producto, index) in selectedCompra?.productos" :key="index">
+                <td>{{ index + 1 }}</td>
+                <td>{{ producto.codigo }}</td>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.descripcion }}</td>
+                <td>{{ producto.cantidad }}</td>
+                <td>{{ formatCurrency(producto.precio_unitario) }}</td>
+                <td>{{ formatCurrency(producto.total) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="total-section">
+          <h3>Total Compra: {{ formatCurrency(selectedCompra?.total) }}</h3>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="closeDetallesModal">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import ExportButton from '../components/ExportButton.vue';
-import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
+import { useToast } from "vue-toastification";
 import PageHeader from "@/components/PageHeader.vue";
+import ExportButton from '../components/ExportButton.vue';
+import AdminCompras from '../../services/Soliadminventa';
 
 export default {
+  name: 'AdministrarCompras',
   components: {
     PageHeader,
-    ExportButton,
-    btnCerrarModal
+    ExportButton
+  },
+  setup() {
+    const toast = useToast();
+    return { toast };
   },
   data() {
     return {
       titulo: 'Administrar Compras',
       searchQuery: '',
-      itemsPerPage: "",
+      startDate: '',
+      endDate: '',
+      selectedCompra: null,
       isDetallesModalOpen: false,
-      compraDetalles: [],
-      compras: [
-        { codigo: '2001', nombre: 'Lápiz', cantidad: 10, preciounitario: 'L. 5.00', descuento: 'L. 1.00', total: 'L. 49.00', fechaHora: '2024-01-15 10:30' },
-        { codigo: '2002', nombre: 'Cuaderno', cantidad: 5, preciounitario: 'L. 25.00', descuento: 'L. 5.00', total: 'L. 120.00', fechaHora: '2024-02-20 14:45' },
-        { codigo: '2003', nombre: 'Borrador', cantidad: 20, preciounitario: 'L. 3.00', descuento: 'L. 0.50', total: 'L. 49.50', fechaHora: '2024-03-10 09:20' },
-        { codigo: '2004', nombre: 'Carpeta', cantidad: 7, preciounitario: 'L. 30.00', descuento: 'L. 2.00', total: 'L. 206.00', fechaHora: '2024-04-05 16:30' },
-        // Más datos de compras aquí...
-      ],
+      compras: [],
+      currentPage: 1,
+      pageSize: 10,
       columns: [
         { header: '#', dataKey: 'index' },
         { header: 'Código', dataKey: 'codigo' },
-        { header: 'Nombre', dataKey: 'nombre' },
+        { header: 'Empleado', dataKey: 'nombre' },
+        { header: 'Proveedor', dataKey: 'proveedor' },
         { header: 'Cantidad', dataKey: 'cantidad' },
-        { header: 'Precio Unitario', dataKey: 'preciounitario' },
-        { header: 'Descuento', dataKey: 'descuento' },
         { header: 'Total', dataKey: 'total' },
+        { header: 'Estado', dataKey: 'estado' },
+        { header: 'Método de Pago', dataKey: 'metodo_pago' },
         { header: 'Fecha y Hora', dataKey: 'fechaHora' }
       ],
-      rows: []
+      rows: [],
+      loading: false,
+      error: null
     };
   },
   computed: {
     filteredCompras() {
-      return this.compras.filter(compra =>
-        compra.codigo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        compra.nombre.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
+      return this.compras.filter(compra => {
+        const compraFecha = new Date(compra.fechaHora);
+        
+        const matchesSearchQuery = 
+          String(compra.codigo).toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          compra.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          compra.proveedor.toLowerCase().includes(this.searchQuery.toLowerCase());
+
+        const matchesDateRange = 
+          (!this.startDate || compraFecha >= new Date(this.startDate + 'T00:00:00')) &&
+          (!this.endDate || compraFecha <= new Date(this.endDate + 'T23:59:59'));
+
+        return matchesSearchQuery && matchesDateRange;
+      });
     },
     paginatedCompras() {
-      if (this.itemsPerPage === "" || this.itemsPerPage === null) {
-        return this.filteredCompras;
-      } else {
-        return this.filteredCompras.slice(0, parseInt(this.itemsPerPage));
-      }
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredCompras.slice(startIndex, endIndex);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredCompras.length / this.pageSize);
+    },
+    filteredRows() {
+      return this.paginatedCompras.map((compra, index) => ({
+        index: ((this.currentPage - 1) * this.pageSize) + index + 1,
+        codigo: compra.codigo,
+        nombre: compra.nombre,
+        proveedor: compra.proveedor,
+        cantidad: compra.cantidad,
+        total: this.formatCurrency(compra.total),
+        estado: compra.estado,
+        metodo_pago: compra.metodo_pago,
+        fechaHora: this.formatDateTime(compra.fechaHora)
+      }));
     }
   },
   methods: {
-    showDetalles(index) {
-      // Muestra los detalles de la compra seleccionada
-      this.compraDetalles = [
-        { codigo: this.compras[index].codigo, nombre: this.compras[index].nombre, cantidad: this.compras[index].cantidad, preciounitario: this.compras[index].preciounitario, descuento: this.compras[index].descuento, rtnProveedor: '98765432109876', subtotal: this.compras[index].cantidad * parseFloat(this.compras[index].preciounitario.replace('L. ', '')), total: this.compras[index].total, fechaHora: this.compras[index].fechaHora }
-      ];
-      this.isDetallesModalOpen = true;
+    formatCurrency(value) {
+      return `L. ${Number(value).toFixed(2)}`;
     },
+
+    formatDateTime(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleString('es-HN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      }).replace(',', '');
+    },
+
+    async loadCompras() {
+      this.loading = true;
+      this.error = null;
+      try {
+        console.log('Iniciando carga de compras...');
+        const response = await AdminCompras.obtenerCompras();
+        console.log('Respuesta del servidor:', response);
+        
+        const comprasData = response.data || response;
+        if (comprasData) {
+          this.compras = comprasData;
+          console.log('Compras procesadas:', this.compras);
+          this.generateRows();
+        } else {
+          throw new Error('No se pudieron obtener las compras');
+        }
+      } catch (error) {
+        console.error('Error al cargar compras:', error);
+        this.error = 'Error al cargar las compras. Por favor, intente nuevamente.';
+        this.toast.error(this.error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async showDetalles(compra) {
+      try {
+        console.log('Mostrando detalles para:', compra);
+        const detalles = await AdminCompras.obtenerDetalleCompra(compra.id_compra);
+        this.selectedCompra = detalles;
+        this.isDetallesModalOpen = true;
+      } catch (error) {
+        console.error('Error al obtener detalles:', error);
+        this.toast.error('Error al obtener los detalles de la compra');
+      }
+    },
+
     closeDetallesModal() {
       this.isDetallesModalOpen = false;
-      this.compraDetalles = [];
+      this.selectedCompra = null;
     },
+
+    async generarReporte() {
+      if (!this.startDate || !this.endDate) {
+        this.toast.warning('Seleccione un rango de fechas');
+        return;
+      }
+
+      try {
+        this.loading = true;
+        const blob = await AdminCompras.generarReporteCompras(this.startDate, this.endDate);
+        
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `reporte-compras-${this.startDate}-${this.endDate}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        this.toast.success('Reporte generado exitosamente');
+      } catch (error) {
+        console.error('Error al generar reporte:', error);
+        this.toast.error('Error al generar el reporte');
+      } finally {
+        this.loading = false;
+      }
+    },
+
     generateRows() {
-      // Genera las filas basadas en las compras paginadas
-      this.rows = this.paginatedCompras.map((compra, index) => ({
-        index: index + 1,
-        codigo: compra.codigo,
-        nombre: compra.nombre,
-        cantidad: compra.cantidad,
-        preciounitario: compra.preciounitario,
-        descuento: compra.descuento,
-        total: compra.total,
-        fechaHora: compra.fechaHora
-      }));
-      console.log('Filas generadas:', this.rows);
+      this.rows = this.filteredRows;
     },
-    changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
-      link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
+
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+
+    resetFilters() {
+      this.searchQuery = '';
+      this.startDate = '';
+      this.endDate = '';
+      this.currentPage = 1;
     }
   },
   watch: {
-    // Cuando cambie la paginación o el filtro, actualiza las filas
-    paginatedCompras() {
-      this.generateRows();
+    paginatedCompras: {
+      handler() {
+        this.generateRows();
+      },
+      deep: true
+    },
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    startDate() {
+      this.currentPage = 1;
+    },
+    endDate() {
+      this.currentPage = 1;
     }
   },
-  mounted() {
-    // Genera las filas al cargar el componente
-    this.generateRows();
+  async mounted() {
+    await this.loadCompras();
     document.title = "Administrar Compras";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
   }
 };
 </script>
@@ -209,26 +415,20 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+/* Estilos globales */
 * {
   font-family: 'Montserrat', sans-serif;
   box-sizing: border-box;
 }
 
+/* Contenedor principal */
 .compras-wrapper {
   padding: 16px;
   width: 100%;
   overflow-x: hidden;
 }
 
-/* Ajustar las opciones igual que en categorías */
-.opciones {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
+/* Barra de búsqueda */
 .busqueda {
   padding: 10px;
   font-size: 14px;
@@ -238,11 +438,44 @@ export default {
   max-width: 300px;
 }
 
+/* Botón de exportación */
 .export-button {
   margin: 0;
 }
 
-#btnDetalles {
+/* Opciones y filtros */
+.opciones {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Filtro de fechas */
+.date-filter {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.date-filter label {
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+.date-filter input {
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  margin-right: 20px;
+  width: auto;
+}
+
+/* Botones de acción */
+.btn {
   font-size: 18px;
   width: 50px;
   height: 40px;
@@ -253,25 +486,68 @@ export default {
   justify-content: center;
   padding: 0;
   border: none;
-}
-
-#btnDetalles:hover {
-  background-color: #17a2b8;
-  transform: scale(1.05);
   transition: all 0.3s ease;
 }
 
-.bi-eye-fill {
-  font-size: 20px;
+.btn:hover {
+  transform: scale(1.05);
 }
 
+.btn-view {
+  background-color: #20B2AA;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.btn-view:hover {
+  background-color: #1A958F;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+}
+
+.btn-success {
+  background-color: #28a745;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  width: auto;
+  padding: 0 16px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Estado badge */
+.estado-badge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  display: inline-block;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* Contenedor de la tabla */
 .table-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   width: 100%;
   overflow-x: auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Estilos de la tabla */
 .table {
   width: 100%;
   min-width: 800px;
@@ -284,17 +560,42 @@ export default {
   border: 1px solid #dee2e6;
   padding: 8px;
   text-align: center;
+  vertical-align: middle;
 }
 
 .table th {
-  background-color: none;
   font-weight: bold;
   position: sticky;
   top: 0;
   background-color: white;
-  z-index: 0;
+  z-index: 1;
 }
 
+/* Acciones columna */
+.actions-column {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.bi-eye-fill {
+  font-size: 20px;
+}
+
+/* Loading y No Data */
+.loading-indicator,
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.no-data {
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+/* Modal Styles */
 .modal {
   position: fixed;
   top: 0;
@@ -310,76 +611,112 @@ export default {
 
 .modal-content {
   background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 1500px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   width: 90%;
-  margin: 20px;
-  overflow-y: auto;
+  max-width: 800px;
   max-height: 90vh;
+  overflow-y: auto;
 }
 
-.h2-modal-content {
-  font-size: 24px;
-  margin-bottom: 20px;
+.modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.btn {
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal-footer {
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn-close {
+  background: none;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-size: 16px;
+  font-size: 1.5rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  padding: 0;
+  color: #6c757d;
 }
 
-.btn-info {
-  background-color: #17a2b8;
-  color: white;
-}
-
-.btn-info:hover {
-  background-color: #138496;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-}
-
-.custom-select {
-  padding: 5px;
-  border-radius: 5px;
-  border: 1px solid #ced4da;
-  width: auto;
-}
-
-/* Scroll personalizado */
-.table-container::-webkit-scrollbar,
-.modal-content::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.table-container::-webkit-scrollbar-track,
-.modal-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
+/* Detalles Info */
+.detalles-info {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  margin: 1rem;
   border-radius: 4px;
 }
 
-.table-container::-webkit-scrollbar-thumb,
-.modal-content::-webkit-scrollbar-thumb {
-  background: #c09d62;
-  border-radius: 4px;
+.info-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
 }
 
-.table-container::-webkit-scrollbar-thumb:hover,
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background: #a38655;
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-item strong {
+  color: #495057;
+}
+
+.total-section {
+  padding: 1rem;
+  text-align: right;
+  font-size: 1.25rem;
+  color: #495057;
+}
+
+/* Paginación */
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  margin-top: auto;
+}
+
+.pagination-info {
+  color: #6c757d;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* Media Queries */
@@ -390,40 +727,51 @@ export default {
   }
 
   .busqueda,
-  .custom-select,
   .export-button {
     width: 100%;
     margin: 8px 0;
   }
 
-  #btnDetalles {
+  .date-filter {
+    flex-direction: column;
+    align-items: stretch;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .date-filter input {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 10px;
+  }
+
+  .info-section {
+    grid-template-columns: 1fr;
+  }
+
+  .btn {
     width: 40px;
     height: 35px;
     font-size: 14px;
   }
 
-  .bi-eye-fill {
-    font-size: 16px;
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 1rem;
   }
 
-  .modal-content {
-    width: 95%;
-    padding: 15px;
-  }
-
-  .btn {
-    width: 100%;
-    margin: 5px 0;
+  .pagination-container {
+    justify-content: center;
+    flex-wrap: wrap;
   }
 }
 
 @media screen and (max-width: 480px) {
-
-  .h2-modal-content {
-    font-size: 20px;
-    margin-bottom: 15px;
-  }
-
   .table th,
   .table td {
     padding: 6px;
@@ -434,51 +782,46 @@ export default {
     max-width: 100%;
   }
 
-  .modal-content {
-    margin: 10px;
-    padding: 10px;
+  .modal-footer {
+    flex-direction: column;
   }
 
-  .btn {
-    padding: 8px 16px;
+  .modal-footer .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .pagination-button {
+    padding: 6px 12px;
     font-size: 14px;
   }
 }
-/* =======================================================
-   Modo Oscuro
-======================================================= */
-/* Contenedor principal */
-.dark .categorias-wrapper {
-  background-color: #1e1e1e;
-  color: #fff;
+
+/* Modo oscuro para el componente completo */
+.dark .compras-wrapper {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
 }
 
-/* Inputs y búsqueda en modo oscuro */
-.dark .busqueda {
+/* Título en modo oscuro */
+.dark h1,
+.dark .page-header h1,
+.dark .page-header .titulo {
+  color: #ffffff !important;
+}
+
+/* Inputs en modo oscuro */
+.dark .busqueda,
+.dark .date-filter input {
   background-color: #2d2d2d;
   border-color: #404040;
-  color: #fff;
-}
-
-.dark .custom-select {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .custom-select option {
-  background-color: #2d2d2d;
-  color: #fff;
+  color: #e0e0e0;
 }
 
 /* Tabla en modo oscuro */
 .dark .table-container {
-  border-color: #404040;
   background-color: #2d2d2d;
-}
-
-.dark .table thead {
-  background-color: #2d2d2d;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .dark .table th {
@@ -488,89 +831,112 @@ export default {
 }
 
 .dark .table td {
-  color: #fff;
   border-color: #404040;
+  color: #e0e0e0;
 }
 
-.dark .table tr:hover {
-  background-color: #383838;
+/* Estado badges en modo oscuro */
+.dark .estado-badge {
+  opacity: 0.9;
+}
+
+.dark .estado-completado {
+  background-color: #1b4332;
+  color: #95d5b2;
+}
+
+.dark .estado-pendiente {
+  background-color: #4a4a00;
+  color: #ffff99;
+}
+
+.dark .estado-cancelado {
+  background-color: #4c1d1d;
+  color: #ff9999;
 }
 
 /* Modal en modo oscuro */
 .dark .modal-content {
   background-color: #2d2d2d;
-  color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
-.dark .modal-content input,
-.dark .modal-content textarea {
+.dark .modal-header,
+.dark .modal-footer {
+  border-color: #404040;
+}
+
+.dark .modal-title {
+  color: #e0e0e0;
+}
+
+.dark .btn-close {
+  color: #e0e0e0;
+}
+
+/* Detalles info en modo oscuro */
+.dark .detalles-info {
+  background-color: #383838;
+}
+
+.dark .info-item strong {
+  color: #e0e0e0;
+}
+
+/* Paginación en modo oscuro */
+.dark .pagination-button {
   background-color: #383838;
   border-color: #404040;
-  color: #fff;
+  color: #e0e0e0;
 }
 
-.dark .form-group label {
-  color: #fff;
+.dark .pagination-button:hover:not(:disabled) {
+  background-color: #454545;
+}
+
+.dark .pagination-button:disabled {
+  opacity: 0.5;
+  background-color: #2d2d2d;
+}
+
+.dark .pagination-info {
+  color: #b0b0b0;
+}
+
+/* Loading y No Data en modo oscuro */
+.dark .loading-indicator,
+.dark .no-data {
+  color: #b0b0b0;
+  background-color: #2d2d2d;
 }
 
 /* Scroll personalizado en modo oscuro */
 .dark .table-container::-webkit-scrollbar-track {
-  background: #2d2d2d;
+  background: #383838;
 }
 
 .dark .table-container::-webkit-scrollbar-thumb {
-  background: #c09d62;
+  background: #606060;
 }
 
 .dark .table-container::-webkit-scrollbar-thumb:hover {
-  background: #a38655;
+  background: #707070;
 }
 
-/* Botones en modo oscuro (manteniendo los colores originales) */
-.dark .button-promocion {
-  background-color: #4cafaf;
-  color: white;
+/* Botones en modo oscuro */
+.dark .btn-info {
+  background-color: #0f7285;
 }
 
-.dark .button-unidad-medida {
-  background-color: #4caf4c;
-  color: #000;
+.dark .btn-info:hover {
+  background-color: #0d606f;
 }
 
-.dark #btnAdd {
-  background-color: #c09d62;
-  color: black;
+.dark .btn-secondary {
+  background-color: #4a4a4a;
 }
 
-.dark #btnAdd:hover {
-  background-color: #a38655;
-}
-
-.dark #btnEditar {
-  background-color: #ffc107;
-  color: black;
-}
-
-.dark #btnEditar:hover {
-  background-color: #e8af06;
-}
-
-.dark #btnEliminar {
-  background-color: #dc3545;
-  color: black;
-}
-
-.dark #btnEliminar:hover {
-  background-color: #b72433;
-}
-
-.dark .modalShowConfirm-Si {
-  background-color: #dc3545;
-  color: white;
-}
-
-.dark .modalShowConfirm-no {
-  background-color: #6c757d;
-  color: white;
+.dark .btn-secondary:hover {
+  background-color: #5a5a5a;
 }
 </style>

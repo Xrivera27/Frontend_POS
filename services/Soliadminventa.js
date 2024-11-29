@@ -139,5 +139,146 @@ export default {
             console.error('Error al cancelar venta:', error);
             throw error;
         }
+    },
+
+    async obtenerCompras() {
+        try {
+            const headers = getAuthHeaders();
+            const url = `${homeUrl}/AdminCompras/compras`;
+            console.log('Haciendo petición a:', url);
+    
+            const response = await fetch(url, { 
+                method: 'GET',
+                headers
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            console.log('Datos recibidos:', data);
+            return data.data;
+        } catch (error) {
+            console.error('Error al obtener compras:', error);
+            throw error;
+        }
+    },
+
+    async obtenerDetalleCompra(idCompra) {
+        try {
+            console.log('Solicitando detalle de compra:', idCompra);
+            const url = `${homeUrl}/AdminCompras/compras/${idCompra}`;
+            console.log('URL de petición:', url);
+            
+            const headers = getAuthHeaders();
+            const response = await fetch(url, { 
+                method: 'GET',
+                headers 
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Detalle de compra recibido:', data);
+            return data.data;
+        } catch (error) {
+            console.error('Error al obtener detalle de compra:', error);
+            throw error;
+        }
+    },
+
+    async registrarCompra(compraData) {
+        try {
+            console.log('Iniciando registro de compra:', compraData);
+            const url = `${homeUrl}/AdminCompras/compras`;
+            
+            const headers = getAuthHeaders();
+            const response = await fetch(url, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(compraData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Compra registrada:', data);
+            return data;
+        } catch (error) {
+            console.error('Error al registrar compra:', error);
+            throw error;
+        }
+    },
+
+    async actualizarEstadoCompra(idCompra, estado) {
+        try {
+            console.log('Actualizando estado de compra:', { idCompra, estado });
+            const url = `${homeUrl}/AdminCompras/compras/${idCompra}/estado`;
+            
+            const headers = getAuthHeaders();
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers,
+                body: JSON.stringify({ estado })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Estado de compra actualizado:', data);
+            return data;
+        } catch (error) {
+            console.error('Error al actualizar estado de compra:', error);
+            throw error;
+        }
+    },
+
+    async generarReporteCompras(fechaInicio, fechaFin) {
+        try {
+            console.log('Generando reporte de compras:', { fechaInicio, fechaFin });
+            const url = `${homeUrl}/AdminCompras/compras/reporte?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+            
+            const headers = getAuthHeaders();
+            // Eliminar Content-Type para respuesta blob
+            delete headers['Content-Type'];
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers,
+                responseType: 'blob'
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('Error response:', text);
+                throw new Error(`Error al generar reporte: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            console.log('Blob recibido:', {
+                size: blob.size,
+                type: blob.type
+            });
+
+            if (blob.size === 0) {
+                throw new Error('PDF recibido está vacío');
+            }
+
+            return blob;
+        } catch (error) {
+            console.error('Error al generar reporte de compras:', error);
+            throw error;
+        }
     }
 };

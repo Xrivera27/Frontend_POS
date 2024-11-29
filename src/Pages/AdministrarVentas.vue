@@ -14,6 +14,8 @@
       <!-- Botón de exportación PDF -->
       <ExportButton :columns="columns" :rows="filteredRows" fileName="Ventas.pdf" class="export-button" />
 
+     
+
       <!-- Barra de búsqueda -->
       <div class="search-bar">
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar venta..." />
@@ -322,12 +324,11 @@ export default {
       }
     },
 
-    changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
-      link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
+    resetFilters() {
+      this.searchQuery = '';
+      this.startDate = '';
+      this.endDate = '';
+      this.currentPage = 1;
     }
   },
   watch: {
@@ -336,12 +337,20 @@ export default {
         this.generateRows();
       },
       deep: true
+    },
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    startDate() {
+      this.currentPage = 1; 
+    },
+    endDate() {
+      this.currentPage = 1;
     }
   },
   async mounted() {
     await this.loadVentas();
     document.title = "Administrar Ventas";
-    this.changeFavicon('/img/spiderman.ico');
   }
 };
 </script>
