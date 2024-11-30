@@ -51,7 +51,7 @@
       <div>
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar promoción..." />
         <button v-if="esCeo" class="btn activar-form" @click="activarForm">
-          Nueva promoción
+          Nueva promoción {{ esCeo }}
         </button>
       </div>
       <div class="table-container" v-pdf-export ref="table">
@@ -239,6 +239,7 @@ export default {
   },
   data() {
     return {
+      id_usuario: "",
       titulo: 'Promociones: Categorías',
       searchQuery: "",
       activeForm: false,
@@ -254,6 +255,7 @@ export default {
       currentPage: 1,
       pageSize: 10,
       categorias: [],
+      esCeo: false,
       promForm: {
         categoria_id: "",
         categoria: "",
@@ -262,7 +264,7 @@ export default {
         fecha_inicio: "",
         fecha_final: "",
         estado: true,
-        esCeo: false,
+
       },
       promFormModal: {
         id: "",
@@ -311,13 +313,17 @@ export default {
   async mounted() {
     try {
       this.changeFavicon('/img/spiderman.ico');
-      await Promise.all([
+      const result = await Promise.all([
         this.cargarPromociones(),
-        this.cargarCategorias()
+        this.cargarCategorias(),
+        solicitudes.solicitarUsuarioToken()
       ]);
+      this.id_usuario = result[2];
+
       this.esCeo = await esCeo(this.id_usuario);
+
     } catch (error) {
-      console.error('Error en mounted:', error);
+      alert(error);
     }
   },
 
