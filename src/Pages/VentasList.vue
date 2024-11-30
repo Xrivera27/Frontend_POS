@@ -706,11 +706,9 @@ export default {
           if (!this.recuperandoVenta) {
            const result = await agregarProductoCodigo(nuevaCantidad, codigoValidar, this.id_usuario);
            console.log(result);
-           if(result.ok){
-            const error = {
-              message: 'No hay suficiente stock en el inventario'
-            }
-            throw error;
+           if(result.error){
+            
+            throw result;
            }
           }
   
