@@ -681,7 +681,7 @@ export default {
 
     async agregarProducto() {
         let nuevaCantidad = this.totalCantidad;
-        let productoReducir;
+
         const codigoValidar = this.addQuery;
         if (!codigoValidar) {
           const toast = useToast();
@@ -702,23 +702,29 @@ export default {
   
             return;
           }
+
+          if (!this.recuperandoVenta) {
+           const result = await agregarProductoCodigo(nuevaCantidad, codigoValidar, this.id_usuario);
+           console.log(result);
+           if(result.ok){
+            const error = {
+              message: 'No hay suficiente stock en el inventario'
+            }
+            throw error;
+           }
+          }
   
           const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
           if (existingProduct) {
             existingProduct.cantidad += nuevaCantidad;
-            productoReducir = existingProduct.codigo_producto;
+
   
           } else {
             newProduct.cantidad = nuevaCantidad;
             this.productosLista.push({ ...newProduct });
-            productoReducir = newProduct.codigo_producto;
   
           }
-          if (!this.recuperandoVenta) {
-            //  alert(nuevaCantidad);
-            await agregarProductoCodigo(nuevaCantidad, productoReducir, this.id_usuario);
-  
-          }
+          
   
         } catch (error) {
           console.log(error);
