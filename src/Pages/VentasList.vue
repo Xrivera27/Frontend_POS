@@ -523,6 +523,13 @@ export default {
         toast.warning("No hay productos en la tabla de ventas.");
         return;
       }
+
+      const totalNumero = this.productosLista.reduce((total, p) => total + (p.precio_final), 0);
+      
+      if(!this.clienteSeleccionado && totalNumero > 10000){
+        toast.warning("Agregue un cliente para compras mayores a L. 10,0000");
+        return;
+      }
       this.isModalLoading = true;
       this.loadingMessage = 'Procesando venta...';
 
@@ -703,8 +710,6 @@ export default {
             return;
           }
 
-          
-  
           const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
           if (existingProduct) {
             existingProduct.cantidad += nuevaCantidad;
