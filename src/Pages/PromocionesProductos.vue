@@ -243,6 +243,7 @@ export default {
   },
   data() {
     return {
+      id_usuario: "",
       currentPage: 1,
       pageSize: 10,
       titulo: 'Promociones: Productos',
@@ -286,13 +287,21 @@ export default {
   },
 
   async mounted() {
-    document.title = "Promociones Productos";
+    try {
+      document.title = "Promociones Productos";
     this.changeFavicon('/img/spiderman.ico');
-    await Promise.all([
+    const result = await Promise.all([ 
       this.cargarPromociones(),
-      this.cargarProductos()
+      this.cargarProductos(),
+      solicitudes.solicitarUsuarioToken()
     ]);
+    this.id_usuario = result[2];
     this.esCeo = await esCeo(this.id_usuario);
+    } catch (error) {
+      alert("Ocurrio un error");
+    }
+    
+
   },
 
   computed: {
