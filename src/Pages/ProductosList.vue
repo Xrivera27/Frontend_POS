@@ -17,35 +17,23 @@
         <button class="button-promocion">Promociones</button>
       </RouterLink>
 
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select> registros
-        </span>
-      </div>
-
       <!-- Barra de búsqueda -->
       <div class="search-bar">
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar producto..." />
       </div>
+
       <div class="registros">
         <span>
           <select class="custom-select select-sucursal" v-model="searchSucursal" v-show="(sucursales.length > 1)"
             @change="mostrarRegistros(searchSucursal)">
             <option value="default">Todas</option>
-            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
-              sucursal.nombre_administrativo }}</option>
-
+            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">
+              {{ sucursal.nombre_administrativo }}</option>
           </select>
         </span>
       </div>
     </div>
+
     <!-- Tabla exportable -->
     <div class="table-container" v-pdf-export ref="table">
       <table class="table">
@@ -62,11 +50,12 @@
         </thead>
         <tbody>
           <tr v-for="(producto, index) in paginatedProductos" :key="index">
-            <td>{{ index + 1 }}</td>
+            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
             <td>{{ producto.codigo_producto }}</td>
             <td>{{ producto.nombre }}</td>
-            <td>{{ producto.stock_actual }} <button class="edit-stock" @click="openModalStock(producto)"><i
-                  class="bi bi-pencil-square"></i></button> </td>
+            <td>{{ producto.stock_actual }} <button class="edit-stock" @click="openModalStock(producto)">
+                <i class="bi bi-pencil-square"></i></button>
+            </td>
             <td>{{ producto.precio_unitario }}</td>
             <td>Inactivo</td>
             <td v-if="esCeo">
@@ -80,6 +69,22 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Paginación -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Mostrando {{ paginatedProductos.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }} a 
+          {{ Math.min(currentPage * pageSize, filteredProductos.length) }} de {{ filteredProductos.length }} registros
+        </div>
+        <div class="pagination-container">
+          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+            Anterior
+          </button>
+          <button class="pagination-button" :disabled="currentPage === totalPages || totalPages === 0" @click="nextPage">
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="modal" v-if="showConfirmModal">
@@ -205,7 +210,6 @@
     </div>
 
     <!-- modal para mostrar categorias -->
-
     <div v-if="isModalCategoriaOpen" class="modal">
       <div class="modal-content modal-categorias">
         <div class="categoria-header">
@@ -234,7 +238,6 @@
     </div>
 
     <!-- modal para editar stocks min y max por sucursal -->
-
     <div v-if="isModalStockOpen" class="modal">
       <div class="modal-content modal-content-stock">
         <div class="sotck-encabezado">
@@ -243,7 +246,6 @@
           </div>
         </div>
         <form class="form-form-stock">
-
           <select class="custom-select select-sucursal-stock" @change="mostrarStockbySucursal(searchSucursalStock)"
             v-model="searchSucursalStock" v-show="(sucursales.length > 1)">
             <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
@@ -268,24 +270,18 @@
             <input type="text" class="input" @keypress="soloNumeros($event)"
               placeholder="Ingrese stock maximo del producto" v-model="inputStockMax">
           </div>
-
         </form>
 
         <div class="categoria-botones">
-
           <btnGuardarModal @click="guardarStock(searchSucursalStock)">Guardar</btnGuardarModal>
           <btnCerrarModal :texto="'Cerrar'" @click="closeModalStock"></btnCerrarModal>
         </div>
-
       </div>
-
     </div>
-
   </div>
 </template>
 
 <script>
-
 //compontentes
 import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
@@ -308,7 +304,6 @@ import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitude
 import { getCategoriaProductosEmpresa } from '../../services/categoriaSolicitudes.js';
 const { esCeo } = require('../../services/usuariosSolicitudes');
 
-
 //recursos
 const { impuestos } = require('../resources/impuestos.js');
 
@@ -322,7 +317,7 @@ export default {
   data() {
     return {
       titulo: 'Productos',
-      showConfirmModal: false, // Agregar esto
+      showConfirmModal: false,
       productoToDelete: null,
       searchQuery: '',
       searchCategoria: '',
@@ -336,7 +331,8 @@ export default {
       inputStockMax: 0,
       inputStockMin: 0,
       idProductoStock: '',
-      itemsPerPage: "",
+      currentPage: 1,
+      pageSize: 10,
       id_usuario: '',
       unidadesMostrar: [],
       proveedoresMostrar: [],
@@ -352,11 +348,9 @@ export default {
         precio_mayorista: "",
         cantidad_activar_mayorista: "",
         categorias: []
-
       },
       productos: [],
       sucursales: [],
-      // categorias: [],
       categoriasSeleccionadas: [],
       categorias: [],
       columns: [
@@ -373,24 +367,29 @@ export default {
       rows: []
     };
   },
+
   computed: {
     filteredProductos() {
       return this.productos.filter(producto =>
         producto.codigo_producto.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        producto.descripcion.toLowerCase().includes(this.searchQuery.toLowerCase())
+        producto.nombre.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
+
+    paginatedProductos() {
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredProductos.slice(startIndex, endIndex);
+    },
+
+    totalPages() {
+      return Math.ceil(this.filteredProductos.length / this.pageSize);
+    },
+
     filteredCategorias() {
       return this.categorias.filter(categoria =>
         categoria.nombre_categoria.toLowerCase().includes(this.searchCategoria.toLowerCase())
       );
-    },
-    paginatedProductos() {
-      if (this.itemsPerPage === "" || this.itemsPerPage === null) {
-        return this.filteredProductos;
-      } else {
-        return this.filteredProductos.slice(0, parseInt(this.itemsPerPage));
-      }
     }
   },
 
@@ -398,9 +397,7 @@ export default {
   nombreProductoStock: '',
 
   methods: {
-
     async mostrarRegistros(valor) {
-
       if (this.sucursales.length === 1) {
         valor = this.sucursales[0].id_sucursal;
         this.searchSucursal = this.sucursales[0].id_sucursal;
@@ -415,19 +412,13 @@ export default {
         } catch (error) {
           console.log(error);
         }
-
       }
     },
 
     soloNumeros(event) {
-      // Permite números y punto decimal
       const codigoTecla = event.keyCode || event.which;
       const tecla = String.fromCharCode(codigoTecla);
-
-      // Expresión regular que permite números y un punto decimal
       const regex = /^[0-9.]$/;
-
-      // Si la tecla no coincide con la regex o ya hay un punto y se intenta agregar otro
       if (!regex.test(tecla) ||
         (tecla === '.' && event.target.value.includes('.'))) {
         event.preventDefault();
@@ -437,22 +428,16 @@ export default {
 
     formatearPrecio(event, campo) {
       let valor = event.target.value;
-
-      // Si el valor está vacío, no hacer nada
       if (valor === '') return;
-
-      // Convertir a número y formatear con 2 decimales
       const numeroFormateado = parseFloat(valor).toFixed(2);
-
-      // Actualizar el valor en el formulario
       this.productoForm[campo] = numeroFormateado;
     },
 
     async openModal() {
       this.isModalOpen = true;
       await this.cargarUnidadMedidaProveedores();
-
     },
+
     closeModal() {
       this.isModalOpen = false;
       this.clearForm();
@@ -481,10 +466,8 @@ export default {
         }
         this.inputStockMin = response.stock_min || 0;
         this.inputStockMax = response.stock_max || 0;
-
       } catch (error) {
         console.error('Error al abrir el modal de stock:', error);
-
       }
     },
 
@@ -495,19 +478,14 @@ export default {
 
       if (this.searchSucursal === 'default') {
         this.searchSucursalStock = this.sucursales[0].id_sucursal;
-      }
-
-      else {
+      } else {
         this.searchSucursalStock = this.searchSucursal;
       }
       await this.mostrarStockbySucursal(this.searchSucursalStock);
-
       this.isModalStockOpen = true;
     },
 
-
     async guardarStock(sucursal) {
-
       const stock_min = Number(this.inputStockMin);
       const stock_max = Number(this.inputStockMax);
 
@@ -524,7 +502,6 @@ export default {
       try {
         const response = await PostStockMinMax(this.idProductoStock, sucursal, datosStock);
         if (response instanceof Error) {
-          console.log('Entro aqui');
           throw response;
         }
         notificaciones('success');
@@ -572,10 +549,9 @@ export default {
       this.productoForm.id_usuario = this.id_usuario;
 
       if (this.isEditing) {
-
         try {
-
-          if (this.productoForm.codigo_producto === this.productos[this.editIndex].codigo_producto) this.productoForm.codigo_producto = '';
+          if (this.productoForm.codigo_producto === this.productos[this.editIndex].codigo_producto) 
+            this.productoForm.codigo_producto = '';
           const nuevoRegistro = await patchProducto(this.productoForm, this.productos[this.editIndex].id_producto);
           if (nuevoRegistro == true) {
             this.productoForm.codigo_producto = this.productos[this.editIndex].codigo_producto;
@@ -584,19 +560,17 @@ export default {
         } catch (error) {
           notificaciones('error', error.message);
         }
-
       } else {
-
         try {
           const nuevoRegistro = await postProducto(this.productoForm);
           this.productos.push(nuevoRegistro[0]);
         } catch (error) {
           notificaciones('error', error.message);
         }
-
       }
       this.closeModal();
     },
+
     async editProducto(producto, index) {
       this.productoForm = { ...producto };
 
@@ -612,11 +586,9 @@ export default {
         this.isEditing = true;
         this.editIndex = index;
         this.openModal();
-
       } catch (error) {
         notificaciones('error', error.message);
       }
-
     },
 
     async deleteProducto(producto) {
@@ -650,8 +622,19 @@ export default {
       this.categoriaToDelete = null;
     },
 
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+
     generateRows() {
-      // Genera las filas basadas en los productos paginados
       this.rows = this.paginatedProductos.map((producto, index) => ({
         index: index + 1,
         codigo_producto: producto.codigo_producto,
@@ -663,8 +646,8 @@ export default {
         preciodescuento: producto.preciodescuento,
         fecha: producto.fecha
       }));
-      console.log('Filas generadas:', this.rows);
     },
+
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
@@ -673,30 +656,32 @@ export default {
       document.getElementsByTagName('head')[0].appendChild(link);
     }
   },
+
   watch: {
-    // Cuando cambie la paginación o el filtro, actualiza las filas
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    searchSucursal() {
+      this.currentPage = 1;
+    },
     paginatedProductos() {
       this.generateRows();
     }
   },
+
   async mounted() {
-    // Genera las filas al cargar el componente
     this.generateRows();
     document.title = "Productos";
     this.changeFavicon('/img/spiderman.ico');
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
-
       this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
       this.esCeo = await esCeo(this.id_usuario);
-
-
       this.mostrarRegistros(this.searchSucursal);
-
     } catch (error) {
-      console.log(error); //modal error pendiente
-    }// Usar la ruta correcta
+      console.log(error);
+    }
   }
 };
 </script>
@@ -872,13 +857,11 @@ export default {
 
 .table-container {
   width: 100%;
-  border-radius: 10px;
-  border: 1px solid #ddd;
+  border-radius: 0;
+  border: 1px solid #e2e8f0;
   margin-top: 16px;
-  height: auto;
-  max-height: 480px;
-  overflow-x: auto;
-  overflow-y: auto;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .table {
@@ -1053,6 +1036,45 @@ export default {
   background-color: #45a049;
 }
 
+/* Pagination styles */
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  margin-top: auto;
+  background-color: #fff;
+}
+
+.pagination-info {
+  color: #6c757d;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* Estilo para scroll personalizado */
 .table-container::-webkit-scrollbar {
   width: 8px;
@@ -1176,40 +1198,6 @@ export default {
   border-radius: 0 0 12px 12px;
 }
 
-/* Modo Oscuro */
-.dark .modal-categorias {
-  background-color: #2d2d2d;
-}
-
-.dark .categoria-header,
-.dark .categoria-footer {
-  background-color: #1e1e1e;
-  border-color: #404040;
-}
-
-.dark .categoria-header h3 {
-  color: #fff;
-}
-
-.dark .search-input {
-  background-color: #383838;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .categoria-checkbox {
-  background-color: #383838;
-  border-color: #404040;
-}
-
-.dark .categoria-checkbox:hover {
-  background-color: #404040;
-}
-
-.dark .checkbox-text {
-  color: #fff;
-}
-
 /* Modal de Producto */
 .modal-producto {
   background: white;
@@ -1314,6 +1302,7 @@ export default {
   padding-right: 40px;
 }
 
+
 /* Footer */
 .modal-footer {
   padding: 20px 24px;
@@ -1412,8 +1401,7 @@ export default {
   }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   .modal-categorias {
     width: 95%;
     margin: 20px;
@@ -1432,10 +1420,7 @@ export default {
   .search-input {
     padding: 10px 12px;
   }
-}
 
-/* Media Queries */
-@media screen and (max-width: 768px) {
   .contenedor-principal {
     flex-direction: column;
   }
@@ -1478,10 +1463,23 @@ export default {
   .modal-content-categoria {
     width: 90%;
   }
+
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .pagination-container {
+    justify-content: center;
+  }
+
+  .pagination-info {
+    margin-bottom: 1rem;
+  }
 }
 
 @media screen and (max-width: 480px) {
-
   .modal-content,
   .modal-content-stock {
     width: 95%;
@@ -1526,7 +1524,7 @@ export default {
    Modo Oscuro
 ======================================================= */
 /* Contenedor principal */
-.dark .categorias-wrapper {
+.dark .productos-wrapper {
   background-color: #1e1e1e;
   color: #fff;
 }
@@ -1602,6 +1600,31 @@ export default {
 
 .dark .table-container::-webkit-scrollbar-thumb:hover {
   background: #a38655;
+}
+
+/* Paginación en modo oscuro */
+.dark .pagination-wrapper {
+  background-color: #2d2d2d;
+  border-color: #404040;
+}
+
+.dark .pagination-info {
+  color: #aaa;
+}
+
+.dark .pagination-button {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .pagination-button:hover:not(:disabled) {
+  background-color: #444;
+}
+
+.dark .pagination-button:disabled {
+  background-color: #2d2d2d;
+  color: #666;
 }
 
 /* Botones en modo oscuro (manteniendo los colores originales) */

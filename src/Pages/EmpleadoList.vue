@@ -3,8 +3,9 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-        Usuario</button>
+      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">
+        Agregar Usuario
+      </button>
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
@@ -15,15 +16,25 @@
         <span>
           <select class="custom-select" v-model="searchSucursal">
             <option value="default" selected>Todas</option>
-            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
-              sucursal.nombre_administrativo }}</option>
+            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">
+              {{ sucursal.nombre_administrativo }}</option>
           </select>
         </span>
       </div>
-
     </div>
+
     <div class="table-container">
-      <table class="table">
+      <!-- Indicador de carga -->
+      <div v-if="isLoading" class="loading-indicator">
+        Cargando empleados...
+      </div>
+
+      <!-- Mensaje si no hay datos -->
+      <div v-else-if="paginatedEmpleados.length === 0" class="no-data">
+        No se encontraron empleados para mostrar.
+      </div>
+
+      <table v-else class="table">
         <thead>
           <tr>
             <th>#</th>
@@ -33,30 +44,45 @@
             <th>Telefono</th>
             <th>Email</th>
             <th>Rol</th>
-
-
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(empleado, index) in paginatedEmpleados" :key="index">
-            <td>{{ index + 1 }}</td>
+            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
             <td>{{ empleado.nombre }}</td>
             <td>{{ empleado.apellido }}</td>
             <td>{{ empleado.nombre_usuario }}</td>
             <td>{{ empleado.telefono }}</td>
             <td>{{ empleado.correo }}</td>
             <td>{{ getRol(empleado.id_rol) }}</td>
-
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(empleado)"><i
-                  class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteUsuariol(empleado)"><b><i
-                    class="bi bi-x-lg"></i></b></button>
+              <button id="btnEditar" class="btn btn-warning" @click="editEmpleado(empleado)">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteUsuariol(empleado)">
+                <i class="bi bi-x-lg"></i>
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
+
+      <!-- Paginación -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredEmpleados.length) }} de {{ filteredEmpleados.length }} registros
+        </div>
+        <div class="pagination-container">
+          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+            Anterior
+          </button>
+
+          <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="modal" v-if="showConfirmModal">
@@ -101,7 +127,6 @@
               <label>Correo:</label>
               <input v-model="usuarioForm.correo" type="text" required />
             </div>
-
 
             <div class="form-group">
               <label for="rol">Selecciona rol:</label>
@@ -149,13 +174,13 @@
 
             <div class="form-group">
               <label for="sucursal">Selecciona sucursal:</label>
-              <select class="form-select" id="sucursal" name="sucursal" value="default" v-model="usuarioForm.sucursal" required>
+              <select class="form-select" id="sucursal" name="sucursal" value="default" v-model="usuarioForm.sucursal"
+                required>
                 <option value="" disabled selected>Selecciona una sucursal</option>
-                <option v-for="(sucursal, index) in sucursales" :key="index" :value="sucursal.id_sucursal">{{
-                  sucursal.nombre_administrativo }}</option>
+                <option v-for="(sucursal, index) in sucursales" :key="index" :value="sucursal.id_sucursal">
+                  {{ sucursal.nombre_administrativo }}</option>
               </select>
             </div>
-
           </div>
         </div>
         <div>
@@ -169,9 +194,7 @@
         </div>
       </div>
     </div>
-
   </div>
-
 </template>
 
 <script>
@@ -186,6 +209,7 @@ import { COUNTRY_CODES } from "../../services/countrySelector.js";
 import { validacionesUsuario } from '../../services/validarCampos.js';
 
 export default {
+  name: 'AdministrarEmpleados',
   components: {
     btnGuardarModal,
     btnCerrarModal,
@@ -209,7 +233,8 @@ export default {
       countryData: COUNTRY_CODES,
       phoneLength: 8,
       editIndex: null,
-      itemsPerPage: "",
+      currentPage: 1,
+      pageSize: 10,
       sucursales: [],
       esCeo: false,
       roles: [],
@@ -230,22 +255,6 @@ export default {
     };
   },
 
-  async mounted() {
-    document.title = "Usuarios";
-    this.changeFavicon('/img/spiderman.ico');
-    await this.loadEmpleados();
-
-    try {
-      this.id_usuario = await solicitudes.solicitarUsuarioToken();
-      this.esCeo = await esCeo(this.id_usuario);
-      this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
-      this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
-      this.roles = await solicitudes.fetchRegistros('/roles');
-    } catch (error) {
-      notis('error', error.message);
-    }
-  },
-
   computed: {
     filteredEmpleados() {
       return this.empleados
@@ -258,12 +267,14 @@ export default {
     },
 
     paginatedEmpleados() {
-      if (this.itemsPerPage === "" || this.itemsPerPage === null) {
-        return this.filteredEmpleados;
-      } else {
-        return this.filteredEmpleados.slice(0, parseInt(this.itemsPerPage));
-      }
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredEmpleados.slice(startIndex, endIndex);
     },
+
+    totalPages() {
+      return Math.ceil(this.filteredEmpleados.length / this.pageSize);
+    }
   },
 
   methods: {
@@ -364,6 +375,18 @@ export default {
       }
     },
 
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+
     async deleteUsuariol(empleado) {
       if (!this.showConfirmModal) {
         this.empleadoToDelete = empleado;
@@ -429,6 +452,31 @@ export default {
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
     },
+  },
+
+  watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    searchSucursal() {
+      this.currentPage = 1;
+    }
+  },
+
+  async mounted() {
+    document.title = "Usuarios";
+    this.changeFavicon('/img/spiderman.ico');
+    await this.loadEmpleados();
+
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      this.esCeo = await esCeo(this.id_usuario);
+      this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
+      this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
+      this.roles = await solicitudes.fetchRegistros('/roles');
+    } catch (error) {
+      notis('error', error.message);
+    }
   }
 };
 </script>
@@ -548,17 +596,6 @@ export default {
   justify-content: center;
 }
 
-.stock-group {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-}
-
-.stock-group label {
-  margin: 5px;
-}
-
 .form-select {
   width: 100%;
   border: none;
@@ -598,61 +635,6 @@ export default {
   background-color: #dc3545;
   color: white;
 }
-
-#registrar-usuario {
-  background-color: rgb(253, 253, 56);
-  margin-left: 30px;
-  height: 50px;
-}
-
-#registrar-usuario:hover {
-  background-color: rgb(228, 228, 48);
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-.form-categoria {
-  display: flex;
-  flex-direction: column;
-}
-
-#proveedor-contenedor {
-  display: flex;
-  align-items: center;
-}
-
-.modal-content-categoria {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  width: 30%;
-  height: 72%;
-  min-height: 500px;
-  min-width: 300px;
-}
-
-.form-form-categoria {
-  padding: 20px;
-  padding-top: 0;
-  height: 240px;
-  overflow-y: scroll;
-}
-
-.categoria-botones {
-  width: 100%;
-  margin-top: 20px;
-  display: flex;
-  justify-content: space-evenly;
-}
-
-.categoria-encabezado {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
 
 .opciones {
   display: flex;
@@ -700,7 +682,6 @@ export default {
   transition: all 0.3s ease;
 }
 
-/* ALTERA LOS BOTONES DE LOS MODALES */
 #btnCerrarM {
   margin-left: 28rem;
 }
@@ -732,22 +713,6 @@ export default {
   transition: all 0.3s ease;
 }
 
-#campana {
-  margin-right: 10px;
-  font-size: 18px;
-  color: #a38655;
-}
-
-.container-top {
-  width: 100%;
-  text-align: right;
-}
-
-.rol {
-  color: #969696;
-  font-size: 14px;
-}
-
 .empleados-wrapper {
   padding: 16px;
   width: 100%;
@@ -756,13 +721,11 @@ export default {
 
 .table-container {
   width: 100%;
-  border-radius: 10px;
-  border: 1px solid #ddd;
+  border-radius: 0;
+  border: 1px solid #e2e8f0;
   margin-top: 16px;
-  height: auto;
-  max-height: 480px;
-  overflow-x: auto;
-  overflow-y: auto;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .table {
@@ -795,35 +758,75 @@ export default {
   border-top: 1px solid #ddd;
 }
 
-.table thead th:first-child {
-  border-top-left-radius: 10px;
+/* Estilos para la paginación */
+.loading-indicator,
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
 }
 
-.table thead th:last-child {
-  border-top-right-radius: 10px;
-}
-
-.table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: 10px;
-}
-
-.table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 10px;
-}
-
-#AddEmpleadoModal {
-  padding: 0.75rem 1.5rem;
-  border: none;
+.no-data {
+  background-color: #f8f9fa;
   border-radius: 4px;
-  font-size: 1rem;
-  color: #fff;
-  background-color: #007bff;
-  cursor: pointer;
-  margin-right: 1rem;
 }
 
-button {
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  margin-top: auto;
+}
+
+.pagination-info {
+  color: #6c757d;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background-color: white;
   cursor: pointer;
+  border-radius: 4px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Personalización del scroll */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
 }
 
 .custom-select {
@@ -837,39 +840,27 @@ button {
   min-width: 400px;
 }
 
-.custom-select:focus {
-  outline: none;
-  border-color: #a38655;
+/* Estilos del teléfono */
+.phone-input-container {
+  display: flex;
+  gap: 8px;
 }
 
-.custom-select option {
-  font-size: 16px;
-}
-
-.password-wrapper {
-  position: relative;
-}
-
-.password-wrapper input {
-  width: 95%;
-  height: 25%;
-  padding: 0.5rem;
+.phone-input-container select {
+  width: 110px;
+  margin: 0;
+  height: 35px;
+  padding: 0 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  justify-content: center;
 }
 
-.password-wrapper .toggle-password {
-  position: absolute;
-  right: 1.3rem;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  color: #aaa;
-}
-
-.password-wrapper .toggle-password:hover {
-  color: #000;
+.phone-input-container input {
+  flex: 1;
+  height: 35px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 /* Media Queries */
@@ -911,23 +902,18 @@ button {
     padding: 8px;
   }
 
-  .table-container {
-    margin-top: 24px;
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 1rem;
   }
 
-  .modal-content-categoria {
-    width: 90%;
-    min-width: auto;
-  }
-
-  #registrar-usuario {
-    margin-left: 0;
-    width: 100%;
+  .pagination-container {
+    justify-content: center;
+    flex-wrap: wrap;
   }
 }
 
 @media screen and (max-width: 480px) {
-
   .modal-content {
     width: 95%;
     padding: 15px;
@@ -947,97 +933,14 @@ button {
   .password-wrapper input {
     width: 100%;
   }
-
-  .h2-modal-content {
-    font-size: 20px;
-  }
-
-  .busqueda {
-    min-width: auto;
-  }
-
-  .form-form-categoria {
-    padding: 10px;
-    height: 200px;
-  }
-
-  .categoria-botones {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  #AddUsuarioModal,
-  #BtnCerrar {
-    width: 100%;
-  }
-
-  .password-wrapper .toggle-password {
-    right: 0.5rem;
-  }
 }
 
-/* Estilo para scroll personalizado */
-.table-container::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: #c09d62;
-  border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: #a38655;
-}
-
-.phone-input-container {
-  display: flex;
-  gap: 8px;
-}
-
-.phone-input-container select {
-  width: 110px;
-  margin: 0;
-  /* Importante: sin márgenes */
-  height: 35px;
-  padding: 0 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.phone-input-container input {
-  flex: 1;
-  height: 35px;
-  padding: 0 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-
-/* Estilos para modo oscuro */
-.dark .country-code-select,
-.dark .phone-input {
-  background-color: #383838;
-  border-color: #404040;
-  color: #fff;
-}
-
-/* =======================================================
-   Modo Oscuro
-======================================================= */
-/* Contenedor principal */
-.dark .categorias-wrapper {
+/* Modo Oscuro */
+.dark .empleados-wrapper {
   background-color: #1e1e1e;
   color: #fff;
 }
 
-/* Inputs y búsqueda en modo oscuro */
 .dark .busqueda {
   background-color: #2d2d2d;
   border-color: #404040;
@@ -1050,12 +953,6 @@ button {
   color: #fff;
 }
 
-.dark .custom-select option {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
-/* Tabla en modo oscuro */
 .dark .table-container {
   border-color: #404040;
   background-color: #2d2d2d;
@@ -1076,28 +973,42 @@ button {
   border-color: #404040;
 }
 
-.dark .table tr:hover {
-  background-color: #383838;
-}
-
-/* Modal en modo oscuro */
 .dark .modal-content {
   background-color: #2d2d2d;
   color: #fff;
 }
 
-.dark .modal-content input,
-.dark .modal-content textarea {
+.dark .form-group input,
+.dark .form-group select {
   background-color: #383838;
   border-color: #404040;
   color: #fff;
 }
 
-.dark .form-group label {
+.dark .pagination-wrapper {
+  border-color: #404040;
+}
+
+.dark .pagination-info {
+  color: #aaa;
+}
+
+.dark .pagination-button {
+  background-color: #2d2d2d;
+  border-color: #404040;
   color: #fff;
 }
 
-/* Scroll personalizado en modo oscuro */
+.dark .pagination-button:hover:not(:disabled) {
+  background-color: #383838;
+}
+
+.dark .loading-indicator,
+.dark .no-data {
+  color: #aaa;
+  background-color: #2d2d2d;
+}
+
 .dark .table-container::-webkit-scrollbar-track {
   background: #2d2d2d;
 }
@@ -1108,53 +1019,5 @@ button {
 
 .dark .table-container::-webkit-scrollbar-thumb:hover {
   background: #a38655;
-}
-
-/* Botones en modo oscuro (manteniendo los colores originales) */
-.dark .button-promocion {
-  background-color: #4cafaf;
-  color: white;
-}
-
-.dark .button-unidad-medida {
-  background-color: #4caf4c;
-  color: #000;
-}
-
-.dark #btnAdd {
-  background-color: #c09d62;
-  color: black;
-}
-
-.dark #btnAdd:hover {
-  background-color: #a38655;
-}
-
-.dark #btnEditar {
-  background-color: #ffc107;
-  color: black;
-}
-
-.dark #btnEditar:hover {
-  background-color: #e8af06;
-}
-
-.dark #btnEliminar {
-  background-color: #dc3545;
-  color: black;
-}
-
-.dark #btnEliminar:hover {
-  background-color: #b72433;
-}
-
-.dark .modalShowConfirm-Si {
-  background-color: #dc3545;
-  color: white;
-}
-
-.dark .modalShowConfirm-no {
-  background-color: #6c757d;
-  color: white;
 }
 </style>

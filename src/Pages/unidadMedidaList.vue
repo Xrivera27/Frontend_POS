@@ -1,36 +1,33 @@
 <template>
-
   <div class="categorias-wrapper">
     <PageHeader :titulo="titulo" />
     <div class="opciones">
-      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal"
-        style="width: 200px; white-space: nowrap;">Agregar
-        Unidad</button>
+      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal">
+        Agregar Unidad
+      </button>
 
       <RouterLink to="categorias">
         <button class="button-categorias">Categorias</button>
       </RouterLink>
 
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select> registros
-        </span>
-      </div>
-
       <!-- Barra de búsqueda -->
       <div class="search-bar">
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar categoría..." />
+        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar unidad..." />
       </div>
     </div>
+
     <div class="table-container">
-      <table class="table">
+      <!-- Indicador de carga -->
+      <div v-if="isLoading" class="loading-indicator">
+        Cargando unidades...
+      </div>
+
+      <!-- Mensaje si no hay datos -->
+      <div v-else-if="paginatedUnidades.length === 0" class="no-data">
+        No se encontraron unidades para mostrar.
+      </div>
+
+      <table v-else class="table">
         <thead>
           <tr>
             <th>#</th>
@@ -41,24 +38,43 @@
         </thead>
         <tbody>
           <tr v-for="(unidad, index) in paginatedUnidades" :key="index">
-            <td>{{ index + 1 }}</td>
+            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
             <td>{{ unidad.medida }}</td>
-            <td class="totalProductos">{{ unidad.totalProductos }}
-              <button class="btn mostrar-producto" @click="mostrarModalProductos(unidad.id_medida)">Mostrar
-                Prod.</button>
+            <td class="totalProductos">
+              {{ unidad.totalProductos }}
+              <button class="btn mostrar-producto" @click="mostrarModalProductos(unidad.id_medida)">
+                Mostrar Prod.
+              </button>
             </td>
             <td v-if="esCeo">
-              <button id="btnEditar" class="btn btn-warning" @click="editUnidad(unidad)"><i
-                  class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteUnidad(unidad)"><b><i
-                    class="bi bi-x-lg"></i></b></button>
+              <button id="btnEditar" class="btn btn-warning" @click="editUnidad(unidad)">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteUnidad(unidad)">
+                <b><i class="bi bi-x-lg"></i></b>
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
+
+      <!-- Paginación -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredUnidades.length) }} de {{ filteredUnidades.length }} registros
+        </div>
+        <div class="pagination-container">
+          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+            Anterior
+          </button>
+          <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Modal para agregar o editar categorías -->
+    <!-- Modal para agregar o editar unidades -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
         <h2 class="h2-modal-content">{{ isEditing ? 'Editar Unidad' : 'Agregar Unidad' }}</h2>
@@ -73,12 +89,8 @@
           </btnGuardarModal>
           <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
-
-
-
       </div>
     </div>
-
 
     <!-- Modal para mostrar productos con esa id medida -->
     <div v-if="isModalProductosOpen" class="modal">
@@ -104,16 +116,12 @@
         <div class="contenedor-botones">
           <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
-
       </div>
     </div>
-
   </div>
 </template>
 
 <script>
-
-//componentes
 import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
@@ -121,82 +129,115 @@ import { notis } from '../../services/notificaciones.js';
 import { useToast } from "vue-toastification";
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import { validacionesComunes } from '../../services/validarCampos.js';
-// importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
-import { getUnidadMedidaEmpresas, postUnidad, patchUnidad, getProductosUnidad, eliminarUnidad } from "../../services/unidadMedidaSolicitud.js";
-
+import { 
+  getUnidadMedidaEmpresas, 
+  postUnidad, 
+  patchUnidad, 
+  getProductosUnidad, 
+  eliminarUnidad 
+} from "../../services/unidadMedidaSolicitud.js";
 
 export default {
-  components:
-  {
+  name: 'UnidadesInventario',
+  components: {
     PageHeader,
     btnGuardarModal,
     btnCerrarModal,
   },
+  
   data() {
     return {
       titulo: 'Unidades de Inventario y Venta',
-      searchQuery: '', // Almacena el texto de búsqueda
-      itemsPerPage: "",
-      id_usuario: '', // Valor por defecto para mostrar todos los registros
+      searchQuery: '',
+      isLoading: false,
+      currentPage: 1,
+      pageSize: 10,
+      id_usuario: '',
       unidadesMedida: [],
       mostrarProductos: [],
       isModalOpen: false,
       esCeo: false,
-      isModalProductosOpen: false, // Estado para controlar si el modal está abierto o cerrado
-      isEditing: false, // Estado para verificar si estamos editando una categoría
-      unidadForm: { "medida": '' }, // Objeto para el formulario de categorías
+      isModalProductosOpen: false,
+      isEditing: false,
+      unidadForm: { 
+        medida: '' 
+      },
+      editIndex: null
     };
+  },
+
+  computed: {
+    filteredUnidades() {
+      return this.unidadesMedida.filter(unidad =>
+        unidad.medida.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    },
+
+    paginatedUnidades() {
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredUnidades.slice(startIndex, endIndex);
+    },
+
+    totalPages() {
+      return Math.ceil(this.filteredUnidades.length / this.pageSize);
+    },
+
+    mostrarProductosModal() {
+      return this.mostrarProductos;
+    }
+  },
+
+  watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    }
   },
 
   async mounted() {
     document.title = "Presentaciones";
     this.changeFavicon('/img/spiderman.ico');
     try {
+      this.isLoading = true;
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.esCeo = await esCeo(this.id_usuario);
-
-
       this.unidadesMedida = await getUnidadMedidaEmpresas(this.id_usuario);
-
     } catch (error) {
-      console.log(error); //modal error pendiente
+      console.error(error);
+      notis('error', 'Error al cargar los datos');
+    } finally {
+      this.isLoading = false;
     }
   },
-  computed: {
-    filteredUnidades() {
-      // Filtra las categorías basados en el texto de búsqueda
-      return this.unidadesMedida.filter(unidad =>
-        unidad.medida.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-    },
-    paginatedUnidades() {
-      // Si itemsPerPage es 0, mostramos todos los registros, de lo contrario aplicamos la paginación
-      return this.itemsPerPage === "" || this.itemsPerPage === null
-        ? this.filteredUnidades
-        : this.filteredUnidades.slice(0, this.itemsPerPage);
-    },
-    mostrarProductosModal() {
-      return this.mostrarProductos;
-    },
-  },
-  methods: {
 
+  methods: {
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
 
     openModal() {
-      // Resetea el formulario y abre el modal
       this.isModalOpen = true;
       this.isEditing = false;
-      this.unidadForm = { medida: '' }; // Resetea el formulario
+      this.unidadForm = { medida: '' };
     },
+
     closeModal() {
-      // Cierra el modal
       this.isModalOpen = false;
       this.isModalProductosOpen = false;
+      this.isEditing = false;
+      this.editIndex = null;
     },
-    editUnidad(unidad) {
-      // Implementa la lógica para editar una categoría
 
+    editUnidad(unidad) {
       this.isModalOpen = true;
       this.isEditing = true;
       this.unidadForm = { ...unidad };
@@ -206,10 +247,10 @@ export default {
     async mostrarModalProductos(id_medida) {
       try {
         this.mostrarProductos = await getProductosUnidad(id_medida);
-        console.log(this.mostrarProductos);
         this.isModalProductosOpen = true;
       } catch (error) {
-        console.log(error);
+        console.error(error);
+        notis('error', 'Error al cargar los productos');
       }
     },
 
@@ -222,50 +263,45 @@ export default {
 
       try {
         const response = await eliminarUnidad(unidad.id_medida);
-
-        if (response.success === false) {
-          throw response.message;
-        }
-
         if (response === true) {
           this.unidadesMedida = this.unidadesMedida.filter(item => item.id_medida !== unidad.id_medida);
+          notis('success', 'Unidad eliminada correctamente');
+        } else {
+          throw new Error('Error al eliminar la unidad');
         }
-
       } catch (error) {
-        notis('error', error);
+        notis('error', error.message);
       }
-
     },
 
     async guardarUnidad() {
-      if (!validacionesComunes.validarEmpty(this.unidadForm) || !validacionesComunes.validarNombre(this.unidadForm.medida)) {
+      if (!validacionesComunes.validarEmpty(this.unidadForm) || 
+          !validacionesComunes.validarNombre(this.unidadForm.medida)) {
         return;
       }
 
       this.unidadForm.id_usuario = this.id_usuario;
-      if (this.isEditing) {
-        try {
-
-          const nuevoRegistro = await patchUnidad(this.unidadForm, this.unidadesMedida[this.editIndex].id_medida);
-          if (nuevoRegistro == true) {
+      
+      try {
+        if (this.isEditing) {
+          const response = await patchUnidad(
+            this.unidadForm, 
+            this.unidadesMedida[this.editIndex].id_medida
+          );
+          
+          if (response === true) {
             notis("success", "Procesando guardado...");
             Object.assign(this.unidadesMedida[this.editIndex], this.unidadForm);
-
           }
-        } catch (error) {
-          notis('error', error.message);
-        }
-      } else {
-
-        try {
+        } else {
           const nuevoRegistro = await postUnidad(this.unidadForm);
           this.unidadesMedida.push(nuevoRegistro[0]);
-        } catch (error) {
-          notis('error', error.message);
+          notis('success', 'Unidad agregada correctamente');
         }
-
+        this.closeModal();
+      } catch (error) {
+        notis('error', error.message);
       }
-      this.closeModal();
     },
 
     changeFavicon(iconPath) {
@@ -274,8 +310,7 @@ export default {
       link.rel = 'icon';
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
-    },
-
+    }
   }
 };
 </script>
@@ -291,7 +326,7 @@ export default {
 .categorias-wrapper {
   padding: 16px;
   width: 100%;
-  overflow-x: hidden;
+  max-height: calc(100vh - 100px);
 }
 
 .opciones {
@@ -301,6 +336,56 @@ export default {
   flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.loading-indicator,
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.no-data {
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  margin-top: auto;
+}
+
+.pagination-info {
+  color: #6c757d;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .button-categorias {
@@ -324,6 +409,7 @@ export default {
 
 .mostrar-producto {
   background-color: #2b8cf3;
+  color: white;
 }
 
 .btn-danger {
@@ -338,7 +424,7 @@ export default {
 
 #btnCerrarM {
   border-radius: 8px;
-  margin-left: 8rem
+  margin-left: 8rem;
 }
 
 #btnAdd {
@@ -386,137 +472,6 @@ export default {
   transition: all 0.3s ease;
 }
 
-#AddUnidadModal,
-#BtnCerrar {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-right: 1rem;
-}
-
-#AddUnidadModal {
-  background-color: #007bff;
-  color: #fff;
-}
-
-#BtnCerrar {
-  background-color: rgb(93, 100, 104);
-  color: #fff;
-}
-
-.export-button {
-  margin: 0;
-}
-
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 1rem;
-}
-
-.modal-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  width: 90%;
-  max-width: 400px;
-  min-height: 250px;
-  margin: 20px;
-}
-
-/* Formulario */
-.form-group {
-  margin-bottom: 16px;
-  width: 100%;
-}
-
-.form-group label {
-  margin-bottom: 8px;
-  display: block;
-}
-
-.form-group input,
-.descriptionForm {
-  width: 100%;
-  height: 35px;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.descriptionForm {
-  resize: vertical;
-  min-height: 100px;
-}
-
-/* Estilos para textarea */
-textarea {
-  width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  resize: vertical;
-  min-height: 100px;
-}
-
-textarea:focus {
-  outline: none;
-  border-color: #a38655;
-  box-shadow: 0 0 5px rgba(163, 134, 85, 0.5);
-}
-
-/* Estilos generales */
-.container-top {
-  width: 100%;
-  text-align: right;
-}
-
-.rol {
-  color: #969696;
-  font-size: 14px;
-}
-
-select,
-.custom-select {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  height: 35px;
-  font-size: 16px;
-  margin: 10px 5px;
-}
-
-.custom-select {
-  padding: 5px;
-  background-color: #fff;
-  cursor: pointer;
-  width: 80px;
-}
-
-.custom-select:focus {
-  outline: none;
-  border-color: #a38655;
-}
-
-.custom-select option {
-  font-size: 16px;
-}
-
-/* Barra de búsqueda */
 .busqueda {
   padding: 10px;
   font-size: 14px;
@@ -526,22 +481,14 @@ select,
   max-width: 300px;
 }
 
-/* Tabla */
 .table-container {
   width: 100%;
-  border-radius: 10px;
-  border: 1px solid #ddd;
+  border-radius: 0;
+  border: 1px solid #e2e8f0;
   margin-top: 16px;
-  height: auto;
-  max-height: 480px;
-  overflow-x: auto;
-  overflow-y: auto;
-}
-
-.table-modal-container {
-  max-height: 400px;
-  overflow-y: auto;
-  width: 100%;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+ 
 }
 
 .table {
@@ -549,13 +496,26 @@ select,
   min-width: 800px;
   border-collapse: separate;
   border-spacing: 0;
+  background-color: white;
 }
 
 .table thead {
   position: sticky;
   top: 0;
   z-index: 1;
+  background-color: #e7e4e4;
+}
+
+.table thead tr {
+  background-color: #e7e4e4;
+}
+
+.table tbody tr {
   background-color: white;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
 }
 
 .table th,
@@ -565,11 +525,10 @@ select,
 }
 
 .table thead th {
+  text-align: center;
   border-bottom: 1px solid #ddd;
-}
-
-.table tbody td {
-  border-top: 1px solid #ddd;
+  position: relative;
+  background: none;
 }
 
 .table thead th:first-child {
@@ -588,27 +547,75 @@ select,
   border-bottom-right-radius: 10px;
 }
 
-/* Custom scrollbar */
-.table-container::-webkit-scrollbar,
-.table-modal-container::-webkit-scrollbar {
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+  width: 90%;
+  max-width: 400px;
+  min-height: 250px;
+  margin: 20px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  display: block;
+}
+
+.form-group input {
+  width: 100%;
+  height: 35px;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Modal de productos */
+.table-modal-container {
+  max-height: 400px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+/* Scroll personalizado */
+::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.table-container::-webkit-scrollbar-track,
-.table-modal-container::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 4px;
 }
 
-.table-container::-webkit-scrollbar-thumb,
-.table-modal-container::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: #c09d62;
   border-radius: 4px;
 }
 
-.table-container::-webkit-scrollbar-thumb:hover,
-.table-modal-container::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
   background: #a38655;
 }
 
@@ -625,11 +632,6 @@ select,
     margin: 8px 0;
   }
 
-  .custom-select {
-    width: 100%;
-    max-width: none;
-  }
-
   #btnEditar,
   #btnEliminar {
     width: 40px;
@@ -638,14 +640,19 @@ select,
     padding: 8px;
   }
 
-  .table-container {
-    margin-top: 24px;
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 1rem;
   }
 
-  #AddUnidadModal,
-  #BtnCerrar {
+  .pagination-container {
+    justify-content: center;
     width: 100%;
-    margin: 8px 0;
+  }
+
+  .pagination-button {
+    flex: 1;
+    max-width: 120px;
   }
 
   .button-categorias {
@@ -654,7 +661,6 @@ select,
 }
 
 @media screen and (max-width: 480px) {
-
   .modal-content {
     width: 95%;
     padding: 15px;
@@ -670,54 +676,22 @@ select,
   .form-group {
     margin-bottom: 12px;
   }
-
-  #btnAdd {
-    font-size: 14px;
-    height: 35px;
-  }
-
-  .rol {
-    text-align: center;
-    margin-top: 8px;
-  }
-
-  textarea,
-  .descriptionForm {
-    min-height: 80px;
-  }
 }
 
-/* =======================================================
-   Modo Oscuro
-======================================================= */
-/* Contenedor principal */
+/* Modo Oscuro */
 .dark .categorias-wrapper {
   background-color: #1e1e1e;
   color: #fff;
 }
 
-/* Inputs y búsqueda en modo oscuro */
 .dark .busqueda {
   background-color: #2d2d2d;
   border-color: #404040;
   color: #fff;
 }
 
-.dark .custom-select {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .custom-select option {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
-/* Tabla en modo oscuro */
 .dark .table-container {
   border-color: #404040;
-  background-color: #2d2d2d;
 }
 
 .dark .table thead {
@@ -735,49 +709,39 @@ select,
   border-color: #404040;
 }
 
-.dark .table tr:hover {
-  background-color: #383838;
-}
-
-/* Modal en modo oscuro */
 .dark .modal-content {
   background-color: #2d2d2d;
   color: #fff;
 }
 
-.dark .modal-content input,
-.dark .modal-content textarea {
+.dark .form-group input {
   background-color: #383838;
   border-color: #404040;
   color: #fff;
 }
 
-.dark .form-group label {
+.dark .pagination-wrapper {
+  border-color: #404040;
+}
+
+.dark .pagination-info {
+  color: #aaa;
+}
+
+.dark .pagination-button {
+  background-color: #2d2d2d;
+  border-color: #404040;
   color: #fff;
 }
 
-/* Scroll personalizado en modo oscuro */
-.dark .table-container::-webkit-scrollbar-track {
-  background: #2d2d2d;
+.dark .pagination-button:hover:not(:disabled) {
+  background-color: #383838;
 }
 
-.dark .table-container::-webkit-scrollbar-thumb {
-  background: #c09d62;
-}
-
-.dark .table-container::-webkit-scrollbar-thumb:hover {
-  background: #a38655;
-}
-
-/* Botones en modo oscuro (manteniendo los colores originales) */
-.dark .button-promocion {
-  background-color: #4cafaf;
-  color: white;
-}
-
-.dark .button-unidad-medida {
-  background-color: #4caf4c;
-  color: #000;
+.dark .loading-indicator,
+.dark .no-data {
+  color: #aaa;
+  background-color: #2d2d2d;
 }
 
 .dark #btnAdd {
@@ -785,35 +749,13 @@ select,
   color: black;
 }
 
-.dark #btnAdd:hover {
-  background-color: #a38655;
-}
-
 .dark #btnEditar {
   background-color: #ffc107;
   color: black;
 }
 
-.dark #btnEditar:hover {
-  background-color: #e8af06;
-}
-
 .dark #btnEliminar {
   background-color: #dc3545;
   color: black;
-}
-
-.dark #btnEliminar:hover {
-  background-color: #b72433;
-}
-
-.dark .modalShowConfirm-Si {
-  background-color: #dc3545;
-  color: white;
-}
-
-.dark .modalShowConfirm-no {
-  background-color: #6c757d;
-  color: white;
 }
 </style>
