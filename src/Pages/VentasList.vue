@@ -703,24 +703,30 @@ export default {
             return;
           }
 
-          if (!this.recuperandoVenta) {
-           const result = await agregarProductoCodigo(nuevaCantidad, codigoValidar, this.id_usuario);
-           console.log(result);
-           if(result.error){
-            
-            throw result;
-           }
-          }
+          
   
           const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
           if (existingProduct) {
             existingProduct.cantidad += nuevaCantidad;
 
-  
           } else {
             newProduct.cantidad = nuevaCantidad;
             this.productosLista.push({ ...newProduct });
-  
+          }
+
+          if (!this.recuperandoVenta) {
+           const result = await agregarProductoCodigo(nuevaCantidad, codigoValidar, this.id_usuario);
+           console.log(result);
+           if(result.error){
+
+            const index = this.productosLista.findIndex(i => i.codigo_producto === codigoValidar);
+            this.productosLista[index].cantidad = this.productosLista[index].cantidad - nuevaCantidad;
+            if(this.productosLista[index].cantidad < 1){
+              this.productosLista.splice(index, 1);
+            }
+            result.message = 'No hay stock disponible en el inventario.';
+            throw result;
+           }
           }
           
   
