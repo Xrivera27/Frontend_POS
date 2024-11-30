@@ -241,22 +241,12 @@ export default {
 </script>
 
 <style scoped>
-/* =======================================================
-   Importación de Fuentes
-======================================================= */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
-/* =======================================================
-   Estilos Base
-======================================================= */
+/* Estilos Base */
 * {
     font-family: 'Montserrat', sans-serif;
-}
-
-a.nav-link {
-    display: flex;
-    justify-content: flex-start;
-    /* Alinea el contenido a la izquierda */
+    box-sizing: border-box;
 }
 
 .nav {
@@ -268,9 +258,7 @@ ul.nav {
     padding: 0 15px;
 }
 
-/* =======================================================
-   Estilos del Sidebar
-======================================================= */
+/* Sidebar */
 .sidebar {
     display: flex;
     flex-direction: column;
@@ -289,7 +277,7 @@ ul.nav {
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Para iconos cuando el sidebar está colapsado */
+/* Sidebar no expandido */
 .sidebar:not(.expanded) .nav-link {
     justify-content: center;
     padding: 1vh;
@@ -316,109 +304,25 @@ ul.nav {
     width: 100%;
 }
 
-/* Ajuste para el modo oscuro */
-.sidebar.dark:not(.expanded) .dropdown-menu {
-    background-color: #333;
-    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Ocultar la flecha del dropdown cuando está colapsado */
 .sidebar:not(.expanded) .dropdown-arrow {
     transform: rotate(-90deg);
 }
 
-/* Ajustar el ancho del dropdown cuando está expandido */
+/* Sidebar expandido */
+.sidebar.expanded {
+    width: 200px;
+}
+
 .sidebar.expanded .nav-item.dropdown {
     width: 88%;
 }
 
-/* Para mantener el estilo cuando está expandido */
 .sidebar.expanded .nav-link {
     justify-content: flex-start;
     padding: 1vh 1.5vh;
 }
 
-/* Específico para dropdowns */
-.nav-item.dropdown .nav-link {
-    justify-content: space-between;
-}
-
-/* Animaciones mejoradas para el sidebar */
-.sidebar.expanded {
-    width: 200px;
-    transform: translateX(0);
-}
-
-.sidebar-content {
-    height: calc(100% - 65px);
-    overflow-y: auto;
-    overflow-x: hidden;
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 10px;
-}
-
-/* Overlay para móviles */
-.sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.sidebar-overlay.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-.sidebar.expanded {
-    width: 200px;
-}
-
-.sidebar.expanded .toggle-btn {
-    padding: 0;
-}
-
-/* =======================================================
-   Estilos en Modo Oscuro para el Sidebar
-======================================================= */
-.sidebar.dark {
-    background-color: #333;
-}
-
-.sidebar.dark a.nav-link {
-    color: #c09d62;
-    /* Color de los íconos y texto en modo oscuro */
-}
-
-.sidebar.dark .nav-link.active {
-    color: #79552f;
-    /* Color del texto y los íconos en estado activo en modo oscuro */
-}
-
-.sidebar.dark .toggle-btn,
-.sidebar.dark .toggle-btn i {
-    color: #c09d62;
-    /* Mantiene el color del ícono en modo oscuro */
-}
-
-.sidebar.dark .dropdown-menu {
-    background-color: rgba(192, 157, 98, 0.05);
-}
-
-.sidebar.dark .dropdown-item:hover {
-    background-color: rgba(192, 157, 98, 0.15);
-}
-
-/* =======================================================
-   Estilos de los Elementos de Navegación
-======================================================= */
+/* Navegación */
 .nav-item {
     transform: translateX(-10px);
     opacity: 0;
@@ -429,53 +333,7 @@ ul.nav {
 .nav-item.dropdown {
     width: 88%;
     padding: 4px 0;
-    /* Mismo padding que los otros elementos */
-}
-
-.nav-item.dropdown .nav-link {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-@keyframes slideIn {
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-.nav-item:nth-child(1) {
-    animation-delay: 0.1s;
-}
-
-.nav-item:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.nav-item:nth-child(3) {
-    animation-delay: 0.3s;
-}
-
-.nav-item:nth-child(4) {
-    animation-delay: 0.4s;
-}
-
-.nav-item:nth-child(5) {
-    animation-delay: 0.5s;
-}
-
-.nav-item:nth-child(6) {
-    animation-delay: 0.6s;
-}
-
-.nav-item:nth-child(7) {
-    animation-delay: 0.7s;
-}
-
-.nav-item:nth-child(8) {
-    animation-delay: 0.8s;
+    font-weight: 550;
 }
 
 .nav-link {
@@ -484,8 +342,6 @@ ul.nav {
     overflow: hidden;
     align-items: center;
     justify-content: flex-start;
-    /* Alinea los íconos a la izquierda */
-
     color: #c09d62;
     text-decoration: none;
     border-radius: 8px;
@@ -502,208 +358,12 @@ ul.nav {
     background-color: #dadada;
 }
 
-.nav-link:hover::after {
-    width: 100%;
-}
-
 .nav-link.active {
     background-color: #d4d4d4;
     color: #79552f;
-    /* Color del texto y los íconos en estado activo */
 }
 
-.nav-link:hover i {
-    transform: scale(1.1);
-}
-
-.nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background-color: #c09d62;
-    transition: width 0.3s ease;
-}
-
-/* =======================================================
-   Estilos del Botón de Toggle
-======================================================= */
-.toggle-btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 35px;
-    /* Tamaño fijo */
-    height: 35px;
-    /* Tamaño fijo */
-    min-width: 35px;
-    /* Evita que se encoja */
-    min-height: 35px;
-    /* Evita que se encoja */
-    border-radius: 50%;
-    padding: 0;
-    /* Elimina el padding */
-    cursor: pointer;
-    margin-bottom: 2px;
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
-    flex-shrink: 0;
-    /* Evita que se encoja */
-    background-color: transparent;
-    transition: background-color 0.3s ease;
-    /* Solo transición para el hover */
-}
-
-.toggle-btn i {
-    font-size: 20px;
-    /* Tamaño fijo del icono */
-}
-
-.toggle-btn:hover {
-    background-color: rgba(192, 157, 98, 0.1);
-}
-
-/* =======================================================
-   Estilos del Texto de Tooltip
-======================================================= */
-.tooltip-text {
-    margin-left: 10px;
-    font-size: 15px;
-}
-
-@media (max-width: 480px) {
-    .sidebar {
-        transform: translateX(-100%);
-        width: 100%;
-        transition: transform 0.3s ease;
-    }
-
-    .sidebar.expanded {
-        transform: translateX(0);
-        width: 50%;
-    }
-
-    /* Hamburger menu button */
-    .mobile-toggle {
-        position: fixed;
-        top: 15px;
-        left: 15px;
-        width: 40px;
-        height: 40px;
-        background-color: #ebebeb;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 1001;
-        border: none;
-    }
-
-    .sidebar.dark .mobile-toggle {
-        background-color: #333;
-    }
-
-    /* Overlay for backdrop */
-    .sidebar-overlay {
-        display: block;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 999;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s ease;
-    }
-
-    .sidebar-overlay.show {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    /* Adjust nav items for better touch targets */
-    .nav-item {
-        margin: 8px 0;
-    }
-
-    .nav-link {
-        padding: 12px 20px;
-    }
-
-    /* Hide default toggle button */
-    .toggle-btn {
-        display: none;
-    }
-
-    /* Adjust dropdown positioning */
-    .dropdown-menu {
-        position: static;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-    }
-}
-
-/* Estilos responsivos */
-@media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-        width: 250px;
-    }
-
-    .sidebar.expanded {
-        transform: translateX(0);
-    }
-
-    .mobile-collapsed {
-        transform: translateX(-100%);
-    }
-
-    .nav-link {
-        padding: 15px 20px;
-        /* Aumentar área táctil en móviles */
-    }
-
-    .tooltip-text {
-        font-size: 16px;
-        /* Texto más grande para móviles */
-    }
-
-    .dropdown-menu.show {
-        padding: 4px 0;
-    }
-
-    .dropdown-item {
-        padding: 12px 16px;
-        margin: 2px 0;
-    }
-
-    .toggle-btn {
-        width: 40px;
-        height: 40px;
-        /* Botón más grande para móviles */
-    }
-}
-
-.mobile-toggle {
-    background-color: transparent;
-    color: #c09d62;
-}
-
-.sidebar.dark .mobile-toggle {
-    color: #c09d62;
-    background-color: transparent;
-}
-
-/* =======================================================
-   Estilos del Menú Desplegable
-======================================================= */
+/* Dropdown */
 .dropdown-menu {
     position: static;
     max-height: 0;
@@ -713,35 +373,15 @@ ul.nav {
     background-color: rgba(192, 157, 98, 0.1);
     border-radius: 8px;
     margin: 0 8px;
-}
-
-/* Animación suave para el dropdown */
-.dropdown-menu {
     transform-origin: top;
     transform: scaleY(0);
-    transition: all 0.3s ease;
-}
-
-.dropdown-menu.show {
-    transform: scaleY(1);
-}
-
-/* Animación para el modo oscuro */
-.sidebar,
-.nav-link,
-.dropdown-menu {
-    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
 }
 
 .dropdown-menu.show {
     max-height: 1000px;
     opacity: 1;
     padding: 8px 0;
-}
-
-.dropdown-menu.open {
     transform: scaleY(1);
-    opacity: 1;
 }
 
 .dropdown-item {
@@ -768,59 +408,176 @@ ul.nav {
     transform: rotate(180deg);
 }
 
-
 .dropdown-menu a {
     font-size: 14px;
     width: auto;
     text-decoration: none;
-    color: inherit;
+    color: #c09d62;
 }
 
-.dropdown-menu a:hover {
-    background-color: #f0f0f0;
+/* Modo Oscuro */
+.sidebar.dark {
+    background-color: #333;
 }
 
-/* =======================================================
-   Estilos de la Línea del Sidebar
-======================================================= */
+.sidebar.dark a.nav-link {
+    color: #c09d62;
+}
+
+.sidebar.dark .nav-link.active {
+    color: #79552f;
+}
+
+.sidebar.dark .toggle-btn,
+.sidebar.dark .toggle-btn i {
+    color: #c09d62;
+}
+
+.sidebar.dark .dropdown-menu {
+    background-color: #2d2d2d;
+}
+
+.sidebar.dark .dropdown-menu *,
+.sidebar.dark .dropdown-item,
+.sidebar.dark .dropdown-menu a {
+    color: #c09d62 !important;
+}
+
+.sidebar.dark .dropdown-item:hover {
+    background-color: rgba(192, 157, 98, 0.15);
+}
+
+.sidebar.dark:not(.expanded) .dropdown-menu {
+    background-color: #2d2d2d;
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Botón Toggle */
+.toggle-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
+    min-height: 35px;
+    border-radius: 50%;
+    padding: 0;
+    cursor: pointer;
+    margin-bottom: 2px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    flex-shrink: 0;
+    background-color: transparent;
+    transition: background-color 0.3s ease;
+}
+
+.toggle-btn i {
+    font-size: 20px;
+}
+
+.toggle-btn:hover {
+    background-color: rgba(192, 157, 98, 0.1);
+}
+
+/* Tooltip */
+.tooltip-text {
+    margin-left: 10px;
+    font-size: 15px;
+    font-weight: 550;
+}
+
+/* Línea divisoria */
 #aside-line {
     width: 60%;
     height: 1px;
     background-color: #c09d62;
     margin: 8px auto;
-    /* Ajustar el margen de la línea divisora */
 }
 
-/* =======================================================
-   Estilos del Contenedor Principal
-======================================================= */
-.app-wrapper {
-    display: flex;
-    min-height: 100vh;
+/* Mobile */
+@media (max-width: 480px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 100%;
+    }
+
+    .sidebar.expanded {
+        transform: translateX(0);
+        width: 50%;
+    }
+
+    .mobile-toggle {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        width: 40px;
+        height: 40px;
+        background-color: transparent;
+        color: #c09d62;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1001;
+        border: none;
+    }
+
+    .sidebar-overlay {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .nav-item {
+        margin: 8px 0;
+    }
+
+    .nav-link {
+        padding: 12px 20px;
+    }
+
+    .toggle-btn {
+        display: none;
+    }
+
+    .dropdown-menu {
+        position: static;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
 }
 
-/* =======================================================
-   Estilos del Contenido Principal
-======================================================= */
-.main-content {
-    margin-left: 80px;
-    padding: 20px;
-    width: 100%;
-    background-color: #f5f5f5;
-    transition: margin-left 0.3s ease, background-color 0.3s ease;
+/* Animaciones */
+@keyframes slideIn {
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
-.main-content.expanded {
-    padding-left: 0px;
-    z-index: 1;
-}
-
-.main-content.dark {
-    background-color: #1e1e1e;
-    color: #ffffff;
-}
-
-/* =======================================================
-   Estilos Adicionales
-======================================================= */
+.nav-item:nth-child(1) { animation-delay: 0.1s; }
+.nav-item:nth-child(2) { animation-delay: 0.2s; }
+.nav-item:nth-child(3) { animation-delay: 0.3s; }
+.nav-item:nth-child(4) { animation-delay: 0.4s; }
+.nav-item:nth-child(5) { animation-delay: 0.5s; }
+.nav-item:nth-child(6) { animation-delay: 0.6s; }
+.nav-item:nth-child(7) { animation-delay: 0.7s; }
+.nav-item:nth-child(8) { animation-delay: 0.8s; }
 </style>

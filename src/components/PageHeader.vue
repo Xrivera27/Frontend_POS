@@ -1,6 +1,6 @@
 <template>
     <div class="encabezado">
-        <h1 class="header-title" :style="{ color: titleColor }">{{ titulo }}</h1>
+        <h1 class="header-title">{{ titulo }}</h1>
         <ProfileButton />
     </div>
     <hr style="width: 90%" />
@@ -17,10 +17,6 @@ export default {
         titulo: {
             type: String,
             required: true
-        },
-        titleColor: {
-            type: String,
-            default: 'black'
         }
     }
 }
@@ -38,12 +34,19 @@ export default {
     flex-wrap: wrap;
     padding: 0 16px;
     gap: 16px;
-    /*margin-top: 25px;*/
 }
 
 .header-title {
     font-size: clamp(24px, 4vw, 32px);
     margin: 10px 0;
+    color: #333;
+}
+
+:deep(.dark) .header-title,
+:deep(.dark) h1,
+.dark .header-title,
+.dark h1 {
+    color: #ffffff !important;
 }
 
 @media screen and (max-width: 480px) {
