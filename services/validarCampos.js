@@ -47,8 +47,8 @@ const validacionesComunes = {
   },
 
   validarNombre(nombre) {
-    // Validar caracteres permitidos primero
-    const caracteresPattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]+$/;
+    // Validar caracteres permitidos: solo letras y espacios
+    const caracteresPattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     if (!caracteresPattern.test(nombre)) {
       notis("warning", `El nombre tiene caracteres no permitidos`);
       return false;

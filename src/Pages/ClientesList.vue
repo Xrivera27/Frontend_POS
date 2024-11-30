@@ -222,8 +222,8 @@ export default {
     async guardarCliente() {
       if (!validacionesClientes.validarCampos(this.clienteForm, this.selectedCountry)) {
         return;
-      }  
-
+      }
+      notis('success', 'Cliente guardado correctamente');
       this.clienteForm.id_usuario = this.id_usuario;
       let response;
 
