@@ -3,7 +3,8 @@
   <div class="categorias-wrapper">
     <PageHeader :titulo="titulo" />
     <div class="opciones">
-      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal"
+        style="width: 200px; white-space: nowrap;">Agregar
         Unidad</button>
 
       <RouterLink to="categorias">
@@ -35,7 +36,7 @@
             <th>#</th>
             <th>Nombre unidad Inventario</th>
             <th>Productos usados</th>
-            <th v-if="esCeo" >Acciones</th>
+            <th v-if="esCeo">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -46,7 +47,7 @@
               <button class="btn mostrar-producto" @click="mostrarModalProductos(unidad.id_medida)">Mostrar
                 Prod.</button>
             </td>
-            <td v-if="esCeo" >
+            <td v-if="esCeo">
               <button id="btnEditar" class="btn btn-warning" @click="editUnidad(unidad)"><i
                   class="bi bi-pencil-fill"></i></button>
               <button id="btnEliminar" class="btn btn-danger" @click="deleteUnidad(unidad)"><b><i
@@ -67,7 +68,8 @@
           <input v-model="unidadForm.medida" type="text" required>
         </div>
         <div class="contenedor-botones">
-          <btnGuardarModal id="AggUnid" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'" @click="guardarUnidad">
+          <btnGuardarModal id="AggUnid" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'"
+            @click="guardarUnidad">
           </btnGuardarModal>
           <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
@@ -115,11 +117,10 @@
 import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
-import validarCamposService from '../../services/validarCampos.js';
-import { notificaciones } from '../../services/notificaciones.js';
+import { notis } from '../../services/notificaciones.js';
 import { useToast } from "vue-toastification";
 const { esCeo } = require('../../services/usuariosSolicitudes');
-
+import { validacionesComunes } from '../../services/validarCampos.js';
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
 import { getUnidadMedidaEmpresas, postUnidad, patchUnidad, getProductosUnidad, eliminarUnidad } from "../../services/unidadMedidaSolicitud.js";
@@ -144,7 +145,7 @@ export default {
       esCeo: false,
       isModalProductosOpen: false, // Estado para controlar si el modal está abierto o cerrado
       isEditing: false, // Estado para verificar si estamos editando una categoría
-      unidadForm: { medida: '' }, // Objeto para el formulario de categorías
+      unidadForm: { "medida": '' }, // Objeto para el formulario de categorías
     };
   },
 
@@ -180,23 +181,13 @@ export default {
     },
   },
   methods: {
-    validarCampos(unidadForm) {
-      const campos = {
-        Medida: unidadForm.medida,
-      };
 
-      if (!validarCamposService.validarEmpty(campos)) {
-        return false;
-      }
-
-      return true;
-    },
 
     openModal() {
       // Resetea el formulario y abre el modal
       this.isModalOpen = true;
       this.isEditing = false;
-      this.unidadForm = { medida: '', descripcion: '' }; // Resetea el formulario
+      this.unidadForm = { medida: '' }; // Resetea el formulario
     },
     closeModal() {
       // Cierra el modal
@@ -205,6 +196,7 @@ export default {
     },
     editUnidad(unidad) {
       // Implementa la lógica para editar una categoría
+
       this.isModalOpen = true;
       this.isEditing = true;
       this.unidadForm = { ...unidad };
@@ -240,29 +232,28 @@ export default {
         }
 
       } catch (error) {
-        notificaciones('error', error);
+        notis('error', error);
       }
 
     },
 
     async guardarUnidad() {
-      if (!this.validarCampos(this.unidadForm)) {
+      if (!validacionesComunes.validarEmpty(this.unidadForm) || !validacionesComunes.validarNombre(this.unidadForm.medida)) {
         return;
       }
 
-      validarCamposService.formSuccess();
       this.unidadForm.id_usuario = this.id_usuario;
       if (this.isEditing) {
         try {
 
           const nuevoRegistro = await patchUnidad(this.unidadForm, this.unidadesMedida[this.editIndex].id_medida);
           if (nuevoRegistro == true) {
-
+            notis("success", "Procesando guardado...");
             Object.assign(this.unidadesMedida[this.editIndex], this.unidadForm);
 
           }
         } catch (error) {
-          notificaciones('error', error.message);
+          notis('error', error.message);
         }
       } else {
 
@@ -270,7 +261,7 @@ export default {
           const nuevoRegistro = await postUnidad(this.unidadForm);
           this.unidadesMedida.push(nuevoRegistro[0]);
         } catch (error) {
-          notificaciones('error', error.message);
+          notis('error', error.message);
         }
 
       }
@@ -340,12 +331,12 @@ export default {
   color: white;
 }
 
-#AggUnid{
+#AggUnid {
   background-color: #a38655;
   border-radius: 8px;
 }
 
-#btnCerrarM{
+#btnCerrarM {
   border-radius: 8px;
   margin-left: 8rem
 }

@@ -3,7 +3,8 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal"
+        style="width: 200px; white-space: nowrap;">Agregar
         Proveedor</button>
 
       <div class="registros">
@@ -43,7 +44,7 @@
             <td>{{ proveedor.telefono }}</td>
             <td>{{ proveedor.correo }}</td>
             <td>{{ proveedor.direccion }}</td>
-            <td v-if="esCeo" >
+            <td v-if="esCeo">
               <button id="btnEditar" class="btn btn-warning" @click="editProveedor(proveedor)"><i
                   class="bi bi-pencil-fill"></i></button>
               <button id="btnEliminar" class="btn btn-danger" @click="deleteProveedor(proveedor)"><b><i
@@ -79,9 +80,18 @@
           <input v-model="proveedorForm.nombre" type="text" required>
         </div>
 
-        <div id="form-tel" class="form-group">
+        <div class="form-group">
           <label>Teléfono:</label>
-          <input v-model="proveedorForm.telefono" type="text" required>
+          <div class="phone-input-container">
+            <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+              <option value="">País</option>
+              <option v-for="(country, code) in countryData" :key="code" :value="code">
+                {{ country.emoji }} {{ country.code }}
+              </option>
+            </select>
+            <input v-model="proveedorForm.telefono" type="text" class="input-phone"
+              :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+          </div>
         </div>
 
         <div class="form-group">
@@ -94,7 +104,8 @@
           <input v-model="proveedorForm.direccion" type="text" required>
         </div>
 
-        <btnGuardarModal id="btnAggProv" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Proveedor'" @click="guardarProveedor">
+        <btnGuardarModal id="btnAggProv" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Proveedor'"
+          @click="guardarProveedor">
         </btnGuardarModal>
         <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
 
@@ -107,9 +118,10 @@
 import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
-import validarCamposService from '../../services/validarCampos.js';
-import { notificaciones } from '../../services/notificaciones.js';
+import { notis } from '../../services/notificaciones.js';
 const { esCeo } = require('../../services/usuariosSolicitudes');
+import { COUNTRY_CODES } from "../../services/countrySelector.js";
+import { validacionesProveedores } from '../../services/validarCampos.js';
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -131,6 +143,9 @@ export default {
       id_usuario: 0,
       itemsPerPage: "",
       esCeo: false,
+      selectedCountry: 'HN',
+      countryData: COUNTRY_CODES,
+      phoneLength: 8,
       proveedorForm: {
         nombre: '',
         telefono: '',
@@ -175,29 +190,6 @@ export default {
   },
   methods: {
 
-    validarCampos(proveedorForm) {
-      const campos = {
-        nombre: proveedorForm.nombre,
-        telefono: proveedorForm.telefono,
-        correo: proveedorForm.correo, // Cambiado a proveedorForm.correo
-        direccion: proveedorForm.direccion
-      };
-
-      if (!validarCamposService.validarEmpty(campos)) {
-        return false;
-      }
-
-      if (!validarCamposService.validarEmail(campos.correo)) {
-        return false;
-      }
-
-      if (!validarCamposService.validarTelefono(campos.telefono)) {
-        return false;
-      }
-
-      return true;
-    },
-
     openModal() {
       this.isModalOpen = true;
     },
@@ -216,10 +208,9 @@ export default {
       this.editIndex = null;
     },
     async guardarProveedor() {
-      if (!this.validarCampos(this.proveedorForm)) {
+      if (!validacionesProveedores.validarCampos(this.proveedorForm, this.selectedCountry)) {
         return;
       }
-      validarCamposService.formSuccess();
 
       this.proveedorForm.id_usuario = this.id_usuario;
       let response;
@@ -236,11 +227,11 @@ export default {
           );
 
           if (response == true) {
-
+            notis('success', "Actualizando datos del proveedor...")
             Object.assign(this.proveedores[this.editIndex], this.proveedorForm);
-          } else notificaciones('error', response.message);
+          } else notis('error', response.message);
         } catch (error) {
-          notificaciones('error', error.message);
+          notis('error', error.message);
         }
       } else {
         parametros = `/proveedores/crear-proveedor/${this.id_usuario}`;
@@ -251,7 +242,7 @@ export default {
           );
 
           if (response.length > 0) {
-
+            notis('success', "Proveedor guardado correctamente...")
             this.proveedores.push(response[0]);
 
           } else {
@@ -295,10 +286,10 @@ export default {
 
         if (response == true) {
           this.proveedores = this.proveedores.filter(item => item.id !== this.proveedorToDelete.id);
-          notificaciones('success', 'Proveedor eliminado correctamente');
+          notis('success', 'Proveedor eliminado correctamente');
         }
       } catch (error) {
-        notificaciones('error', error.message);
+        notis('error', error.message);
       } finally {
         this.showConfirmModal = false;
         this.proveedorToDelete = null;
@@ -361,12 +352,12 @@ export default {
 
 /* Botones */
 
-#btnAggProv{
+#btnAggProv {
   background-color: #a38655;
   border-radius: 8px;
 }
 
-#btnCerrarM{
+#btnCerrarM {
   border-radius: 8px;
   margin-left: 13.4rem;
 }
@@ -590,6 +581,39 @@ select {
   border: 1px solid #ddd;
   border-radius: 4px;
 }
+
+.phone-input-container {
+  display: flex;
+  gap: 8px;
+}
+
+.phone-input-container select {
+  width: 110px;
+  margin: 0;
+  /* Importante: sin márgenes */
+  height: 35px;
+  padding: 0 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.phone-input-container input {
+  flex: 1;
+  height: 35px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+
+/* Estilos para modo oscuro */
+.dark .country-code-select,
+.dark .phone-input {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
 
 /* Otros estilos */
 .h2-modal-content {

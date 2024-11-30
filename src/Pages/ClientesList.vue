@@ -36,7 +36,7 @@
             <th>Dirección</th>
             <th>Teléfono</th>
             <th>RTN</th>
-            <th v-if="esCeo" >Acciones</th>
+            <th v-if="esCeo">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -47,7 +47,7 @@
             <td>{{ cliente.direccion }}</td>
             <td>{{ cliente.telefono }}</td>
             <td>{{ cliente.rtn }}</td>
-            <td v-if="esCeo" >
+            <td v-if="esCeo">
               <button id="btnEditar" class="btn btn-warning" @click="editCliente(cliente)">
                 <i class="bi bi-pencil-fill"></i>
               </button>
@@ -94,17 +94,27 @@
           <input v-model="clienteForm.direccion" type="text" required>
         </div>
 
-        <div id="form-tel" class="form-group">
+        <div class="form-group">
           <label>Teléfono:</label>
-          <input v-model="clienteForm.telefono" type="text" required>
+          <div class="phone-input-container">
+            <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+              <option value="">País</option>
+              <option v-for="(country, code) in countryData" :key="code" :value="code">
+                {{ country.emoji }} {{ country.code }}
+              </option>
+            </select>
+            <input v-model="clienteForm.telefono" type="text" class="input-phone"
+              :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+          </div>
         </div>
 
         <div class="form-group">
           <label>RTN:</label>
-          <input v-model="clienteForm.rtn" type="text" required>
+          <input v-model="clienteForm.rtn" type="text" maxlength="14" required>
         </div>
 
-        <btnGuardarModal id="btnAggCli" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Cliente'" @click="guardarCliente">
+        <btnGuardarModal id="btnAggCli" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Cliente'"
+          @click="guardarCliente">
         </btnGuardarModal>
         <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
       </div>
@@ -118,10 +128,11 @@ import ExportButton from '../components/ExportButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 import solicitudes from "../../services/solicitudes";
-import validarCamposService from '../../services/validarCampos.js';
-import { notificaciones } from '../../services/notificaciones.js';
+import { validacionesClientes } from '../../services/validarCampos.js';
+import { notis } from '../../services/notificaciones.js';
 const { getClientesbyEmpresa, postCliente, patchCliente, desactivarCliente } = require('../../services/clienteSolicitudes.js');
 const { esCeo } = require('../../services/usuariosSolicitudes');
+import { COUNTRY_CODES } from "../../services/countrySelector.js";
 
 export default {
   components: {
@@ -142,6 +153,9 @@ export default {
       editIndex: null,
       id_usuario: 0,
       esCeo: false,
+      selectedCountry: 'HN',
+      countryData: COUNTRY_CODES,
+      phoneLength: 8,
       clienteForm: {
         id: null,
         nombre_completo: '',
@@ -162,7 +176,6 @@ export default {
       this.clientes = await getClientesbyEmpresa(this.id_usuario);
       this.esCeo = await esCeo(this.id_usuario);
 
-
     } catch (error) {
       console.log(error);
     }
@@ -181,32 +194,10 @@ export default {
     }
   },
   methods: {
-    validarCampos(clienteForm) {
-      const campos = {
-        Nombre: clienteForm.nombre_completo,
-        Correo: clienteForm.correo,
-        Direccion: clienteForm.direccion,
-        Telefono: clienteForm.telefono,
-        RTN: clienteForm.rtn
-      };
-
-      if (!validarCamposService.validarEmpty(campos)) {
-        return false;
+    updatePhoneValidation() {
+      if (this.selectedCountry && this.countryData[this.selectedCountry]) {
+        this.phoneLength = this.countryData[this.selectedCountry].length;
       }
-
-      if (!validarCamposService.validarEmail(campos.Correo)) {
-        return false;
-      }
-
-      if (!validarCamposService.validarTelefono(campos.Telefono)) {
-        return false;
-      }
-
-      if (!validarCamposService.validarRTN(campos.RTN)) {
-        return false;
-      }
-
-      return true;
     },
 
     openModal() {
@@ -229,10 +220,9 @@ export default {
       this.editIndex = null;
     },
     async guardarCliente() {
-      if (!this.validarCampos(this.clienteForm)) {
+      if (!validacionesClientes.validarCampos(this.clienteForm, this.selectedCountry)) {
         return;
-      }
-      validarCamposService.formSuccess();
+      }  
 
       this.clienteForm.id_usuario = this.id_usuario;
       let response;
@@ -240,7 +230,7 @@ export default {
       if (this.isEditing) {
         const nuevoRegistro = await patchCliente(this.clienteForm, this.clientes[this.editIndex].id_cliente);
         if (nuevoRegistro == true) {
-
+          notis('success', 'Cliente actualizado correctamente');
           Object.assign(this.clientes[this.editIndex], this.clienteForm);
 
         }
@@ -279,12 +269,12 @@ export default {
         const response = await desactivarCliente(this.clienteToDelete.id_cliente);
         if (response === true) {
           this.clientes = this.clientes.filter(item => item.id_cliente !== this.clienteToDelete.id_cliente);
-          notificaciones('success', 'Cliente eliminado correctamente');
+          notis('success', 'Cliente eliminado correctamente');
         } else {
           throw response;
         }
       } catch (error) {
-        notificaciones('error', error.message);
+        notis('error', error.message);
       } finally {
         this.showConfirmModal = false;
         this.clienteToDelete = null;
@@ -345,12 +335,12 @@ export default {
 
 /* Botones */
 
-#btnAggCli{
+#btnAggCli {
   background-color: #a38655;
   border-radius: 8px;
 }
 
-#btnCerrarM{
+#btnCerrarM {
   margin-left: 14rem;
   border-radius: 8px;
 }
@@ -597,6 +587,38 @@ export default {
 .container-top {
   width: 100%;
   text-align: right;
+}
+
+.phone-input-container {
+  display: flex;
+  gap: 8px;
+}
+
+.phone-input-container select {
+  width: 110px;
+  margin: 0;
+  /* Importante: sin márgenes */
+  height: 35px;
+  padding: 0 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.phone-input-container input {
+  flex: 1;
+  height: 35px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+
+/* Estilos para modo oscuro */
+.dark .country-code-select,
+.dark .phone-input {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
 }
 
 /* Media Queries */
