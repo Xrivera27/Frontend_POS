@@ -578,6 +578,7 @@ export default {
           if (this.productoForm.codigo_producto === this.productos[this.editIndex].codigo_producto) this.productoForm.codigo_producto = '';
           const nuevoRegistro = await patchProducto(this.productoForm, this.productos[this.editIndex].id_producto);
           if (nuevoRegistro == true) {
+            notificaciones('success')
             this.productoForm.codigo_producto = this.productos[this.editIndex].codigo_producto;
             Object.assign(this.productos[this.editIndex], this.productoForm);
           }
