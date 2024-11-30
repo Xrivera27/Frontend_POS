@@ -4,7 +4,8 @@
 
     <div class="opciones">
       <div class="action-bar">
-        <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">
+        <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal"
+          style="width: 200px; white-space: nowrap;">
           Agregar Producto
         </button>
       </div>
@@ -56,7 +57,7 @@
             <th>Stock</th>
             <th>Precio Unitario</th>
             <th>Promocion Activa</th>
-            <th v-if="esCeo" >Acciones</th>
+            <th v-if="esCeo">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -68,7 +69,7 @@
                   class="bi bi-pencil-square"></i></button> </td>
             <td>{{ producto.precio_unitario }}</td>
             <td>Inactivo</td>
-            <td v-if="esCeo" >
+            <td v-if="esCeo">
               <button id="btnEditar" class="btn btn-warning" @click="editProducto(producto, index)">
                 <i class="bi bi-pencil-fill"></i>
               </button>
@@ -153,8 +154,8 @@
                 <label>Precio por Unidad:</label>
                 <div class="input-icon">
                   <span class="currency-symbol">L.</span>
-                  <input v-model="productoForm.precio_unitario" type="number" step="0.01" min="0" placeholder="0.00"
-                    required />
+                  <input v-model="productoForm.precio_unitario" type="text" step="0.01" min="0" placeholder="0.00"
+                    @blur="formatearPrecio($event, 'precio_unitario')" @keypress="soloNumeros($event)" required />
                 </div>
               </div>
 
@@ -162,15 +163,15 @@
                 <label>Precio por mayoreo:</label>
                 <div class="input-icon">
                   <span class="currency-symbol">L.</span>
-                  <input v-model="productoForm.precio_mayorista" type="number" step="0.01" min="0" placeholder="0.00"
-                    required />
+                  <input v-model="productoForm.precio_mayorista" type="text" step="0.01" min="0" placeholder="0.00"
+                    @blur="formatearPrecio($event, 'precio_mayorista')" @keypress="soloNumeros($event)" required />
                 </div>
               </div>
 
               <div class="form-group">
                 <label>Cantidad activar mayoreo:</label>
-                <input v-model="productoForm.cantidad_activar_mayorista" type="number" min="0" placeholder="0"
-                  required />
+                <input @keypress="soloNumeros($event)" v-model="productoForm.cantidad_activar_mayorista" type="text"
+                  min="0" placeholder="0" required />
               </div>
 
               <div class="form-group">
@@ -258,12 +259,14 @@
           </div>
           <div class="form-group-stock">
             <label for="stock-min">Stock Min:</label>
-            <input type="text" class="input" placeholder="Ingrese stock minimo del producto " v-model="inputStockMin">
+            <input type="text" class="input" @keypress="soloNumeros($event)"
+              placeholder="Ingrese stock minimo del producto " v-model="inputStockMin">
           </div>
 
           <div class="form-group-stock">
             <label for="stock-max">Stock Max:</label>
-            <input type="text" class="input" placeholder="Ingrese stock maximo del producto" v-model="inputStockMax">
+            <input type="text" class="input" @keypress="soloNumeros($event)"
+              placeholder="Ingrese stock maximo del producto" v-model="inputStockMax">
           </div>
 
         </form>
@@ -345,9 +348,9 @@ export default {
         unidad_medida: 'default',
         impuesto: impuestos[0]?.id || null,
         proveedor: 'default',
-        precio_unitario: 0,
-        precio_mayorista: 0,
-        cantidad_activar_mayorista: 0,
+        precio_unitario: "",
+        precio_mayorista: "",
+        cantidad_activar_mayorista: "",
         categorias: []
 
       },
@@ -414,6 +417,35 @@ export default {
         }
 
       }
+    },
+
+    soloNumeros(event) {
+      // Permite números y punto decimal
+      const codigoTecla = event.keyCode || event.which;
+      const tecla = String.fromCharCode(codigoTecla);
+
+      // Expresión regular que permite números y un punto decimal
+      const regex = /^[0-9.]$/;
+
+      // Si la tecla no coincide con la regex o ya hay un punto y se intenta agregar otro
+      if (!regex.test(tecla) ||
+        (tecla === '.' && event.target.value.includes('.'))) {
+        event.preventDefault();
+        return false;
+      }
+    },
+
+    formatearPrecio(event, campo) {
+      let valor = event.target.value;
+
+      // Si el valor está vacío, no hacer nada
+      if (valor === '') return;
+
+      // Convertir a número y formatear con 2 decimales
+      const numeroFormateado = parseFloat(valor).toFixed(2);
+
+      // Actualizar el valor en el formulario
+      this.productoForm[campo] = numeroFormateado;
     },
 
     async openModal() {
@@ -790,12 +822,12 @@ export default {
   margin: 0;
 }
 
-#btnAggProd{
+#btnAggProd {
   background-color: #a38655;
   border-radius: 8px;
 }
 
-#btnCanc{
+#btnCanc {
   border-radius: 8px;
 }
 

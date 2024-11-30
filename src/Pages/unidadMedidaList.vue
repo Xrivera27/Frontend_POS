@@ -3,7 +3,8 @@
   <div class="categorias-wrapper">
     <PageHeader :titulo="titulo" />
     <div class="opciones">
-      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal"
+        style="width: 200px; white-space: nowrap;">Agregar
         Unidad</button>
 
       <RouterLink to="categorias">
@@ -35,7 +36,7 @@
             <th>#</th>
             <th>Nombre unidad Inventario</th>
             <th>Productos usados</th>
-            <th v-if="esCeo" >Acciones</th>
+            <th v-if="esCeo">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -46,7 +47,7 @@
               <button class="btn mostrar-producto" @click="mostrarModalProductos(unidad.id_medida)">Mostrar
                 Prod.</button>
             </td>
-            <td v-if="esCeo" >
+            <td v-if="esCeo">
               <button id="btnEditar" class="btn btn-warning" @click="editUnidad(unidad)"><i
                   class="bi bi-pencil-fill"></i></button>
               <button id="btnEliminar" class="btn btn-danger" @click="deleteUnidad(unidad)"><b><i
@@ -116,7 +117,7 @@
 import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
-import { notificaciones } from '../../services/notificaciones.js';
+import { notis } from '../../services/notificaciones.js';
 import { useToast } from "vue-toastification";
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import { validacionesComunes } from '../../services/validarCampos.js';
@@ -144,7 +145,7 @@ export default {
       esCeo: false,
       isModalProductosOpen: false, // Estado para controlar si el modal está abierto o cerrado
       isEditing: false, // Estado para verificar si estamos editando una categoría
-      unidadForm: { medida: '' }, // Objeto para el formulario de categorías
+      unidadForm: { "medida": '' }, // Objeto para el formulario de categorías
     };
   },
 
@@ -195,6 +196,7 @@ export default {
     },
     editUnidad(unidad) {
       // Implementa la lógica para editar una categoría
+
       this.isModalOpen = true;
       this.isEditing = true;
       this.unidadForm = { ...unidad };
@@ -230,13 +232,13 @@ export default {
         }
 
       } catch (error) {
-        notificaciones('error', error);
+        notis('error', error);
       }
 
     },
 
     async guardarUnidad() {
-      if (!validacionesComunes.validarEmpty(this.unidadForm)) {
+      if (!validacionesComunes.validarEmpty(this.unidadForm) || !validacionesComunes.validarNombre(this.unidadForm.medida)) {
         return;
       }
 
@@ -246,12 +248,12 @@ export default {
 
           const nuevoRegistro = await patchUnidad(this.unidadForm, this.unidadesMedida[this.editIndex].id_medida);
           if (nuevoRegistro == true) {
-            notificaciones('form-success');
+            notis("success", "Procesando guardado...");
             Object.assign(this.unidadesMedida[this.editIndex], this.unidadForm);
 
           }
         } catch (error) {
-          notificaciones('error', error.message);
+          notis('error', error.message);
         }
       } else {
 
@@ -259,7 +261,7 @@ export default {
           const nuevoRegistro = await postUnidad(this.unidadForm);
           this.unidadesMedida.push(nuevoRegistro[0]);
         } catch (error) {
-          notificaciones('error', error.message);
+          notis('error', error.message);
         }
 
       }

@@ -106,7 +106,7 @@
             <div class="form-group">
               <label for="rol">Selecciona rol:</label>
               <select class="form-select" id="rol" name="rol" v-model="usuarioForm.rol" required>
-                <option value="" disabled selected>Selecciona un rol</option>
+                <option value="default" disabled selected>Selecciona un rol</option>
                 <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option>
               </select>
             </div>
@@ -149,7 +149,7 @@
 
             <div class="form-group">
               <label for="sucursal">Selecciona sucursal:</label>
-              <select class="form-select" id="sucursal" name="sucursal" v-model="usuarioForm.sucursal" required>
+              <select class="form-select" id="sucursal" name="sucursal" value="default" v-model="usuarioForm.sucursal" required>
                 <option value="" disabled selected>Selecciona una sucursal</option>
                 <option v-for="(sucursal, index) in sucursales" :key="index" :value="sucursal.id_sucursal">{{
                   sucursal.nombre_administrativo }}</option>
@@ -178,7 +178,7 @@
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 import solicitudes from "../../services/solicitudes.js";
-import { notificaciones } from '../../services/notificaciones.js';
+import { notis } from '../../services/notificaciones.js';
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import PageHeader from "@/components/PageHeader.vue";
 import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
@@ -242,7 +242,7 @@ export default {
       this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
       this.roles = await solicitudes.fetchRegistros('/roles');
     } catch (error) {
-      notificaciones('error', error.message);
+      notis('error', error.message);
     }
   },
 
@@ -279,7 +279,7 @@ export default {
         const id_usuario = await solicitudes.solicitarUsuarioToken();
         this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${id_usuario}`);
       } catch (error) {
-        notificaciones('error', error.message);
+        notis('error', error.message);
       } finally {
         this.isLoading = false;
       }
@@ -339,10 +339,10 @@ export default {
           );
 
           if (response == true) {
-            notificaciones('success')
+            notis('success', "Actualizando datos del usuario...")
             Object.assign(this.empleados[this.editIndex], this.usuarioForm);
           } else {
-            notificaciones('error', response);
+            notis('error', response);
           }
         } else {
           parametros = `/usuario/crear`;
@@ -352,7 +352,7 @@ export default {
           );
 
           if (response.length > 0) {
-            notificaciones('form-success')
+            notis('success', "Usuario guardado correctamente...")
             this.empleados.push(response[0]);
           } else {
             throw response;
@@ -360,7 +360,7 @@ export default {
         }
         this.closeModal();
       } catch (error) {
-        notificaciones('error', error.message);
+        notis('error', error.message);
       }
     },
 
@@ -383,10 +383,10 @@ export default {
           if (index !== -1) {
             this.empleados.splice(index, 1);
           }
-          notificaciones('success', 'Usuario eliminado correctamente');
+          notis('success', 'Usuario eliminado correctamente');
         }
       } catch (error) {
-        notificaciones('error', error.message);
+        notis('error', error.message);
       } finally {
         this.showConfirmModal = false;
         this.empleadoToDelete = null;

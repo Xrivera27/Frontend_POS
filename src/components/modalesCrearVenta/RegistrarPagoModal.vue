@@ -50,36 +50,11 @@
                     <!-- Sección de Tarjeta (condicional) -->
                     <div v-if="metodoPago === 'Tarjeta' || metodoPago === 'Mixto'" class="tarjeta-section">
                         <div class="form-group">
-                            <label>Tipo de Tarjeta:</label>
-                            <select v-model="tipoTarjeta">
-                                <option value="Visa">Visa</option>
-                                <option value="MasterCard">MasterCard</option>
-                                <option value="American Express">American Express</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Número de Tarjeta:</label>
-                            <input type="text" v-model="numeroTarjeta" maxlength="19" @input="formatearNumeroTarjeta" />
-                        </div>
-                        <div class="tarjeta-detalles">
-                            <div class="form-group">
-                                <label>Fecha Exp:</label>
-                                <input type="text" v-model="fechaExp" placeholder="MM/YY" maxlength="5"
-                                    @input="formatearFechaExp" />
-                            </div>
-                            <div class="form-group">
-                                <label>CVV:</label>
-                                <input type="text" v-model="cvv" maxlength="4" />
-                            </div>
-                            <div class="form-group">
-                                <label>Cuotas:</label>
-                                <select v-model="cuotas">
-                                    <option value="1">1 cuota</option>
-                                    <option value="3">3 cuotas</option>
-                                    <option value="6">6 cuotas</option>
-                                    <option value="12">12 cuotas</option>
-                                </select>
-                            </div>
+                            <label>Cantidad a depositar:</label>
+                            <input type="text" v-model="numeroTarjeta" />
+                            <label>Fecha Exp:</label>
+                            <input type="text" v-model="fechaExp" placeholder="MM/YY" maxlength="5"
+                                @input="formatearFechaExp" />
                         </div>
                     </div>
 
@@ -167,7 +142,7 @@ export default {
             return this.factura.total_ISV;
         },
 
-        returnDescuento(){
+        returnDescuento() {
             return this.factura.descuento;
         },
 
@@ -295,7 +270,7 @@ export default {
     padding: 5px 0;
 }
 
-.item-descuento{
+.item-descuento {
     color: rgb(194, 30, 30);
 }
 

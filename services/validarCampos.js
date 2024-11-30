@@ -1,23 +1,89 @@
-import { notificaciones } from "./notificaciones.js";
+import { notis } from "./notificaciones.js";
 import { COUNTRY_CODES } from "./countrySelector.js";
 
 const validacionesComunes = {
   validarEmpty(campos) {
-    for (const [campo, valor] of Object.entries(campos)) {
+    // Obtener las llaves del objeto campos y mantener su orden original
+    const camposPresentes = Object.keys(campos);
+
+    for (const nombreCampo of camposPresentes) {
+      const valor = campos[nombreCampo];
       if (
         valor === "" ||
         valor === undefined ||
         valor === null ||
         valor === "default"
       ) {
-        // Verificar si el campo es un select por su nombre
-        if (campo === "Rol" || campo === "Sucursal" || campo === "País") {
-          notificaciones("empty-campo-select", campo);
-        } else {
-          notificaciones("empty-campo", campo);
-        }
+        notis("warning", "El campo " + nombreCampo + " está vacío");
         return false;
       }
+    }
+    return true;
+  },
+
+  validarRTN(rtn) {
+    // Verificar que solo contenga números y tenga longitud correcta
+    const soloNumeros = /^\d+$/.test(rtn);
+    if (!soloNumeros || rtn.length !== 14) {
+      // RTN debe tener 14 dígitos
+      notis("warning", "RTN inválido");
+      return false;
+    }
+    return true;
+  },
+
+  validarSelect(valor, campo) {
+    if (
+      !valor ||
+      valor === "default" ||
+      valor === undefined ||
+      valor === null ||
+      valor === ""
+    ) {
+      notis("warning", `Debe seleccionar: ${campo}`);
+      return false;
+    }
+    return true;
+  },
+
+  validarNombre(nombre) {
+    // Validar caracteres permitidos primero
+    const caracteresPattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]+$/;
+    if (!caracteresPattern.test(nombre)) {
+      notis("warning", `El nombre tiene caracteres no permitidos`);
+      return false;
+    }
+
+    // Validar longitud después
+    if (nombre.length < 3 || nombre.length > 50) {
+      notis("warning", `El nombre debe tener entre 3 y 50 caracteres`);
+      return false;
+    }
+
+    return true;
+  },
+
+  validarDireccion(direccion) {
+    /*     // Validar caracteres permitidos primero
+    const caracteresPattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]+$/;
+    if (!caracteresPattern.test(direccion)) {
+      notis("warning", `La direccion tiene caracteres no permitidos`);
+      return false;
+    } */
+
+    // Validar longitud después
+    if (direccion.length < 10 || direccion.length > 150) {
+      notis("warning", `La direccion debe tener entre 10 y 150 caracteres`);
+      return false;
+    }
+
+    return true;
+  },
+
+  validarNumero(valor, campo) {
+    if (isNaN(valor)) {
+      notis("warning", `El campo ${campo} debe ser un número`);
+      return false;
     }
     return true;
   },
@@ -25,9 +91,27 @@ const validacionesComunes = {
   validarEmail(email) {
     const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!pattern.test(email)) {
-      notificaciones("invalid-email");
+      console.log("Correo inválido");
+      notis("warning", "El correo electrónico ingresado no es válido");
       return false;
     }
+    return true;
+  },
+
+  validarDescripcion(descripcion) {
+    // Validar caracteres permitidos primero
+    const descPattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,;:()\-_!¡¿?""'']+$/;
+    if (!descPattern.test(descripcion)) {
+      notis("warning", "La descripción contiene caracteres no permitidos");
+      return false;
+    }
+
+    // Validar longitud después
+    if (descripcion.length < 10 || descripcion.length > 200) {
+      notis("warning", "La descripción debe tener entre 10 y 200 caracteres");
+      return false;
+    }
+
     return true;
   },
 
@@ -36,21 +120,21 @@ const validacionesComunes = {
     const config = COUNTRY_CODES[codigoPais];
 
     if (!config) {
-      notificaciones("pais-no-soportado");
-      return false;
-    }
-
-    if (numeroLimpio.length !== config.length) {
-      notificaciones(
-        "invalid-phone",
-        `El número debe tener ${config.length} dígitos para ${codigoPais}`
-      );
+      notis("warning", "País no soportado");
       return false;
     }
 
     const soloNumeros = /^\d+$/.test(numeroLimpio);
     if (!soloNumeros) {
-      notificaciones("invalid-phone", "El teléfono solo debe contener números");
+      notis("warning", "El teléfono solo debe contener números");
+      return false;
+    }
+
+    if (numeroLimpio.length !== config.length) {
+      notis(
+        "warning",
+        `El teléfono debe tener ${config.length} dígitos para ${codigoPais}`
+      );
       return false;
     }
 
@@ -59,7 +143,7 @@ const validacionesComunes = {
 
   validarPass(password1, password2) {
     if (password1 !== password2) {
-      notificaciones("diferent-password");
+      notis("warning", "Las contraseñas no coinciden");
       return false;
     }
     return true;
@@ -69,15 +153,10 @@ const validacionesComunes = {
     const pattern =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
     if (!pattern.test(password)) {
-      notificaciones("invalid-password");
-      return false;
-    }
-    return true;
-  },
-
-  validarSelect(valor, campo) {
-    if (!valor || valor === "default" || valor === "") {
-      notificaciones("select-invalido", `Debe seleccionar un ${campo}`);
+      notis(
+        "warning",
+        "La contraseña no cumple con los requisitos de seguridad"
+      );
       return false;
     }
     return true;
@@ -91,58 +170,72 @@ const validacionesUsuario = {
       Apellido: form.apellido,
       "Nombre de Usuario": form.nombre_usuario,
       Correo: form.correo,
+      Rol: form.rol,
+      Contraseña: form.password,
+      "Confirmar Contraseña": form.confirmPassword,
       Telefono: form.telefono,
       Direccion: form.direccion,
       Sucursal: form.sucursal,
-      Rol: form.rol,
     };
 
-    // Validar campos vacíos
-    if (!validacionesComunes.validarEmpty(campos)) return false;
-
-    // Validar selects
-    if (!validacionesComunes.validarSelect(form.sucursal, "sucursal"))
-      return false;
-    if (!validacionesComunes.validarSelect(form.rol, "rol")) return false;
-
-    // Validar nombre de usuario (alfanumérico y guiones bajos, 4-20 caracteres)
-    const usernamePattern = /^[a-zA-Z0-9_]{4,20}$/;
-    if (!usernamePattern.test(form.nombre_usuario)) {
-      notificaciones("invalid-username");
-      return false;
-    }
-
-    // Validar correo
-    if (!validacionesComunes.validarEmail(campos.Correo)) return false;
-
-    // Validar teléfono
-    if (!validacionesComunes.validarTelefono(campos.Telefono, selectedCountry))
-      return false;
-
-    // Validar contraseña si es requerida
     if (isPassEdit) {
-      if (!validacionesComunes.validarPass(form.password, form.confirmPassword))
-        return false;
-      if (!validacionesComunes.validarPasswordSegura(form.password))
-        return false;
-    }
-
-    // Validar nombre y apellido (solo letras y espacios, mínimo 3 caracteres)
-    const nombrePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,}$/;
-    if (!nombrePattern.test(form.nombre)) {
-      notificaciones(
-        "invalid-name",
-        "El nombre debe contener solo letras y tener al menos 3 caracteres"
-      );
+      if (!validacionesComunes.validarEmpty(campos)) return false;
       return false;
     }
+
+    if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
+
+    const nombrePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,50}$/;
     if (!nombrePattern.test(form.apellido)) {
-      notificaciones(
-        "invalid-name",
+      notis(
+        "warning",
         "El apellido debe contener solo letras y tener al menos 3 caracteres"
       );
       return false;
     }
+
+    const usernamePattern = /^[a-zA-Z0-9_]+$/;
+    if (!usernamePattern.test(campos["Nombre de Usuario"])) {
+      notis(
+        "warning",
+        "El nombre de usuario solo puede contener letras, números y guiones bajos"
+      );
+      return false;
+    }
+    if (
+      campos["Nombre de Usuario"].length < 3 ||
+      campos["Nombre de Usuario"].length > 50
+    ) {
+      notis(
+        "warning",
+        `El nombre de usuario debe tener entre al menos 3 caracteres`
+      );
+      return false;
+    }
+
+    if (!validacionesComunes.validarEmail(campos.Correo)) return false;
+
+    if (!validacionesComunes.validarSelect(campos.Rol, "Rol")) return false;
+
+    if (isPassEdit) {
+      if (!validacionesComunes.validarPasswordSegura(campos.Contraseña))
+        return false;
+      if (
+        !validacionesComunes.validarPass(
+          campos.Contraseña,
+          campos["Confirmar Contraseña"]
+        )
+      )
+        return false;
+    }
+
+    if (!validacionesComunes.validarTelefono(campos.Telefono, selectedCountry))
+      return false;
+
+    if (!validacionesComunes.validarDireccion(campos.Direccion)) return false;
+
+    if (!validacionesComunes.validarSelect(campos.Sucursal, "Sucursal"))
+      return false;
 
     return true;
   },
@@ -158,25 +251,10 @@ const validacionesCategorias = {
     // Validar campos vacíos
     if (!validacionesComunes.validarEmpty(campos)) return false;
 
-    // Validar nombre
-    const nombrePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]{3,50}$/;
-    if (!nombrePattern.test(form.nombre_categoria)) {
-      notificaciones("empty-campo", "Nombre");
-      return false;
-    }
+    if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
 
-    // Validar longitud de descripción
-    if (form.descripcion.length < 10 || form.descripcion.length > 200) {
-      notificaciones("descripcion-length");
+    if (!validacionesComunes.validarDescripcion(campos.Descripción))
       return false;
-    }
-
-    // Validar caracteres de descripción
-    const descPattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,;:()\-_!¡¿?""'']+$/;
-    if (!descPattern.test(form.descripcion)) {
-      notificaciones("empty-campo", "Descripción");
-      return false;
-    }
 
     return true;
   },
@@ -194,20 +272,12 @@ const validacionesSucursal = {
     if (!validacionesComunes.validarEmpty(campos)) return false;
 
     // Validar nombre (letras, números y espacios, 3-50 caracteres)
-    const nombrePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]{3,50}$/;
-    if (!nombrePattern.test(form.nombre_administrativo)) {
-      notificaciones(
-        "invalid-name",
-        "El nombre debe tener entre 3 y 50 caracteres"
-      );
-      return false;
-    }
-
+    if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
     // Validar correo
-    if (!validacionesComunes.validarEmail(form.correo)) return false;
+    if (!validacionesComunes.validarEmail(campos.Correo)) return false;
 
     // Validar teléfono
-    if (!validacionesComunes.validarTelefono(form.telefono, selectedCountry))
+    if (!validacionesComunes.validarTelefono(campos.Telefono, selectedCountry))
       return false;
 
     return true;
@@ -220,105 +290,91 @@ const validacionesProductos = {
       Código: form.codigo_producto,
       Nombre: form.nombre,
       Descripción: form.descripcion,
-      "Unidad de Medida": form.unidad_medida,
       Impuesto: form.impuesto,
       Proveedor: form.proveedor,
       "Precio Unitario": form.precio_unitario,
       "Precio Mayorista": form.precio_mayorista,
       "Cantidad Mayoreo": form.cantidad_activar_mayorista,
+      "Unidad de Medida": form.unidad_medida,
     };
 
     // Validar campos vacíos
     if (!validacionesComunes.validarEmpty(campos)) return false;
 
+    // Validar codigo
+    const longitudPattern = /^.{3,20}$/; // Verifica que la longitud esté entre 3 y 20 caracteres
+    const alfanumericoPattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]+$/; // Verifica que sea alfanumérico
+
+    if (!longitudPattern.test(campos.Código)) {
+      notis("warning", "El código debe contener entre 3 y 20 caracteres.");
+      return false;
+    }
+
+    if (!alfanumericoPattern.test(campos.Código)) {
+      notis("warning", "El código tiene caracteres no permitidos");
+      return false;
+    }
+
+    // Validar nombre
+    if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
+
+    // Validar descripcion
+    if (!validacionesComunes.validarDescripcion(campos.Descripción))
+      return false;
+
     // Validar selects
+    if (!validacionesComunes.validarSelect(campos.Impuesto, "Impuesto"))
+      return false;
+
+    if (!validacionesComunes.validarSelect(campos.Proveedor, "Proveedor"))
+      return false;
+
     if (
-      !validacionesComunes.validarSelect(form.unidad_medida, "unidad de medida")
+      !validacionesComunes.validarNumero(
+        campos["Precio Unitario"],
+        "Precio Unitario"
+      )
     )
       return false;
-    if (!validacionesComunes.validarSelect(form.proveedor, "proveedor"))
+    if (
+      !validacionesComunes.validarNumero(
+        campos["Precio Mayorista"],
+        "Precio Mayorista"
+      )
+    )
       return false;
-    if (!validacionesComunes.validarSelect(form.impuesto, "impuesto"))
-      return false;
-
-    // Validar código de producto (alfanumérico, sin espacios, entre 3-20 caracteres)
-    const codigoPattern = /^[a-zA-Z0-9-_]{3,20}$/;
-    if (!codigoPattern.test(form.codigo_producto)) {
-      notificaciones(
-        "invalid-code",
-        "El código debe contener entre 3 y 20 caracteres alfanuméricos, guiones o guiones bajos"
-      );
-      return false;
-    }
-
-    // Validar nombre (letras, números y espacios, 3-50 caracteres)
-    const nombrePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]{3,50}$/;
-    if (!nombrePattern.test(form.nombre)) {
-      notificaciones(
-        "invalid-name",
-        "El nombre debe tener entre 3 y 50 caracteres y solo puede contener letras, números y espacios"
-      );
-      return false;
-    }
-
-    // Validar descripción (longitud)
-    if (form.descripcion.length < 10 || form.descripcion.length > 200) {
-      notificaciones("descripcion-length");
-      return false;
-    }
-
-    // Validar caracteres permitidos en la descripción
-    const descPattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s.,;:()\-_!¡¿?""'']+$/;
-    if (!descPattern.test(form.descripcion)) {
-      notificaciones(
-        "invalid-description",
-        "La descripción contiene caracteres no permitidos"
-      );
-      return false;
-    }
-
-    // Validar precios y cantidades (números positivos)
-    if (!this.validarPrecios(form)) return false;
 
     // Validar que el precio mayorista sea menor que el precio unitario
-    if (parseFloat(form.precio_mayorista) >= parseFloat(form.precio_unitario)) {
-      notificaciones("invalid-price-may-uni");
+    if (
+      parseFloat(campos["Precio Mayorista"]) >=
+      parseFloat(campos["Precio Unitario"])
+    ) {
+      notis(
+        "warning",
+        "El precio mayorista debe ser menor que el precio unitario"
+      );
       return false;
     }
 
     // Validar cantidad mínima para mayoreo (número entero positivo)
     if (
-      !Number.isInteger(Number(form.cantidad_activar_mayorista)) ||
-      Number(form.cantidad_activar_mayorista) <= 0
+      !Number.isInteger(Number(campos["Cantidad Mayoreo"])) ||
+      Number(campos["Cantidad Mayoreo"]) <= 0
     ) {
-      notificaciones("invalid-quantity");
+      notis(
+        "warning",
+        "La cantidad para activar precio mayorista debe ser un número entero positivo"
+      );
       return false;
     }
 
-    return true;
-  },
-
-  validarPrecios(form) {
-    // Validar que los precios sean números positivos
-    const precios = {
-      "Precio Unitario": form.precio_unitario,
-      "Precio Mayorista": form.precio_mayorista,
-    };
-
-    for (const [valor] of Object.entries(precios)) {
-      // Convertir a número y validar
-      const precio = parseFloat(valor);
-      if (isNaN(precio) || precio <= 0) {
-        notificaciones("invalid-price");
-        return false;
-      }
-
-      // Validar que tenga máximo 2 decimales
-      if (!/^\d+(\.\d{1,2})?$/.test(valor)) {
-        notificaciones("invalid-price-decimal");
-        return false;
-      }
-    }
+    if (
+      !validacionesComunes.validarSelect(
+        campos["Unidad de Medida"],
+        "unidad de medida"
+      )
+    )
+      return false;
 
     return true;
   },
@@ -326,18 +382,66 @@ const validacionesProductos = {
   validarCategorias(categorias) {
     // Validar que exista el array de categorías
     if (!Array.isArray(categorias)) {
-      notificaciones("invalid-categories", "No se han definido las categorías");
+      notis("warning", "No se han definido las categorías");
       return false;
     }
 
     // Validar que tenga al menos un objeto
     if (categorias.length === 0) {
-      notificaciones(
-        "empty-categories",
-        "Debe seleccionar al menos una categoría"
-      );
+      notis("warning", "Debe seleccionar al menos una categoría");
       return false;
     }
+
+    return true;
+  },
+};
+
+const validacionesClientes = {
+  validarCampos(form, selectedCountry) {
+    const campos = {
+      Nombre: form.nombre_completo,
+      Correo: form.correo,
+      Direccion: form.direccion,
+      Telefono: form.telefono,
+      RTN: form.rtn,
+    };
+
+    if (!validacionesComunes.validarEmpty(campos)) return false;
+
+    if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
+
+    if (!validacionesComunes.validarEmail(campos.Correo)) return false;
+
+    if (!validacionesComunes.validarDireccion(campos.Direccion)) return false;
+
+    if (!validacionesComunes.validarTelefono(campos.Telefono, selectedCountry))
+      return false;
+
+    if (!validacionesComunes.validarRTN(campos.RTN)) return false;
+
+    return true;
+  },
+};
+
+const validacionesProveedores = {
+  validarCampos(form, selectedCountry) {
+    const campos = {
+      Nombre: form.nombre,
+      Telefono: form.telefono,
+      Correo: form.correo,
+      Direccion: form.direccion,
+    };
+
+    if (!validacionesComunes.validarEmpty(campos)) return false;
+
+    if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
+
+    if (!validacionesComunes.validarTelefono(campos.Telefono, selectedCountry))
+      return false;
+
+    if (!validacionesComunes.validarEmail(campos.Correo)) return false;
+
+    if (!validacionesComunes.validarDireccion(campos.Direccion)) return false;
 
     return true;
   },
@@ -349,4 +453,6 @@ export {
   validacionesCategorias,
   validacionesSucursal,
   validacionesProductos,
+  validacionesClientes,
+  validacionesProveedores,
 };

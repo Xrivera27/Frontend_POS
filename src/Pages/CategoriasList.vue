@@ -112,7 +112,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
 import { validacionesCategorias } from '../../services/validarCampos.js';
-import { notificaciones } from '../../services/notificaciones.js';
+import { notis } from '../../services/notificaciones.js';
 import { useToast } from "vue-toastification";
 import solicitudes from "../../services/solicitudes.js";
 const { deleteCategoria } = require('../../services/categoriaSolicitudes');
@@ -200,10 +200,10 @@ export default {
           this.categorias = this.categorias.filter(
             item => item.id_categoria !== this.categoriaToDelete.id_categoria
           );
-          notificaciones('success', 'Categoría eliminada correctamente');
+          notis('success', 'Categoría eliminada correctamente');
         }
       } catch (error) {
-        notificaciones('error', new Error(error).message);
+        notis('error', new Error(error).message);
       } finally {
         this.showConfirmModal = false;
         this.categoriaToDelete = null;
@@ -221,7 +221,7 @@ export default {
 
         if (!validacionesCategorias.validarCampos(this.categoriaForm)) {
           console.log("Falló la validación");
-          return;
+          return false;
         }
 
         console.log("Pasó validación");
@@ -237,7 +237,7 @@ export default {
 
           if (response === true) {
             Object.assign(this.categorias[this.editIndex], this.categoriaForm);
-            notificaciones('success');
+            notis("success", "Actualizando datos...");
             this.closeModal();
           } else {
             throw new Error(response.message || 'Error al actualizar la categoría');
@@ -249,7 +249,7 @@ export default {
 
           if (response && response.length > 0) {
             this.categorias.push(response[0]);
-            notificaciones('form-success');
+            notis("success", "Procesando guardado...");
             this.closeModal();
           } else {
             throw new Error('Error al crear la categoría');
@@ -257,7 +257,7 @@ export default {
         }
       } catch (error) {
         console.error("Error en guardarCategoria:", error);
-        notificaciones('error', error.message);
+        notis('error', error.message);
       }
     },
 
@@ -515,7 +515,13 @@ export default {
 }
 
 .descriptionForm {
-  width: 100%;
+  width: 100%; /* Fijar el ancho a 300px, ajusta según tus necesidades */
+  max-height: 150px; /* Limitar la altura a 150px */
+  overflow-y: auto; /* Habilitar el scroll vertical si es necesario */
+  resize: none; /* Evitar que el usuario cambie el tamaño manualmente */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 .form-group label {
