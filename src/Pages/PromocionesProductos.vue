@@ -50,7 +50,17 @@
         <button v-if="esCeo" class="btn activar-form" @click="activarForm">Nueva promocion</button>
       </div>
       <div class="table-container" v-pdf-export ref="table">
-        <table class="table">
+        <!-- Indicador de carga -->
+        <div v-if="isLoading" class="loading-indicator">
+          Cargando promociones...
+        </div>
+
+        <!-- Mensaje si no hay datos -->
+        <div v-else-if="paginatedPromociones.length === 0" class="no-data">
+          No se encontraron promociones para mostrar.
+        </div>
+
+        <table v-else class="table">
           <thead>
             <tr>
               <th id="numero-promocion">#</th>
@@ -64,8 +74,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(p, index) in filterPromociones" :key="index">
-              <td>{{ index + 1 }}</td>
+            <tr v-for="(p, index) in paginatedPromociones" :key="index">
+              <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
               <td>{{ p.producto?.nombre || p.producto }}</td>
               <td>{{ p.promocion_nombre }}</td>
               <td>{{ p.porcentaje_descuento }}</td>
@@ -80,7 +90,6 @@
                   @click="desactivarProm(index)">
                   <b><i class="bi bi-check"></i></b>
                 </button>
-                <!-- Cambiar en el template -->
                 <button v-if="!p.manejo_automatico" id="btnActivar" class="btn btn-secondary"
                   @click="activarProm(p.id)">
                   <b><i class="bi bi-x"></i></b>
@@ -92,6 +101,31 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Paginación -->
+        <div class="pagination-wrapper">
+          <div class="pagination-info">
+            Mostrando {{ (currentPage - 1) * pageSize + 1 }} a 
+            {{ Math.min(currentPage * pageSize, filterPromociones.length) }} 
+            de {{ filterPromociones.length }} registros
+          </div>
+          <div class="pagination-container">
+            <button 
+              class="pagination-button" 
+              :disabled="currentPage === 1" 
+              @click="previousPage"
+            >
+              Anterior
+            </button>
+            <button 
+              class="pagination-button" 
+              :disabled="currentPage === totalPages" 
+              @click="nextPage"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -209,6 +243,8 @@ export default {
   },
   data() {
     return {
+      currentPage: 1,
+      pageSize: 10,
       titulo: 'Promociones: Productos',
       searchQuery: "",
       activeForm: false,
@@ -261,12 +297,21 @@ export default {
 
   computed: {
     filterPromociones() {
-      return this.promociones.filter(
-        (promocion) =>
-          promocion.promocion_nombre?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          (promocion.producto?.nombre || promocion.producto)?.toLowerCase().includes(this.searchQuery.toLowerCase())
+    return this.promociones
+      .filter(promocion =>
+        promocion.promocion_nombre?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        (promocion.producto?.nombre || promocion.producto)?.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
+    paginatedPromociones() {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return this.filterPromociones.slice(startIndex, endIndex);
+  },
+
+  totalPages() {
+    return Math.ceil(this.filterPromociones.length / this.pageSize);
+  }
   },
 
   methods: {
@@ -313,6 +358,18 @@ export default {
         }
       }
     },
+
+    previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  },
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  },
 
     handleProductoSelect(form) {
       const productoSeleccionado = this.productos.find(
@@ -798,6 +855,12 @@ async eliminarProm() {
       document.getElementsByTagName('head')[0].appendChild(link);
     }
   },
+
+  watch: {
+  searchQuery() {
+    this.currentPage = 1;
+  }
+},
 };
 </script>
 
@@ -834,6 +897,75 @@ async eliminarProm() {
   color: #495057;
   font-size: 1.1em;
   margin-bottom: 10px;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  margin-top: auto;
+}
+
+.pagination-info {
+  color: #6c757d;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Agregar estos estilos al modo oscuro existente */
+.dark .pagination-wrapper {
+  border-color: #404040;
+}
+
+.dark .pagination-info {
+  color: #aaa;
+}
+
+.dark .pagination-button {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .pagination-button:hover:not(:disabled) {
+  background-color: #383838;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .pagination-container {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }
 
 .warning-text {

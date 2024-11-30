@@ -125,6 +125,25 @@ import axios from 'axios';
         }
       },
 
+      async agregarProductoLista(parametros, datosActualizados){
+        try {
+
+            const url = `${homeUrl}${parametros}`;
+          const respuesta = await fetch(`${url}`,
+          {
+            method: 'PATCH',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datosActualizados)
+          });
+      
+          return respuesta.json();
+        } catch (error) {
+          throw new Error(`Ocurrio un error: ${error}`);
+        }
+      },
+
       async desactivarRegistro(parametros, datosActualizados){
         try {
             const url = `${homeUrl}${parametros}`;

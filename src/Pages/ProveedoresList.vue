@@ -4,55 +4,72 @@
 
     <div class="opciones">
       <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal"
-        style="width: 200px; white-space: nowrap;">Agregar
-        Proveedor</button>
+        style="width: 200px; white-space: nowrap;">
+        Agregar Proveedor
+      </button>
 
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select> registros
-        </span>
-      </div>
-
-      <!-- Barra de búsqueda -->
       <div class="search-bar">
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar proveedor..." />
       </div>
     </div>
+
     <div class="table-container">
-      <table class="table">
+      <!-- Indicador de carga -->
+      <div v-if="isLoading" class="loading-indicator">
+        Cargando proveedores...
+      </div>
+
+      <!-- Mensaje si no hay datos -->
+      <div v-else-if="paginatedProveedores.length === 0" class="no-data">
+        No se encontraron proveedores para mostrar.
+      </div>
+
+      <table v-else class="table">
         <thead>
           <tr>
             <th class="col-id">#</th>
             <th class="col-nombre">Nombre</th>
             <th class="col-telefono">Teléfono</th>
             <th class="col-email">Email</th>
-            <th class="col-direccion">Direccion</th>
+            <th class="col-direccion">Dirección</th>
             <th v-if="esCeo" class="col-acciones">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(proveedor, index) in paginatedProveedores" :key="index">
-            <td>{{ index + 1 }}</td>
+            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
             <td>{{ proveedor.nombre }}</td>
             <td>{{ proveedor.telefono }}</td>
             <td>{{ proveedor.correo }}</td>
             <td>{{ proveedor.direccion }}</td>
             <td v-if="esCeo">
-              <button id="btnEditar" class="btn btn-warning" @click="editProveedor(proveedor)"><i
-                  class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteProveedor(proveedor)"><b><i
-                    class="bi bi-x-lg"></i></b></button>
+              <button id="btnEditar" class="btn btn-warning" @click="editProveedor(proveedor)">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button id="btnEliminar" class="btn btn-danger" @click="deleteProveedor(proveedor)">
+                <i class="bi bi-x-lg"></i>
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
+
+      <!-- Paginación -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Mostrando {{ paginatedProveedores.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }} a 
+          {{ Math.min(currentPage * pageSize, filteredProveedores.length) }} 
+          de {{ filteredProveedores.length }} registros
+        </div>
+        <div class="pagination-container">
+          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+            Anterior
+          </button>
+          <button class="pagination-button" :disabled="currentPage === totalPages || totalPages === 0" @click="nextPage">
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="modal" v-if="showConfirmModal">
@@ -60,7 +77,7 @@
         <h2>Confirmación</h2>
         <p>¿Estás seguro de que quieres eliminar este proveedor?</p>
         <div class="modal-actions">
-          <button class="btn modalShowConfirm-Si" @click="deleteProveedor(proveedor)">
+          <button class="btn modalShowConfirm-Si" @click="deleteProveedor()">
             Sí, eliminar
           </button>
           <button class="btn modalShowConfirm-no" @click="cancelDelete">
@@ -108,7 +125,6 @@
           @click="guardarProveedor">
         </btnGuardarModal>
         <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
-
       </div>
     </div>
   </div>
@@ -122,10 +138,10 @@ import { notis } from '../../services/notificaciones.js';
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
 import { validacionesProveedores } from '../../services/validarCampos.js';
-
-// importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
+
 export default {
+  name: 'AdministrarProveedores',
   components: {
     PageHeader,
     btnGuardarModal,
@@ -134,14 +150,16 @@ export default {
   data() {
     return {
       titulo: 'Proveedores',
-      showConfirmModal: false, // Agregar esto
-      proveedoresToDelete: null,
-      searchQuery: '', // Almacena el texto de búsqueda
+      isLoading: false,
+      showConfirmModal: false,
+      proveedorToDelete: null,
+      searchQuery: '',
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
       id_usuario: 0,
-      itemsPerPage: "",
+      currentPage: 1,
+      pageSize: 10,
       esCeo: false,
       selectedCountry: 'HN',
       countryData: COUNTRY_CODES,
@@ -155,48 +173,67 @@ export default {
       proveedores: []
     };
   },
-  async mounted() {
-    document.title = "Proveedores";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
-    try {
-      this.id_usuario = await solicitudes.solicitarUsuarioToken();
-
-      this.proveedores = await solicitudes.fetchRegistros(
-        `/proveedores/${this.id_usuario}`
-      );
-      this.esCeo = await esCeo(this.id_usuario);
-
-    } catch (error) {
-      console.log(error); //modal error pendiente
-    }
-
-  },
+  
   computed: {
     filteredProveedores() {
-      // Filtra los proveedores basados en el texto de búsqueda
       return this.proveedores.filter(proveedor =>
         proveedor.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         proveedor.telefono.includes(this.searchQuery)
       );
     },
+    
     paginatedProveedores() {
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredProveedores.slice(startIndex, endIndex);
+    },
 
-      if (this.itemsPerPage === "" || this.itemsPerPage === null) {
-        return this.filteredProveedores;
-      } else {
-        return this.filteredProveedores.slice(0, parseInt(this.itemsPerPage));
-      }
+    totalPages() {
+      return Math.ceil(this.filteredProveedores.length / this.pageSize);
     }
   },
+  
   methods: {
+    updatePhoneValidation() {
+      if (this.selectedCountry && this.countryData[this.selectedCountry]) {
+        this.phoneLength = this.countryData[this.selectedCountry].length;
+      }
+    },
+
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+
+    async loadProveedores() {
+      this.isLoading = true;
+      try {
+        this.proveedores = await solicitudes.fetchRegistros(
+          `/proveedores/${this.id_usuario}`
+        );
+      } catch (error) {
+        notis('error', error.message);
+      } finally {
+        this.isLoading = false;
+      }
+    },
 
     openModal() {
       this.isModalOpen = true;
     },
+
     closeModal() {
       this.isModalOpen = false;
       this.clearForm();
     },
+
     clearForm() {
       this.proveedorForm = {
         nombre: '',
@@ -207,6 +244,7 @@ export default {
       this.isEditing = false;
       this.editIndex = null;
     },
+
     async guardarProveedor() {
       if (!validacionesProveedores.validarCampos(this.proveedorForm, this.selectedCountry)) {
         return;
@@ -215,49 +253,41 @@ export default {
       this.proveedorForm.id_usuario = this.id_usuario;
       let response;
       let parametros;
+
       if (this.isEditing) {
         try {
-          console.log(this.proveedorForm);
-          parametros = `/proveedores/actualizar-proveedor/${this.proveedores[this.editIndex].id
-            }`;
-          console.log(this.proveedores[this.editIndex].id);
-          response = await solicitudes.patchRegistro(
-            parametros,
-            this.proveedorForm
-          );
+          parametros = `/proveedores/actualizar-proveedor/${this.proveedores[this.editIndex].id}`;
+          response = await solicitudes.patchRegistro(parametros, this.proveedorForm);
 
-          if (response == true) {
-            notis('success', "Actualizando datos del proveedor...")
+          if (response === true) {
+            notis('success', "Actualizando datos del proveedor...");
             Object.assign(this.proveedores[this.editIndex], this.proveedorForm);
-          } else notis('error', response.message);
+          } else {
+            notis('error', response.message);
+          }
         } catch (error) {
           notis('error', error.message);
         }
       } else {
-        parametros = `/proveedores/crear-proveedor/${this.id_usuario}`;
         try {
-          response = await solicitudes.postRegistro(
-            parametros,
-            this.proveedorForm
-          );
+          parametros = `/proveedores/crear-proveedor/${this.id_usuario}`;
+          response = await solicitudes.postRegistro(parametros, this.proveedorForm);
 
           if (response.length > 0) {
-            notis('success', "Proveedor guardado correctamente...")
+            notis('success', "Proveedor guardado correctamente...");
             this.proveedores.push(response[0]);
-
           } else {
             throw response;
           }
         } catch (error) {
-          console.log(error);
-
+          notis('error', error.message);
         }
       }
       this.closeModal();
     },
+
     editProveedor(proveedor) {
       this.proveedorForm = { ...proveedor };
-
       this.isEditing = true;
       this.editIndex = this.proveedores.findIndex(item => item.id === proveedor.id);
       this.openModal();
@@ -270,21 +300,16 @@ export default {
         return;
       }
 
-      let response;
-      const datosActualizados = {
-        estado: false,
-        id_usuario: this.id_usuario
-      };
-
-      const parametros = `/proveedores/desactivar-proveedor/${this.proveedorToDelete.id}`;
-
       try {
-        response = await solicitudes.desactivarRegistro(
-          parametros,
-          datosActualizados
-        );
+        const datosActualizados = {
+          estado: false,
+          id_usuario: this.id_usuario
+        };
 
-        if (response == true) {
+        const parametros = `/proveedores/desactivar-proveedor/${this.proveedorToDelete.id}`;
+        const response = await solicitudes.desactivarRegistro(parametros, datosActualizados);
+
+        if (response === true) {
           this.proveedores = this.proveedores.filter(item => item.id !== this.proveedorToDelete.id);
           notis('success', 'Proveedor eliminado correctamente');
         }
@@ -308,10 +333,28 @@ export default {
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
     }
+  },
+
+  watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    }
+  },
+
+  async mounted() {
+    document.title = "Proveedores";
+    this.changeFavicon('/img/spiderman.ico');
+    
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      await this.loadProveedores();
+      this.esCeo = await esCeo(this.id_usuario);
+    } catch (error) {
+      notis('error', error.message);
+    }
   }
 };
 </script>
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
@@ -823,4 +866,76 @@ select {
   background-color: #6c757d;
   color: white;
 }
+
+/* Agregar estos estilos en la sección <style> */
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  margin-top: auto;
+}
+
+.pagination-info {
+  color: #6c757d;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Agregar estos estilos al modo oscuro existente */
+.dark .pagination-wrapper {
+  border-color: #404040;
+}
+
+.dark .pagination-info {
+  color: #aaa;
+}
+
+.dark .pagination-button {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .pagination-button:hover:not(:disabled) {
+  background-color: #383838;
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .pagination-container {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
 </style>

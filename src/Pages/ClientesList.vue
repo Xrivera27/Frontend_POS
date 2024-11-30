@@ -1,3 +1,5 @@
+
+
 <template>
   <div class="clientes-wrapper">
     <PageHeader :titulo="titulo" />
@@ -8,26 +10,23 @@
 
       <ExportButton :columns="columns" :rows="rows" fileName="Clientes.pdf" class="export-button" />
 
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select> registros
-        </span>
-      </div>
-
       <div class="search-bar">
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
       </div>
     </div>
 
     <div class="table-container">
-      <table class="table">
+      <!-- Indicador de carga -->
+      <div v-if="isLoading" class="loading-indicator">
+        Cargando clientes...
+      </div>
+
+      <!-- Mensaje si no hay datos -->
+      <div v-else-if="paginatedClientes.length === 0" class="no-data">
+        No se encontraron clientes para mostrar.
+      </div>
+
+      <table v-else class="table">
         <thead>
           <tr>
             <th>#</th>
@@ -41,7 +40,7 @@
         </thead>
         <tbody>
           <tr v-for="(cliente, index) in paginatedClientes" :key="index">
-            <td>{{ index + 1 }}</td>
+            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
             <td>{{ cliente.nombre_completo }}</td>
             <td>{{ cliente.correo }}</td>
             <td>{{ cliente.direccion }}</td>
@@ -58,6 +57,31 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Paginación -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a 
+          {{ Math.min(currentPage * pageSize, filteredClientes.length) }} 
+          de {{ filteredClientes.length }} registros
+        </div>
+        <div class="pagination-container">
+          <button 
+            class="pagination-button" 
+            :disabled="currentPage === 1" 
+            @click="previousPage"
+          >
+            Anterior
+          </button>
+          <button 
+            class="pagination-button" 
+            :disabled="currentPage === totalPages" 
+            @click="nextPage"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="modal" v-if="showConfirmModal">
@@ -144,10 +168,10 @@ export default {
   data() {
     return {
       titulo: 'Clientes',
-      showConfirmModal: false, // Agregar esto
+      isLoading: false,
+      showConfirmModal: false,
       clienteToDelete: null,
       searchQuery: '',
-      itemsPerPage: "",
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
@@ -156,6 +180,8 @@ export default {
       selectedCountry: 'HN',
       countryData: COUNTRY_CODES,
       phoneLength: 8,
+      currentPage: 1,
+      pageSize: 10,
       clienteForm: {
         id: null,
         nombre_completo: '',
@@ -170,14 +196,15 @@ export default {
   async mounted() {
     document.title = "Clientes";
     this.changeFavicon('/img/spiderman.ico');
+    this.isLoading = true;
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
-
       this.clientes = await getClientesbyEmpresa(this.id_usuario);
       this.esCeo = await esCeo(this.id_usuario);
-
     } catch (error) {
       console.log(error);
+    } finally {
+      this.isLoading = false;
     }
   },
   computed: {
@@ -188,9 +215,12 @@ export default {
       );
     },
     paginatedClientes() {
-      return this.itemsPerPage === "" || this.itemsPerPage === null
-        ? this.filteredClientes
-        : this.filteredClientes.slice(0, parseInt(this.itemsPerPage));
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredClientes.slice(startIndex, endIndex);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredClientes.length / this.pageSize);
     }
   },
   methods: {
@@ -200,13 +230,27 @@ export default {
       }
     },
 
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+
     openModal() {
       this.isModalOpen = true;
     },
+    
     closeModal() {
       this.isModalOpen = false;
       this.clearForm();
     },
+
     clearForm() {
       this.clienteForm = {
         id: null,
@@ -219,6 +263,7 @@ export default {
       this.isEditing = false;
       this.editIndex = null;
     },
+
     async guardarCliente() {
       if (!validacionesClientes.validarCampos(this.clienteForm, this.selectedCountry)) {
         return;
@@ -232,16 +277,12 @@ export default {
         if (nuevoRegistro == true) {
           notis('success', 'Cliente actualizado correctamente');
           Object.assign(this.clientes[this.editIndex], this.clienteForm);
-
         }
       } else {
-
         try {
           response = await postCliente(this.clienteForm, this.id_usuario);
           if (response.length > 0) {
-
             this.clientes.push(response[0]);
-
           } else {
             throw new Error('Error al crear el cliente.');
           }
@@ -258,6 +299,7 @@ export default {
       this.editIndex = this.clientes.findIndex(item => item.id_cliente === cliente.id_cliente);
       this.openModal();
     },
+
     async deleteCliente(cliente) {
       if (!this.showConfirmModal) {
         this.clienteToDelete = cliente;
@@ -292,6 +334,11 @@ export default {
       link.rel = 'icon';
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
+    }
+  },
+  watch: {
+    searchQuery() {
+      this.currentPage = 1;
     }
   }
 };
@@ -832,5 +879,75 @@ export default {
 .dark .modalShowConfirm-no {
   background-color: #6c757d;
   color: white;
+}
+
+/* Agregar estos estilos en la sección de estilos */
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  margin-top: auto;
+}
+
+.pagination-info {
+  color: #6c757d;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Agregar estos estilos al modo oscuro existente */
+.dark .pagination-wrapper {
+  border-color: #404040;
+}
+
+.dark .pagination-info {
+  color: #aaa;
+}
+
+.dark .pagination-button {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .pagination-button:hover:not(:disabled) {
+  background-color: #383838;
+}
+
+/* Actualizar los Media Queries existentes */
+@media screen and (max-width: 768px) {
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .pagination-container {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }
 </style>

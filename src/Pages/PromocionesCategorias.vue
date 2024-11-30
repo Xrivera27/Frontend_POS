@@ -1,7 +1,7 @@
 <template>
   <div class="categorias-wrapper">
     <PageHeader :titulo="titulo" />
-    <!-- Formulario principal con las correcciones -->
+    <!-- Formulario principal -->
     <form @submit.prevent="agregarPromocion" autocomplete="off" v-show="activeForm" class="promocion-form">
       <div class="contenedor-titulo">
         <h2 class="titulo-form">Registro de promociones</h2>
@@ -46,7 +46,7 @@
       </div>
     </form>
 
-    <!-- Vista de tabla -->
+    <!-- Vista de tabla con paginación -->
     <div class="tabla-busqueda" v-if="!activeForm">
       <div>
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar promoción..." />
@@ -55,7 +55,17 @@
         </button>
       </div>
       <div class="table-container" v-pdf-export ref="table">
-        <table class="table">
+        <!-- Indicador de carga -->
+        <div v-if="isLoading" class="loading-indicator">
+          Cargando promociones...
+        </div>
+
+        <!-- Mensaje si no hay datos -->
+        <div v-else-if="paginatedPromociones.length === 0" class="no-data">
+          No se encontraron promociones para mostrar.
+        </div>
+
+        <table v-else class="table">
           <thead>
             <tr>
               <th id="numero-promocion">#</th>
@@ -69,8 +79,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(p, index) in filterPromociones" :key="index">
-              <td>{{ index + 1 }}</td>
+            <tr v-for="(p, index) in paginatedPromociones" :key="index">
+              <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
               <td>{{ p.categoria?.nombre_categoria || p.categoria }}</td>
               <td>{{ p.nombre_promocion }}</td>
               <td>{{ p.porcentaje_descuento }}</td>
@@ -96,6 +106,21 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Paginación -->
+        <div class="pagination-wrapper">
+          <div class="pagination-info">
+            Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filterPromociones.length) }} de {{ filterPromociones.length }} registros
+          </div>
+          <div class="pagination-container">
+            <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+              Anterior
+            </button>
+            <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
+              Siguiente
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -202,7 +227,6 @@
   </div>
 </template>
 
-
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import solicitudes from "../../services/soli";
@@ -227,6 +251,8 @@ export default {
       tempPromocionData: null,
       isLoading: false,
       error: null,
+      currentPage: 1,
+      pageSize: 10,
       categorias: [],
       promForm: {
         categoria_id: "",
@@ -252,6 +278,32 @@ export default {
     };
   },
 
+  computed: {
+    filterPromociones() {
+      return this.promociones.filter(
+        (promocion) =>
+          promocion.nombre_promocion?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          (promocion.categoria?.nombre_categoria || promocion.categoria)?.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    },
+
+    paginatedPromociones() {
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filterPromociones.slice(startIndex, endIndex);
+    },
+
+    totalPages() {
+      return Math.ceil(this.filterPromociones.length / this.pageSize);
+    }
+  },
+
+  watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    }
+  },
+
   created() {
     document.title = "Promociones Categorías";
   },
@@ -269,28 +321,15 @@ export default {
     }
   },
 
-  computed: {
-    filterPromociones() {
-      return this.promociones.filter(
-        (promocion) =>
-          promocion.nombre_promocion?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          (promocion.categoria?.nombre_categoria || promocion.categoria)?.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-    },
-  },
-
   methods: {
     formatDate(dateString) {
       if (!dateString) return '';
       try {
         const date = new Date(dateString + 'T00:00:00');
-
         if (isNaN(date.getTime())) return '';
-
         const day = date.getDate();
         const month = date.toLocaleString('es-ES', { month: 'long' });
         const year = date.getFullYear();
-
         return `${day} de ${month} de ${year}`;
       } catch (error) {
         console.error('Error al formatear fecha:', error);
@@ -301,6 +340,18 @@ export default {
     getFechaMinima() {
       const hoy = new Date();
       return hoy.toISOString().split('T')[0];
+    },
+
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
     },
 
     async cargarCategorias() {
@@ -352,6 +403,7 @@ export default {
         this.isLoading = false;
       }
     },
+
     activarForm() {
       this.activeForm = !this.activeForm;
       if (this.activeForm) {
@@ -510,247 +562,105 @@ export default {
       }
     },
 
+    async desactivarProm(index) {
+      try {
+        const promocion = this.paginatedPromociones[index];
+        if (!promocion || !promocion.id) {
+          throw new Error('Promoción no válida');
+        }
+
+        const response = await solicitudes.patchRegistro(
+          `/promocionesC/cambiar-estado-promocion/${promocion.id}`,
+          { manejo_automatico: false }
+        );
+
+        if (response) {
+          await this.cargarPromociones();
+          this.$emit('mostrar-notificacion', {
+            mensaje: 'Promoción desactivada exitosamente',
+            tipo: 'success'
+          });
+        }
+      } catch (error) {
+        console.error('Error al desactivar promoción:', error);
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Error al desactivar la promoción',
+          tipo: 'error'
+        });
+      }
+    },
+
     async activarProm(promocionId) {
-  try {
-    // Usar filterPromociones para encontrar la promoción correcta
-    const promocionAActivar = this.filterPromociones.find(p => p.id === promocionId);
-    if (!promocionAActivar) {
-      throw new Error('Promoción no encontrada');
-    }
-
-    console.log('Promoción a activar:', {
-      id: promocionAActivar.id,
-      categoria: promocionAActivar.categoria?.nombre_categoria,
-      categoria_id: promocionAActivar.categoria_id,
-      categoria_producto_Id: promocionAActivar.categoria_producto_Id
-    });
-    
-    // Verificar si ya existe una promoción activa para la misma categoría
-    const promocionesActivas = this.promociones.filter(p => {
-      // Verificar si es la misma categoría usando cualquiera de los IDs disponibles
-      const mismaCategoria = 
-        (promocionAActivar.categoria_producto_Id && p.categoria_producto_Id === promocionAActivar.categoria_producto_Id) ||
-        (promocionAActivar.categoria_id && p.categoria_id === promocionAActivar.categoria_id);
-
-      const estaActiva = p.manejo_automatico;
-      const esDistinta = p.id !== promocionId;
-
-      console.log('Comparando con promoción:', {
-        id: p.id,
-        categoria: p.categoria?.nombre_categoria,
-        categoria_id: p.categoria_id,
-        categoria_producto_Id: p.categoria_producto_Id,
-        activa: estaActiva,
-        mismaCategoria: mismaCategoria,
-        esDistinta: esDistinta
-      });
-
-      return estaActiva && esDistinta && mismaCategoria;
-    });
-
-    console.log('Promociones activas encontradas:', promocionesActivas.length);
-
-    // Si no hay promociones activas para esta categoría, activar directamente
-    if (promocionesActivas.length === 0) {
-      const response = await solicitudes.patchRegistro(
-        `/promocionesC/cambiar-estado-promocion/${promocionId}`,
-        { manejo_automatico: true }
-      );
-
-      if (response) {
-        await this.cargarPromociones();
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Promoción activada exitosamente',
-          tipo: 'success'
-        });
-      }
-      return;
-    }
-
-    // Verificar conflictos de fecha con las promociones activas
-    const fechaInicioActual = new Date(promocionAActivar.fecha_inicio);
-    const fechaFinalActual = new Date(promocionAActivar.fecha_final);
-
-    const promocionConflicto = promocionesActivas.find(p => {
-      const fechaInicioExistente = new Date(p.fecha_inicio);
-      const fechaFinalExistente = new Date(p.fecha_final);
-
-      const hayConflicto = fechaInicioActual <= fechaFinalExistente && 
-                          fechaFinalActual >= fechaInicioExistente;
-
-      console.log('Verificando conflicto de fechas:', {
-        promocionId: p.id,
-        fechaInicioActual: fechaInicioActual.toISOString(),
-        fechaFinalActual: fechaFinalActual.toISOString(),
-        fechaInicioExistente: fechaInicioExistente.toISOString(),
-        fechaFinalExistente: fechaFinalExistente.toISOString(),
-        hayConflicto
-      });
-
-      return hayConflicto;
-    });
-
-    if (promocionConflicto) {
-      // Si hay conflicto, mostrar el modal de conflicto
-      this.tempPromocionData = promocionAActivar;
-      this.conflictingPromocion = promocionConflicto;
-      this.showConflictModal = true;
-      
-      this.$emit('mostrar-notificacion', {
-        mensaje: 'Ya existe una promoción activa para esta categoría en las fechas seleccionadas',
-        tipo: 'warning'
-      });
-    } else {
-      // Si no hay conflicto de fechas, activar la promoción
-      const response = await solicitudes.patchRegistro(
-        `/promocionesC/cambiar-estado-promocion/${promocionId}`,
-        { manejo_automatico: true }
-      );
-
-      if (response) {
-        await this.cargarPromociones();
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Promoción activada exitosamente',
-          tipo: 'success'
-        });
-      }
-    }
-  } catch (error) {
-    console.error('Error al activar promoción:', error);
-    this.$emit('mostrar-notificacion', {
-      mensaje: 'Error al activar la promoción',
-      tipo: 'error'
-    });
-  }
-},
-
-// También actualizar el método createAnywayPromocion para mantener la consistencia
-async createAnywayPromocion() {
-  try {
-    console.log('Procesando promoción con conflicto');
-    if (this.tempPromocionData) {
-      // Primero desactivar la promoción existente
-      const desactivarResponse = await solicitudes.patchRegistro(
-        `/promocionesC/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
-        { manejo_automatico: false }
-      );
-
-      if (desactivarResponse) {
-        // Luego activar la nueva promoción
-        const activarResponse = await solicitudes.patchRegistro(
-          `/promocionesC/cambiar-estado-promocion/${this.tempPromocionData.id}`,
+      try {
+        const response = await solicitudes.patchRegistro(
+          `/promocionesC/cambiar-estado-promocion/${promocionId}`,
           { manejo_automatico: true }
         );
 
-        if (activarResponse) {
+        if (response) {
           await this.cargarPromociones();
           this.$emit('mostrar-notificacion', {
-            mensaje: 'Nueva promoción activada y promoción anterior desactivada exitosamente',
+            mensaje: 'Promoción activada exitosamente',
             tipo: 'success'
           });
-          this.clearForm();
-          this.isShowModal = false;
-          this.activeForm = false;
-          this.closeConflictModal();
         }
+      } catch (error) {
+        console.error('Error al activar promoción:', error);
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Error al activar la promoción',
+          tipo: 'error'
+        });
       }
-    }
-  } catch (error) {
-    console.error('Error al procesar la promoción:', error);
-    this.$emit('mostrar-notificacion', {
-      mensaje: 'Error al procesar las promociones',
-      tipo: 'error'
-    });
-  }
-},
-
-   
-
- // Método desactivarProm actualizado
-async desactivarProm(index) {
-  try {
-    // Usar filterPromociones en lugar de promociones
-    const promocion = this.filterPromociones[index];
-    if (!promocion || !promocion.id) {
-      throw new Error('Promoción no válida');
-    }
-
-    console.log('Desactivando promoción:', promocion.id);
-    const response = await solicitudes.patchRegistro(
-      `/promocionesC/cambiar-estado-promocion/${promocion.id}`,
-      { manejo_automatico: false }
-    );
-
-    if (response) {
-      await this.cargarPromociones();
-      this.$emit('mostrar-notificacion', {
-        mensaje: 'Promoción desactivada exitosamente',
-        tipo: 'success'
-      });
-    }
-  } catch (error) {
-    console.error('Error al desactivar promoción:', error);
-    this.$emit('mostrar-notificacion', {
-      mensaje: 'Error al desactivar la promoción',
-      tipo: 'error'
-    });
-  }
-},
-
+    },
 
     editarPromocion(index) {
-  // Usar filterPromociones en lugar de promociones
-  const promocion = this.filterPromociones[index];
-  
-  this.promFormModal = {
-    id: promocion.id,
-    categoria_id: promocion.categoria_producto_Id,
-    categoria: promocion.categoria?.nombre_categoria || promocion.categoria,
-    nombre_promocion: promocion.nombre_promocion,
-    porcentaje_descuento: promocion.porcentaje_descuento,
-    fecha_inicio: promocion.fecha_inicio,
-    fecha_final: promocion.fecha_final,
-    estado: promocion.estado
-  };
-  
-  // Encontrar el índice real en la lista completa
-  this.editIndex = this.promociones.findIndex(p => p.id === promocion.id);
-  this.isEditing = true;
-  this.showModal();
-},
+      const promocion = this.paginatedPromociones[index];
+      
+      this.promFormModal = {
+        id: promocion.id,
+        categoria_id: promocion.categoria_producto_Id,
+        categoria: promocion.categoria?.nombre_categoria || promocion.categoria,
+        nombre_promocion: promocion.nombre_promocion,
+        porcentaje_descuento: promocion.porcentaje_descuento,
+        fecha_inicio: promocion.fecha_inicio,
+        fecha_final: promocion.fecha_final,
+        estado: promocion.estado
+      };
+      
+      this.editIndex = this.promociones.findIndex(p => p.id === promocion.id);
+      this.isEditing = true;
+      this.showModal();
+    },
 
-   // Método eliminarProm actualizado
-async eliminarProm() {
-  try {
-    const promocion = this.promociones[this.editIndex];
-    console.log('Intentando eliminar promoción:', promocion);
-    
-    if (!promocion || !promocion.id) {
-      throw new Error('Promoción no válida');
-    }
+    async eliminarProm() {
+      try {
+        const promocion = this.promociones[this.editIndex];
+        if (!promocion || !promocion.id) {
+          throw new Error('Promoción no válida');
+        }
 
-    const response = await solicitudes.deleteRegistro(
-      `/promocionesC/eliminar-promocion/${promocion.id}`
-    );
+        const response = await solicitudes.deleteRegistro(
+          `/promocionesC/eliminar-promocion/${promocion.id}`
+        );
 
-    if (response === true) {
-      await this.cargarPromociones();
-      this.$emit('mostrar-notificacion', {
-        mensaje: 'Promoción eliminada exitosamente',
-        tipo: 'success'
-      });
-      this.showConfirmModal = false;
-    }
-  } catch (error) {
-    console.error('Error al eliminar promoción:', error);
-    this.$emit('mostrar-notificacion', {
-      mensaje: 'Error al eliminar la promoción',
-      tipo: 'error'
-    });
-  } finally {
-    this.editIndex = null;
-  }
-},
+        if (response === true) {
+          await this.cargarPromociones();
+          this.$emit('mostrar-notificacion', {
+            mensaje: 'Promoción eliminada exitosamente',
+            tipo: 'success'
+          });
+          this.showConfirmModal = false;
+        }
+      } catch (error) {
+        console.error('Error al eliminar promoción:', error);
+        this.$emit('mostrar-notificacion', {
+          mensaje: 'Error al eliminar la promoción',
+          tipo: 'error'
+        });
+      } finally {
+        this.editIndex = null;
+      }
+    },
 
     showModal() {
       this.isShowModal = true;
@@ -775,21 +685,6 @@ async eliminarProm() {
     },
 
     closeConflictModal() {
-      if (this.tempPromocionData && this.tempPromocionData.id) {
-        // Abrir el modal de edición con los datos de la promoción
-        this.promFormModal = {
-          id: this.tempPromocionData.id,
-          categoria_id: this.tempPromocionData.categoria_id,
-          categoria: this.tempPromocionData.categoria?.nombre_categoria || this.tempPromocionData.categoria,
-          nombre_promocion: this.tempPromocionData.nombre_promocion,
-          porcentaje_descuento: this.tempPromocionData.porcentaje_descuento,
-          fecha_inicio: this.tempPromocionData.fecha_inicio,
-          fecha_final: this.tempPromocionData.fecha_final,
-          estado: this.tempPromocionData.estado
-        };
-        this.isEditing = true;
-        this.showModal();
-      }
       this.showConflictModal = false;
       this.conflictingPromocion = null;
       this.tempPromocionData = null;
@@ -802,7 +697,7 @@ async eliminarProm() {
       link.href = iconPath;
       document.getElementsByTagName('head')[0].appendChild(link);
     }
-  },
+  }
 };
 </script>
 
@@ -811,6 +706,57 @@ async eliminarProm() {
 
 * {
   font-family: "Montserrat", sans-serif;
+  box-sizing: border-box;
+}
+
+.loading-indicator,
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.no-data {
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  margin-top: auto;
+}
+
+.pagination-info {
+  color: #6c757d;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .contenedor-principal {
@@ -1110,48 +1056,7 @@ input {
   margin: 10px 0;
 }
 
-.btn-warning.modal-action {
-  background-color: #28a745;
-  color: white;
-}
-
-.btn-warning.modal-action:hover {
-  background-color: #218838;
-}
-
-/* Estilos adicionales para el modal de conflicto */
-.modal-content h2 {
-  color: #343a40;
-  margin-bottom: 15px;
-}
-
-.promocion-details {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  margin: 15px 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.promocion-details strong {
-  color: #495057;
-}
-
-.promocion-details p {
-  margin: 8px 0;
-}
-
-input[type="date"]:disabled {
-  background-color: #e9ecef;
-  cursor: not-allowed;
-}
-
-input[type="date"] {
-  color: #495057;
-  cursor: pointer;
-}
-
-/* Scroll personalizado */
+/* Estilos del scroll personalizado */
 .table-container::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -1222,10 +1127,18 @@ input[type="date"] {
   .modal-actions .btn {
     min-width: 100%;
   }
+
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .pagination-container {
+    justify-content: center;
+  }
 }
 
 @media screen and (max-width: 480px) {
-
   .titulo-form {
     font-size: 12px;
     top: -8%;
@@ -1245,34 +1158,18 @@ input[type="date"] {
   }
 }
 
-/* =======================================================
-   Modo Oscuro
-======================================================= */
-/* Contenedor principal */
+/* Modo Oscuro */
 .dark .categorias-wrapper {
   background-color: #1e1e1e;
   color: #fff;
 }
 
-/* Inputs y búsqueda en modo oscuro */
 .dark .busqueda {
   background-color: #2d2d2d;
   border-color: #404040;
   color: #fff;
 }
 
-.dark .custom-select {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .custom-select option {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
-/* Tabla en modo oscuro */
 .dark .table-container {
   border-color: #404040;
   background-color: #2d2d2d;
@@ -1293,28 +1190,35 @@ input[type="date"] {
   border-color: #404040;
 }
 
-.dark .table tr:hover {
-  background-color: #383838;
-}
-
-/* Modal en modo oscuro */
 .dark .modal-content {
   background-color: #2d2d2d;
   color: #fff;
 }
 
-.dark .modal-content input,
-.dark .modal-content textarea {
-  background-color: #383838;
+.dark .pagination-wrapper {
+  border-color: #404040;
+}
+
+.dark .pagination-info {
+  color: #aaa;
+}
+
+.dark .pagination-button {
+  background-color: #2d2d2d;
   border-color: #404040;
   color: #fff;
 }
 
-.dark .form-group label {
-  color: #fff;
+.dark .pagination-button:hover:not(:disabled) {
+  background-color: #383838;
 }
 
-/* Scroll personalizado en modo oscuro */
+.dark .loading-indicator,
+.dark .no-data {
+  color: #aaa;
+  background-color: #2d2d2d;
+}
+
 .dark .table-container::-webkit-scrollbar-track {
   background: #2d2d2d;
 }
@@ -1325,53 +1229,5 @@ input[type="date"] {
 
 .dark .table-container::-webkit-scrollbar-thumb:hover {
   background: #a38655;
-}
-
-/* Botones en modo oscuro (manteniendo los colores originales) */
-.dark .button-promocion {
-  background-color: #4cafaf;
-  color: white;
-}
-
-.dark .button-unidad-medida {
-  background-color: #4caf4c;
-  color: #000;
-}
-
-.dark #btnAdd {
-  background-color: #c09d62;
-  color: black;
-}
-
-.dark #btnAdd:hover {
-  background-color: #a38655;
-}
-
-.dark #btnEditar {
-  background-color: #ffc107;
-  color: black;
-}
-
-.dark #btnEditar:hover {
-  background-color: #e8af06;
-}
-
-.dark #btnEliminar {
-  background-color: #dc3545;
-  color: black;
-}
-
-.dark #btnEliminar:hover {
-  background-color: #b72433;
-}
-
-.dark .modalShowConfirm-Si {
-  background-color: #dc3545;
-  color: white;
-}
-
-.dark .modalShowConfirm-no {
-  background-color: #6c757d;
-  color: white;
 }
 </style>

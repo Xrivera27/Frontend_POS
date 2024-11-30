@@ -523,6 +523,13 @@ export default {
         toast.warning("No hay productos en la tabla de ventas.");
         return;
       }
+
+      const totalNumero = this.productosLista.reduce((total, p) => total + (p.precio_final), 0);
+      
+      if(!this.clienteSeleccionado && totalNumero > 10000){
+        toast.warning("Agregue un cliente para compras mayores a L. 10,0000");
+        return;
+      }
       this.isModalLoading = true;
       this.loadingMessage = 'Procesando venta...';
 
@@ -681,7 +688,7 @@ export default {
 
     async agregarProducto() {
         let nuevaCantidad = this.totalCantidad;
-        let productoReducir;
+
         const codigoValidar = this.addQuery;
         if (!codigoValidar) {
           const toast = useToast();
@@ -702,23 +709,31 @@ export default {
   
             return;
           }
-  
+
           const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
           if (existingProduct) {
             existingProduct.cantidad += nuevaCantidad;
-            productoReducir = existingProduct.codigo_producto;
-  
+
           } else {
             newProduct.cantidad = nuevaCantidad;
             this.productosLista.push({ ...newProduct });
-            productoReducir = newProduct.codigo_producto;
-  
           }
+
           if (!this.recuperandoVenta) {
-            //  alert(nuevaCantidad);
-            await agregarProductoCodigo(nuevaCantidad, productoReducir, this.id_usuario);
-  
+           const result = await agregarProductoCodigo(nuevaCantidad, codigoValidar, this.id_usuario);
+           console.log(result);
+           if(result.error){
+
+            const index = this.productosLista.findIndex(i => i.codigo_producto === codigoValidar);
+            this.productosLista[index].cantidad = this.productosLista[index].cantidad - nuevaCantidad;
+            if(this.productosLista[index].cantidad < 1){
+              this.productosLista.splice(index, 1);
+            }
+            result.message = 'No hay stock disponible en el inventario.';
+            throw result;
+           }
           }
+          
   
         } catch (error) {
           console.log(error);

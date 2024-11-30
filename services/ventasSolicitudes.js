@@ -116,8 +116,7 @@ export const agregarProductoCodigo = async (cantidad, codigo, id_usuario) => {
     const parametros = `/ventas/buscar-producto/${id_usuario}`;
     try {
 
-        const response = await solicitudes.patchRegistroProducto(parametros, datos);
-        console.log(response);
+        const response = await solicitudes.agregarProductoLista(parametros, datos);
 
             return response; 
 

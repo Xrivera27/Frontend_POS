@@ -318,6 +318,7 @@ export default {
 
 .categorias-wrapper {
   padding: 16px;
+  width: 100%;
 }
 
 .button-promocion {
@@ -342,18 +343,26 @@ export default {
 .opciones {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
-  margin-bottom: 16px;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 .busqueda {
-  padding: 10px;
+  padding: 12px;
   font-size: 14px;
-  border-radius: 10px;
-  border-width: 0.5px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
   width: 100%;
-  max-width: 300px;
+  max-width: 350px;
+  transition: border-color 0.2s ease;
+}
+
+.busqueda:focus {
+  outline: none;
+  border-color: #a38655;
 }
 
 /* Botones */
@@ -382,63 +391,47 @@ export default {
 
 #btnAdd:hover {
   background-color: #a38655;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
+  transform: scale(1.02);
 }
 
 #btnEditar,
 #btnEliminar {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  margin: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   font-size: 18px;
-  width: 50px;
-  height: 40px;
-  border-radius: 10px;
 }
 
 #btnEditar {
-  background-color: #ffc107;
-  color: black;
+  background-color: #fbbf24;
+  color: #000;
 }
 
 #btnEditar:hover {
-  background-color: #e8af06;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
+  background-color: #f59e0b;
+  transform: translateY(-1px);
 }
 
 #btnEliminar {
-  color: black;
-  background-color: #dc3545;
+  background-color: #ef4444;
+  color: white;
 }
 
 #btnEliminar:hover {
-  background-color: #b72433;
-  transform: scale(1.05);
-  transition: all 0.3s ease;
-}
-
-.col-id {
-  width: 10%;
-}
-
-.col-nombre {
-  width: 10%;
-}
-
-.col-descripcion {
-  width: 45%;
-}
-
-.col-productos-usados {
-  width: 20%;
-}
-
-.col-acciones {
-  width: 15%;
+  background-color: #dc2626;
+  transform: translateY(-1px);
 }
 
 /* Modal */
 .modal {
   position: fixed;
+  z-index: 1000;
   top: 0;
   left: 0;
   width: 100%;
@@ -447,7 +440,6 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
 }
 
 .modalShowConfirm-Si {
@@ -476,7 +468,11 @@ export default {
 /* Tabla */
 .table-container {
   width: 100%;
+  border-radius: 0;
+  border: 1px solid #e2e8f0;
   margin-top: 16px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .table {
@@ -486,11 +482,6 @@ export default {
   border-spacing: 0;
 }
 
-.table th,
-.table td {
-  padding: 8px;
-}
-
 .table thead {
   position: sticky;
   top: 0;
@@ -498,15 +489,33 @@ export default {
   background-color: white;
 }
 
+.table th,
+.table td {
+  padding: 8px;
+}
+
 .table thead th {
+  background-color: none;
   text-align: center;
   border-bottom: 1px solid #ddd;
 }
 
-.table tbody td {
-  text-align: center;
-  border-top: 1px solid #ddd;
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #1e293b;
 }
+
+.table tbody tr:hover {
+  background-color: #f8fafc;
+  transition: background-color 0.2s ease;
+}
+
+.col-id { width: 10%; }
+.col-nombre { width: 20%; }
+.col-descripcion { width: 45%; }
+.col-productos-usados { width: 15%; }
+.col-acciones { width: 10%; }
 
 /* Formulario */
 .form-group {
@@ -515,10 +524,10 @@ export default {
 }
 
 .descriptionForm {
-  width: 100%; /* Fijar el ancho a 300px, ajusta según tus necesidades */
-  max-height: 150px; /* Limitar la altura a 150px */
-  overflow-y: auto; /* Habilitar el scroll vertical si es necesario */
-  resize: none; /* Evitar que el usuario cambie el tamaño manualmente */
+  width: 100%;
+  max-height: 150px;
+  overflow-y: auto;
+  resize: none;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -536,68 +545,45 @@ export default {
   border-radius: 4px;
 }
 
-/* Estilos generales */
-.btn {
+/* Paginación */
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-top: 1px solid #e2e8f0;
+  background-color: white;
+}
+
+.pagination-info {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-button {
   padding: 8px 16px;
-  margin: 4px;
-  border: none;
+  border: 1px solid #e2e8f0;
+  background-color: white;
+  color: #475569;
   cursor: pointer;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.btn-danger {
-  background-color: #dc3545;
-  color: white;
+.pagination-button:hover:not(:disabled) {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
 }
 
-/* Media Queries */
-@media screen and (max-width: 768px) {
-  .opciones {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .busqueda,
-  #btnAdd {
-    width: 100%;
-    margin: 8px 0;
-  }
-
-  #btnEditar,
-  #btnEliminar {
-    width: 40px;
-    height: 35px;
-    font-size: 14px;
-    padding: 8px;
-  }
-
-  .table-container {
-    margin-top: 24px;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .modal-content {
-    width: 95%;
-    padding: 15px;
-  }
-
-  .table thead th,
-  .table tbody td {
-    padding: 6px;
-    font-size: 14px;
-  }
-
-  .form-group {
-    margin-bottom: 12px;
-  }
-
-  .h2-modal-content {
-    font-size: 20px;
-  }
-
-  .busqueda {
-    max-width: 100%;
-  }
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 /* Modo Oscuro */
@@ -612,23 +598,32 @@ export default {
   color: #fff;
 }
 
+.dark .table-container {
+  background-color: #1e1e1e;
+  border-color: #374151;
+}
+
+.dark .table {
+  background-color: #1e1e1e;
+}
+
 .dark .table thead {
-  background-color: #2d2d2d;
+  background-color: #111827;
 }
 
 .dark .table th {
-  background-color: #383838;
-  color: #fff;
-  border-color: #404040;
+  background-color: #111827;
+  color: #e5e7eb;
+  border-bottom-color: #374151;
 }
 
 .dark .table td {
-  color: #fff;
-  border-color: #404040;
+  color: #e5e7eb;
+  border-bottom-color: #374151;
 }
 
-.dark .table tr:hover {
-  background-color: #383838;
+.dark .table tbody tr:hover {
+  background-color: #1f2937;
 }
 
 .dark .modal-content {
@@ -647,138 +642,75 @@ export default {
   color: #fff;
 }
 
-/* Botones en modo oscuro */
-.dark .button-promocion {
-  background-color: #4cafaf;
-  color: white;
-}
-
-.dark .button-unidad-medida {
-  background-color: #4caf4c;
-  color: #000;
-}
-
-.dark #btnAdd {
-  background-color: #c09d62;
-  color: black;
-}
-
-.dark #btnAdd:hover {
-  background-color: #a38655;
-}
-
-.dark #btnEditar {
-  background-color: #ffc107;
-  color: black;
-}
-
-.dark #btnEditar:hover {
-  background-color: #e8af06;
-}
-
-.dark #btnEliminar {
-  background-color: #dc3545;
-  color: black;
-}
-
-.dark #btnEliminar:hover {
-  background-color: #b72433;
-}
-
-.dark .modalShowConfirm-Si {
-  background-color: #dc3545;
-  color: white;
-}
-
-.dark .modalShowConfirm-no {
-  background-color: #6c757d;
-  color: white;
-}
-
-/* Paginación */
-.pagination-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  border-top: 1px solid #dee2e6;
-  margin-top: auto;
-}
-
-.pagination-info {
-  color: #6c757d;
-}
-
-.pagination-container {
-  display: flex;
-  gap: 5px;
-}
-
-.pagination-button {
-  padding: 8px 16px;
-  border: 1px solid #dee2e6;
-  background-color: white;
-  cursor: pointer;
-  border-radius: 4px;
-  min-width: 40px;
-  transition: all 0.3s ease;
-}
-
-.pagination-button:hover:not(:disabled) {
-  background-color: #e9ecef;
-}
-
-.pagination-button.active {
-  background-color: #17a2b8;
-  color: white;
-  border-color: #17a2b8;
-}
-
-.pagination-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* Paginación en modo oscuro */
 .dark .pagination-wrapper {
-  border-top-color: #404040;
-}
-
-.dark .pagination-info {
-  color: #adb5bd;
+  background-color: #1e1e1e;
+  border-color: #374151;
 }
 
 .dark .pagination-button {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
+  background-color: #1e1e1e;
+  border-color: #374151;
+  color: #e5e7eb;
 }
 
 .dark .pagination-button:hover:not(:disabled) {
-  background-color: #383838;
+  background-color: #374151;
 }
 
-.dark .pagination-button.active {
-  background-color: #17a2b8;
-}
-
-/* Media Queries para la paginación */
+/* Media Queries */
 @media screen and (max-width: 768px) {
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .busqueda,
+  #btnAdd {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  #btnEditar,
+  #btnEliminar {
+    width: 32px;
+    height: 32px;
+  }
+
   .pagination-wrapper {
     flex-direction: column;
     gap: 1rem;
+    text-align: center;
   }
 
   .pagination-container {
     justify-content: center;
-    flex-wrap: wrap;
   }
 }
 
 @media screen and (max-width: 480px) {
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .table th,
+  .table td {
+    padding: 8px;
+    font-size: 14px;
+  }
+
   .pagination-button {
     padding: 6px 12px;
     font-size: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .h2-modal-content {
+    font-size: 20px;
   }
 }
 </style>
