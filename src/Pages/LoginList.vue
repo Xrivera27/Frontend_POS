@@ -77,43 +77,53 @@ export default {
   },
   methods: {
     async login() {
-      const toast = useToast(); // Inicializa el toast
-      try {
-        this.isLoading = true;
+  const toast = useToast();
+  try {
+    this.isLoading = true;
 
-        const response = await fetch('http://localhost:3000/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: this.username, password: this.password })
-        });
+    const response = await fetch('http://localhost:3000/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: this.username, password: this.password })
+    });
 
-        const data = await response.json();
+    const data = await response.json();
 
-        if (response.ok) {
-          localStorage.setItem('auth', data.token);
-          localStorage.setItem('role', data.role); // Guarda el rol
-          this.isLoading = false;
-          const role = localStorage.getItem('role');
-          if (role === '3') {
-            this.$router.push('/ventas'); // Redirecciona al home
-          } else {
-            this.$router.push('/home');
-          }
-        } else {
-          this.isLoading = false;// Muestra el mensaje de error en un popup
-          toast.error(data.message, {
-            timeout: 5000
-          });
-        }
-      } catch (error) {
-        this.isLoading = false;
-        console.error('Error:', error);// Popup para errores generales
-        toast.error('Error de red o servidor.', {
-          timeout: 5000
-        });
+    if (response.ok) {
+      // Limpiar cualquier estado previo
+      localStorage.clear();
+      
+      // Guardar datos en localStorage
+      localStorage.setItem('auth', data.token);
+      localStorage.setItem('role', data.role);
+      
+      // Emitir eventos para actualizar el estado
+      window.dispatchEvent(new Event('roleChange'));
+      this.$emit('auth-change');
+
+      this.isLoading = false;
+
+      // Redirigir según el rol
+      const role = localStorage.getItem('role');
+      if (role === '3') {
+        this.$router.push('/ventas');
+      } else {
+        this.$router.push('/home');
       }
-    },
-
+    } else {
+      this.isLoading = false;
+      toast.error(data.message, {
+        timeout: 5000
+      });
+    }
+  } catch (error) {
+    this.isLoading = false;
+    console.error('Error:', error);
+    toast.error('Error de red o servidor.', {
+      timeout: 5000
+    });
+  }
+},
     async recoverPassword() {
       try {
         this.isLoading = true;

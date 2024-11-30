@@ -23,7 +23,7 @@ import AdministrarInventario from "@/Pages/AlertasInventario.vue";
 
 // Función para obtener el rol desde localStorage
 function getRole() {
-  return localStorage.getItem("role"); // Obtiene el rol del usuario desde localStorage
+  return localStorage.getItem("role");
 }
 
 /*
@@ -38,26 +38,28 @@ const routes = [
     path: "/administrar-compras",
     name: "AdministrarCompras",
     component: AdministrarCompras,
+    meta: { requiresAuth: true, role: [1, 2, 4] },
   },
   {
     path: "/administrar-ventas",
     name: "AdministrarVentas",
     component: AdministrarVentas,
+    meta: { requiresAuth: true, role: [1, 2, 4] },
   },
   {
     path: "/",
-    redirect: "/login", // Redirige a /login cuando se accede a la ruta raíz
+    redirect: "/login",
   },
   {
     path: "/login",
     name: "Login",
-    component: LoginList, // Solo el componente de login
+    component: LoginList,
   },
   {
     path: "/home",
     name: "Home",
     component: HomeList,
-    meta: { requiresAuth: true }, // Añadido para rutas protegidas
+    meta: { requiresAuth: true },
   },
   {
     path: "/clientes",
@@ -65,15 +67,12 @@ const routes = [
     component: ClientesList,
     meta: { requiresAuth: true, role: [1, 2, 4] },
   },
-
   {
     path: "/reporte",
     name: "reporte",
     component: ReporteVentasList,
     meta: { requiresAuth: true, role: [1, 2, 4] },
   },
-
-
   {
     path: "/sucursales",
     name: "Sucursales",
@@ -108,7 +107,7 @@ const routes = [
     path: "/productos",
     name: "Productos",
     component: ProductosList,
-    meta: { requiresAuth: true, role: [1, 2, 3, 4] },
+    meta: { requiresAuth: true, role: [1, 2, 4] },
   },
   {
     path: "/registro",
@@ -119,7 +118,7 @@ const routes = [
     path: "/compras",
     name: "Compras",
     component: ComprasList,
-    meta: { requiresAuth: true, role: [1, 2, 3] },
+    meta: { requiresAuth: true, role: [1, 2] },
   },
   {
     path: "/ventas",
@@ -131,17 +130,19 @@ const routes = [
     path: "/promociones-producto",
     name: "Promociones-producto",
     component: PromocionesProductos,
+    meta: { requiresAuth: true, role: [1, 2, 4] },
   },
   {
     path: "/promociones-categorias",
     name: "Promociones-categorias",
     component: PromocionesCategorias,
+    meta: { requiresAuth: true, role: [1, 2, 4] },
   },
   {
     path: "/config-page",
     name: "Config-page",
     component: ConfigPage,
-    meta: { requiresAuth: true, role: [1, 2, 3, 4] },
+    meta: { requiresAuth: true, role: [1, 2, 4] },
   },
   {
     path: "/config-company",
@@ -159,50 +160,98 @@ const routes = [
     path: "/admin-invenario",
     name: "Admin-inventario",
     component: AdministrarInventario,
-    meta: { requiresAuth: true, role: [1, 2, 3, 4] },
+    meta: { requiresAuth: true, role: [1, 2, 4] },
   },
   {
-    path: "/:pathMatch(.*)*", // Ruta para manejar rutas no encontradas
-    redirect: "/",
-  },
+    path: "/:pathMatch(.*)*",
+    redirect: () => {  // Removido el parámetro 'to' ya que no se usa
+      const isAuthenticated = Boolean(localStorage.getItem("auth"));
+      const role = getRole();
+      
+      if (!isAuthenticated) return '/login';
+      return role === '3' ? '/ventas' : '/home';
+    }
+  }
 ];
 
-// Crear el router
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 
-// Verificación de autenticación y control de acceso por roles
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = Boolean(localStorage.getItem("auth")); // Verifica si el usuario está autenticado
+  const isAuthenticated = Boolean(localStorage.getItem("auth"));
   const role = getRole();
 
   console.log("Ruta solicitada:", to.path);
   console.log("Usuario autenticado:", isAuthenticated);
   console.log("Rol del usuario:", role);
 
-  // Permitir siempre el acceso a la ruta /reset sin autenticación
+  // Si el usuario está autenticado e intenta acceder al login
+  if (to.path === '/login' && isAuthenticated) {
+    if (role === '3') {
+      return next('/ventas');
+    }
+    return next('/home');
+  }
+
+  // Si intenta acceder a la ruta raíz estando autenticado
+  if (to.path === '/' && isAuthenticated) {
+    if (role === '3') {
+      return next('/ventas');
+    }
+    return next('/home');
+  }
+
+  // Permitir acceso a reset-password sin autenticación
   if (to.path === "/reset") {
-    return next(); // Permite el acceso a la ruta de restablecimiento de contraseña
+    return next();
   }
 
   // Si la ruta requiere autenticación y el usuario no está autenticado
-  if (
-    to.matched.some((record) => record.meta.requiresAuth) &&
-    !isAuthenticated
-  ) {
-    return next("/login"); // Redirige al login
+  if (to.matched.some((record) => record.meta.requiresAuth) && !isAuthenticated) {
+    return next("/login");
   }
 
   // Si la ruta tiene roles definidos y el rol del usuario no tiene acceso
   if (
     to.matched.some((record) => record.meta.role) &&
-    !to.meta.role.includes(Number(role))
+    !to.meta.role?.includes(Number(role))
   ) {
-    return next("/home"); // Redirige a Home si el rol no tiene acceso
+    if (role === '3') {
+      return next('/ventas');
+    }
+    return next("/home");
   }
 
-  next(); // Permite la navegación
+  // Si el usuario está autenticado y trata de acceder a una ruta no existente
+  if (to.matched.length === 0 && isAuthenticated) {
+    if (role === '3') {
+      return next('/ventas');
+    }
+    return next('/home');
+  }
+
+  next();
 });
+
+// Manejar el evento popstate (botones atrás/adelante del navegador)
+if (typeof window !== 'undefined') {
+  window.addEventListener('popstate', () => {
+    const isAuthenticated = Boolean(localStorage.getItem("auth"));
+    const role = getRole();
+
+    if (isAuthenticated) {
+      const currentPath = window.location.pathname;
+      if (currentPath === '/login' || currentPath === '/') {
+        if (role === '3') {
+          router.push('/ventas');
+        } else {
+          router.push('/home');
+        }
+      }
+    }
+  });
+}
+
 export default router;
