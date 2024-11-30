@@ -97,37 +97,43 @@
             </div>
           </div>
         </div>
+        <div class="right-section">
+          <div class="numeric-keypad">
+            <input name="codigo-producto" autocomplete="off0" ref="codigoRef" type="text" class="campo"
+              v-model="addQuery" tabindex="1" :disabled="!cajaAbierta || isModalFocused || isModalVisible" required />
 
-        <!-- Teclado numérico -->
-        <div class="numeric-keypad">
-          <input name="codigo-producto" autocomplete="off0" ref="codigoRef" type="text" class="campo" v-model="addQuery"
-            tabindex="1" :disabled="!cajaAbierta || isModalFocused || isModalVisible" required />
-
-          <div class="keypad">
-            <button :disabled="!cajaAbierta" @click="agregarNumero(1)">1</button>
-            <button :disabled="!cajaAbierta" @click="agregarNumero(2)">2</button>
-            <button :disabled="!cajaAbierta" @click="agregarNumero(3)">3</button>
-            <button :disabled="!cajaAbierta" @click="agregarNumero(4)">4</button>
-            <button :disabled="!cajaAbierta" @click="agregarNumero(5)">5</button>
-            <button :disabled="!cajaAbierta" @click="agregarNumero(6)">6</button>
-            <button :disabled="!cajaAbierta" @click="agregarNumero(7)">7</button>
-            <button :disabled="!cajaAbierta" @click="agregarNumero(8)">8</button>
-            <button :disabled="!cajaAbierta" @click="agregarNumero(9)">9</button>
-            <button :disabled="!cajaAbierta" @click="agregarNumero(0)">0</button>
-            <button :disabled="!cajaAbierta" @click="agregarNumero('.')">.</button>
-            <button :disabled="!cajaAbierta" @click="agregarNumero('*')">*</button>
-            <button :disabled="!cajaAbierta" class="borrar" @click="borrarUltimo">←</button>
-            <button :disabled="!cajaAbierta" class="limpiar" @click="limpiar">Limpiar</button>
-            <button :disabled="!cajaAbierta" class="enter" @click="procesarEnter">Enter</button>
+            <div class="keypad">
+              <button :disabled="!cajaAbierta" @click="agregarNumero(1)">1</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(2)">2</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(3)">3</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(4)">4</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(5)">5</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(6)">6</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(7)">7</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(8)">8</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(9)">9</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(0)">0</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero('.')">.</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero('*')">*</button>
+              <button :disabled="!cajaAbierta" class="borrar" @click="borrarUltimo">←</button>
+              <button :disabled="!cajaAbierta" class="limpiar" @click="limpiar">Limpiar</button>
+              <button :disabled="!cajaAbierta" class="enter" @click="procesarEnter">Enter</button>
+            </div>
           </div>
+
+          <!-- <div v-if="!estadoCajaValidado"> -->
+          <!-- </div> -->
+          <button v-if="!cajaAbierta" class="abrir-caja-button" @click="abrirCaja">
+            Abrir caja
+          </button>
+          <button v-if="cajaAbierta" class="abrir-caja-button" @click="cerrarCaja" style="background-color: crimson;">
+            Cerrar caja
+          </button>
+
         </div>
       </div>
 
-      <div v-if="estadoCajaValidado">
-        <button v-if="!cajaAbierta" class="cajaButton" @click="abrirCaja">
-          Abrir caja
-        </button>
-      </div>
+
 
       <div class="footer-container">
         <button :disabled="!cajaAbierta" @click="buscarProducto">Buscar producto [F2]</button>
@@ -166,7 +172,7 @@ import RegistrarPagoModal from '../components/modalesCrearVenta/RegistrarPagoMod
 import EliminarItemsModal from '../components/modalesCrearVenta/EliminarItemsModal.vue';
 import BuscarProductoModal from '../components/modalesCrearVenta/BuscarProductoModal.vue';
 import { useToast } from "vue-toastification";
-import { notificaciones } from '../../services/notificaciones.js';
+import { notificaciones, notis } from '../../services/notificaciones.js';
 import ModalLoading from '@/components/ModalLoading.vue';
 import GuardarVentaModal from '@/components/modalesCrearVenta/GuardarVentaModal.vue';
 import RecuperarVentaModal from '@/components/modalesCrearVenta/RecuperarVentaModal.vue';
@@ -315,6 +321,10 @@ export default {
     abrirCaja() {
       this.isAperturaCajaModalVisible = true;
       this.pauseMainKeyboardEvents();
+    },
+
+    cerrarCaja() {
+      notis("success", "Caja cerrada con éxito :D (obviamente esto no va a así va, pero no se que puercas va en el modal de cerrar caja .i.)");
     },
 
     async handleAperturaCaja(monto) {
@@ -525,8 +535,8 @@ export default {
       }
 
       const totalNumero = this.productosLista.reduce((total, p) => total + (p.precio_final), 0);
-      
-      if(!this.clienteSeleccionado && totalNumero > 10000){
+
+      if (!this.clienteSeleccionado && totalNumero > 10000) {
         toast.warning("Agregue un cliente para compras mayores a L. 10,0000");
         return;
       }
@@ -687,60 +697,60 @@ export default {
     },
 
     async agregarProducto() {
-        let nuevaCantidad = this.totalCantidad;
+      let nuevaCantidad = this.totalCantidad;
 
-        const codigoValidar = this.addQuery;
-        if (!codigoValidar) {
+      const codigoValidar = this.addQuery;
+      if (!codigoValidar) {
+        const toast = useToast();
+        toast.warning("Ingresa un código");
+        return;
+      }
+
+      if (!nuevaCantidad || nuevaCantidad === 0 || nuevaCantidad === "") {
+        nuevaCantidad = 1;
+      }
+
+      try {
+        this.limpiar();
+        const newProduct = this.productos.find((p) => p.codigo_producto === codigoValidar);
+        if (!newProduct) {
           const toast = useToast();
-          toast.warning("Ingresa un código");
+          toast.warning("No existe el producto");
+
           return;
         }
-  
-        if (!nuevaCantidad || nuevaCantidad === 0 || nuevaCantidad === "") {
-          nuevaCantidad = 1;
+
+        const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
+        if (existingProduct) {
+          existingProduct.cantidad += nuevaCantidad;
+
+        } else {
+          newProduct.cantidad = nuevaCantidad;
+          this.productosLista.push({ ...newProduct });
         }
-  
-        try {
-          this.limpiar();
-          const newProduct = this.productos.find((p) => p.codigo_producto === codigoValidar);
-          if (!newProduct) {
-            const toast = useToast();
-            toast.warning("No existe el producto");
-  
-            return;
-          }
 
-          const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
-          if (existingProduct) {
-            existingProduct.cantidad += nuevaCantidad;
-
-          } else {
-            newProduct.cantidad = nuevaCantidad;
-            this.productosLista.push({ ...newProduct });
-          }
-
-          if (!this.recuperandoVenta) {
-           const result = await agregarProductoCodigo(nuevaCantidad, codigoValidar, this.id_usuario);
-           console.log(result);
-           if(result.error){
+        if (!this.recuperandoVenta) {
+          const result = await agregarProductoCodigo(nuevaCantidad, codigoValidar, this.id_usuario);
+          console.log(result);
+          if (result.error) {
 
             const index = this.productosLista.findIndex(i => i.codigo_producto === codigoValidar);
             this.productosLista[index].cantidad = this.productosLista[index].cantidad - nuevaCantidad;
-            if(this.productosLista[index].cantidad < 1){
+            if (this.productosLista[index].cantidad < 1) {
               this.productosLista.splice(index, 1);
             }
             result.message = 'No hay stock disponible en el inventario.';
             throw result;
-           }
           }
-          
-  
-        } catch (error) {
-          console.log(error);
-          notificaciones('error', error.message);
         }
-      },
-      
+
+
+      } catch (error) {
+        console.log(error);
+        notificaciones('error', error.message);
+      }
+    },
+
     async guardarVenta() {
       if (this.productosLista.length === 0) {
         const toast = useToast();
@@ -921,7 +931,7 @@ export default {
       }
     } catch (error) {
       notificaciones('error', error.message);
-      this.estadoCajaValidado = true; 
+      this.estadoCajaValidado = true;
     }
   },
 
@@ -1193,14 +1203,57 @@ td {
   font-size: clamp(12px, 1.5vw, 14px);
 }
 
-/* Teclado Numérico */
-.numeric-keypad {
+.right-section {
   width: clamp(250px, 20%, 300px);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 10px;
+  gap: 15px;
   border-left: 1px solid #ccc;
+  padding: 10px;
+}
+
+.abrir-caja-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #7bff00;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 35%;
+}
+
+
+.abrir-caja-button:hover {
+  background-color: #6ce600;
+}
+
+.dark .abrir-caja-button {
+  background-color: #5cb300;
+  color: #fff;
+}
+
+.dark .abrir-caja-button:hover {
+  background-color: #4c9900;
+}
+
+@media screen and (max-width: 768px) {
+  .right-section {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #ccc;
+  }
+}
+
+/* Teclado Numérico */
+.numeric-keypad {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   z-index: 1;
 }
 
@@ -1501,11 +1554,6 @@ button {
   -webkit-text-fill-color: #fff;
   -webkit-box-shadow: 0 0 0px 1000px #383838 inset;
   transition: background-color 5000s ease-in-out 0s;
-}
-
-.cajaButton {
-  background-color: #2d2d2d;
-  width: 25%;
 }
 
 button:disabled {

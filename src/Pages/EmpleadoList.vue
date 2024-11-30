@@ -89,7 +89,7 @@
       <div class="modal-content">
         <h2>Confirmación</h2>
         <p>¿Estás seguro de que quieres eliminar este usuario?</p>
-        <div class="modal-actions">
+        <div class="modal-actions">{}
           <button class="btn modalShowConfirm-Si" @click="deleteUsuariol(empleado)">
             Sí, eliminar
           </button>
