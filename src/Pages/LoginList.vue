@@ -99,16 +99,19 @@ export default {
       
       // Emitir eventos para actualizar el estado
       window.dispatchEvent(new Event('roleChange'));
-      this.$emit('auth-change');
+      
+      // Forzar una actualización del estado
+      this.$nextTick(() => {
+        this.$emit('auth-change');
+      });
 
       this.isLoading = false;
 
       // Redirigir según el rol
-      const role = localStorage.getItem('role');
-      if (role === '3') {
-        this.$router.push('/ventas');
+      if (data.role === '3') {
+        await this.$router.push('/ventas');
       } else {
-        this.$router.push('/home');
+        await this.$router.push('/home');
       }
     } else {
       this.isLoading = false;

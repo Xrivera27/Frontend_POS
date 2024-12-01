@@ -1,15 +1,17 @@
 <template>
     <div>
         <div class="btn-config-container">
-            <!-- Usa router-link sin la función isActive -->
             <router-link to="/config-page" class="btn-config nav-link">
                 <div class="icon-container">
                     <i id="campana" class="bi bi-bell-fill"></i>
                 </div>
-                <div class="text-container">
+                <div class="text-container" v-if="!loading">
                     <span class="id_usuario">{{ username }} {{ apellido }}</span>
                     <br>
                     <span class="rol">{{ rol }}</span>
+                </div>
+                <div v-else class="text-container">
+                    <span class="id_usuario">Cargando...</span>
                 </div>
             </router-link>
         </div>
@@ -22,28 +24,33 @@ import axios from 'axios';
 export default {
     data() {
         return {
-            username: '',  // Estado para el nombre de usuario
-            role: '',  // Estado para el rol
-            id_usuario: '',  // Estado para el id del usuario
+            username: '',
+            apellido: '',
+            rol: '',
+            id_usuario: '',
+            loading: true
         };
     },
     methods: {
-        fetchUserProfile() {
-            const token = localStorage.getItem('auth');
-            axios.get('http://localhost:3000/api/perfil', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-                .then(response => {
-                    this.id_usuario = response.data.id_usuario;
-                    this.username = response.data.nombre;
-                    this.apellido = response.data.apellido;
-                    this.rol = response.data.cargo;
-                })
-                .catch(error => {
-                    console.error('Error al obtener el perfil del usuario:', error);
+        async fetchUserProfile() {
+            try {
+                this.loading = true;
+                const token = localStorage.getItem('auth');
+                const response = await axios.get('http://localhost:3000/api/perfil', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
                 });
+                
+                this.id_usuario = response.data.id_usuario;
+                this.username = response.data.nombre;
+                this.apellido = response.data.apellido;
+                this.rol = response.data.cargo;
+            } catch (error) {
+                console.error('Error al obtener el perfil del usuario:', error);
+            } finally {
+                this.loading = false;
+            }
         }
     },
     mounted() {
