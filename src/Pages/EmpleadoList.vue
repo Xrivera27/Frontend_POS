@@ -12,7 +12,7 @@
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar empleado..." />
       </div>
 
-      <div class="registros">
+      <div class="registros" v-if="sucursales.length > 1" >
         <span>
           <select class="custom-select" v-model="searchSucursal">
             <option value="default" selected>Todas</option>
@@ -89,7 +89,7 @@
       <div class="modal-content">
         <h2>Confirmación</h2>
         <p>¿Estás seguro de que quieres eliminar este usuario?</p>
-        <div class="modal-actions">{}
+        <div class="modal-actions">
           <button class="btn modalShowConfirm-Si" @click="deleteUsuariol(empleado)">
             Sí, eliminar
           </button>
@@ -130,8 +130,10 @@
 
             <div class="form-group">
               <label for="rol">Selecciona rol:</label>
-              <select class="form-select" id="rol" name="rol" v-model="usuarioForm.rol" required>
-                <option value="default" disabled selected>Selecciona un rol</option>
+              
+              <select class="form-select" id="rol" name="rol" value="default" v-model="usuarioForm.rol"
+                required>
+                <option value="" disabled selected>Selecciona un rol</option>
                 <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option>
               </select>
             </div>
@@ -172,7 +174,7 @@
               <input v-model="usuarioForm.direccion" type="text" required />
             </div>
 
-            <div class="form-group">
+            <div class="form-group" v-if="sucursales.length > 1" >
               <label for="sucursal">Selecciona sucursal:</label>
               <select class="form-select" id="sucursal" name="sucursal" value="default" v-model="usuarioForm.sucursal"
                 required>
@@ -202,7 +204,7 @@ import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 import solicitudes from "../../services/solicitudes.js";
 import { notis } from '../../services/notificaciones.js';
-const { esCeo } = require('../../services/usuariosSolicitudes');
+const { esCeo, getUsuariosEmpresa, getRolesUsuarioPage, getUsuariosSucrusal } = require('../../services/usuariosSolicitudes');
 import PageHeader from "@/components/PageHeader.vue";
 import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
@@ -284,17 +286,6 @@ export default {
       }
     },
 
-    async loadEmpleados() {
-      this.isLoading = true;
-      try {
-        const id_usuario = await solicitudes.solicitarUsuarioToken();
-        this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${id_usuario}`);
-      } catch (error) {
-        notis('error', error.message);
-      } finally {
-        this.isLoading = false;
-      }
-    },
 
     openModal() {
       this.isModalOpen = true;
@@ -327,6 +318,23 @@ export default {
     getRol(id_rol) {
       const rol = this.roles.find(rol => rol.id_rol === id_rol);
       return rol ? rol.cargo : 'Desconocido';
+    },
+
+    async getUsuarios(sucursales){
+      try {
+        if(sucursales.length === 1){
+          
+          this.empleados = await getUsuariosSucrusal(this.id_usuario, sucursales[0].id_sucursal);
+          this.searchSucursal = sucursales[0].id_sucursal;
+          this.usuarioForm.sucursal = sucursales[0].id_sucursal;
+        }
+
+        else{
+          this.empleados = await getUsuariosEmpresa(this.id_usuario);
+        }
+      } catch (error) {
+        notis('error', 'Error al obtener usuarios.');
+      }
     },
 
     editarPassword() {
@@ -466,14 +474,14 @@ export default {
   async mounted() {
     document.title = "Usuarios";
     this.changeFavicon('/img/spiderman.ico');
-    await this.loadEmpleados();
+  
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.esCeo = await esCeo(this.id_usuario);
       this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
-      this.empleados = await solicitudes.fetchRegistros(`/usuarios/getBy-empresa/${this.id_usuario}`);
-      this.roles = await solicitudes.fetchRegistros('/roles');
+      await this.getUsuarios(this.sucursales);
+      this.roles = await getRolesUsuarioPage();
     } catch (error) {
       notis('error', error.message);
     }
