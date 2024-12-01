@@ -133,8 +133,6 @@
         </div>
       </div>
 
-
-
       <div class="footer-container">
         <button :disabled="!cajaAbierta" @click="buscarProducto">Buscar producto [F2]</button>
         <BuscarProductoModal :isVisible="isBuscarProductoModalVisible" :productos="productos"

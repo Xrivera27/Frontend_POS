@@ -343,6 +343,7 @@ export default {
 
     async guardarUsuario() {
       if (!validacionesUsuario.validarCampos(this.usuarioForm, this.isPassEdit, this.selectedCountry)) {
+      alert("Error equisde")
         return;
       }
 

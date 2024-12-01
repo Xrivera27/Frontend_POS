@@ -180,7 +180,6 @@ const validacionesUsuario = {
 
     if (isPassEdit) {
       if (!validacionesComunes.validarEmpty(campos)) return false;
-      return false;
     }
 
     if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
