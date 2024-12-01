@@ -13,65 +13,77 @@
                     <div class="resumen-grid">
                         <div class="resumen-item">
                             <span>Subtotal:</span>
-                            <span>L. {{ mostrarSubtotal }}</span>
+                            <span>L. {{ formatPrice(factura.sub_total) }}</span>
                         </div>
                         <div class="resumen-item">
                             <span>Impuesto:</span>
-                            <span>L. {{ impuesto }}</span>
+                            <span>L. {{ formatPrice(factura.total_ISV) }}</span>
                         </div>
                         <div class="resumen-item item-descuento">
                             <span>Descuento:</span>
-                            <span>L.-{{ returnDescuento }}</span>
+                            <span>L. -{{ formatPrice(factura.descuento) }}</span>
                         </div>
                         <div class="resumen-item total">
                             <span>Total:</span>
-                            <span>L. {{ total }}</span>
+                            <span>L. {{ formatPrice(total) }}</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-container">
-                    <!-- Monto a pagar -->
-                    <div class="form-group">
-                        <label>Monto a Pagar:</label>
-                        <input type="number" v-model="monto" ref="montoInput" @input="calcularCambio" />
-                    </div>
-
                     <!-- Método de Pago -->
                     <div class="form-group">
                         <label>Método de Pago:</label>
                         <select v-model="metodoPago" @change="handleMetodoPagoChange">
                             <option value="Efectivo">Efectivo</option>
-                            <option value="Tarjeta">Tarjeta</option>
+                            <option value="Transferencia">Transferencia</option>
                             <option value="Mixto">Pago Mixto</option>
                         </select>
                     </div>
 
-                    <!-- Sección de Tarjeta (condicional) -->
-                    <div v-if="metodoPago === 'Tarjeta' || metodoPago === 'Mixto'" class="tarjeta-section">
-                        <div class="form-group">
-                            <label>Cantidad a depositar:</label>
-                            <input type="text" v-model="numeroTarjeta" />
-                            <label>Fecha Exp:</label>
-                            <input type="text" v-model="fechaExp" placeholder="MM/YY" maxlength="5"
-                                @input="formatearFechaExp" />
+                    <!-- Pago en Efectivo -->
+                    <div v-if="metodoPago === 'Efectivo'" class="form-group">
+                        <label>Monto a Pagar:</label>
+                        <input type="number" v-model.number="montoEfectivo" ref="montoInput" @input="calcularCambio"
+                            :min="total" step="0.01" />
+                        <div v-if="errorEfectivo" class="error-message">
+                            {{ errorEfectivo }}
                         </div>
                     </div>
 
-                    <!-- Sección de Pago Mixto (condicional) -->
+                    <!-- Pago por Transferencia -->
+                    <div v-if="metodoPago === 'Transferencia'" class="form-group">
+                        <label>Monto de la transferencia:</label>
+                        <input type="number" v-model.number="montoTransferencia" readonly />
+                        <label>Número de transferencia:</label>
+                        <input type="text" v-model="numeroTransferencia" maxlength="5" pattern="\d{5}"
+                            placeholder="12345" />
+                        <div v-if="errorTransferencia" class="error-message">
+                            {{ errorTransferencia }}
+                        </div>
+                    </div>
+
+                    <!-- Pago Mixto -->
                     <div v-if="metodoPago === 'Mixto'" class="mixto-section">
                         <div class="form-group">
                             <label>Monto en Efectivo:</label>
-                            <input type="number" v-model="montoEfectivo" @input="actualizarMontoTarjeta" />
+                            <input type="number" v-model.number="montoEfectivo" @input="actualizarPagoMixto"
+                                :max="total" step="0.01" />
                         </div>
                         <div class="form-group">
-                            <label>Monto en Tarjeta:</label>
-                            <input type="number" v-model="montoTarjeta" readonly />
+                            <label>Monto en Transferencia:</label>
+                            <input type="number" v-model.number="montoTransferencia" readonly />
+                            <label v-if="montoTransferencia > 0">Número de transferencia:</label>
+                            <input v-if="montoTransferencia > 0" type="text" v-model="numeroTransferencia" maxlength="5"
+                                pattern="\d{5}" placeholder="12345" />
+                        </div>
+                        <div v-if="errorMixto" class="error-message">
+                            {{ errorMixto }}
                         </div>
                     </div>
 
-                    <!-- Cambio (para efectivo) -->
-                    <div v-if="metodoPago === 'Efectivo' || metodoPago === 'Mixto'" class="cambio-section">
+                    <!-- Cambio (solo para efectivo o pago mixto) -->
+                    <div v-if="mostrarCambio" class="cambio-section">
                         <div class="resumen-item cambio">
                             <span>Cambio:</span>
                             <span>L. {{ formatPrice(cambio) }}</span>
@@ -86,8 +98,8 @@
                 </div>
 
                 <div class="button-container">
-                    <button @click="confirmarPago" :disabled="!isPagoValido" class="btn-confirm">
-                        Confirmar Pago
+                    <button @click="confirmarPago" :disabled="!isPagoValido || isModalLoading" class="btn-confirm">
+                        {{ isModalLoading ? 'Procesando...' : 'Confirmar Pago' }}
                     </button>
                     <button @click="$emit('close')" class="btn-cancel">Cancelar</button>
                 </div>
@@ -106,98 +118,105 @@ export default {
         },
         factura: {
             type: Object,
-            default: () => ({})
+            required: true
         }
     },
     data() {
         return {
             isModalLoading: false,
-            monto: 0,
             metodoPago: 'Efectivo',
-            notas: '',
-            // Datos de tarjeta
-            tipoTarjeta: 'Visa',
-            numeroTarjeta: '',
-            fechaExp: '',
-            cvv: '',
-            cuotas: '1',
-            // Datos de pago mixto
             montoEfectivo: 0,
-            montoTarjeta: 0,
-            // Cálculos
-            subtotal: 1000, // Esto debería venir de las props
-            isv: 150, // 15% del subtotal
-            descuento: 0,
-            cambio: 0
+            montoTransferencia: 0,
+            numeroTransferencia: '',
+            notas: '',
+            cambio: 0,
+            errorEfectivo: '',
+            errorTransferencia: '',
+            errorMixto: ''
         }
     },
     computed: {
         total() {
             return this.factura.total;
         },
-        mostrarSubtotal() {
-            return this.factura.sub_total
+        mostrarCambio() {
+            return (this.metodoPago === 'Efectivo' || this.metodoPago === 'Mixto') && this.cambio > 0;
         },
-        impuesto() {
-            return this.factura.total_ISV;
-        },
-
-        returnDescuento() {
-            return this.factura.descuento;
-        },
-
         isPagoValido() {
-            if (this.metodoPago === 'Efectivo') {
-                return this.monto >= this.total;
-            } else if (this.metodoPago === 'Tarjeta') {
-                return this.validarDatosTarjeta();
-            } else if (this.metodoPago === 'Mixto') {
-                return this.montoEfectivo + this.montoTarjeta >= this.total &&
-                    this.validarDatosTarjeta();
+            switch (this.metodoPago) {
+                case 'Efectivo':
+                    return this.montoEfectivo >= this.total;
+                case 'Transferencia':
+                    return this.montoTransferencia === this.total &&
+                        this.numeroTransferencia?.length === 5;
+                case 'Mixto':
+                    return this.montoEfectivo + this.montoTransferencia === this.total &&
+                        (this.montoTransferencia === 0 || this.numeroTransferencia?.length === 5);
+                default:
+                    return false;
             }
-            return false;
         }
     },
     methods: {
         formatPrice(value) {
-            return value.toFixed(2);
+            return Number(value).toFixed(2);
         },
         calcularCambio() {
             if (this.metodoPago === 'Efectivo') {
-                this.cambio = Math.max(0, this.monto - this.total);
+                this.cambio = Math.max(0, this.montoEfectivo - this.total);
+                this.errorEfectivo = this.montoEfectivo < this.total
+                    ? `Debe ingresar al menos L. ${this.formatPrice(this.total)}`
+                    : '';
+            }
+        },
+        actualizarPagoMixto() {
+            // Limitar el monto en efectivo al total
+            if (this.montoEfectivo > this.total) {
+                this.montoEfectivo = this.total;
+            }
+
+            // Calcular monto en transferencia
+            this.montoTransferencia = Math.max(0, this.total - this.montoEfectivo);
+
+            // Calcular cambio si aplica
+            this.cambio = Math.max(0, this.montoEfectivo - (this.total - this.montoTransferencia));
+
+            // Validar y mostrar errores
+            if (this.montoEfectivo + this.montoTransferencia !== this.total) {
+                this.errorMixto = 'La suma de los montos debe ser igual al total';
+            } else {
+                this.errorMixto = '';
+            }
+
+            // Limpiar número de transferencia si ya no se necesita
+            if (this.montoTransferencia === 0) {
+                this.numeroTransferencia = '';
             }
         },
         handleMetodoPagoChange() {
-            this.monto = this.total;
+            // Resetear valores
+            this.montoEfectivo = 0;
             this.cambio = 0;
-            if (this.metodoPago === 'Mixto') {
-                this.montoEfectivo = 0;
-                this.montoTarjeta = this.total;
+            this.numeroTransferencia = '';
+            this.errorEfectivo = '';
+            this.errorTransferencia = '';
+            this.errorMixto = '';
+
+            // Configurar valores iniciales según método
+            switch (this.metodoPago) {
+                case 'Efectivo':
+                    this.montoEfectivo = this.total;
+                    this.montoTransferencia = 0;
+                    break;
+                case 'Transferencia':
+                    this.montoTransferencia = this.total; // Aquí establecemos el valor
+                    this.montoEfectivo = 0;
+                    break;
+                case 'Mixto':
+                    this.montoEfectivo = 0;
+                    this.montoTransferencia = this.total;
+                    break;
             }
-        },
-        formatearNumeroTarjeta() {
-            // Eliminar espacios y caracteres no numéricos
-            let nums = this.numeroTarjeta.replace(/\D/g, '');
-            // Insertar espacio cada 4 números
-            this.numeroTarjeta = nums.replace(/(\d{4})/g, '$1 ').trim();
-        },
-        formatearFechaExp() {
-            let fecha = this.fechaExp.replace(/\D/g, '');
-            if (fecha.length >= 2) {
-                this.fechaExp = fecha.slice(0, 2) + '/' + fecha.slice(2, 4);
-            }
-        },
-        actualizarMontoTarjeta() {
-            this.montoTarjeta = Math.max(0, this.total - this.montoEfectivo);
-            this.calcularCambio();
-        },
-        validarDatosTarjeta() {
-            if (this.metodoPago === 'Tarjeta' || this.metodoPago === 'Mixto') {
-                return this.numeroTarjeta.length >= 19 &&
-                    this.fechaExp.length === 5 &&
-                    this.cvv.length >= 3;
-            }
-            return true;
         },
         async confirmarPago() {
             if (!this.isPagoValido) return;
@@ -206,27 +225,17 @@ export default {
             try {
                 const datosPago = {
                     metodoPago: this.metodoPago,
-                    monto: this.monto,
+                    montoEfectivo: this.montoEfectivo,
+                    montoTransferencia: this.montoTransferencia,
+                    numeroTransferencia: this.numeroTransferencia,
                     cambio: this.cambio,
                     notas: this.notas
                 };
 
-                if (this.metodoPago === 'Tarjeta' || this.metodoPago === 'Mixto') {
-                    datosPago.datosTarjeta = {
-                        tipo: this.tipoTarjeta,
-                        numero: this.numeroTarjeta,
-                        fechaExp: this.fechaExp,
-                        cuotas: this.cuotas
-                    };
-                }
-
-                if (this.metodoPago === 'Mixto') {
-                    datosPago.montoEfectivo = this.montoEfectivo;
-                    datosPago.montoTarjeta = this.montoTarjeta;
-                }
-
                 await this.$emit('confirm-payment', datosPago);
                 this.$emit('close');
+            } catch (error) {
+                console.error('Error al procesar el pago:', error);
             } finally {
                 this.isModalLoading = false;
             }
@@ -235,10 +244,16 @@ export default {
     watch: {
         isVisible(newVal) {
             if (newVal) {
-                this.monto = this.total;
+                this.metodoPago = 'Efectivo';
+                this.montoEfectivo = this.total;
+                this.calcularCambio();
                 this.$nextTick(() => {
                     this.$refs.montoInput?.focus();
                 });
+            } else {
+                // Resetear formulario al cerrar
+                this.handleMetodoPagoChange();
+                this.notas = '';
             }
         }
     }
@@ -420,7 +435,8 @@ textarea:focus {
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
@@ -474,5 +490,34 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+input:read-only {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.mixto-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.btn-confirm {
+    min-width: 120px;
+}
+
+.btn-confirm:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
 }
 </style>

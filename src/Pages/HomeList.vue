@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import BarChart from '../components/BarChartList.vue';
+import BarChart from '../components/DashboardList.vue';
 import PageHeader from "@/components/PageHeader.vue";
 
 export default {

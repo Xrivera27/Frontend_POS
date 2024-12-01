@@ -371,11 +371,11 @@ export default {
   .cards-container {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .charts-container {
     flex-direction: column;
   }
-  
+
   .line-chart,
   .pie-chart {
     width: 100%;
@@ -387,15 +387,14 @@ export default {
   .cards-container {
     grid-template-columns: 1fr;
   }
-  
+
   .graphics-container {
     padding: 0;
   }
-  
+
   .sales-table {
     overflow-x: auto;
     display: block;
   }
 }
-
 </style>
