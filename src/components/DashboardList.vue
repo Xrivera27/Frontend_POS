@@ -2,12 +2,9 @@
   <div class="dashboard-container">
     <!-- Tarjetas informativas con iconos de Bootstrap y enlaces "Ver más" -->
     <div class="cards-container">
-
-      <div class="card" v-for="(item, index) in cards" :key="index">
+      <div class="card" v-for="(item, index) in cardsData" :key="index">
         <div class="card-content">
-
           <div class="value-content">
-
             <h3>{{ item.title }}</h3>
             <i :class="item.icon" class="card-icon"></i>
             <p class="item-value">{{ item.value }}</p>
@@ -15,8 +12,8 @@
         </div>
         <a :href="item.link" class="card-link">Ver más</a>
       </div>
-
     </div>
+
     <div class="graphics-container">
       <!-- Gráfico de ventas y Productos más vendidos (más pequeños) -->
       <div class="charts-container">
@@ -29,35 +26,39 @@
       </div>
 
       <!-- Tabla de últimas ventas -->
-
+      <table class="sales-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Vendedor</th>
+            <th>Número</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(sale, index) in sales" :key="index">
+            <td>{{ sale.nombre }}</td>
+            <td>{{ sale.vendedor }}</td>
+            <td>{{ sale.numero }}</td>
+            <td>{{ sale.fecha }}</td>
+            <td>{{ sale.total }}</td>
+            <td>
+              <a href="#">Ver más</a><span>|</span>
+              <button style="font-size: 1rem;">Descargar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <table class="sales-table">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Vendedor</th>
-          <th>Número</th>
-          <th>Fecha</th>
-          <th>Total</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(sale, index) in sales" :key="index">
-          <td>{{ sale.nombre }}</td>
-          <td>{{ sale.vendedor }}</td>
-          <td>{{ sale.numero }}</td>
-          <td>{{ sale.fecha }}</td>
-          <td>{{ sale.total }}</td>
-          <td><a href="#">Ver más</a><span>|</span><button style="font-size: 1rem;">Descargar</button></td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 </template>
 
 <script>
 import { Line, Pie } from 'vue-chartjs';
+const { getTotalVentasDia } = require('../../services/dashboardSolicitudes')
+import solicitudes from "../../services/solicitudes.js";
 import {
   Chart as ChartJS,
   Title,
@@ -70,23 +71,29 @@ import {
   LinearScale,
 } from 'chart.js';
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, ArcElement, CategoryScale, LinearScale);
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  PointElement,
+  ArcElement,
+  CategoryScale,
+  LinearScale
+);
 
 export default {
+  name: 'DashboardList',
+  
   components: {
     LineChart: Line,
     PieChart: Pie,
   },
+  
   data() {
     return {
-      // Datos para las tarjetas con iconos y enlaces
-      cards: [
-        { title: "Ventas", value: "L. 21,324", icon: "bi bi-cash", link: "/administrar-ventas" },
-        { title: "Compras Pendientes", value: "35", icon: "bi bi-wallet", link: "/administrar-compras" },
-        { title: "Clientes", value: "2,703", icon: "bi bi-people", link: "/clientes" },
-        { title: "Alertas", value: "3", icon: "bi bi-tags", link: "/admin-invenario" },
-      ],
-      // Datos para el gráfico de líneas (Ventas por mes)
+      ventas: 0,
+      id_usuario: '',
       lineChartData: {
         labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],
         datasets: [
@@ -112,7 +119,6 @@ export default {
           },
         },
       },
-      // Datos para el gráfico de pastel (Productos más vendidos)
       pieChartData: {
         labels: ['Electrónicos', 'Hogar', 'Juguetería'],
         datasets: [
@@ -131,15 +137,87 @@ export default {
           },
         },
       },
-      // Datos para la tabla de últimas ventas
       sales: [
-        { nombre: 'Gerson Rivera', vendedor: 'Jenni Lemus', numero: '9299-2019', fecha: '2024-07-27 11:20:56', total: 'L. 1,230.00' },
-        { nombre: 'Axel Arteaga', vendedor: 'Jenni Lemus', numero: '8888-8888', fecha: '2024-07-28 15:40:56', total: 'L. 1,231.00' },
-        { nombre: 'Denzer Hernández', vendedor: 'Jenni Lemus', numero: '3333-3333', fecha: '2024-07-28 17:30:56', total: 'L. 1,232.00' },
-        { nombre: 'Carlos Sosa', vendedor: 'Jenni Lemus', numero: '0202-0202', fecha: '2024-07-28 05:20:56', total: 'L. 1,242.42' },
+        {
+          nombre: 'Gerson Rivera',
+          vendedor: 'Jenni Lemus',
+          numero: '9299-2019',
+          fecha: '2024-07-27 11:20:56',
+          total: 'L. 1,230.00'
+        },
+        {
+          nombre: 'Axel Arteaga',
+          vendedor: 'Jenni Lemus',
+          numero: '8888-8888',
+          fecha: '2024-07-28 15:40:56',
+          total: 'L. 1,231.00'
+        },
+        {
+          nombre: 'Denzer Hernández',
+          vendedor: 'Jenni Lemus',
+          numero: '3333-3333',
+          fecha: '2024-07-28 17:30:56',
+          total: 'L. 1,232.00'
+        },
+        {
+          nombre: 'Carlos Sosa',
+          vendedor: 'Jenni Lemus',
+          numero: '0202-0202',
+          fecha: '2024-07-28 05:20:56',
+          total: 'L. 1,242.42'
+        },
       ],
     };
   },
+
+  computed: {
+    retornarVentas() {
+      return this.ventas;
+    },
+    cardsData() {
+      return [
+        {
+          title: "Ventas",
+          value: `L. ${this.retornarVentas}`,
+          icon: "bi bi-cash",
+          link: "/administrar-ventas"
+        },
+        {
+          title: "Compras Pendientes",
+          value: "35",
+          icon: "bi bi-wallet",
+          link: "/administrar-compras"
+        },
+        {
+          title: "Clientes",
+          value: "2,703",
+          icon: "bi bi-people",
+          link: "/clientes"
+        },
+        {
+          title: "Alertas",
+          value: "3",
+          icon: "bi bi-tags",
+          link: "/admin-invenario"
+        },
+      ];
+    }
+  },
+
+  methods: {
+    async devolverVenta() {
+      this.ventas = await getTotalVentasDia(this.id_usuario);
+    }
+  },
+
+  async mounted() {
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      await this.devolverVenta(); // Obtener ventas cuando el componente se monta
+    } catch (error) {
+      console.log(error);
+    }
+  }
 };
 </script>
 
