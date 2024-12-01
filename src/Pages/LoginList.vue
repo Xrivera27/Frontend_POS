@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <LoadingSpinner :isLoading="isLoading" />
+    <ModalLoading :isLoading="isLoading" />
     <div class="login-card">
       <h2 v-if="!isRecoveringPassword">Login</h2>
       <h2 v-else>Recuperar Contraseña</h2>
@@ -48,12 +48,12 @@
 </template>
 
 <script>
-import LoadingSpinner from '@/components/LoadingSpinnerList.vue';
+import ModalLoading from '@/components/ModalLoading.vue';
 import { useToast } from "vue-toastification"; // Importación para el popup
 
 export default {
   components: {
-    LoadingSpinner
+    ModalLoading
   },
   data() {
     return {

@@ -1,5 +1,6 @@
 <template>
   <div class="empleados-wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
@@ -12,7 +13,7 @@
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar empleado..." />
       </div>
 
-      <div class="registros" v-if="sucursales.length > 1" >
+      <div class="registros" v-if="sucursales.length > 1">
         <span>
           <select class="custom-select" v-model="searchSucursal">
             <option value="default" selected>Todas</option>
@@ -71,7 +72,8 @@
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredEmpleados.length) }} de {{ filteredEmpleados.length }} registros
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize,
+            filteredEmpleados.length) }} de {{ filteredEmpleados.length }} registros
         </div>
         <div class="pagination-container">
           <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
@@ -130,9 +132,8 @@
 
             <div class="form-group">
               <label for="rol">Selecciona rol:</label>
-              
-              <select class="form-select" id="rol" name="rol" value="default" v-model="usuarioForm.rol"
-                required>
+
+              <select class="form-select" id="rol" name="rol" value="default" v-model="usuarioForm.rol" required>
                 <option value="" disabled selected>Selecciona un rol</option>
                 <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option>
               </select>
@@ -174,7 +175,7 @@
               <input v-model="usuarioForm.direccion" type="text" required />
             </div>
 
-            <div class="form-group" v-if="sucursales.length > 1" >
+            <div class="form-group" v-if="sucursales.length > 1">
               <label for="sucursal">Selecciona sucursal:</label>
               <select class="form-select" id="sucursal" name="sucursal" value="default" v-model="usuarioForm.sucursal"
                 required>
@@ -209,13 +210,15 @@ import PageHeader from "@/components/PageHeader.vue";
 import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
 import { validacionesUsuario } from '../../services/validarCampos.js';
+import ModalLoading from '@/components/ModalLoading.vue';
 
 export default {
   name: 'AdministrarEmpleados',
   components: {
     btnGuardarModal,
     btnCerrarModal,
-    PageHeader
+    PageHeader,
+    ModalLoading
   },
   data() {
     return {
@@ -320,16 +323,16 @@ export default {
       return rol ? rol.cargo : 'Desconocido';
     },
 
-    async getUsuarios(sucursales){
+    async getUsuarios(sucursales) {
       try {
-        if(sucursales.length === 1){
-          
+        if (sucursales.length === 1) {
+
           this.empleados = await getUsuariosSucrusal(this.id_usuario, sucursales[0].id_sucursal);
           this.searchSucursal = sucursales[0].id_sucursal;
           this.usuarioForm.sucursal = sucursales[0].id_sucursal;
         }
 
-        else{
+        else {
           this.empleados = await getUsuariosEmpresa(this.id_usuario);
         }
       } catch (error) {
@@ -343,9 +346,9 @@ export default {
 
     async guardarUsuario() {
       if (!validacionesUsuario.validarCampos(this.usuarioForm, this.isPassEdit, this.selectedCountry)) {
-      alert("Error equisde")
         return;
       }
+      this.isLoading = true;
 
       let response;
       let parametros;
@@ -381,6 +384,8 @@ export default {
         this.closeModal();
       } catch (error) {
         notis('error', error.message);
+      } finally {
+        this.isLoading = false;
       }
     },
 
@@ -403,6 +408,7 @@ export default {
         return;
       }
 
+      this.isLoading = true;
       try {
         const parametros = `/usuario/desactivar/${this.empleadoToDelete.id_usuario}`;
         const response = await solicitudes.desactivarRegistro(
@@ -420,6 +426,7 @@ export default {
       } catch (error) {
         notis('error', error.message);
       } finally {
+        this.isLoading = false;
         this.showConfirmModal = false;
         this.empleadoToDelete = null;
       }
@@ -473,9 +480,9 @@ export default {
   },
 
   async mounted() {
+    this.isLoading = true;
     document.title = "Usuarios";
     this.changeFavicon('/img/spiderman.ico');
-  
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
@@ -485,6 +492,8 @@ export default {
       this.roles = await getRolesUsuarioPage();
     } catch (error) {
       notis('error', error.message);
+    }finally{
+      this.isLoading = false;
     }
   }
 };

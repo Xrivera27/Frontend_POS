@@ -1,5 +1,6 @@
 <template>
   <div class="proveedores-wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
@@ -57,15 +58,16 @@
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ paginatedProveedores.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }} a 
-          {{ Math.min(currentPage * pageSize, filteredProveedores.length) }} 
+          Mostrando {{ paginatedProveedores.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }} a
+          {{ Math.min(currentPage * pageSize, filteredProveedores.length) }}
           de {{ filteredProveedores.length }} registros
         </div>
         <div class="pagination-container">
           <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
             Anterior
           </button>
-          <button class="pagination-button" :disabled="currentPage === totalPages || totalPages === 0" @click="nextPage">
+          <button class="pagination-button" :disabled="currentPage === totalPages || totalPages === 0"
+            @click="nextPage">
             Siguiente
           </button>
         </div>
@@ -139,13 +141,15 @@ const { esCeo } = require('../../services/usuariosSolicitudes');
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
 import { validacionesProveedores } from '../../services/validarCampos.js';
 import solicitudes from "../../services/solicitudes.js";
+import ModalLoading from '@/components/ModalLoading.vue';
 
 export default {
   name: 'AdministrarProveedores',
   components: {
     PageHeader,
     btnGuardarModal,
-    btnCerrarModal
+    btnCerrarModal,
+    ModalLoading
   },
   data() {
     return {
@@ -173,7 +177,7 @@ export default {
       proveedores: []
     };
   },
-  
+
   computed: {
     filteredProveedores() {
       return this.proveedores.filter(proveedor =>
@@ -181,7 +185,7 @@ export default {
         proveedor.telefono.includes(this.searchQuery)
       );
     },
-    
+
     paginatedProveedores() {
       const startIndex = (this.currentPage - 1) * this.pageSize;
       const endIndex = startIndex + this.pageSize;
@@ -192,7 +196,7 @@ export default {
       return Math.ceil(this.filteredProveedores.length / this.pageSize);
     }
   },
-  
+
   methods: {
     updatePhoneValidation() {
       if (this.selectedCountry && this.countryData[this.selectedCountry]) {
@@ -250,6 +254,8 @@ export default {
         return;
       }
 
+      this.isLoading = true;
+
       this.proveedorForm.id_usuario = this.id_usuario;
       let response;
       let parametros;
@@ -260,6 +266,7 @@ export default {
           response = await solicitudes.patchRegistro(parametros, this.proveedorForm);
 
           if (response === true) {
+            this.isLoading = false;
             notis('success', "Actualizando datos del proveedor...");
             Object.assign(this.proveedores[this.editIndex], this.proveedorForm);
           } else {
@@ -267,6 +274,8 @@ export default {
           }
         } catch (error) {
           notis('error', error.message);
+        } finally {
+          this.isLoading = false;
         }
       } else {
         try {
@@ -274,6 +283,7 @@ export default {
           response = await solicitudes.postRegistro(parametros, this.proveedorForm);
 
           if (response.length > 0) {
+            this.isLoading = false;
             notis('success', "Proveedor guardado correctamente...");
             this.proveedores.push(response[0]);
           } else {
@@ -281,6 +291,8 @@ export default {
           }
         } catch (error) {
           notis('error', error.message);
+        } finally {
+          this.isLoading = false;
         }
       }
       this.closeModal();
@@ -299,7 +311,7 @@ export default {
         this.showConfirmModal = true;
         return;
       }
-
+      this.isLoading = true;
       try {
         const datosActualizados = {
           estado: false,
@@ -314,10 +326,11 @@ export default {
           notis('success', 'Proveedor eliminado correctamente');
         }
       } catch (error) {
-        notis('error', error.message);
+        notis('error', 'Error al eliminar el proveedor');
       } finally {
         this.showConfirmModal = false;
         this.proveedorToDelete = null;
+        this.isLoading = false;
       }
     },
 
@@ -342,15 +355,18 @@ export default {
   },
 
   async mounted() {
+    this.isLoading = true;
     document.title = "Proveedores";
     this.changeFavicon('/img/spiderman.ico');
-    
+
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       await this.loadProveedores();
       this.esCeo = await esCeo(this.id_usuario);
     } catch (error) {
       notis('error', error.message);
+    } finally {
+      this.isLoading = false;
     }
   }
 };

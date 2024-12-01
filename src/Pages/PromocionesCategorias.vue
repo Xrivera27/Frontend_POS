@@ -1,5 +1,6 @@
 <template>
   <div class="categorias-wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
     <!-- Formulario principal -->
     <form @submit.prevent="agregarPromocion" autocomplete="off" v-show="activeForm" class="promocion-form">
@@ -51,7 +52,7 @@
       <div>
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar promoción..." />
         <button v-if="esCeo" class="btn activar-form" @click="activarForm">
-          Nueva promoción {{ esCeo }}
+          Nueva promoción
         </button>
       </div>
       <div class="table-container" v-pdf-export ref="table">
@@ -110,7 +111,8 @@
         <!-- Paginación -->
         <div class="pagination-wrapper">
           <div class="pagination-info">
-            Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filterPromociones.length) }} de {{ filterPromociones.length }} registros
+            Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize,
+              filterPromociones.length) }} de {{ filterPromociones.length }} registros
           </div>
           <div class="pagination-container">
             <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
@@ -231,11 +233,14 @@
 import PageHeader from "@/components/PageHeader.vue";
 import solicitudes from "../../services/soli";
 const { esCeo } = require('../../services/usuariosSolicitudes');
+import ModalLoading from '@/components/ModalLoading.vue';
+import { notis } from '../../services/notificaciones.js';
 
 export default {
   name: 'PromocionesCategoria',
   components: {
-    PageHeader
+    PageHeader,
+    ModalLoading
   },
   data() {
     return {
@@ -311,6 +316,7 @@ export default {
   },
 
   async mounted() {
+    this.isLoading = true;
     try {
       this.changeFavicon('/img/spiderman.ico');
       const result = await Promise.all([
@@ -324,6 +330,8 @@ export default {
 
     } catch (error) {
       alert(error);
+    } finally {
+      this.isLoading = false;
     }
   },
 
@@ -361,19 +369,19 @@ export default {
     },
 
     async cargarCategorias() {
+      this.isLoading = true;
       try {
         const categoriasResponse = await solicitudes.fetchRegistros('/promocionesC/categorias/empresa');
         this.categorias = categoriasResponse;
         console.log('Categorías cargadas:', this.categorias);
       } catch (error) {
         console.error('Error al cargar categorías:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al cargar las categorías',
-          tipo: 'error'
-        });
+        notis("error", 'Error al cargar las categorías');
         if (error.message.includes('No hay token')) {
           this.$router.push('/login');
         }
+      } finally {
+        this.isLoading = false;
       }
     },
 
@@ -448,18 +456,12 @@ export default {
       if (!form.categoria_id || !form.nombre_promocion ||
         !form.porcentaje_descuento || !form.fecha_inicio ||
         !form.fecha_final) {
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Todos los campos son obligatorios',
-          tipo: 'error'
-        });
+        notis("warning", 'Todos los campos son obligatorios');
         return false;
       }
 
       if (form.porcentaje_descuento < 0 || form.porcentaje_descuento > 100) {
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'El porcentaje de descuento debe estar entre 0 y 100',
-          tipo: 'error'
-        });
+        notis("warning", 'El porcentaje de descuento debe estar entre 0 y 100');
         return false;
       }
 
@@ -472,18 +474,12 @@ export default {
       fechaFinal.setHours(0, 0, 0, 0);
 
       if (fechaInicio < hoy) {
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'La fecha de inicio no puede ser anterior a hoy',
-          tipo: 'error'
-        });
+        notis("warning", 'La fecha de inicio no puede ser anterior a hoy');
         return false;
       }
 
       if (fechaInicio > fechaFinal) {
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'La fecha final debe ser posterior a la fecha inicial',
-          tipo: 'error'
-        });
+        notis("warning", 'La fecha final debe ser posterior a la fecha inicial');
         return false;
       }
 
@@ -491,6 +487,7 @@ export default {
     },
 
     async agregarPromocion() {
+      this.isLoading = true;
       try {
         if (!this.validarFormulario()) return;
 
@@ -513,10 +510,7 @@ export default {
 
             if (response.length > 0) {
               await this.cargarPromociones();
-              this.$emit('mostrar-notificacion', {
-                mensaje: 'Promoción creada exitosamente',
-                tipo: 'success'
-              });
+              notis("success", 'Promocion creada exitosamente');
               this.clearForm();
               this.isShowModal = false;
               this.activeForm = false;
@@ -526,15 +520,14 @@ export default {
               this.tempPromocionData = { ...formData };
               this.conflictingPromocion = error.response.data.promocion_existente;
 
-              this.$emit('mostrar-notificacion', {
-                mensaje: 'Hay una promoción activa que coincide con las fechas indicadas',
-                tipo: 'warning'
-              });
+              notis("warning", 'Hay una promoción activa que coincide con las fechas indicadas');
 
               this.showConflictModal = true;
               return;
             }
             throw error;
+          } finally {
+            this.isLoading = false;
           }
         } else {
           const datos = {
@@ -551,24 +544,21 @@ export default {
 
           if (response) {
             await this.cargarPromociones();
-            this.$emit('mostrar-notificacion', {
-              mensaje: 'Promoción actualizada exitosamente',
-              tipo: 'success'
-            });
+            notis("success", 'Promoción actualizada exitosamente');
             this.clearForm();
             this.isShowModal = false;
           }
         }
       } catch (error) {
         console.error('Error en agregarPromocion:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al procesar la promoción',
-          tipo: 'error'
-        });
+        notis("error", 'Error al procesar la promoción');
+      } finally {
+        this.isLoading = false;
       }
     },
 
     async desactivarProm(index) {
+      this.isLoading = true;
       try {
         const promocion = this.paginatedPromociones[index];
         if (!promocion || !promocion.id) {
@@ -582,21 +572,18 @@ export default {
 
         if (response) {
           await this.cargarPromociones();
-          this.$emit('mostrar-notificacion', {
-            mensaje: 'Promoción desactivada exitosamente',
-            tipo: 'success'
-          });
+          notis("success", 'Promoción desactivada exitosamente');
         }
       } catch (error) {
         console.error('Error al desactivar promoción:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al desactivar la promoción',
-          tipo: 'error'
-        });
+        notis("error", 'Error al desactivar promoción');
+      } finally {
+        this.isLoading = false;
       }
     },
 
     async activarProm(promocionId) {
+      this.isLoading = true;
       try {
         const response = await solicitudes.patchRegistro(
           `/promocionesC/cambiar-estado-promocion/${promocionId}`,
@@ -605,23 +592,19 @@ export default {
 
         if (response) {
           await this.cargarPromociones();
-          this.$emit('mostrar-notificacion', {
-            mensaje: 'Promoción activada exitosamente',
-            tipo: 'success'
-          });
+          notis("success", 'Promoción activada exitosamente');
         }
       } catch (error) {
         console.error('Error al activar promoción:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al activar la promoción',
-          tipo: 'error'
-        });
+        notis("error", 'Error al activar promoción');
+      } finally {
+        this.isLoading = false;
       }
     },
 
     editarPromocion(index) {
       const promocion = this.paginatedPromociones[index];
-      
+
       this.promFormModal = {
         id: promocion.id,
         categoria_id: promocion.categoria_producto_Id,
@@ -632,13 +615,14 @@ export default {
         fecha_final: promocion.fecha_final,
         estado: promocion.estado
       };
-      
+
       this.editIndex = this.promociones.findIndex(p => p.id === promocion.id);
       this.isEditing = true;
       this.showModal();
     },
 
     async eliminarProm() {
+      this.isLoading = true;
       try {
         const promocion = this.promociones[this.editIndex];
         if (!promocion || !promocion.id) {
@@ -651,19 +635,14 @@ export default {
 
         if (response === true) {
           await this.cargarPromociones();
-          this.$emit('mostrar-notificacion', {
-            mensaje: 'Promoción eliminada exitosamente',
-            tipo: 'success'
-          });
+          notis("success", 'Promoción eliminada exitosamente');
           this.showConfirmModal = false;
         }
       } catch (error) {
         console.error('Error al eliminar promoción:', error);
-        this.$emit('mostrar-notificacion', {
-          mensaje: 'Error al eliminar la promoción',
-          tipo: 'error'
-        });
+        notis("error", 'Error al eliminar promoción');
       } finally {
+        this.isLoading = false;
         this.editIndex = null;
       }
     },

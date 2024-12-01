@@ -1,7 +1,6 @@
-
-
 <template>
   <div class="clientes-wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
@@ -61,23 +60,15 @@
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a 
-          {{ Math.min(currentPage * pageSize, filteredClientes.length) }} 
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
+          {{ Math.min(currentPage * pageSize, filteredClientes.length) }}
           de {{ filteredClientes.length }} registros
         </div>
         <div class="pagination-container">
-          <button 
-            class="pagination-button" 
-            :disabled="currentPage === 1" 
-            @click="previousPage"
-          >
+          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
             Anterior
           </button>
-          <button 
-            class="pagination-button" 
-            :disabled="currentPage === totalPages" 
-            @click="nextPage"
-          >
+          <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
             Siguiente
           </button>
         </div>
@@ -157,6 +148,7 @@ import { notis } from '../../services/notificaciones.js';
 const { getClientesbyEmpresa, postCliente, patchCliente, desactivarCliente } = require('../../services/clienteSolicitudes.js');
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
+import ModalLoading from '@/components/ModalLoading.vue';
 
 export default {
   components: {
@@ -164,6 +156,7 @@ export default {
     btnGuardarModal,
     btnCerrarModal,
     PageHeader,
+    ModalLoading
   },
   data() {
     return {
@@ -194,9 +187,9 @@ export default {
     };
   },
   async mounted() {
+    this.isLoading = true;
     document.title = "Clientes";
     this.changeFavicon('/img/spiderman.ico');
-    this.isLoading = true;
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.clientes = await getClientesbyEmpresa(this.id_usuario);
@@ -245,7 +238,7 @@ export default {
     openModal() {
       this.isModalOpen = true;
     },
-    
+
     closeModal() {
       this.isModalOpen = false;
       this.clearForm();
@@ -268,20 +261,24 @@ export default {
       if (!validacionesClientes.validarCampos(this.clienteForm, this.selectedCountry)) {
         return;
       }
-      notis('success', 'Cliente guardado correctamente');
+      this.isLoading = true;
+
       this.clienteForm.id_usuario = this.id_usuario;
       let response;
 
       if (this.isEditing) {
         const nuevoRegistro = await patchCliente(this.clienteForm, this.clientes[this.editIndex].id_cliente);
         if (nuevoRegistro == true) {
-          notis('success', 'Cliente actualizado correctamente');
+          this.isLoading = false;
+          notis('success', 'Actualizado datos del cliente...');
           Object.assign(this.clientes[this.editIndex], this.clienteForm);
         }
       } else {
         try {
           response = await postCliente(this.clienteForm, this.id_usuario);
           if (response.length > 0) {
+            this.isLoading = false;
+            notis('success', 'Cliente guardado correctamente');
             this.clientes.push(response[0]);
           } else {
             throw new Error('Error al crear el cliente.');
@@ -307,10 +304,12 @@ export default {
         return;
       }
 
+      this.isLoading = true;
       try {
         const response = await desactivarCliente(this.clienteToDelete.id_cliente);
         if (response === true) {
           this.clientes = this.clientes.filter(item => item.id_cliente !== this.clienteToDelete.id_cliente);
+          this.isLoading = false;
           notis('success', 'Cliente eliminado correctamente');
         } else {
           throw response;
@@ -320,6 +319,7 @@ export default {
       } finally {
         this.showConfirmModal = false;
         this.clienteToDelete = null;
+        this.isLoading = false;
       }
     },
 

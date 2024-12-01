@@ -1,5 +1,6 @@
 <template>
   <div class="productos-wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
@@ -73,14 +74,15 @@
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ paginatedProductos.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }} a 
+          Mostrando {{ paginatedProductos.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }} a
           {{ Math.min(currentPage * pageSize, filteredProductos.length) }} de {{ filteredProductos.length }} registros
         </div>
         <div class="pagination-container">
           <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
             Anterior
           </button>
-          <button class="pagination-button" :disabled="currentPage === totalPages || totalPages === 0" @click="nextPage">
+          <button class="pagination-button" :disabled="currentPage === totalPages || totalPages === 0"
+            @click="nextPage">
             Siguiente
           </button>
         </div>
@@ -290,6 +292,7 @@ import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 import { validacionesProductos } from '../../services/validarCampos.js';
 import { notificaciones } from '../../services/notificaciones.js';
 import { useToast } from "vue-toastification";
+import ModalLoading from '@/components/ModalLoading.vue';
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
@@ -312,12 +315,14 @@ export default {
     PageHeader,
     ExportButton,
     btnGuardarModal,
-    btnCerrarModal
+    btnCerrarModal,
+    ModalLoading
   },
   data() {
     return {
       titulo: 'Productos',
       showConfirmModal: false,
+      isLoading: false,
       productoToDelete: null,
       searchQuery: '',
       searchCategoria: '',
@@ -434,8 +439,10 @@ export default {
     },
 
     async openModal() {
-      this.isModalOpen = true;
+      this.isLoading = true;
       await this.cargarUnidadMedidaProveedores();
+      this.isModalOpen = true;
+      this.isLoading = false;
     },
 
     closeModal() {
@@ -444,13 +451,17 @@ export default {
     },
 
     async openModalCategoria() {
+      this.isLoading = true;
       this.categorias = await getCategoriaProductosEmpresa(this.id_usuario);
       this.isModalCategoriaOpen = true;
+      this.isLoading = false;
     },
 
     guardarCategorias() {
+      this.isLoading = true;
       this.productoForm.categorias = this.categoriasSeleccionadas;
       this.closeModalCategoria();
+      this.isLoading = false;
     },
 
     closeModalCategoria() {
@@ -458,6 +469,7 @@ export default {
     },
 
     async mostrarStockbySucursal(id_sucursal) {
+      this.isLoading = true;
       try {
         const response = await getStockMinMax(this.idProductoStock, id_sucursal);
         if (response.error) {
@@ -468,6 +480,8 @@ export default {
         this.inputStockMax = response.stock_max || 0;
       } catch (error) {
         console.error('Error al abrir el modal de stock:', error);
+      } finally {
+        this.isLoading = false;
       }
     },
 
@@ -546,11 +560,13 @@ export default {
         return;
       }
 
+      this.isLoading = true;
+
       this.productoForm.id_usuario = this.id_usuario;
 
       if (this.isEditing) {
         try {
-          if (this.productoForm.codigo_producto === this.productos[this.editIndex].codigo_producto) 
+          if (this.productoForm.codigo_producto === this.productos[this.editIndex].codigo_producto)
             this.productoForm.codigo_producto = '';
           const nuevoRegistro = await patchProducto(this.productoForm, this.productos[this.editIndex].id_producto);
           if (nuevoRegistro == true) {
@@ -560,6 +576,8 @@ export default {
           }
         } catch (error) {
           notificaciones('error', error.message);
+        } finally {
+          this.isLoading = false;
         }
       } else {
         try {
@@ -567,8 +585,11 @@ export default {
           this.productos.push(nuevoRegistro[0]);
         } catch (error) {
           notificaciones('error', error.message);
+        } finally {
+          this.isLoading = false;
         }
       }
+      this.isLoading = false;
       this.closeModal();
     },
 
@@ -598,15 +619,17 @@ export default {
         this.showConfirmModal = true;
         return;
       }
-
+      this.isLoading = true;
       const toast = useToast();
       try {
         const registroEliminado = await desactivarProducto(this.productoToDelete.id_producto);
 
         if (registroEliminado == true) {
           this.productos = this.productos.filter(item => item.id_producto !== this.productoToDelete.id_producto);
+          this.isLoading = false;
           notificaciones('success', 'Producto eliminado correctamente');
         } else {
+          this.isLoading = false;
           toast.error('Error al eliminar producto');
         }
       } catch (error) {
@@ -615,6 +638,7 @@ export default {
       } finally {
         this.showConfirmModal = false;
         this.productoToDelete = null;
+        this.isLoading = false;
       }
     },
 
@@ -671,6 +695,7 @@ export default {
   },
 
   async mounted() {
+    this.isLoading = true;
     this.generateRows();
     document.title = "Productos";
     this.changeFavicon('/img/spiderman.ico');
@@ -682,6 +707,8 @@ export default {
       this.mostrarRegistros(this.searchSucursal);
     } catch (error) {
       console.log(error);
+    } finally {
+      this.isLoading = false;
     }
   }
 };
@@ -1481,6 +1508,7 @@ export default {
 }
 
 @media screen and (max-width: 480px) {
+
   .modal-content,
   .modal-content-stock {
     width: 95%;
