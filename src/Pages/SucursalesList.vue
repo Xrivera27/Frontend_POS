@@ -8,24 +8,23 @@
         Agregar sucursales
       </button>
       <ExportButton :columns="columns" :rows="rows" fileName="Sucursales.pdf" class="export-button" />
-      <div class="registros">
-        <span>Mostrar
-          <select v-model="itemsPerPage" class="custom-select">
-            <option value="">Todos</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-          </select>
-          registros
-        </span>
+      <div class="search-bar">
+        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar sucursal..." />
       </div>
-      <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar sucursal..." />
     </div>
 
     <div class="table-container">
-      <table class="table">
+      <!-- Indicador de carga -->
+      <div v-if="isLoading" class="loading-indicator">
+        Cargando sucursales...
+      </div>
+
+      <!-- Mensaje si no hay datos -->
+      <div v-else-if="paginatedSucursales.length === 0" class="no-data">
+        No se encontraron sucursales para mostrar.
+      </div>
+
+      <table v-else class="table">
         <thead>
           <tr>
             <th class="col-id">#</th>
@@ -38,7 +37,7 @@
         </thead>
         <tbody>
           <tr v-for="(sucursal, index) in paginatedSucursales" :key="index">
-            <td>{{ index + 1 }}</td>
+            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
             <td>{{ sucursal.nombre_administrativo }}</td>
             <td>{{ sucursal.correo }}</td>
             <td>{{ sucursal.telefono }}</td>
@@ -54,6 +53,23 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Paginación -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize,
+            filteredSucursales.length) }} de {{ filteredSucursales.length }} registros
+        </div>
+        <div class="pagination-container">
+          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+            Anterior
+          </button>
+
+          <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal para agregar o editar Sucursales -->
@@ -125,7 +141,6 @@ export default {
       id_usuario: 1,
       id_empresa: 11,
       searchQuery: "",
-      itemsPerPage: "",
       isModalOpen: false,
       isEditing: false,
       isLoading: false,
@@ -133,6 +148,8 @@ export default {
       selectedCountry: 'HN',
       countryData: COUNTRY_CODES,
       phoneLength: 8,
+      currentPage: 1,
+      pageSize: 10,
 
       sucursalForm: {
         id_sucursal: 0,
@@ -163,10 +180,13 @@ export default {
       );
     },
     paginatedSucursales() {
-      return this.itemsPerPage === "" || this.itemsPerPage === null
-        ? this.filteredSucursales
-        : this.filteredSucursales.slice(0, parseInt(this.itemsPerPage));
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = startIndex + this.pageSize;
+      return this.filteredSucursales.slice(startIndex, endIndex);
     },
+    totalPages() {
+      return Math.ceil(this.filteredSucursales.length / this.pageSize);
+    }
   },
   methods: {
     updatePhoneValidation() {
@@ -195,7 +215,6 @@ export default {
     async guardarSucursal() {
       this.isLoading = true;
       try {
-        // Validar los campos usando el servicio de validaciones
         if (!validacionesSucursal.validarCampos(this.sucursalForm, this.selectedCountry)) {
           return;
         }
@@ -240,9 +259,6 @@ export default {
       this.isEditing = true;
       this.editIndex = this.sucursales.findIndex(item => item.id_sucursal === sucursal.id_sucursal);
       this.sucursalForm = { ...sucursal };
-
-      // Extraer código de país del número de teléfono si es necesario
-      // Aquí puedes agregar lógica para determinar el país basado en el número
     },
 
     async deleteSucursal(sucursal) {
@@ -253,7 +269,6 @@ export default {
 
         if (response === true) {
           this.sucursales = this.sucursales.filter(item => item.id_sucursal !== sucursal.id_sucursal);
-          //notificaciones('success', 'Sucursal eliminada correctamente');
           this.generateRows();
         } else {
           throw new Error('Error al eliminar la sucursal');
@@ -261,6 +276,8 @@ export default {
       } catch (error) {
         this.isLoading = false;
         notificaciones('error', error.message);
+      } finally {
+        this.isLoading = false;
       }
     },
 
@@ -274,6 +291,18 @@ export default {
       }));
     },
 
+    previousPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement("link");
       link.type = "image/x-icon";
@@ -283,6 +312,9 @@ export default {
     },
   },
   watch: {
+    searchQuery() {
+      this.currentPage = 1;
+    },
     paginatedSucursales: {
       handler() {
         this.generateRows();
@@ -300,7 +332,6 @@ export default {
       document.title = "Sucursales";
       this.changeFavicon("/img/spiderman.ico");
     } catch (error) {
-      //notificaciones('error', 'Error al cargar las sucursales');
       console.error(error);
     } finally {
       this.isLoading = false;
@@ -453,13 +484,11 @@ export default {
 
 .table-container {
   width: 100%;
-  border-radius: 10px;
-  border: 1px solid #ddd;
+  border-radius: 0;
+  border: 1px solid #e2e8f0;
   margin-top: 16px;
-  height: auto;
-  max-height: 480px;
-  overflow-x: auto;
-  overflow-y: auto;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .table {
@@ -472,7 +501,7 @@ export default {
 .table thead {
   position: sticky;
   top: 0;
-  z-index: 0;
+  z-index: 1;
   background-color: white;
 }
 
@@ -842,5 +871,81 @@ export default {
 .dark .modalShowConfirm-no {
   background-color: #6c757d;
   color: white;
+}
+
+/* Nueva paginación */
+.loading-indicator,
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.no-data {
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  margin-top: auto;
+}
+
+.pagination-info {
+  color: #6c757d;
+}
+
+.pagination-container {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Dark mode para la paginación */
+.dark .pagination-wrapper {
+  border-color: #404040;
+}
+
+.dark .pagination-info {
+  color: #aaa;
+}
+
+.dark .pagination-button {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .pagination-button:hover:not(:disabled) {
+  background-color: #383838;
+}
+
+.dark .loading-indicator,
+.dark .no-data {
+  color: #aaa;
+  background-color: #2d2d2d;
 }
 </style>

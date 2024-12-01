@@ -22,7 +22,22 @@
       </div>
     </div>
 
+    
+
     <div class="table-container">
+
+
+       <!-- Indicador de carga -->
+       <div v-if="isLoading" class="loading-indicator">
+        Cargando categorias...
+      </div>
+
+      <!-- Mensaje si no hay datos -->
+      <div v-else-if="paginatedCategorias.length === 0" class="no-data">
+        No se encontraron categorias para mostrar.
+      </div>
+
+
       <table class="table">
         <thead>
           <tr>
@@ -745,4 +760,15 @@ export default {
     font-size: 20px;
   }
 }
+
+/* Estilos para la paginación */
+.loading-indicator,
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+
 </style>
