@@ -20,22 +20,26 @@
 
         <!-- Correo -->
         <div class="form-group">
-          <input id="correo" v-model="form.correo_principal" type="email" placeholder="Correo electrónico" required />
+          <input id="correo" v-model="form.correo_principal" type="email" placeholder="Correo electrónico principal" required />
         </div>
 
         <!-- Teléfono -->
         <div class="form-group">
-          <input id="telefono" v-model="form.telefono_principal" type="tel" placeholder="Teléfono" required />
+          <input id="telefono" v-model="form.telefono_principal" type="tel" placeholder="Teléfono principal" required />
         </div>
 
          <!-- Encargado -->
          <div class="form-group">
-          <input id="encargado" v-model="form.nombre_usuario" type="text" placeholder="Nombre" required />
+          <input id="encargado" v-model="form.nombre_usuario" type="text" placeholder="Nombre del CEO" required />
         </div>
 
           <!-- Encargado -->
           <div class="form-group">
-          <input id="apellido" v-model="form.apellido_usuario" type="text" placeholder="Apellido" required />
+          <input id="apellido" v-model="form.apellido_usuario" type="text" placeholder="Apellido del CEO" required />
+        </div>
+
+        <div class="form-group">
+          <input id="apellido" v-model="form.rtn" type="text" placeholder="RTN Empresa" required />
         </div>
 
           <!-- Direccion -->
@@ -68,6 +72,7 @@ import { reactive, ref, onMounted } from 'vue';
 const form = reactive({
   nombre: '',
   id_categoria: '',
+  rtn: '',
   correo_principal: '',
   telefono_principal: '',
   nombre_usuario: '',
@@ -79,6 +84,7 @@ const form = reactive({
 function limpiarForm (){
   form.apellido_usuario ='';
   form.id_categoria ='';
+  form.rtn = '';
   form.correo_principal ='';
   form.telefono_principal ='';
   form.nombre_usuario ='';
