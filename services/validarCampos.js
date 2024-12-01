@@ -178,8 +178,21 @@ const validacionesUsuario = {
       Sucursal: form.sucursal,
     };
 
+    const campos2 = {
+      Nombre: form.nombre,
+      Apellido: form.apellido,
+      "Nombre de Usuario": form.nombre_usuario,
+      Correo: form.correo,
+      Rol: form.rol,
+      Telefono: form.telefono,
+      Direccion: form.direccion,
+      Sucursal: form.sucursal,
+    };
+
     if (isPassEdit) {
       if (!validacionesComunes.validarEmpty(campos)) return false;
+    } else {
+      if (!validacionesComunes.validarEmpty(campos2)) return false;
     }
 
     if (!validacionesComunes.validarNombre(campos.Nombre)) return false;

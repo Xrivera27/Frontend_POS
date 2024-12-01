@@ -1,5 +1,6 @@
 <template>
   <div class="sucursales-wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
@@ -101,6 +102,7 @@
 
 <script>
 import ExportButton from "../components/ExportButton.vue";
+import ModalLoading from '@/components/ModalLoading.vue';
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
 import { notificaciones } from '../../services/notificaciones.js';
@@ -114,7 +116,8 @@ export default {
     ExportButton,
     btnGuardarModal,
     btnCerrarModal,
-    PageHeader
+    PageHeader,
+    ModalLoading
   },
   data() {
     return {
@@ -125,6 +128,7 @@ export default {
       itemsPerPage: "",
       isModalOpen: false,
       isEditing: false,
+      isLoading: false,
       editIndex: null,
       selectedCountry: 'HN',
       countryData: COUNTRY_CODES,
@@ -189,6 +193,7 @@ export default {
     },
 
     async guardarSucursal() {
+      this.isLoading = true;
       try {
         // Validar los campos usando el servicio de validaciones
         if (!validacionesSucursal.validarCampos(this.sucursalForm, this.selectedCountry)) {
@@ -223,7 +228,10 @@ export default {
         this.closeModal();
         this.generateRows();
       } catch (error) {
-        //notificaciones('error', error.message);
+        this.isLoading = false;
+        notificaciones('error', error.message);
+      } finally {
+        this.isLoading = false;
       }
     },
 
@@ -238,6 +246,7 @@ export default {
     },
 
     async deleteSucursal(sucursal) {
+      this.isLoading = true;
       try {
         const parametros = `/sucursales/desactivar-sucursal/${sucursal.id_sucursal}`;
         const response = await solicitudes.desactivarRegistro(parametros, { estado: false });
@@ -250,7 +259,8 @@ export default {
           throw new Error('Error al eliminar la sucursal');
         }
       } catch (error) {
-        //notificaciones('error', error.message);
+        this.isLoading = false;
+        notificaciones('error', error.message);
       }
     },
 
@@ -281,6 +291,7 @@ export default {
     }
   },
   async mounted() {
+    this.isLoading = true;
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.sucursales = await solicitudes.fetchRegistros(`/sucursales/empresa/${this.id_usuario}`);
@@ -291,6 +302,8 @@ export default {
     } catch (error) {
       //notificaciones('error', 'Error al cargar las sucursales');
       console.error(error);
+    } finally {
+      this.isLoading = false;
     }
   },
 };
@@ -700,6 +713,7 @@ export default {
   border-color: #404040;
   color: #fff;
 }
+
 /* =======================================================
    Modo Oscuro
 ======================================================= */

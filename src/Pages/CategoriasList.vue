@@ -1,9 +1,11 @@
 <template>
   <div class="categorias-wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
+      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal"
+        style="width: 200px; white-space: nowrap;">Agregar
         Categoría</button>
 
       <RouterLink to="promociones-categorias">
@@ -117,17 +119,20 @@ import { useToast } from "vue-toastification";
 import solicitudes from "../../services/solicitudes.js";
 const { deleteCategoria } = require('../../services/categoriaSolicitudes');
 const { esCeo } = require('../../services/usuariosSolicitudes');
+import ModalLoading from '@/components/ModalLoading.vue';
 
 export default {
   components: {
     btnGuardarModal,
     btnCerrarModal,
-    PageHeader
+    PageHeader,
+    ModalLoading
   },
   data() {
     return {
       titulo: 'Categorías',
       showConfirmModal: false,
+      isLoading: false,
       categoriaToDelete: null,
       searchQuery: '',
       currentPage: 1,
@@ -184,15 +189,20 @@ export default {
     },
     async deleteCategoria(categoria) {
       if (!this.showConfirmModal) {
+        this.isLoading = true;
         if (categoria.totalProd > 0) {
           const toast = useToast();
+          this.isLoading = false;
           toast.error('Productos existentes dentro de esta categoría');
           return;
         }
+        this.isLoading = false;
         this.categoriaToDelete = categoria;
         this.showConfirmModal = true;
         return;
       }
+
+      this.isLoading = true;
 
       try {
         const response = await deleteCategoria(this.categoriaToDelete.id_categoria);
@@ -207,6 +217,7 @@ export default {
       } finally {
         this.showConfirmModal = false;
         this.categoriaToDelete = null;
+        this.isLoading = false;
       }
     },
     cancelDelete() {
@@ -215,12 +226,14 @@ export default {
     },
 
     async guardarCategoria() {
+      this.isLoading = true;
       try {
         console.log("Iniciando guardado de categoría");
         console.log("Form antes de validar:", this.categoriaForm);
 
         if (!validacionesCategorias.validarCampos(this.categoriaForm)) {
           console.log("Falló la validación");
+          this.isLoading = false;
           return false;
         }
 
@@ -258,6 +271,8 @@ export default {
       } catch (error) {
         console.error("Error en guardarCategoria:", error);
         notis('error', error.message);
+      } finally {
+        this.isLoading = false;
       }
     },
 
@@ -285,6 +300,7 @@ export default {
     }
   },
   async mounted() {
+    this.isLoading = true;
     document.title = "Categorías";
     this.changeFavicon('/img/spiderman.ico');
 
@@ -294,9 +310,11 @@ export default {
         `/categoria-producto/${this.id_usuario}`
       );
       this.esCeo = await esCeo(this.id_usuario);
-      
+
     } catch (error) {
       console.log(error);
+    } finally {
+      this.isLoading = false;
     }
   },
   watch: {
@@ -511,11 +529,25 @@ export default {
   transition: background-color 0.2s ease;
 }
 
-.col-id { width: 10%; }
-.col-nombre { width: 20%; }
-.col-descripcion { width: 45%; }
-.col-productos-usados { width: 15%; }
-.col-acciones { width: 10%; }
+.col-id {
+  width: 10%;
+}
+
+.col-nombre {
+  width: 20%;
+}
+
+.col-descripcion {
+  width: 45%;
+}
+
+.col-productos-usados {
+  width: 15%;
+}
+
+.col-acciones {
+  width: 10%;
+}
 
 /* Formulario */
 .form-group {
