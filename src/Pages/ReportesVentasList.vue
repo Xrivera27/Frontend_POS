@@ -269,17 +269,21 @@ export default {
     async cargarDatos() {
       try {
         this.cargando = true;
-        const [clientes, sucursales, empleados, productos] = await Promise.all([
+        const [clientes, empleados, productos] = await Promise.all([
           clientesReportes(this.id_usuario),
-          sucursalReportes(this.id_usuario),
           solicitudes.obtenerEmpleadosReporte(),
           reportesProductos(this.id_usuario, this.esCeo)
         ]);
 
         this.clientes = clientes;
-        this.sucursales = sucursales;
+        
         this.empleados = empleados;
         this.productos = productos;
+
+        if(this.esCeo){
+          this.sucursales = await sucursalReportes(this.id_usuario);
+        }
+
       } catch (error) {
         console.error('Error al cargar datos:', error);
         this.error = 'Error al cargar los datos de filtros';
