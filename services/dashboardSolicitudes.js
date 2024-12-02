@@ -25,3 +25,13 @@ export const getClientesPorEmpresa = async (id_usuario) => {
         throw new Error('No se pudo obtener los clientes para el usuario especificado.');
     }
 };
+
+export const getAlertasPorPromocion = async (id_usuario) => {
+    try {
+        const response = await solicitudes.fetchRegistros(`/dashboard/alertas-promocion/${id_usuario}`);
+        return response;
+    } catch (error) {
+        console.error('Error al obtener las alertas de promoción:', error);
+        throw new Error('No se pudo obtener las alertas de promoción para el usuario especificado.');
+    }
+};

@@ -59,6 +59,7 @@
 import { Line, Pie } from 'vue-chartjs';
 const { getTotalVentasDia } = require('../../services/dashboardSolicitudes')
 const { getClientesPorEmpresa } = require('../../services/dashboardSolicitudes')
+const { getAlertasPorPromocion } = require('../../services/dashboardSolicitudes')
 import solicitudes from "../../services/solicitudes.js";
 import {
   Chart as ChartJS,
@@ -95,6 +96,7 @@ export default {
     return {
       ventas: 0,
       clientesNumero: 0,
+      alertasPorPromocion: 0,
       id_usuario: '',
       lineChartData: {
         labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],
@@ -185,22 +187,22 @@ export default {
           link: "/administrar-ventas"
         },
         {
-          title: "Compras Pendientes",
-          value: "35",
-          icon: "bi bi-wallet",
-          link: "/administrar-compras"
-        },
-        {
           title: "Clientes",
           value: this.clientesNumero,
           icon: "bi bi-people",
           link: "/clientes"
         },
         {
-          title: "Alertas",
-          value: "3",
+          title: "Alertas Promocion",
+          value: this.getAlertasPromocionFormatted(),
           icon: "bi bi-tags",
           link: "/admin-invenario"
+        },
+        {
+          title: "Promociones Productos",
+          value: "35",
+          icon: "bi bi-megaphone",
+          link: "/administrar-compras"
         },
       ];
     }
@@ -214,14 +216,29 @@ export default {
       // Nuevo método para obtener el número de clientes
       const clientes = await getClientesPorEmpresa(this.id_usuario);
       this.clientesNumero = clientes.totalClientes; // Almacenar el número de clientes
-    }
+    },
+    async getAlertasPromocion() {
+      try {
+        this.alertasPorPromocion = await getAlertasPorPromocion(this.id_usuario);
+        console.log(this.alertasPorPromocion)
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    getAlertasPromocionFormatted() {
+      if (this.alertasPorPromocion) {
+        const { totalAlertas } = this.alertasPorPromocion;
+        return totalAlertas;
+      }
+    },
   },
 
   async mounted() {
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
-      await this.devolverVenta(); // Obtener ventas cuando el componente se monta
-      await this.obtenerNumeroClientes(); // Obtener número de clientes
+      await this.devolverVenta();
+      await this.obtenerNumeroClientes();
+      await this.getAlertasPromocion();
     } catch (error) {
       console.log(error);
     }
