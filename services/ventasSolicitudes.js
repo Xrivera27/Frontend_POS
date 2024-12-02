@@ -106,6 +106,26 @@ export const createCaja = async (id_usuario, valor_inicial) => {
     }
 }
 
+export const cerrarCaja = async(id_usuario) => {
+    
+    const datos = {
+        id_usuario: id_usuario,
+
+    }
+
+    const parametros = `/ventas/cerrar-caja`;
+    try {
+
+        const response = await solicitudes.patchRegistroProducto(parametros, datos);
+
+            return response; 
+
+    } catch (error) {
+        console.error('Error al cerrar caja:', error); 
+        throw error;
+    }
+}
+
 export const agregarProductoCodigo = async (cantidad, codigo, id_usuario) => {
 
     const datos = {
