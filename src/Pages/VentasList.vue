@@ -506,7 +506,8 @@ export default {
       }
 
       try {
-        const pagando = await pagar(datosPago.monto, this.venta.id_venta, datosPago.notas, this.id_usuario);
+        console.log(datosPago);
+        const pagando = await pagar(datosPago.montoEfectivo, this.venta.id_venta, datosPago.notas, this.id_usuario);
         if (!pagando) {
           throw 'No se realizo el pago';
         }
