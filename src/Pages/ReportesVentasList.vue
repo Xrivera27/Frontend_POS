@@ -13,6 +13,7 @@
                 <option value="ventas_cliente">Ventas por Cliente</option>
                 <option value="ventas_sucursal">Ventas por Sucursal</option>
                 <option value="ventas_empleado">Ventas por Empleado</option>
+                <option value="ventas_producto">Ventas de Productos</option>
               </select>
             </div>
 
@@ -156,8 +157,10 @@
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
+import { notis } from '../../services/notificaciones.js';
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
 import solicitudes from "../../services/solicitudes.js";
+const { clientesReportes, sucursalReportes } = require('../../services/reporteSolicitudes.js')
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -170,6 +173,7 @@ export default {
   data() {
     return {
       titulo: 'Reportería',
+      id_usuario: '',
       cargando: false,
       error: null,
       isDragging: false,
@@ -222,6 +226,7 @@ export default {
         case 'ventas_cliente':
           return this.clientes;
         case 'ventas_sucursal':
+          console.log(this.sucursales);
           return this.sucursales;
         case 'ventas_empleado':
           return this.empleados;
@@ -258,8 +263,8 @@ export default {
       try {
         this.cargando = true;
         const [clientes, sucursales, empleados] = await Promise.all([
-          solicitudes.obtenerClientesReporte(),
-          solicitudes.obtenerSucursalesReporte(),
+          clientesReportes(this.id_usuario),
+          sucursalReportes(this.id_usuario),
           solicitudes.obtenerEmpleadosReporte()
         ]);
 
@@ -274,38 +279,38 @@ export default {
       }
     },
 
-    async generarReporte(formato = 'preview') {
-      if (!this.fechasValidas) {
-        alert('Por favor seleccione un intervalo de fechas válido');
-        return;
-      }
+    // async generarReporte(formato = 'preview') {
+    //   if (!this.fechasValidas) {
+    //     alert('Por favor seleccione un intervalo de fechas válido');
+    //     return;
+    //   }
 
-      this.cargando = true;
-      this.error = null;
+    //   this.cargando = true;
+    //   this.error = null;
 
-      try {
-        if (formato === 'preview') {
-          const response = await solicitudes.obtenerReporteVentas({
-            reporteSeleccionado: this.reporteSeleccionado,
-            fechaInicio: this.filtros.fechaInicio,
-            fechaFin: this.filtros.fechaFin,
-            valorFiltro: this.valorFiltro
-          });
+    //   try {
+    //     if (formato === 'preview') {
+    //       const response = await solicitudes.obtenerReporteVentas({
+    //         reporteSeleccionado: this.reporteSeleccionado,
+    //         fechaInicio: this.filtros.fechaInicio,
+    //         fechaFin: this.filtros.fechaFin,
+    //         valorFiltro: this.valorFiltro
+    //       });
 
-          this.datosReporte = response.datos;
-          this.totales = response.totales;
-        } else if (formato === 'pdf') {
-          await this.exportarPDF();
-        } else if (formato === 'excel') {
-          await this.exportarExcel();
-        }
-      } catch (error) {
-        console.error('Error al generar reporte:', error);
-        this.error = 'Error al generar el reporte';
-      } finally {
-        this.cargando = false;
-      }
-    },
+    //       this.datosReporte = response.datos;
+    //       this.totales = response.totales;
+    //     } else if (formato === 'pdf') {
+    //       await this.exportarPDF();
+    //     } else if (formato === 'excel') {
+    //       await this.exportarExcel();
+    //     }
+    //   } catch (error) {
+    //     console.error('Error al generar reporte:', error);
+    //     this.error = 'Error al generar el reporte';
+    //   } finally {
+    //     this.cargando = false;
+    //   }
+    // },
 
     setHoy() {
       const hoy = new Date().toISOString().split('T')[0];
@@ -631,10 +636,12 @@ export default {
 
   async mounted() {
     // Cargar logo guardado si existe
-    const savedLogo = localStorage.getItem('logoEmpresa');
+    try {
+      const savedLogo = localStorage.getItem('logoEmpresa');
     if (savedLogo) {
       this.logoUrl = savedLogo;
     }
+    this.id_usuario = await solicitudes.solicitarUsuarioToken();
     
     // Cargar datos iniciales
     await this.cargarDatos();
@@ -643,6 +650,11 @@ export default {
     if (this.fechasValidas) {
       await this.generarReporte('preview');
     }
+    } catch (error) {
+      console.log(error);
+      notis('error', 'Error al cargar datos. Intente de nuevo');
+    }
+   
   },
 
   watch: {
