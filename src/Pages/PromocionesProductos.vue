@@ -1507,4 +1507,13 @@ input[type="date"] {
   background-color: #6c757d;
   color: white;
 }
+
+/* Estilos para la paginación */
+.loading-indicator,
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
 </style>
