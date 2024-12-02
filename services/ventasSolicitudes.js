@@ -274,6 +274,34 @@ export const pagar = async (pago, id_venta, descripcion, id_usuario) => {
     }
 }
 
+export const pagarTranferir = async (pago, id_venta, numeroTransferencia, notas, id_usuario) => {
+
+    const datos = {
+        id_venta: id_venta,
+        pago: pago,
+        id_usuario: id_usuario,
+        descripcion: `Numero de transferencia: ${numeroTransferencia}. Notas: ${notas}`
+    }
+
+    const parametros = `/ventas/pagar-transferencia`;
+    try {
+
+        const response = await solicitudes.patchRegistro(parametros, datos);
+
+        if (response && response == true) {
+
+            return response; // Retorna el registro creado o la respuesta completa
+        } else {
+            console.log(response);
+            throw new Error('No se hizo el patch');
+        }
+
+    } catch (error) {
+        console.error('Error al registrar pago de venta:', error); // Registra el error para depuración
+        throw error; // Opcional: vuelve a lanzar el error para manejarlo en otro lugar
+    }
+}
+
 
 
 

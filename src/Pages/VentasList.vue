@@ -178,7 +178,7 @@ import PaymentAnimationModal from '@/components/PaymentAnimationModal.vue';
 //import VentaPendienteModal from '@/components/modalesCrearVenta/VentaPendiente.vue';
 import AperturaCajaModal from '@/components/modalesCrearVenta/AperturaCajaModal.vue';
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, cajaUsuario, createCaja, cerrarCaja, pagar } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, cajaUsuario, createCaja, cerrarCaja, pagar, pagarTranferir } from '../../services/ventasSolicitudes.js';
 //cajaUsuario
 import FacturaModal from '@/components/FacturaModal.vue'; // Nuevo
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
@@ -499,6 +499,8 @@ export default {
     },
 
     async realizarPago(datosPago) {
+      console.log(datosPago);
+      let pagando = false;
       if (this.productosLista.length === 0) {
         const toast = useToast();
         toast.warning("No hay productos en la tabla de ventas.");
@@ -506,8 +508,13 @@ export default {
       }
 
       try {
-        console.log(datosPago);
-        const pagando = await pagar(datosPago.montoEfectivo, this.venta.id_venta, datosPago.notas, this.id_usuario);
+        if( datosPago.metodoPago === 'Efectivo' ){
+          pagando = await pagar(datosPago.montoEfectivo, this.venta.id_venta, datosPago.notas, this.id_usuario);
+        }
+        else if(datosPago.metodoPago === 'Transferencia'){
+          pagando = await pagarTranferir(datosPago.montoTransferencia, this.venta.id_venta, datosPago.numeroTransferencia, datosPago.notas, this.id_usuario);
+        }
+        
         if (!pagando) {
           throw 'No se realizo el pago';
         }
