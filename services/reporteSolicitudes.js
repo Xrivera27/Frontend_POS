@@ -3,6 +3,8 @@ import { getProductosEmpresa } from './productosSolicitudes.js';
 
 const { getClientesbyEmpresa } = require('./clienteSolicitudes.js');
 
+const { getUsuariosEmpresa } = require('./usuariosSolicitudes');
+
 export const clientesReportes = async (id_usuario) => {
     const datos = await getClientesbyEmpresa(id_usuario);
     let clientes = [];
@@ -53,6 +55,27 @@ export const reportesProductos = async (id_usuario, esCeo) => {
         });
     
     return productos;
+    
+}
+
+export const reportesEmpleados = async (id_usuario, esCeo) => {
+    let empleados = [];
+    let datos = [];
+    if(esCeo){
+        datos = await getUsuariosEmpresa(id_usuario);
+    }
+    else{
+            datos = await solicitudes.fetchRegistros(`/reporte/empleados/${id_usuario}`);
+        }
+
+        datos.forEach(d => {
+            empleados.push({
+                id: d.id_usuario,
+                nombre: `${d.nombre} ${d.apellido}` 
+            });
+        });
+    
+    return empleados;
     
 }
 

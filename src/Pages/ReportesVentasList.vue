@@ -160,7 +160,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import { notis } from '../../services/notificaciones.js';
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
 import solicitudes from "../../services/solicitudes.js";
-const { clientesReportes, sucursalReportes, reportesProductos } = require('../../services/reporteSolicitudes.js');
+const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados } = require('../../services/reporteSolicitudes.js');
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -271,7 +271,7 @@ export default {
         this.cargando = true;
         const [clientes, empleados, productos] = await Promise.all([
           clientesReportes(this.id_usuario),
-          solicitudes.obtenerEmpleadosReporte(),
+          reportesEmpleados(this.id_usuario, this.esCeo),
           reportesProductos(this.id_usuario, this.esCeo)
         ]);
 
