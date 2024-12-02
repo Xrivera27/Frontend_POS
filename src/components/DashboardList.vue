@@ -58,6 +58,7 @@
 <script>
 import { Line, Pie } from 'vue-chartjs';
 const { getTotalVentasDia } = require('../../services/dashboardSolicitudes')
+const { getClientesPorEmpresa } = require('../../services/dashboardSolicitudes')
 import solicitudes from "../../services/solicitudes.js";
 import {
   Chart as ChartJS,
@@ -93,6 +94,7 @@ export default {
   data() {
     return {
       ventas: 0,
+      clientesNumero: 0,
       id_usuario: '',
       lineChartData: {
         labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],
@@ -190,7 +192,7 @@ export default {
         },
         {
           title: "Clientes",
-          value: "2,703",
+          value: this.clientesNumero,
           icon: "bi bi-people",
           link: "/clientes"
         },
@@ -207,6 +209,11 @@ export default {
   methods: {
     async devolverVenta() {
       this.ventas = await getTotalVentasDia(this.id_usuario);
+    },
+    async obtenerNumeroClientes() {
+      // Nuevo método para obtener el número de clientes
+      const clientes = await getClientesPorEmpresa(this.id_usuario);
+      this.clientesNumero = clientes.totalClientes; // Almacenar el número de clientes
     }
   },
 
@@ -214,6 +221,7 @@ export default {
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       await this.devolverVenta(); // Obtener ventas cuando el componente se monta
+      await this.obtenerNumeroClientes(); // Obtener número de clientes
     } catch (error) {
       console.log(error);
     }
