@@ -768,7 +768,7 @@ export default {
         console.error('Error al eliminar promoción:', error);
         notis("error", "Error al eliminar la promoción");
       } finally {
-        this.isLoading = true;
+        this.isLoading = false;
         this.editIndex = null;
       }
     },
