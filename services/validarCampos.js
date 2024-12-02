@@ -459,6 +459,93 @@ const validacionesProveedores = {
   },
 };
 
+const validacionesConfigPage = {
+  validarCamposConfiguracion(form, isPassEdit, selectedCountry) {
+    const campos = {
+      "Nombre de usuario": form.nombre_usuario,
+      Telefono: form.telefono,
+      Direccion: form.direccion,
+    };
+
+    // Validaciones básicas siempre
+    if (!validacionesComunes.validarEmpty(campos)) return false;
+
+    const usernamePattern = /^[a-zA-Z0-9_]+$/;
+    if (!usernamePattern.test(campos["Nombre de usuario"])) {
+      notis(
+        "warning",
+        "El nombre de usuario solo puede contener letras, números y guiones bajos"
+      );
+      return false;
+    }
+
+    if (
+      campos["Nombre de usuario"].length < 3 ||
+      campos["Nombre de usuario"].length > 50
+    ) {
+      notis(
+        "warning",
+        "El nombre de usuario debe tener entre al menos 3 caracteres"
+      );
+      return false;
+    }
+
+    if (!validacionesComunes.validarTelefono(campos.Telefono, selectedCountry))
+      return false;
+    if (!validacionesComunes.validarDireccion(campos.Direccion)) return false;
+
+    // Solo validar contraseñas si isPassEdit es true
+    if (isPassEdit) {
+      // Agregar campos de contraseña al objeto campos solo si estamos en modo edición de contraseña
+      campos.Contraseña = form.contraseña;
+      campos["Contraseña nueva"] = form.contraseña_nueva;
+      campos["Confirmar contraseña"] = form.contraseña_confirm;
+
+      // Validar que los campos no estén vacíos
+      if (!validacionesComunes.validarEmpty(campos)) return false;
+
+      // Validar la contraseña nueva
+      if (
+        !validacionesComunes.validarPasswordSegura(campos["Contraseña nueva"])
+      )
+        return false;
+
+      // Validar que las contraseñas coincidan
+      if (
+        !validacionesComunes.validarPass(
+          campos["Contraseña nueva"],
+          campos["Confirmar contraseña"]
+        )
+      )
+        return false;
+    }
+
+    return true;
+  },
+
+  validarCamposConfiguracionAvanzada(form) {
+    const campos = {
+      Nombre: form.nombre,
+      Apellido: form.apellido,
+      Correo: form.correo,
+    };
+
+    if (!validacionesComunes.validarEmpty(campos)) return false;
+
+    if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
+    const nombrePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,50}$/;
+    if (!nombrePattern.test(form.apellido)) {
+      notis(
+        "warning",
+        "El apellido debe contener solo letras y tener al menos 3 caracteres"
+      );
+      return false;
+    }
+    if (!validacionesComunes.validarEmail(campos.Correo)) return false;
+    return true;
+  },
+};
+
 export {
   validacionesComunes,
   validacionesUsuario,
@@ -467,4 +554,5 @@ export {
   validacionesProductos,
   validacionesClientes,
   validacionesProveedores,
+  validacionesConfigPage,
 };

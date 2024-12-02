@@ -1,6 +1,7 @@
 <template>
   <div class="configuracion-usuario">
     <div class="config-wrapper">
+      <ModalLoading :isLoading="isLoading" />
 
       <PageHeader :titulo="titulo" />
       <div class="usuario-config" v-if="showUser">
@@ -13,28 +14,48 @@
             <div class="contenedor-principal">
               <div class="contenedor-interno contenedor-izquierdo">
                 <label for="nombre-usuario">Nombre de usuario:</label>
-                <input v-model="userForm.nombre_usuario" type="text" id="nombre_usuario" name="nombre_usuario"
-                  required />
+                <input v-model="userForm.nombre_usuario" type="text" id="nombre_usuario" name="nombre_usuario" />
 
-                <label for="telefono">Teléfono:</label>
-                <input v-model="userForm.telefono" type="text" id="telefono" name="telefono" required />
+                <div class="form-group">
+                  <label>Teléfono:</label>
+                  <div class="phone-input-container">
+                    <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+                      <option value="">País</option>
+                      <option v-for="(country, code) in countryData" :key="code" :value="code">
+                        {{ country.emoji }} {{ country.code }}
+                      </option>
+                    </select>
+                    <input v-model="userForm.telefono" type="text" class="input-phone"
+                      :placeholder="'Número (' + phoneLength + ' dígitos)'" />
+                  </div>
+                </div>
 
                 <label for="direccion">Dirección:</label>
-                <input v-model="userForm.direccion" type="text" id="direccion" name="direccion" required />
+                <input v-model="userForm.direccion" type="text" id="direccion" name="direccion" />
               </div>
+
               <div class="contenedor-interno contenedor-derecho">
-                <label for="contrasena">Contraseña actual:</label>
-                <input v-model="userForm.contraseña" type="password" id="contraseña" name="contraseña" required />
-                <label for="contrasena-nueva">Contraseña nueva:</label>
-                <input v-model="userForm.contraseña_nueva" type="password" id="contraseña_nueva"
-                  name="contraseña_nueva" />
 
-                <label for="contrasena-confirmar">Confirmar contraseña:</label>
-                <input v-model="userForm.contraseña_confirm" type="password" id="contraseña_confirm"
-                  name="contraseña_confirm" />
+                <button type="button" class="btn btn-password" :class="{ 'disabled': usuarioEditing }"
+                  :disabled="usuarioEditing" @click="togglePasswordEdit">
+                  {{ isPassEdit ? 'Cancelar cambio' : 'Cambiar contraseña' }}
+                </button>
 
+                <!-- Los inputs existentes con v-if -->
+                <template v-if="isPassEdit">
+                  <label for="contrasena">Contraseña actual:</label>
+                  <input v-model="userForm.contraseña" type="password" id="contraseña" name="contraseña" required />
 
+                  <label for="contrasena-nueva">Contraseña nueva:</label>
+                  <input v-model="userForm.contraseña_nueva" type="password" id="contraseña_nueva"
+                    name="contraseña_nueva" />
+
+                  <label for="contrasena-confirmar">Confirmar contraseña:</label>
+                  <input v-model="userForm.contraseña_confirm" type="password" id="contraseña_confirm"
+                    name="contraseña_confirm" />
+                </template>
               </div>
+
             </div>
           </fieldset>
           <div class="botones-container">
@@ -52,13 +73,13 @@
             <div class="contenedor-principal">
               <div class="contenedor-interno contenedor-izquierdo">
                 <label for="Nombre">Nombre:</label>
-                <input v-model="userFormAdvanced.nombre" type="text" id="nombre" name="nombre" required />
+                <input v-model="userFormAdvanced.nombre" type="text" id="nombre" name="nombre" />
 
                 <label for="apellido">Apellido:</label>
-                <input v-model="userFormAdvanced.apellido" type="text" id="apellido" name="apellido" required />
+                <input v-model="userFormAdvanced.apellido" type="text" id="apellido" name="apellido" />
 
                 <label for="correo">Correo:</label>
-                <input v-model="userFormAdvanced.correo" type="email" id="correo" name="correo" required />
+                <input v-model="userFormAdvanced.correo" type="text" id="correo" name="correo" />
               </div>
             </div>
           </fieldset>
@@ -89,20 +110,31 @@
 <script>
 import axios from 'axios';
 import PageHeader from "@/components/PageHeader.vue";
+import ModalLoading from '@/components/ModalLoading.vue';
+import { notis } from '../../services/notificaciones.js';
+import { COUNTRY_CODES } from "../../services/countrySelector.js";
+import { validacionesConfigPage } from "../../services/validarCampos.js"
+import solicitudes from "../../services/solicitudes.js";
 
 export default {
   components: {
-    PageHeader
+    PageHeader,
+    ModalLoading
   },
   data() {
     return {
       titulo: 'Configuración',
+      selectedCountry: 'HN',
+      countryData: COUNTRY_CODES,
+      phoneLength: 8,
+      isPassEdit: false,
       userBoton: true,
       companyBoton: false,
       showUser: true,
       userActive: true,
       usuarioEditing: true,
       usuarioAvancedEditing: true,
+      isLoading: false,
       userForm: {
         nombreUsuario: '',
         telefono: '',
@@ -119,7 +151,15 @@ export default {
     };
   },
   methods: {
+    updatePhoneValidation() {
+      if (this.selectedCountry && this.countryData[this.selectedCountry]) {
+        this.phoneLength = this.countryData[this.selectedCountry].length;
+      }
+    },
+
     async getUserData() {
+
+      this.isLoading = true;
       try {
         const token = localStorage.getItem('auth'); // Usa 'auth' para obtener el token
 
@@ -134,37 +174,70 @@ export default {
         this.userForm.nombre_usuario = userData.nombre_usuario || '';
         this.userForm.telefono = userData.telefono || '';
         this.userForm.direccion = userData.direccion || '';
-        this.userForm.contraseña = userData.contraseña || '';
         this.userFormAdvanced.nombre = userData.nombre || '';
         this.userFormAdvanced.apellido = userData.apellido || '';
         this.userFormAdvanced.correo = userData.correo || '';
       } catch (error) {
         console.error('Error al obtener los datos del usuario:', error);
-        alert('No se pudo obtener la información del usuario.'); // Mensaje para el usuario
+        notis("error", 'No se pudo obtener la información del usuario.'); // Mensaje para el usuario
+      } finally {
+        this.isLoading = false;
       }
     },
 
     async updateUserData() {
-      try {
-        const token = localStorage.getItem('auth');
+      // Si se está cambiando la contraseña, verificar primero la contraseña actual
+      if (this.isPassEdit) {
+        try {
+          const token = localStorage.getItem('auth');
+          // Ajustar la URL para que coincida con el endpoint correcto del backend
+          const verifyResponse = await axios.post('http://localhost:3000/api/verificar-password',
+            {
+              contraseña: this.userForm.contraseña,
+              // Posiblemente necesites enviar el ID del usuario u otros datos necesarios
+              id_usuario: await solicitudes.solicitarUsuarioToken()
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
 
-        // Verificar si se están intentando cambiar las contraseñas
-        if (this.userForm.contraseña_nueva || this.userForm.contraseña_confirm) {
-          // Si una de las contraseñas nuevas está presente, ambas deben coincidir
-          if (this.userForm.contraseña_nueva !== this.userForm.contraseña_confirm) {
-            alert('Las contraseñas no coinciden.');
+          if (!verifyResponse.data.isValid) {
+            notis("error", "La contraseña actual es incorrecta");
             return;
           }
+        } catch (error) {
+          console.error('Error al verificar la contraseña:', error);
+          notis("error", "Error al verificar la contraseña");
+          return;
         }
+      }
 
+      // Continuar con las validaciones normales
+      if (!this.usuarioEditing) {
+        if (!validacionesConfigPage.validarCamposConfiguracion(this.userForm, this.isPassEdit, this.selectedCountry)) {
+          return;
+        }
+      } else if (!this.usuarioAvancedEditing) {
+        if (!validacionesConfigPage.validarCamposConfiguracionAvanzada(this.userFormAdvanced)) {
+          return;
+        }
+      }
+
+      // Si todo es válido, proceder con la actualización
+      this.isLoading = true;
+      try {
+        const token = localStorage.getItem('auth');
         const updatedData = {
           nombre_usuario: this.userForm.nombre_usuario,
           telefono: this.userForm.telefono,
           direccion: this.userForm.direccion,
-          // Asegúrate de enviar la contraseña actual y las nuevas
-          contraseña: this.userForm.contraseña, // Contraseña actual
+          contraseña: this.userForm.contraseña,
           contraseña_nueva: this.userForm.contraseña_nueva || undefined,
-          contraseña_confirm: this.userForm.contraseña_confirm || undefined, // Asegúrate de que este campo esté presente
+          contraseña_confirm: this.userForm.contraseña_confirm || undefined,
           nombre: this.userFormAdvanced.nombre,
           apellido: this.userFormAdvanced.apellido,
           correo: this.userFormAdvanced.correo,
@@ -177,24 +250,25 @@ export default {
           },
         });
 
-        console.log('Respuesta del servidor:', response);
-
         if (response.status === 200) {
-          alert('Usuario actualizado exitosamente');
-          window.location.reload(); // Recargar la página después de guardar
+          localStorage.setItem('showUpdateSuccess', 'true');
+          window.location.reload();
         }
       } catch (error) {
         console.error('Error al actualizar los datos del usuario:', error);
-        alert('Hubo un problema al guardar los datos.');
+        notis("error", 'Hubo un problema al guardar los datos.');
+      } finally {
+        this.isLoading = false;
       }
     },
 
-
-
-
-
-
-
+    togglePasswordEdit() {
+      this.isPassEdit = !this.isPassEdit;
+      // Limpiar todos los campos relacionados con contraseña
+      this.userForm.contraseña = '';      // Limpiar contraseña actual
+      this.userForm.contraseña_nueva = '';
+      this.userForm.contraseña_confirm = '';
+    },
 
     isEditing(orden) {
       // Maneja los estados de edición
@@ -208,7 +282,7 @@ export default {
           this.usuarioAvancedEditing = false;
           break;
         default:
-          alert('Ha ocurrido un error');
+          notis("error", 'Ha ocurrido un error');
       }
     },
 
@@ -221,11 +295,15 @@ export default {
     }
   },
   mounted() {
-    // Obtén los datos del usuario cuando el componente esté montado (ej. usuario con ID 1)
-    this.getUserData(1);
-
+    this.getUserData();
     document.title = "Configuración de Usuario";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    this.changeFavicon('/img/spiderman.ico');
+
+    // Verificar si hay que mostrar la notificación
+    if (localStorage.getItem('showUpdateSuccess')) {
+      notis("success", 'Usuario actualizado exitosamente');
+      localStorage.removeItem('showUpdateSuccess'); // Limpiar el flag
+    }
   },
 };
 </script>
@@ -305,9 +383,11 @@ input {
   border: 1px solid #ddd;
   border-radius: 4px;
   width: 95%;
-  height: 25%;
-  justify-content: center;
+  height: 35px;
+  background-color: #fff;
+  /* Fondo blanco por defecto */
 }
+
 
 .contenedor-principal input {
   margin-bottom: 4%;
@@ -453,6 +533,33 @@ input {
   }
 }
 
+.phone-input-container {
+  display: flex;
+  gap: 8px;
+  width: 95%;
+  /* Mismo ancho que los otros inputs */
+}
+
+
+.phone-input-container select {
+  width: 110px;
+  margin: 0;
+  /* Importante: sin márgenes */
+  height: 35px;
+  padding: 0 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.phone-input-container input {
+  flex: 1;
+  height: 35px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+
 /* Scroll personalizado */
 .config-wrapper::-webkit-scrollbar {
   width: 8px;
@@ -584,6 +691,26 @@ input {
 
 .dark ::placeholder {
   color: #666;
+}
+
+.btn-password {
+  background-color: #009b15;
+  color: white;
+  width: 94%;
+  margin-bottom: 15px;
+}
+
+.btn-password.disabled {
+  background-color: #888787;
+  cursor: not-allowed;
+}
+
+.dark .btn-password {
+  background-color: #00b81a;
+}
+
+.dark .btn-password.disabled {
+  background-color: #666;
 }
 
 /* Input autofill en modo oscuro */
