@@ -160,7 +160,8 @@ import PageHeader from "@/components/PageHeader.vue";
 import { notis } from '../../services/notificaciones.js';
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
 import solicitudes from "../../services/solicitudes.js";
-const { clientesReportes, sucursalReportes } = require('../../services/reporteSolicitudes.js')
+const { clientesReportes, sucursalReportes, reportesProductos } = require('../../services/reporteSolicitudes.js');
+const { esCeo } = require('../../services/usuariosSolicitudes');
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -175,6 +176,7 @@ export default {
       titulo: 'Reportería',
       id_usuario: '',
       cargando: false,
+      esCeo: false,
       error: null,
       isDragging: false,
       logoUrl: null,
@@ -204,6 +206,7 @@ export default {
       clientes: [],
       sucursales: [],
       empleados: [],
+      productos: [],
       datosReporte: [],
       totales: {
         exonerado: 0,
@@ -230,6 +233,8 @@ export default {
           return this.sucursales;
         case 'ventas_empleado':
           return this.empleados;
+          case 'ventas_producto':
+          return this.productos;
         default:
           return [];
       }
@@ -243,6 +248,8 @@ export default {
           return 'Sucursal';
         case 'ventas_empleado':
           return 'Empleado';
+          case 'ventas_producto':
+          return 'Producto';
         default:
           return '';
       }
@@ -262,15 +269,17 @@ export default {
     async cargarDatos() {
       try {
         this.cargando = true;
-        const [clientes, sucursales, empleados] = await Promise.all([
+        const [clientes, sucursales, empleados, productos] = await Promise.all([
           clientesReportes(this.id_usuario),
           sucursalReportes(this.id_usuario),
-          solicitudes.obtenerEmpleadosReporte()
+          solicitudes.obtenerEmpleadosReporte(),
+          reportesProductos(this.id_usuario, this.esCeo)
         ]);
 
         this.clientes = clientes;
         this.sucursales = sucursales;
         this.empleados = empleados;
+        this.productos = productos;
       } catch (error) {
         console.error('Error al cargar datos:', error);
         this.error = 'Error al cargar los datos de filtros';
@@ -642,6 +651,7 @@ export default {
       this.logoUrl = savedLogo;
     }
     this.id_usuario = await solicitudes.solicitarUsuarioToken();
+    this.esCeo = await esCeo(this.id_usuario);
     
     // Cargar datos iniciales
     await this.cargarDatos();

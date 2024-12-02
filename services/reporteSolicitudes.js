@@ -1,4 +1,5 @@
 import solicitudes from './solicitudes.js';
+import { getProductosEmpresa } from './productosSolicitudes.js';
 
 const { getClientesbyEmpresa } = require('./clienteSolicitudes.js');
 
@@ -22,7 +23,7 @@ export const sucursalReportes = async (id_usuario) => {
     
     const datos = await solicitudes.fetchRegistros(`/sucursales/empresa/${id_usuario}`);
     let sucursal = [];
-console.log(datos);
+
     datos.forEach(d => {
         sucursal.push({
             id: d.id_sucursal,
@@ -33,3 +34,25 @@ console.log(datos);
     return sucursal;
     
 }
+
+export const reportesProductos = async (id_usuario, esCeo) => {
+    let productos = [];
+    let datos = [];
+    if(esCeo){
+        datos = await getProductosEmpresa(id_usuario);
+    }
+    else{
+            datos = await solicitudes.fetchRegistros(`/reporte/productos/${id_usuario}`);
+        }
+
+        datos.forEach(d => {
+            productos.push({
+                id: d.id_producto,
+                nombre: d.nombre
+            });
+        });
+    
+    return productos;
+    
+}
+
