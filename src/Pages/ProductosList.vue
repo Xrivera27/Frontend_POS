@@ -748,69 +748,12 @@ export default {
   width: 45%;
 }
 
-/* Formularios */
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-group {
-  margin: 10px 0;
-  display: flex;
-  align-items: center;
-}
-
-.label-stock-info {
-  font-weight: bolder;
-}
-
-.form-group label {
-  display: flexbox;
-  margin-bottom: 8px;
-}
-
-.form-group label {
-  white-space: nowrap;
-  margin-right: 5px;
-}
-
-.form-group-select {
-  min-width: 80%;
-  display: flexbox;
-  flex-direction: row;
-}
-
-.form-group input {
-  width: 95%;
-  height: 25%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  justify-content: center;
-}
-
-.form-group input {
-  height: 25%;
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  justify-content: center;
-}
-
 .opciones {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 16px;
-}
-
-.form-select {
-  width: 100%;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  padding: 8px 16px;
 }
 
 .busqueda {
@@ -1344,17 +1287,18 @@ export default {
 
 /* Form Groups */
 
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #333;
-  font-weight: 500;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  width: 100%;
 }
 
-.form-group {
-  margin-bottom: 20px;
-  width: 100%;
+.form-group label {
+  margin: 0;
+  color: #333;
+  font-weight: 500;
 }
 
 .form-group input,
@@ -1365,7 +1309,16 @@ export default {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 14px;
-  box-sizing: border-box;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
 }
 
 .btn-categoria {
@@ -1378,6 +1331,11 @@ export default {
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 500;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
 }
 
 .dark .btn-categoria {
@@ -1396,10 +1354,7 @@ export default {
   font-size: 1.2em;
 }
 
-.form-group textarea {
-  min-height: 100px;
-  resize: vertical;
-}
+
 
 .input-icon {
   position: relative;
