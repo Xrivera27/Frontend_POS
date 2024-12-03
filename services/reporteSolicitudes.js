@@ -101,4 +101,15 @@ export const getRegistrosClientes = async (id_usuario, fechaInicio, fechaFin) =>
      
  }
 
+ export const getRegistrosSucursales = async (id_usuario, fechaInicio, fechaFin) => {
+    try {
+     const response = solicitudes.fetchRegistros(`/reporte/reporte-sucursales/${id_usuario}/${fechaInicio}/${fechaFin}`);
+     return response;
+    } catch (error) {
+     console.error(error);
+     throw 'Ocurrio un error al obtener registros de cajeros';
+    }
+     
+ }
+
 

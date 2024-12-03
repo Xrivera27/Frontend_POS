@@ -11,9 +11,9 @@
               <label>Tipo de Reporte</label>
               <select v-model="reporteSeleccionado" @change="mostrarReportes" class="select-input">
                 <option value="ventas_cliente">Ventas por Cliente</option>
-                <option value="ventas_sucursal">Ventas por Sucursal</option>
+                <option  v-if="esCeo" value="ventas_sucursal">Ventas por Sucursal</option>
                 <option value="ventas_empleado">Ventas por Empleado</option>
-                <option value="ventas_producto">Ventas de Productos</option>
+
               </select>
             </div>
 
@@ -113,7 +113,6 @@
               <th v-if="reporteSeleccionado === 'ventas_cliente'">Cliente</th>
               <th v-if="reporteSeleccionado === 'ventas_sucursal'">Sucursal</th>
               <th v-if="reporteSeleccionado === 'ventas_empleado'">Empleado</th>
-              <th v-if="reporteSeleccionado === 'ventas_producto'">Producto</th>
               
               <th>Valor Exento</th>
               <th>Valor Gravado 15%</th>
@@ -126,7 +125,7 @@
             <tr v-for="(dato, index) in datosReporte" :key="index">
             
               <td v-if="reporteSeleccionado === 'ventas_cliente'">{{ dato.nombre }}</td>
-              <td v-if="reporteSeleccionado === 'ventas_sucursal'">{{ dato.sucursal }}</td>
+              <td v-if="reporteSeleccionado === 'ventas_sucursal'">{{ dato.nombre }}</td>
               <td v-if="reporteSeleccionado === 'ventas_empleado'">{{ dato.nombre }}</td>
              
               <td>{{ formatearMoneda(dato.valor_extento) }}</td>
@@ -161,7 +160,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import { notis } from '../../services/notificaciones.js';
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
 import solicitudes from "../../services/solicitudes.js";
-const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados, getRegistrosClientes } = require('../../services/reporteSolicitudes.js');
+const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados, getRegistrosClientes, getRegistrosSucursales } = require('../../services/reporteSolicitudes.js');
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -320,6 +319,11 @@ try {
 
   if(this.reporteSeleccionado === 'ventas_cliente'){
     const response = await getRegistrosClientes(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+  }
+
+  if(this.reporteSeleccionado === 'ventas_sucursal'){
+    const response = await getRegistrosSucursales(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
     this.datosReporte = response;
   }
 
