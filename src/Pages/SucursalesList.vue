@@ -74,45 +74,70 @@
 
     <!-- Modal para agregar o editar Sucursales -->
     <div v-if="isModalOpen" class="modal">
-      <div class="modal-content">
-        <h2 class="h2-modal-content">
-          {{ isEditing ? "Editar Sucursal" : "Agregar Sucursal" }}
-        </h2>
-
-        <div class="form-group">
-          <label>Nombre:</label>
-          <input v-model="sucursalForm.nombre_administrativo" type="text" required />
+      <div class="modal-sucursales">
+        <div class="modal-header">
+          <h2 class="h2-modal-content">
+            {{ isEditing ? "Editar Sucursal" : "Agregar Sucursal" }}
+          </h2>
         </div>
 
-        <div class="form-group">
-          <label>Correo:</label>
-          <input v-model="sucursalForm.correo" type="text" required />
-        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Nombre:</label>
+            <input v-model="sucursalForm.nombre_administrativo" type="text" required />
+          </div>
 
-        <div class="form-group">
-          <label>Teléfono:</label>
-          <div class="phone-input-container">
-            <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
-              <option value="">País</option>
-              <option v-for="(country, code) in countryData" :key="code" :value="code">
-                {{ country.emoji }} {{ country.code }}
-              </option>
-            </select>
-            <input v-model="sucursalForm.telefono" type="text" class="input-phone"
-              :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+          <div class="form-group">
+            <label>Correo:</label>
+            <input v-model="sucursalForm.correo" type="text" required />
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono:</label>
+            <div class="phone-input-container">
+              <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+                <option value="">País</option>
+                <option v-for="(country, code) in countryData" :key="code" :value="code">
+                  {{ country.emoji }} {{ country.code }}
+                </option>
+              </select>
+              <input v-model="sucursalForm.telefono" type="text" class="input-phone"
+                :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Dirección:</label>
+            <input v-model="sucursalForm.direccion" type="text" required />
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Dirección:</label>
-          <input v-model="sucursalForm.direccion" type="text" required />
+        <div class="modal-footer">
+          <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Sucursal'" @click="guardarSucursal">
+          </btnGuardarModal>
+          <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
-
-        <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Sucursal'" @click="guardarSucursal">
-        </btnGuardarModal>
-        <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
       </div>
     </div>
+
+    <!-- Modal de confirmación -->
+    <div class="modal" v-if="showConfirmModal">
+      <div class="modal-confirm">
+        <div class="modal-header">
+          <h2>Confirmación</h2>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que quieres eliminar esta sucursal?</p>
+        </div>
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteSucursal" />
+            <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -121,12 +146,11 @@ import ExportButton from "../components/ExportButton.vue";
 import ModalLoading from '@/components/ModalLoading.vue';
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
-import { notificaciones } from '../../services/notificaciones.js';
+import { notis } from '../../services/notificaciones.js';
 import PageHeader from "@/components/PageHeader.vue";
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
 import { validacionesSucursal } from '../../services/validarCampos.js';
 import solicitudes from "../../services/solicitudes.js";
-
 export default {
   components: {
     ExportButton,
@@ -150,6 +174,8 @@ export default {
       phoneLength: 8,
       currentPage: 1,
       pageSize: 10,
+      showConfirmModal: false,
+      sucursalToDelete: null,
 
       sucursalForm: {
         id_sucursal: 0,
@@ -228,7 +254,7 @@ export default {
 
           if (response === true) {
             Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
-            notificaciones('success');
+            notis('success', "Actualizando datos de sucursal...");
           } else {
             throw new Error(response.message || 'Error al actualizar la sucursal');
           }
@@ -238,7 +264,7 @@ export default {
 
           if (response && response.length > 0) {
             this.sucursales.push(response[0]);
-            notificaciones('form-success');
+            notis('success', "Sucursal creada correctamente");
           } else {
             throw new Error('Error al crear la sucursal');
           }
@@ -248,7 +274,7 @@ export default {
         this.generateRows();
       } catch (error) {
         this.isLoading = false;
-        notificaciones('error', error.message);
+        notis('error', "Error");
       } finally {
         this.isLoading = false;
       }
@@ -261,21 +287,34 @@ export default {
       this.sucursalForm = { ...sucursal };
     },
 
+    cancelDelete() {
+      this.showConfirmModal = false;
+      this.sucursalToDelete = null;
+    },
+
     async deleteSucursal(sucursal) {
+      if (!this.showConfirmModal) {
+        this.sucursalToDelete = sucursal;
+        this.showConfirmModal = true;
+        return;
+      }
+
       this.isLoading = true;
       try {
-        const parametros = `/sucursales/desactivar-sucursal/${sucursal.id_sucursal}`;
+        const parametros = `/sucursales/desactivar-sucursal/${this.sucursalToDelete.id_sucursal}`;
         const response = await solicitudes.desactivarRegistro(parametros, { estado: false });
 
         if (response === true) {
-          this.sucursales = this.sucursales.filter(item => item.id_sucursal !== sucursal.id_sucursal);
+          this.sucursales = this.sucursales.filter(item => item.id_sucursal !== this.sucursalToDelete.id_sucursal);
           this.generateRows();
+          notis('success', 'Sucursal eliminada correctamente');
+          this.showConfirmModal = false;
+          this.sucursalToDelete = null;
         } else {
           throw new Error('Error al eliminar la sucursal');
         }
       } catch (error) {
-        this.isLoading = false;
-        notificaciones('error', error.message);
+        notis('error', "Error al eliminar la sucursal");
       } finally {
         this.isLoading = false;
       }
@@ -585,41 +624,155 @@ export default {
   padding: 1rem;
 }
 
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  width: 90%;
-  max-width: 500px;
+.modal-sucursales {
+  background: white;
+  border-radius: 12px;
+  width: 35%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
+}
+
+.dark .modal-sucursales {
+  background-color: #2d2d2d;
+}
+
+.modal-confirm {
+  background: white;
+  border-radius: 12px;
+  width: 35%;
+  max-width: 400px;
+  min-width: 300px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   margin: 20px;
 }
 
+.dark .modal-confirm {
+  background-color: #2d2d2d;
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Form Layout */
+.form-row {
+  margin-bottom: 20px;
+}
+
+.form-columns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Form Groups */
 .form-group {
-  margin-bottom: 16px;
-  width: 100%;
+  margin-bottom: 20px;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  line-height: 1;
+  color: #333;
+  font-weight: 500;
 }
 
 .form-group input,
+.form-group textarea,
 .form-group select {
-  height: 35px;
-  /* Altura consistente para todos los inputs */
-  box-sizing: border-box;
-  /* Para que el padding no afecte el tamaño */
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
 }
 
-.form-group input {
-  width: 100%;
-  height: 35px;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
 }
+
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Footer */
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Dark Mode */
+.dark .modal-categoria {
+  background-color: #2d2d2d;
+}
+
+.dark .modal-header,
+.dark .modal-footer {
+  background-color: #1e1e1e;
+  border-color: #404040;
+}
+
+.dark .modal-header h2 {
+  color: #fff;
+}
+
+.dark .form-group label {
+  color: #fff;
+}
+
+.dark .form-group input,
+.dark .form-group textarea,
+.dark .form-group select {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
 
 /* Custom scrollbar */
 .table-container::-webkit-scrollbar {

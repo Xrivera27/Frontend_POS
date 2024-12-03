@@ -1,5 +1,6 @@
 <template>
   <div class="dashboard-container">
+    <ModalLoading :isLoading="isLoading" />
     <!-- Tarjetas informativas con iconos de Bootstrap y enlaces "Ver más" -->
     <div class="cards-container">
       <div class="card" v-for="(item, index) in cardsData" :key="index">
@@ -61,8 +62,10 @@ const { getTotalVentasDia } = require('../../services/dashboardSolicitudes')
 const { getClientesPorEmpresa } = require('../../services/dashboardSolicitudes')
 const { getAlertasPorPromocion } = require('../../services/dashboardSolicitudes')
 const { getAlertasPorPromocionProducto } = require('../../services/dashboardSolicitudes')
+import { notis } from '../../services/notificaciones.js';
 const { getVentasUltimosTresMeses } = require('../../services/dashboardSolicitudes')
 import solicitudes from "../../services/solicitudes.js";
+import ModalLoading from '@/components/ModalLoading.vue';
 import {
   Chart as ChartJS,
   Title,
@@ -88,12 +91,13 @@ ChartJS.register(
 
 export default {
   name: 'DashboardList',
-  
+
   components: {
     LineChart: Line,
     PieChart: Pie,
+    ModalLoading
   },
-  
+
   data() {
     return {
       ventas: 0,
@@ -101,6 +105,7 @@ export default {
       alertasPorPromocion: 0,
       alertasPorPromocionProducto: 0,
       id_usuario: '',
+      isLoading: false,
       lineChartData: {
         labels: [],
         datasets: [
@@ -232,23 +237,49 @@ export default {
 
   methods: {
     async devolverVenta() {
-      this.ventas = await getTotalVentasDia(this.id_usuario);
+      this.isLoading = true;
+      try {
+        this.ventas = await getTotalVentasDia(this.id_usuario);
+      } catch (error) {
+        notis("error", "Error al buscar ventas")
+      } finally {
+        this.isLoading = false;
+      }
     },
     async obtenerNumeroClientes() {
-      const clientes = await getClientesPorEmpresa(this.id_usuario);
-      this.clientesNumero = clientes.totalClientes;
+      this.isLoading = true;
+      try {
+          const clientes = await getClientesPorEmpresa(this.id_usuario);
+        this.clientesNumero = clientes.totalClientes;
+      } catch (error) {
+        notis("error", "Error al buscar el total de clientes")
+      } finally {
+        this.isLoading = false;
+      }
     },
     async getAlertasPromocion() {
+      this.isLoading = true;
       try {
         this.alertasPorPromocion = await getAlertasPorPromocion(this.id_usuario);
       } catch (error) {
         console.error(error);
+        notis("error", "Error al mostras las promociones de productos")
+      } finally {
+        this.isLoading = false;
       }
     },
     getAlertasPromocionFormatted() {
-      if (this.alertasPorPromocion) {
-        const { totalAlertas } = this.alertasPorPromocion;
-        return totalAlertas;
+      this.isLoading = true;
+      try {
+        if (this.alertasPorPromocion) {
+          const { totalAlertas } = this.alertasPorPromocion;
+          return totalAlertas;
+        }
+      } catch (error) {
+        console.error(error);
+        notis("error", "Error al mostras las promociones de productos")
+      } finally {
+        this.isLoading = false;
       }
     },
     async getAlertasPorPromocionProducto() {
@@ -281,6 +312,7 @@ export default {
   },
 
   async mounted() {
+    this.isLoading = true;
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       await this.devolverVenta();
@@ -290,6 +322,8 @@ export default {
       await this.obtenerVentasUltimosTresMeses();
     } catch (error) {
       console.log(error);
+    } finally {
+      this.isLoading = false;
     }
   }
 };

@@ -158,7 +158,6 @@ export default {
     },
 
     async getUserData() {
-
       this.isLoading = true;
       try {
         const token = localStorage.getItem('auth'); // Usa 'auth' para obtener el token
@@ -186,7 +185,9 @@ export default {
     },
 
     async updateUserData() {
-      // Si se está cambiando la contraseña, verificar primero la contraseña actual
+      //--------------------------------------------------------------------------------------------------
+      //*! Si se está cambiando la contraseña, verificar primero la contraseña actual 
+
       if (this.isPassEdit) {
         try {
           const token = localStorage.getItem('auth');
@@ -217,6 +218,7 @@ export default {
       }
 
       // Continuar con las validaciones normales
+      //--------------------------------------------------------------------------------------------------
       if (!this.usuarioEditing) {
         if (!validacionesConfigPage.validarCamposConfiguracion(this.userForm, this.isPassEdit, this.selectedCountry)) {
           return;

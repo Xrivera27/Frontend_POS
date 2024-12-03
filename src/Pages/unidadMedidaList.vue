@@ -1,5 +1,6 @@
 <template>
   <div class="categorias-wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
     <div class="opciones">
       <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal">
@@ -50,7 +51,7 @@
               <button id="btnEditar" class="btn btn-warning" @click="editUnidad(unidad)">
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteUnidad(unidad)">
+              <button id="btnEliminar" class="btn btn-danger" @click="confirmDelete(index)">
                 <b><i class="bi bi-x-lg"></i></b>
               </button>
             </td>
@@ -58,10 +59,30 @@
         </tbody>
       </table>
 
+      <!-- Modal de confirmación de eliminación -->
+      <div class="modal" v-if="showConfirmModal">
+        <div class="modal-confirm">
+
+          <div class="modal-header">
+            <h2>Confirmación</h2>
+          </div>
+          <div class="modal-body">
+            <p>¿Estás seguro de que quieres eliminar esta unidad de medida?</p>
+          </div>
+          <div class="modal-footer">
+            <div class="action-buttons">
+              <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteUnidad" />
+              <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredUnidades.length) }} de {{ filteredUnidades.length }} registros
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize,
+            filteredUnidades.length) }} de {{ filteredUnidades.length }} registros
         </div>
         <div class="pagination-container">
           <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
@@ -93,7 +114,7 @@
     </div>
 
     <!-- Modal para mostrar productos con esa id medida -->
-    <div v-if="isModalProductosOpen" class="modal">
+    <div v-if="isModalProductosOpen" class="modal product-list">
       <div class="modal-content">
         <h2>Lista de productos</h2>
         <div class="table-container table-modal-container">
@@ -130,12 +151,12 @@ import { useToast } from "vue-toastification";
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import { validacionesComunes } from '../../services/validarCampos.js';
 import solicitudes from "../../services/solicitudes.js";
-import { 
-  getUnidadMedidaEmpresas, 
-  postUnidad, 
-  patchUnidad, 
-  getProductosUnidad, 
-  eliminarUnidad 
+import {
+  getUnidadMedidaEmpresas,
+  postUnidad,
+  patchUnidad,
+  getProductosUnidad,
+  eliminarUnidad
 } from "../../services/unidadMedidaSolicitud.js";
 
 export default {
@@ -145,7 +166,7 @@ export default {
     btnGuardarModal,
     btnCerrarModal,
   },
-  
+
   data() {
     return {
       titulo: 'Unidades de Inventario y Venta',
@@ -156,12 +177,13 @@ export default {
       id_usuario: '',
       unidadesMedida: [],
       mostrarProductos: [],
+      showConfirmModal: false,
       isModalOpen: false,
       esCeo: false,
       isModalProductosOpen: false,
       isEditing: false,
-      unidadForm: { 
-        medida: '' 
+      unidadForm: {
+        medida: ''
       },
       editIndex: null
     };
@@ -196,10 +218,10 @@ export default {
   },
 
   async mounted() {
+    this.isLoading = true;
     document.title = "Presentaciones";
     this.changeFavicon('/img/spiderman.ico');
     try {
-      this.isLoading = true;
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.esCeo = await esCeo(this.id_usuario);
       this.unidadesMedida = await getUnidadMedidaEmpresas(this.id_usuario);
@@ -212,6 +234,16 @@ export default {
   },
 
   methods: {
+    confirmDelete(index) {
+      this.editIndex = index;
+      this.showConfirmModal = true;
+    },
+
+    cancelDelete() {
+      this.showConfirmModal = false;
+      this.editIndex = null;
+    },
+
     previousPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
@@ -245,12 +277,15 @@ export default {
     },
 
     async mostrarModalProductos(id_medida) {
+      this.isLoading = true;
       try {
         this.mostrarProductos = await getProductosUnidad(id_medida);
         this.isModalProductosOpen = true;
       } catch (error) {
         console.error(error);
         notis('error', 'Error al cargar los productos');
+      } finally {
+        this.isLoading = false;
       }
     },
 
@@ -261,6 +296,7 @@ export default {
         return;
       }
 
+      this.isLoading = true;
       try {
         const response = await eliminarUnidad(unidad.id_medida);
         if (response === true) {
@@ -271,36 +307,42 @@ export default {
         }
       } catch (error) {
         notis('error', error.message);
+      } finally {
+        this.isLoading = false;
       }
     },
 
     async guardarUnidad() {
-      if (!validacionesComunes.validarEmpty(this.unidadForm) || 
-          !validacionesComunes.validarNombre(this.unidadForm.medida)) {
+      if (!validacionesComunes.validarEmpty(this.unidadForm) ||
+        !validacionesComunes.validarNombre(this.unidadForm.medida)) {
         return;
       }
 
       this.unidadForm.id_usuario = this.id_usuario;
-      
+      this.isLoading = true;
       try {
         if (this.isEditing) {
           const response = await patchUnidad(
-            this.unidadForm, 
+            this.unidadForm,
             this.unidadesMedida[this.editIndex].id_medida
           );
-          
+
           if (response === true) {
+            this.isLoading = false;
             notis("success", "Procesando guardado...");
             Object.assign(this.unidadesMedida[this.editIndex], this.unidadForm);
           }
         } else {
           const nuevoRegistro = await postUnidad(this.unidadForm);
           this.unidadesMedida.push(nuevoRegistro[0]);
+          this.isLoading = false;
           notis('success', 'Unidad agregada correctamente');
         }
         this.closeModal();
       } catch (error) {
         notis('error', error.message);
+      } finally {
+        this.isLoading = false;
       }
     },
 
@@ -488,7 +530,7 @@ export default {
   margin-top: 16px;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
- 
+
 }
 
 .table {
@@ -678,10 +720,65 @@ export default {
   }
 }
 
+/* Estilos específicos para el modal de productos */
+.product-list .modal-content {
+  max-width: 800px;
+  /* Aumentado de 400px */
+  width: 90%;
+  max-height: 80vh;
+  /* Altura máxima del 80% del viewport */
+}
+
+.table-modal-container {
+  max-height: 60vh;
+  /* Aumentado para mostrar más registros */
+  overflow-y: auto;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+/* Estilos para la tabla dentro del modal de productos */
+.table-modal {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-modal th {
+  background-color: #e7e4e4;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 12px;
+  /* Padding aumentado */
+}
+
+.table-modal td {
+  padding: 10px;
+  /* Padding aumentado */
+  border-bottom: 1px solid #ddd;
+}
+
+/* Media query para pantallas más pequeñas */
+@media screen and (max-width: 768px) {
+  .product-list .modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .table-modal-container {
+    max-height: 70vh;
+  }
+}
+
 /* Modo Oscuro */
 .dark .categorias-wrapper {
   background-color: #1e1e1e;
   color: #fff;
+}
+
+.dark .mostrar-producto {
+  background-color: #2b8cf3;
+  color: white;
 }
 
 .dark .busqueda {
@@ -692,21 +789,34 @@ export default {
 
 .dark .table-container {
   border-color: #404040;
-}
-
-.dark .table thead {
   background-color: #2d2d2d;
 }
 
+.dark .table {
+  background-color: #2d2d2d;
+}
+
+.dark .table thead {
+  background-color: #111827;
+}
+
 .dark .table th {
-  background-color: #383838;
-  color: #fff;
-  border-color: #404040;
+  background-color: #111827;
+  color: #e5e7eb;
+  border-bottom-color: #374151;
 }
 
 .dark .table td {
-  color: #fff;
-  border-color: #404040;
+  color: #e5e7eb;
+  border-bottom-color: #374151;
+}
+
+.dark .table tbody tr {
+  background-color: #2d2d2d;
+}
+
+.dark .table tbody tr:hover {
+  background-color: #1f2937;
 }
 
 .dark .modal-content {

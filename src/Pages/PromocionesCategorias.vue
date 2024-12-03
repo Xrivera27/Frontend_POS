@@ -8,42 +8,53 @@
         <h2 class="titulo-form">Registro de promociones</h2>
       </div>
 
-      <div class="contenedor-principal">
+      <div class="modal-body">
         <div class="contenedor-interno contenedor-izquierdo">
-          <label for="categoria">Categoría:</label>
-          <input type="text" id="input-codigo-categoria" name="categoria" v-model="promForm.categoria"
-            list="categorias-list" @change="handleCategoriaSelect(promForm)" required />
-          <datalist id="categorias-list">
-            <option v-for="categoria in categorias" :key="categoria.id_categoria" :value="categoria.nombre_categoria">
-              {{ categoria.nombre_categoria }}
-            </option>
-          </datalist>
+          <div class="form-group">
+            <label for="categoria">Categoría:</label>
+            <input type="text" id="input-codigo-categoria" name="categoria" v-model="promForm.categoria"
+              list="categorias-list" @change="handleCategoriaSelect(promForm)" required />
+            <datalist id="categorias-list">
+              <option v-for="categoria in categorias" :key="categoria.id_categoria" :value="categoria.nombre_categoria">
+                {{ categoria.nombre_categoria }}
+              </option>
+            </datalist>
+          </div>
 
-          <label for="nombre_promocion">Nombre de la promoción:</label>
-          <input type="text" id="nombre_promocion" v-model="promForm.nombre_promocion" name="nombre_promocion"
-            required />
+          <div class="form-group">
+            <label for="nombre_promocion">Nombre de la promoción:</label>
+            <input type="text" id="nombre_promocion" v-model="promForm.nombre_promocion" name="nombre_promocion"
+              required />
+          </div>
 
-          <label for="porcentaje_descuento">Porcentaje de descuento:</label>
-          <input type="number" id="porcentaje_descuento" name="porcentaje_descuento"
-            v-model="promForm.porcentaje_descuento" min="0" max="100" step="0.01" required />
+          <div class="form-group">
+            <label for="porcentaje_descuento">Porcentaje de descuento:</label>
+            <input type="number" id="porcentaje_descuento" name="porcentaje_descuento"
+              v-model="promForm.porcentaje_descuento" min="0" max="100" step="0.01" required />
+          </div>
         </div>
-        <div class="contenedor-interno contenedor-derecho">
-          <label for="fecha_inicio">Fecha de inicio:</label>
-          <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promForm.fecha_inicio"
-            :min="getFechaMinima()" required />
 
-          <label for="fecha_final">Fecha final:</label>
-          <input type="date" id="fecha_final" name="fecha_final" v-model="promForm.fecha_final"
-            :min="promForm.fecha_inicio || getFechaMinima()" required />
+        <div class="contenedor-interno contenedor-derecho">
+          <div class="form-group">
+            <label for="fecha_inicio">Fecha de inicio:</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promForm.fecha_inicio"
+              :min="getFechaMinima()" required />
+          </div>
+
+          <div class="form-group">
+            <label for="fecha_final">Fecha final:</label>
+            <input type="date" id="fecha_final" name="fecha_final" v-model="promForm.fecha_final"
+              :min="promForm.fecha_inicio || getFechaMinima()" required />
+          </div>
         </div>
       </div>
-      <div class="contenedor-boton">
-        <button type="submit" class="btn registrar-categoria">
-          Registrar promoción
-        </button>
-        <button type="button" class="btn cerrar" @click="activarForm">
-          Cancelar
-        </button>
+
+      <div class="modal-footer">
+        <div class="action-buttons">
+          <btnGuardarModal :texto="'Registrar promoción'" type="submit">
+          </btnGuardarModal>
+          <btnCerrarModal :texto="'Cancelar'" @click="limpiarForm"></btnCerrarModal>
+        </div>
       </div>
     </form>
 
@@ -51,7 +62,7 @@
     <div class="tabla-busqueda" v-if="!activeForm">
       <div>
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar promoción..." />
-        <button v-if="esCeo" class="btn activar-form" @click="activarForm">
+        <button v-if="esCeo" class="btn activar-form" @click="limpiarForm">
           Nueva promoción
         </button>
       </div>
@@ -129,9 +140,13 @@
     <!-- Modal de edición -->
     <div v-if="isShowModal" class="modal">
       <div class="modal-content">
-        <form @submit.prevent="agregarPromocion" autocomplete="off">
-          <div class="contenedor-principal">
-            <div class="contenedor-interno contenedor-izquierdo">
+        <div class="modal-header">
+          <h2 class="h2-modal-content">Editar promoción</h2>
+        </div>
+
+        <div class="modal-body">
+          <div class="contenedor-interno">
+            <div class="form-group">
               <label for="categoria">Categoría:</label>
               <input type="text" id="input-codigo-categoria-modal" name="categoria" v-model="promFormModal.categoria"
                 list="categorias-list-modal" @change="handleCategoriaSelect(promFormModal)" required />
@@ -141,49 +156,61 @@
                   {{ categoria.nombre_categoria }}
                 </option>
               </datalist>
+            </div>
 
+            <div class="form-group">
               <label for="nombre_promocion">Nombre de la promoción:</label>
               <input type="text" id="nombre_promocion" v-model="promFormModal.nombre_promocion" name="nombre_promocion"
                 required />
+            </div>
 
+            <div class="form-group">
               <label for="porcentaje_descuento">Porcentaje de descuento:</label>
               <input type="number" id="porcentaje_descuento" name="porcentaje_descuento"
                 v-model="promFormModal.porcentaje_descuento" min="0" max="100" step="0.01" required />
             </div>
-            <div class="contenedor-interno contenedor-derecho">
+          </div>
+          <div class="contenedor-interno">
+            <div class="form-group">
               <label for="fecha_inicio">Fecha de inicio:</label>
               <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promFormModal.fecha_inicio"
                 :min="getFechaMinima()" required />
+            </div>
 
+            <div class="form-group">
               <label for="fecha_final">Fecha final:</label>
               <input type="date" id="fecha_final" name="fecha_final" v-model="promFormModal.fecha_final"
                 :min="promFormModal.fecha_inicio || getFechaMinima()" required />
             </div>
           </div>
-          <div class="contenedor-boton">
-            <button type="submit" class="btn registrar-categoria">
-              Guardar cambios
-            </button>
-            <button type="button" @click="closeModal" class="btn cerrar">
-              Cancelar
-            </button>
+        </div>
+
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal :texto="'Guardar cambios'" @click="agregarPromocion" type="submit">
+            </btnGuardarModal>
+            <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
           </div>
-        </form>
+        </div>
+
       </div>
     </div>
 
     <!-- Modal de confirmación de eliminación -->
     <div class="modal" v-if="showConfirmModal">
-      <div class="modal-content">
-        <h2>Confirmación</h2>
-        <p>¿Estás seguro de que quieres eliminar esta promoción?</p>
-        <div class="modal-actions">
-          <button class="btn modalShowConfirm-Si" @click="eliminarProm">
-            Sí, borrar
-          </button>
-          <button class="btn modalShowConfirm-no" @click="cancelDelete">
-            No, regresar
-          </button>
+      <div class="modal-confirm">
+
+        <div class="modal-header">
+          <h2>Confirmación</h2>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que quieres eliminar esta promoción?</p>
+        </div>
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="eliminarProm" />
+            <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
+          </div>
         </div>
       </div>
     </div>
@@ -235,12 +262,16 @@ import solicitudes from "../../services/soli";
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import ModalLoading from '@/components/ModalLoading.vue';
 import { notis } from '../../services/notificaciones.js';
+import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
+import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 
 export default {
   name: 'PromocionesCategoria',
   components: {
     PageHeader,
-    ModalLoading
+    ModalLoading,
+    btnGuardarModal,
+    btnCerrarModal
   },
   data() {
     return {
@@ -418,7 +449,7 @@ export default {
       }
     },
 
-    activarForm() {
+    limpiarForm() {
       this.activeForm = !this.activeForm;
       if (this.activeForm) {
         this.clearForm();
@@ -450,28 +481,34 @@ export default {
     },
 
     validarFormulario() {
-      console.log('Iniciando validación del formulario');
       const form = this.isEditing ? this.promFormModal : this.promForm;
 
-      if (!form.categoria_id || !form.nombre_promocion ||
-        !form.porcentaje_descuento || !form.fecha_inicio ||
-        !form.fecha_final) {
+      // Validar categoría
+      const categoriaValida = this.categorias.some(c => c.nombre_categoria === form.categoria);
+      if (!categoriaValida) {
+        notis("warning", 'Escoge una categoría válida');
+        return false;
+      }
+
+      // Validar campos obligatorios
+      if (!form.nombre_promocion || !form.porcentaje_descuento ||
+        !form.fecha_inicio || !form.fecha_final) {
         notis("warning", 'Todos los campos son obligatorios');
         return false;
       }
 
+      // Validar porcentaje
       if (form.porcentaje_descuento < 0 || form.porcentaje_descuento > 100) {
         notis("warning", 'El porcentaje de descuento debe estar entre 0 y 100');
         return false;
       }
 
+      // Validar fechas
       const fechaInicio = new Date(form.fecha_inicio + 'T00:00:00');
       const fechaFinal = new Date(form.fecha_final + 'T00:00:00');
       const hoy = new Date();
 
-      hoy.setHours(0, 0, 0, 0);
-      fechaInicio.setHours(0, 0, 0, 0);
-      fechaFinal.setHours(0, 0, 0, 0);
+      [hoy, fechaInicio, fechaFinal].forEach(date => date.setHours(0, 0, 0, 0));
 
       if (fechaInicio < hoy) {
         notis("warning", 'La fecha de inicio no puede ser anterior a hoy');
@@ -520,7 +557,7 @@ export default {
               this.tempPromocionData = { ...formData };
               this.conflictingPromocion = error.response.data.promocion_existente;
 
-              notis("warning", 'Hay una promoción activa que coincide con las fechas indicadas');
+              console.log("warning", 'Hay una promoción activa que coincide con las fechas indicadas');
 
               this.showConflictModal = true;
               return;
@@ -744,10 +781,6 @@ export default {
   opacity: 0.6;
 }
 
-.contenedor-principal {
-  display: flex;
-  justify-content: space-around;
-}
 
 .promocion-details {
   background-color: #f8f9fa;
@@ -795,6 +828,10 @@ form {
   color: #858585;
 }
 
+.dark .titulo-form {
+  background-color: #1e1e1e;
+}
+
 .contenedor-titulo {
   margin: 0;
   padding: 0;
@@ -803,24 +840,101 @@ form {
   justify-content: center;
 }
 
-.contenedor-boton {
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.modal-confirm {
+  background: white;
+  border-radius: 12px;
+  width: 25%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
+}
+
+.modal-body {
   display: flex;
   width: 100%;
-  align-items: center;
-  justify-content: center;
+  justify-content: space-around;
+  padding: 24px;
+  overflow-y: auto;
 }
 
-input {
-  padding: 0.5rem;
+.modal-body input:focus,
+.modal-body textarea:focus,
+.modal-body select:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+}
+
+.modal-body input,
+.modal-body textarea,
+.modal-body select {
+  width: 100%;
+  padding: 10px 12px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
+  margin-top: 2px;
+  margin-bottom: 4px;
 }
 
-.contenedor-principal input {
-  width: 95%;
-  height: 25%;
-  justify-content: center;
-  margin-bottom: 4%;
+.dark .modal-content {
+  background-color: #2d2d2d;
+}
+
+.dark .modal-confirm {
+  background-color: #2d2d2d;
+}
+
+.dark .modal-header,
+.dark .modal-footer {
+  background-color: #1e1e1e;
+  border-color: #404040;
+}
+
+.dark .modal-header h2 {
+  color: #fff;
+}
+
+.dark .form-group label {
+  color: #fff;
+}
+
+.dark .form-group input,
+.dark .form-group textarea,
+.dark .form-group select {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  margin-bottom: 0;
 }
 
 .btn-warning {
@@ -929,6 +1043,11 @@ input {
   color: white;
 }
 
+.dark #btnEditar {
+  background-color: #ffc107;
+  color: black;
+}
+
 .td-botones {
   display: flex;
   align-items: center;
@@ -942,10 +1061,7 @@ input {
 }
 
 .contenedor-interno {
-  display: flex;
-  flex-direction: column;
-  width: 50%;
-  padding: 0 2%;
+  width: 45%;
 }
 
 .activar-form {
@@ -953,9 +1069,9 @@ input {
   margin-left: 20px;
 }
 
-.activar-form:hover {
-  background-color: rgb(79, 185, 189);
-  transition: all 0.3s ease;
+.dark .activar-form {
+  background-color: rgb(101, 217, 221);
+  color: black
 }
 
 .categorias-wrapper {
@@ -964,6 +1080,7 @@ input {
 
 .modal {
   position: fixed;
+  z-index: 1000;
   top: 0;
   left: 0;
   width: 100%;
@@ -972,19 +1089,25 @@ input {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
 }
 
 .modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  max-width: 800px;
-  width: 100%;
+  background: white;
+  border-radius: 12px;
+  width: 50%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
 }
 
 .modal-actions {
@@ -1014,10 +1137,18 @@ input {
 }
 
 .busqueda {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 200px;
+  padding: 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  max-width: 350px;
+  transition: border-color 0.2s ease;
+}
+
+.busqueda:focus {
+  outline: none;
+  border-color: #a38655;
 }
 
 .modal-content .btn {
@@ -1063,7 +1194,7 @@ input {
 
 /* Media Queries */
 @media screen and (max-width: 1024px) {
-  .contenedor-principal {
+  .modal-body {
     flex-direction: column;
   }
 
@@ -1156,24 +1287,33 @@ input {
 }
 
 .dark .table-container {
-  border-color: #404040;
-  background-color: #2d2d2d;
+  background-color: #1e1e1e;
+  border-color: #374151;
+}
+
+.dark .table {
+  background-color: #1e1e1e;
 }
 
 .dark .table thead {
-  background-color: #2d2d2d;
+  background-color: #111827;
 }
 
 .dark .table th {
-  background-color: #383838;
-  color: #fff;
-  border-color: #404040;
+  background-color: #111827;
+  color: #e5e7eb;
+  border-bottom-color: #374151;
 }
 
 .dark .table td {
-  color: #fff;
-  border-color: #404040;
+  color: #e5e7eb;
+  border-bottom-color: #374151;
 }
+
+.dark .table tbody tr:hover {
+  background-color: #1f2937;
+}
+
 
 .dark .modal-content {
   background-color: #2d2d2d;
