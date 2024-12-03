@@ -125,7 +125,7 @@
           <tbody>
             <tr v-for="(dato, index) in datosReporte" :key="index">
             
-              <td v-if="reporteSeleccionado === 'ventas_cliente'">{{ dato.cliente }}</td>
+              <td v-if="reporteSeleccionado === 'ventas_cliente'">{{ dato.nombre }}</td>
               <td v-if="reporteSeleccionado === 'ventas_sucursal'">{{ dato.sucursal }}</td>
               <td v-if="reporteSeleccionado === 'ventas_empleado'">{{ dato.nombre }}</td>
              
@@ -161,7 +161,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import { notis } from '../../services/notificaciones.js';
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
 import solicitudes from "../../services/solicitudes.js";
-const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados } = require('../../services/reporteSolicitudes.js');
+const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados, getRegistrosClientes } = require('../../services/reporteSolicitudes.js');
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -318,6 +318,11 @@ try {
     this.datosReporte = response;
   }
 
+  if(this.reporteSeleccionado === 'ventas_cliente'){
+    const response = await getRegistrosClientes(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+  }
+
   this.datosReporte.forEach(d => {
     this.totales.exento += d.total_extento;
     this.totales.gravado_15 += d.gravado_15;
@@ -325,9 +330,6 @@ try {
     this.totales.total_isv += d.total_isv;
     this.totales.total += d.total;
   });
-
-  console.log(this.totales);
-
 
 } catch (error) {
   console.log(error);
