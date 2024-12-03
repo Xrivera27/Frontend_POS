@@ -35,3 +35,13 @@ export const getAlertasPorPromocion = async (id_usuario) => {
         throw new Error('No se pudo obtener las alertas de promoción para el usuario especificado.');
     }
 };
+
+export const getAlertasPorPromocionProducto = async (id_usuario) => {
+    try {
+        const response = await solicitudes.fetchRegistros(`/dashboard/promocion-producto/${id_usuario}`);
+        return response;
+    } catch (error) {
+        console.error('Error al obtener las alertas de promoción de producto:', error);
+        throw new Error('No se pudo obtener las alertas de promoción de producto para el usuario especificado.');
+    }
+};
