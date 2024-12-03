@@ -9,7 +9,7 @@
           <div class="filter-row">
             <div class="filter-group">
               <label>Tipo de Reporte</label>
-              <select v-model="reporteSeleccionado" class="select-input">
+              <select v-model="reporteSeleccionado" @change="mostrarReportes" class="select-input">
                 <option value="ventas_cliente">Ventas por Cliente</option>
                 <option value="ventas_sucursal">Ventas por Sucursal</option>
                 <option value="ventas_empleado">Ventas por Empleado</option>
@@ -109,29 +109,30 @@
         <table>
           <thead>
             <tr>
-              <th>Fecha</th>
+              
               <th v-if="reporteSeleccionado === 'ventas_cliente'">Cliente</th>
               <th v-if="reporteSeleccionado === 'ventas_sucursal'">Sucursal</th>
               <th v-if="reporteSeleccionado === 'ventas_empleado'">Empleado</th>
-              <th>Factura</th>
-              <th>Valor Exonerado</th>
+              <th v-if="reporteSeleccionado === 'ventas_producto'">Producto</th>
+              
               <th>Valor Exento</th>
-              <th>Valor Gravado</th>
+              <th>Valor Gravado 15%</th>
+              <th>Valor Gravado 18%</th>
               <th>ISV</th>
               <th>Total</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(dato, index) in datosReporte" :key="index">
-              <td>{{ formatearFecha(dato.fecha) }}</td>
+            
               <td v-if="reporteSeleccionado === 'ventas_cliente'">{{ dato.cliente }}</td>
               <td v-if="reporteSeleccionado === 'ventas_sucursal'">{{ dato.sucursal }}</td>
-              <td v-if="reporteSeleccionado === 'ventas_empleado'">{{ dato.empleado }}</td>
-              <td>{{ dato.numero_factura_sar }}</td>
-              <td>{{ formatearMoneda(dato.valor_exonerado) }}</td>
-              <td>{{ formatearMoneda(dato.valor_exento) }}</td>
-              <td>{{ formatearMoneda(dato.valor_gravado) }}</td>
-              <td>{{ formatearMoneda(dato.isv) }}</td>
+              <td v-if="reporteSeleccionado === 'ventas_empleado'">{{ dato.nombre }}</td>
+             
+              <td>{{ formatearMoneda(dato.valor_extento) }}</td>
+              <td>{{ formatearMoneda(dato.gravado_15) }}</td>
+              <td>{{ formatearMoneda(dato.gravado_18) }}</td>
+              <td>{{ formatearMoneda(dato.total_isv) }}</td>
               <td>{{ formatearMoneda(dato.total) }}</td>
             </tr>
           </tbody>
@@ -160,7 +161,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import { notis } from '../../services/notificaciones.js';
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
 import solicitudes from "../../services/solicitudes.js";
-const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados } = require('../../services/reporteSolicitudes.js');
+const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados } = require('../../services/reporteSolicitudes.js');
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -208,6 +209,7 @@ export default {
       empleados: [],
       productos: [],
       datosReporte: [],
+      reportes: [],
       totales: {
         exonerado: 0,
         exento: 0,
@@ -292,44 +294,63 @@ export default {
       }
     },
 
+    async mostrarReportes (){
+      if (!this.fechasValidas) {
+        notis('error', 'Por favor seleccione un intervalo de fechas válido');
+        return;
+      }
+
+try {
+  if(this.reporteSeleccionado === 'ventas_empleado'){
+    const response = await getRegistrosEmpleados(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+    console.log(response);
+  }
+} catch (error) {
+  console.log(error);
+  notis('error', 'Error al cargar datos. Intente de nuevo');
+}
+    },
+
     async generarReporte(formato = 'preview') {
 
       if (!this.fechasValidas) {
         alert('Por favor seleccione un intervalo de fechas válido');
+        console.log(formato);
         return;
       }
 
-      this.cargando = true;
-      this.error = null;
+    //   this.cargando = true;
+    //   this.error = null;
 
-      try {
-        if (formato === 'preview') {
-          const response = await solicitudes.obtenerReporteVentas({
-            reporteSeleccionado: this.reporteSeleccionado,
-            fechaInicio: this.filtros.fechaInicio,
-            fechaFin: this.filtros.fechaFin,
-            valorFiltro: this.valorFiltro
-          });
+    //   try {
+    //     if (formato === 'preview') {
+    //       const response = await solicitudes.obtenerReporteVentas({
+    //         reporteSeleccionado: this.reporteSeleccionado,
+    //         fechaInicio: this.filtros.fechaInicio,
+    //         fechaFin: this.filtros.fechaFin,
+    //         valorFiltro: this.valorFiltro
+    //       });
 
-          this.datosReporte = response.datos;
-          this.totales = response.totales;
-        } else if (formato === 'pdf') {
-          await this.exportarPDF();
-        } else if (formato === 'excel') {
-          await this.exportarExcel();
-        }
-      } catch (error) {
-        console.error('Error al generar reporte:', error);
-        this.error = 'Error al generar el reporte';
-      } finally {
-        this.cargando = false;
-      }
-    },
+    //       this.datosReporte = response.datos;
+    //       this.totales = response.totales;
+    //     } else if (formato === 'pdf') {
+    //       await this.exportarPDF();
+    //     } else if (formato === 'excel') {
+    //       await this.exportarExcel();
+    //     }
+    //   } catch (error) {
+    //     console.error('Error al generar reporte:', error);
+    //     this.error = 'Error al generar el reporte';
+    //   } finally {
+    //     this.cargando = false;
+    //   }
+    // },
 
-    setHoy() {
-      const hoy = new Date().toISOString().split('T')[0];
-      this.filtros.fechaInicio = hoy;
-      this.filtros.fechaFin = hoy;
+    // setHoy() {
+    //   const hoy = new Date().toISOString().split('T')[0];
+    //   this.filtros.fechaInicio = hoy;
+    //   this.filtros.fechaFin = hoy;
     },
 
     validarFechas() {

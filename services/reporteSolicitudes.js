@@ -79,9 +79,9 @@ export const reportesEmpleados = async (id_usuario, esCeo) => {
     
 }
 
-export const getRegistrosEmpleados = async (id_usuario) => {
+export const getRegistrosEmpleados = async (id_usuario, fechaInicio, fechaFin) => {
    try {
-    const response = solicitudes.fetchRegistros(`/reporte/reporte-empleados/${id_usuario}`);
+    const response = solicitudes.fetchRegistros(`/reporte/reporte-empleados/${id_usuario}/${fechaInicio}/${fechaFin}`);
     return response;
    } catch (error) {
     console.error(error);
