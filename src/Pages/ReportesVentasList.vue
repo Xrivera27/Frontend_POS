@@ -306,6 +306,9 @@ export default {
 
     async mostrarReporteDesglose(option){
       this.mostrandoDesglose = true;
+      if(this.filtros.fechaFin === '' || this.filtros.fechaInicio === ''){
+        return;
+      }
       if (!this.fechasValidas) {
         notis('error', 'Por favor seleccione un intervalo de fechas válido');
         return;
@@ -345,8 +348,11 @@ try {
 
     async mostrarReportes (){
       this.mostrandoDesglose = false;
-      
-      if (!this.fechasValidas && (this.filtros.fechaFin !== '' || this.filtros.fechaInicio !== '' )) {
+      this.mostrandoDesglose = true;
+      if(this.filtros.fechaFin === '' || this.filtros.fechaInicio === ''){
+        return;
+      }
+      if (!this.fechasValidas) {
         notis('error', 'Por favor seleccione un intervalo de fechas válido');
         return;
       }
