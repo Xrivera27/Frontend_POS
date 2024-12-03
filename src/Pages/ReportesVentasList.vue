@@ -140,10 +140,10 @@
 
         <!-- Totales -->
         <div class="totals">
-          <div><strong>Total Exonerado:</strong> {{ formatearMoneda(totales.exonerado) }}</div>
           <div><strong>Total Exento:</strong> {{ formatearMoneda(totales.exento) }}</div>
-          <div><strong>Total Gravado:</strong> {{ formatearMoneda(totales.gravado) }}</div>
-          <div><strong>Total ISV:</strong> {{ formatearMoneda(totales.isv) }}</div>
+          <div><strong>Total Gravado 15%:</strong> {{ formatearMoneda(totales.gravado_15) }}</div>
+          <div><strong>Total Gravado 18%:</strong> {{ formatearMoneda(totales.gravado_18) }}</div>
+          <div><strong>Total ISV:</strong> {{ formatearMoneda(totales.total_isv) }}</div>
           <div><strong>Total General:</strong> {{ formatearMoneda(totales.total) }}</div>
         </div>
       </div>
@@ -211,10 +211,10 @@ export default {
       datosReporte: [],
       reportes: [],
       totales: {
-        exonerado: 0,
         exento: 0,
-        gravado: 0,
-        isv: 0,
+        gravado_15: 0,
+        gravado_18: 0,
+        total_isv: 0,
         total: 0
       }
     }
@@ -294,18 +294,41 @@ export default {
       }
     },
 
+    reiniciarTotales(){
+      this.totales = {
+        exento: 0,
+        gravado_15: 0,
+        gravado_18: 0,
+        total_isv: 0,
+        total: 0
+      }
+    },
+
     async mostrarReportes (){
       if (!this.fechasValidas) {
         notis('error', 'Por favor seleccione un intervalo de fechas válido');
         return;
       }
 
+      reiniciarTotales();
+
 try {
   if(this.reporteSeleccionado === 'ventas_empleado'){
     const response = await getRegistrosEmpleados(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
     this.datosReporte = response;
-    console.log(response);
   }
+
+  this.datosReporte.forEach(d => {
+    this.totales.exento += d.total_extento;
+    this.totales.gravado_15 += d.gravado_15;
+    this.totales.gravado_18 += d.gravado_18;
+    this.totales.total_isv += d.total_isv;
+    this.totales.total += d.total;
+  });
+
+  console.log(this.totales);
+
+
 } catch (error) {
   console.log(error);
   notis('error', 'Error al cargar datos. Intente de nuevo');
