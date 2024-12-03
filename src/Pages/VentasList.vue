@@ -744,6 +744,7 @@ export default {
       this.loadingMessage = 'Procesando venta...';
 
       try {
+        console.log(this.clienteSeleccionado);
         if (this.venta.length === 0) {
           this.venta = await postVenta(
             this.productosLista,

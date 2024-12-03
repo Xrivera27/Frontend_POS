@@ -108,6 +108,7 @@ export default {
             showForm: false,
             filteredClients: [],
             newClient: {
+                id_cliente: '',
                 nombre_completo: '',
                 correo: '',
                 direccion: '',
@@ -172,7 +173,9 @@ export default {
             this.isLoading = true;
 
             try {
-                await postCliente(this.newClient, this.id_usuario);
+                const response = await postCliente(this.newClient, this.id_usuario);
+                this.newClient.id_cliente = response[0].id_cliente;
+
                 this.clients.unshift({ ...this.newClient });
                 this.newClient = { nombre_completo: '', direccion: '', rtn: '', telefono: '', correo: '' };
             } catch (error) {
