@@ -65,3 +65,13 @@ export const getCategoriasPopulares = async (id_usuario) => {
         throw new Error('No se pudo obtener las categorías más vendidas para el usuario especificado.');
     }
 };
+
+export const getUltimasVentas = async (id_usuario) => {
+    try {
+        const response = await solicitudes.fetchRegistros(`/dashboard/ventas/ultimas/${id_usuario}`);
+        return response;
+    } catch (error) {
+        console.error('Error al obtener las últimas ventas:', error);
+        throw new Error('No se pudieron obtener las últimas ventas');
+    }
+};

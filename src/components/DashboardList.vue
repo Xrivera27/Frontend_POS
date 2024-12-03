@@ -66,6 +66,7 @@ const { getAlertasPorPromocionProducto } = require('../../services/dashboardSoli
 import { notis } from '../../services/notificaciones.js';
 const { getVentasUltimosTresMeses } = require('../../services/dashboardSolicitudes')
 const { getCategoriasPopulares } = require('../../services/dashboardSolicitudes')
+const { getUltimasVentas } = require('../../services/dashboardSolicitudes')
 import solicitudes from "../../services/solicitudes.js";
 import ModalLoading from '@/components/ModalLoading.vue';
 import {
@@ -168,36 +169,7 @@ export default {
                 }
             }
         },
-      sales: [
-        {
-          nombre: 'Gerson Rivera',
-          vendedor: 'Jenni Lemus',
-          numero: '9299-2019',
-          fecha: '2024-07-27 11:20:56',
-          total: 'L. 1,230.00'
-        },
-        {
-          nombre: 'Axel Arteaga',
-          vendedor: 'Jenni Lemus',
-          numero: '8888-8888',
-          fecha: '2024-07-28 15:40:56',
-          total: 'L. 1,231.00'
-        },
-        {
-          nombre: 'Denzer Hernández',
-          vendedor: 'Jenni Lemus',
-          numero: '3333-3333',
-          fecha: '2024-07-28 17:30:56',
-          total: 'L. 1,232.00'
-        },
-        {
-          nombre: 'Carlos Sosa',
-          vendedor: 'Jenni Lemus',
-          numero: '0202-0202',
-          fecha: '2024-07-28 05:20:56',
-          total: 'L. 1,242.42'
-        },
-      ],
+      sales: [],
     };
   },
 
@@ -330,7 +302,33 @@ export default {
         } finally {
             this.isLoading = false;
         }
-    }
+    },
+    async obtenerUltimasVentas() {
+        this.isLoading = true;
+        try {
+            const response = await getUltimasVentas(this.id_usuario);
+            if (response && response.sales) {
+                // Formatear la fecha antes de asignarla
+                this.sales = response.sales.map(venta => ({
+                    ...venta,
+                    fecha: new Date(venta.fecha).toLocaleString('es-HN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    })
+                }));
+            }
+        } catch (error) {
+            console.error('Error al obtener últimas ventas:', error);
+            notis("error", "Error al obtener las últimas ventas");
+        } finally {
+            this.isLoading = false;
+        }
+    },
   },
 
   async mounted() {
@@ -343,6 +341,7 @@ export default {
       await this.getAlertasPorPromocionProducto();
       await this.obtenerVentasUltimosTresMeses();
       await this.obtenerCategoriasPopulares();
+      await this.obtenerUltimasVentas();
     } catch (error) {
       console.log(error);
     } finally {
