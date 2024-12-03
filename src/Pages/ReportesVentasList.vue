@@ -293,6 +293,7 @@ export default {
     },
 
     async generarReporte(formato = 'preview') {
+
       if (!this.fechasValidas) {
         alert('Por favor seleccione un intervalo de fechas válido');
         return;

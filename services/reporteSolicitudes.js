@@ -79,3 +79,15 @@ export const reportesEmpleados = async (id_usuario, esCeo) => {
     
 }
 
+export const getRegistrosEmpleados = async (id_usuario) => {
+   try {
+    const response = solicitudes.fetchRegistros(`/reporte/reporte-empleados/${id_usuario}`);
+    return response;
+   } catch (error) {
+    console.error(error);
+    throw 'Ocurrio un error al obtener registros de cajeros';
+   }
+    
+}
+
+
