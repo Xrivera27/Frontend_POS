@@ -292,38 +292,38 @@ export default {
       }
     },
 
-    // async generarReporte(formato = 'preview') {
-    //   if (!this.fechasValidas) {
-    //     alert('Por favor seleccione un intervalo de fechas válido');
-    //     return;
-    //   }
+    async generarReporte(formato = 'preview') {
+      if (!this.fechasValidas) {
+        alert('Por favor seleccione un intervalo de fechas válido');
+        return;
+      }
 
-    //   this.cargando = true;
-    //   this.error = null;
+      this.cargando = true;
+      this.error = null;
 
-    //   try {
-    //     if (formato === 'preview') {
-    //       const response = await solicitudes.obtenerReporteVentas({
-    //         reporteSeleccionado: this.reporteSeleccionado,
-    //         fechaInicio: this.filtros.fechaInicio,
-    //         fechaFin: this.filtros.fechaFin,
-    //         valorFiltro: this.valorFiltro
-    //       });
+      try {
+        if (formato === 'preview') {
+          const response = await solicitudes.obtenerReporteVentas({
+            reporteSeleccionado: this.reporteSeleccionado,
+            fechaInicio: this.filtros.fechaInicio,
+            fechaFin: this.filtros.fechaFin,
+            valorFiltro: this.valorFiltro
+          });
 
-    //       this.datosReporte = response.datos;
-    //       this.totales = response.totales;
-    //     } else if (formato === 'pdf') {
-    //       await this.exportarPDF();
-    //     } else if (formato === 'excel') {
-    //       await this.exportarExcel();
-    //     }
-    //   } catch (error) {
-    //     console.error('Error al generar reporte:', error);
-    //     this.error = 'Error al generar el reporte';
-    //   } finally {
-    //     this.cargando = false;
-    //   }
-    // },
+          this.datosReporte = response.datos;
+          this.totales = response.totales;
+        } else if (formato === 'pdf') {
+          await this.exportarPDF();
+        } else if (formato === 'excel') {
+          await this.exportarExcel();
+        }
+      } catch (error) {
+        console.error('Error al generar reporte:', error);
+        this.error = 'Error al generar el reporte';
+      } finally {
+        this.cargando = false;
+      }
+    },
 
     setHoy() {
       const hoy = new Date().toISOString().split('T')[0];
