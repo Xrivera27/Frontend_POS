@@ -5,6 +5,13 @@
     <PaymentAnimationModal :isVisible="isPaymentAnimationVisible" @complete="handlePaymentComplete" />
     <FacturaModal :isVisible="isFacturaModalVisible" :idVenta="venta?.id_venta" :idUsuario="id_usuario"
       @close="closeFacturaModal" />
+
+      <CerrarCajaModal 
+    :isVisible="isCerrarCajaModalVisible" 
+    @confirm="confirmarCierreCaja"
+    @close="isCerrarCajaModalVisible = false"
+  />
+
     <div class="main-container">
       <div class="header-container">
         <!-- Aquí estaba el error, había un div y template anidados innecesariamente -->
@@ -181,6 +188,7 @@ import solicitudes from "../../services/solicitudes.js";
 import { getInfoBasic, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, cajaUsuario, createCaja, cerrarCaja, pagar, pagarTranferir } from '../../services/ventasSolicitudes.js';
 //cajaUsuario
 import FacturaModal from '@/components/FacturaModal.vue'; // Nuevo
+import CerrarCajaModal from '@/components/CierreCajaModal.vue';
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
 
@@ -196,11 +204,14 @@ export default {
     GuardarVentaModal,
     RecuperarVentaModal,
     FacturaModal,
+    CerrarCajaModal,
+    
   },
   data() {
     return {
       isAperturaCajaModalVisible: false,
       estadoCajaValidado: false,
+      isCerrarCajaModalVisible: false,
       isFacturaModalVisible: false,  // Agregado para el modal de factura
       facturaActual: '',
       cajaAbierta: false,
@@ -303,6 +314,9 @@ export default {
   },
 
   methods: {
+    abrirModalCerrarCaja() {
+      this.isCerrarCajaModalVisible = true;
+    },
 
     closeFacturaModal() {
       this.isFacturaModalVisible = false;
@@ -320,17 +334,99 @@ export default {
       this.isAperturaCajaModalVisible = true;
       this.pauseMainKeyboardEvents();
     },
+    async confirmarCierreCaja() {
+  try {
+    console.log('Iniciando proceso de cierre de caja...');
+    this.isModalLoading = true;
+    this.loadingMessage = 'Cerrando caja...';
+    
+    const reporte = await cerrarCaja(this.id_usuario);
+    console.log('Reporte de cierre recibido:', reporte);
+    
+    // Solo intentar generar PDF si el cierre fue exitoso
+    if (reporte) {
+      try {
+        await this.generarPDFCierreCaja(reporte);
+        notis("success", "Caja cerrada y reporte generado exitosamente");
+      } catch (pdfError) {
+        console.error('Error al generar PDF:', pdfError);
+        notis("warning", "Caja cerrada pero hubo un error al generar el PDF");
+      }
+    }
+    
+    this.cajaAbierta = false;
+    this.isCerrarCajaModalVisible = false;
+  } catch (error) {
+    console.error('Error al cerrar caja:', error);
+    notis("error", "Error al cerrar caja");
+  } finally {
+    this.isModalLoading = false;
+  }
+},
+
+async generarPDFCierreCaja(reporte) {
+  console.log('Iniciando generación de PDF...');
+  try {
+    console.log('Datos del reporte a enviar:', reporte);
+    
+    // Usar la URL base del proyecto
+    const url = `${solicitudes.homeUrl}/ventas/generar-pdf-cierre/${this.id_usuario}`;
+    console.log('URL de la petición:', url);
+
+    const token = localStorage.getItem('auth');
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // Agregar el token de autorización
+      },
+      body: JSON.stringify(reporte)
+    });
+
+    console.log('Respuesta del servidor:', response);
+    console.log('Status:', response.status);
+    
+    if (!response.ok) {
+      console.error('Respuesta no exitosa:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('Detalle del error:', errorText);
+      throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+    }
+
+    console.log('Obteniendo blob de la respuesta...');
+    const blob = await response.blob();
+    console.log('Blob recibido:', blob);
+
+    console.log('Creando URL del blob...');
+    const url_blob = window.URL.createObjectURL(blob);
+    console.log('URL creada:', url_blob);
+
+    console.log('Configurando descarga...');
+    const a = document.createElement('a');
+    a.href = url_blob;
+    a.download = `cierre_caja_${new Date().toISOString().split('T')[0]}.pdf`;
+    
+    console.log('Iniciando descarga...');
+    document.body.appendChild(a);
+    a.click();
+    
+    console.log('Limpiando recursos...');
+    window.URL.revokeObjectURL(url_blob);
+    document.body.removeChild(a);
+    
+    console.log('PDF generado y descargado exitosamente');
+  } catch (error) {
+    console.error('Error detallado en generarPDFCierreCaja:', {
+      mensaje: error.message,
+      error: error,
+      stack: error.stack
+    });
+    throw error;
+  }
+},
 
     async cerrarCaja() {
-      try {
-       const reporte = await cerrarCaja(this.id_usuario);
-       console.log(reporte);
-      notis("success", "Caja cerrada con éxito :D (obviamente esto no va a así va, pero no se que puercas va en el modal de cerrar caja .i.)");
-      this.cajaAbierta = false;
-      } catch (error) {
-        notis("error", "Error al cerrar Caja");
-      }
-      
+      this.abrirModalCerrarCaja();
     },
 
     async handleAperturaCaja(monto) {
