@@ -41,7 +41,7 @@
                   <input type="date" v-model="filtros.fechaFin" @change="validarFechas" :min="filtros.fechaInicio" />
                 </div>
               </div>
-              <button @click="showHeaderFooterModal = true" class="header-footer-btn">
+              <button @click="openModalHeaderFooter" :datosInstituto="datosBussines" class="header-footer-btn">
                 Configurar Header/Footer
               </button>
               <div class="button-group">
@@ -161,7 +161,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import { notis } from '../../services/notificaciones.js';
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
 import solicitudes from "../../services/solicitudes.js";
-const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados, getRegistrosClientes, getRegistrosSucursales, getRegistrosEmpleadosDesglose, getRegistrosClienteDesglose, getRegistrosSucursalDesglose } = require('../../services/reporteSolicitudes.js');
+const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados, getRegistrosClientes, getRegistrosSucursales, getRegistrosEmpleadosDesglose, getRegistrosClienteDesglose, getRegistrosSucursalDesglose, getDatosInstitucion } = require('../../services/reporteSolicitudes.js');
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -184,6 +184,7 @@ export default {
       logoUrl: null,
       reporteSeleccionado: 'ventas_cliente',
       showHeaderFooterModal: false,
+      datosBussines: [],
       filtros: {
         fechaInicio: '',
         fechaFin: '',
@@ -344,6 +345,17 @@ try {
   console.log(error);
   notis('error', 'Error al cargar datos. Intente de nuevo');
 }
+    },
+
+    async openModalHeaderFooter (){
+      try {
+        this.showHeaderFooterModal = true;
+        const response = await getDatosInstitucion(this.id_usuario, this.esCeo);
+        this.datosBussines = response;
+
+      } catch (error) {
+        notis('error', 'Error al cargar datos de empresa');
+      }
     },
 
     async mostrarReportes (){

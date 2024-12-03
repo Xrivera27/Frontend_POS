@@ -20,6 +20,20 @@ export const getSucursalesbyEmmpresaSumm = async (id_usuario) => {
     }
 }
 
+export const getDatosSucursal = async (id_usuario) => {
+    try {    
+              const sucursalDatos = await solicitudes.fetchRegistros(
+                  `/sucursales/sucursal-datos/${id_usuario}`
+                );
+
+                return sucursalDatos;
+        
+            } catch (error) {
+              console.log(error);
+              throw 'Algo salio mal';
+            }
+};
+
 export const sucursalSar = async (id_usuario) => {
     const parametros = `/sucursales/sucursal-sar/${id_usuario}`;
     try {

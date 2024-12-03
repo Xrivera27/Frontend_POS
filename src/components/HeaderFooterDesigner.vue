@@ -132,7 +132,16 @@ export default {
                     alignment: 'center'
                 }
             })
-        }
+        },
+        datosInstituto: {
+        type: Object, // Especificamos que es un objeto
+        default: () => ({
+            nombre: '',
+            direccion: '',
+            correo: '',
+            telefono: ''
+        })
+    }
     },
 
     emits: ['update:modelValue', 'save'],

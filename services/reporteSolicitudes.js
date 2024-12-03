@@ -5,6 +5,10 @@ const { getClientesbyEmpresa } = require('./clienteSolicitudes.js');
 
 const { getUsuariosEmpresa } = require('./usuariosSolicitudes');
 
+const { getDatosEmpresas } = require('./empresaSolicitudes.js');
+
+const { getDatosSucursal } = require('./sucursalesSolicitudes.js');
+
 export const clientesReportes = async (id_usuario) => {
     const datos = await getClientesbyEmpresa(id_usuario);
     let clientes = [];
@@ -143,6 +147,35 @@ export const getRegistrosClientes = async (id_usuario, fechaInicio, fechaFin) =>
      throw 'Ocurrio un error al obtener registros de cajeros';
     }
      
+ }
+
+ export const getDatosInstitucion = async (id_usuario, esCeo) => {
+    let datosInstitucion;
+    try {
+       if(esCeo){
+       const response = await getDatosEmpresas(id_usuario);
+       datosInstitucion = {
+        nombre: response.nombre,
+        correo: response.correo_principal,
+        telefono: response.telefono_principal
+       }
+       }
+       else{
+        const response = await getDatosSucursal(id_usuario);
+        datosInstitucion = {
+         nombre: response.nombre_administrativo,
+         correo: response.correo,
+         telefono: response.telefono,
+         direccion: response.direccion
+        }
+       }
+
+       return datosInstitucion;
+
+       } catch (error) {
+        console.error(error);
+        throw 'Ocurrio un error al obtener registros de cajeros';
+       }
  }
 
 
