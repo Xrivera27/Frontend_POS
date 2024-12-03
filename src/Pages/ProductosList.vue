@@ -990,17 +990,17 @@ export default {
 }
 
 .modal-confirm {
-    background: white;
-    border-radius: 12px;
-    width: 25%;
-    max-width: 1000px;
-    max-height: 90vh;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    margin: 20px;
-    overflow: hidden;
+  background: white;
+  border-radius: 12px;
+  width: 25%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
 }
 
 .modal-content-categoria {
@@ -1654,28 +1654,33 @@ export default {
 
 /* Tabla en modo oscuro */
 .dark .table-container {
-  border-color: #404040;
-  background-color: #2d2d2d;
+  background-color: #1e1e1e;
+  border-color: #374151;
+}
+
+.dark .table {
+  background-color: #1e1e1e;
 }
 
 .dark .table thead {
-  background-color: #2d2d2d;
+  background-color: #111827;
 }
 
 .dark .table th {
-  background-color: #383838;
-  color: #fff;
-  border-color: #404040;
+  background-color: #111827;
+  color: #e5e7eb;
+  border-bottom-color: #374151;
 }
 
 .dark .table td {
-  color: #fff;
-  border-color: #404040;
+  color: #e5e7eb;
+  border-bottom-color: #374151;
 }
 
-.dark .table tr:hover {
-  background-color: #383838;
+.dark .table tbody tr:hover {
+  background-color: #1f2937;
 }
+
 
 /* Modal en modo oscuro */
 .dark .modal-content {

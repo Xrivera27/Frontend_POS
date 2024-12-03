@@ -523,71 +523,7 @@ export default {
   max-width: 300px;
 }
 
-.table-container {
-  width: 100%;
-  border-radius: 0;
-  border: 1px solid #e2e8f0;
-  margin-top: 16px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
-}
-
-.table {
-  width: 100%;
-  min-width: 800px;
-  border-collapse: separate;
-  border-spacing: 0;
-  background-color: white;
-}
-
-.table thead {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color: #e7e4e4;
-}
-
-.table thead tr {
-  background-color: #e7e4e4;
-}
-
-.table tbody tr {
-  background-color: white;
-}
-
-.table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-.table th,
-.table td {
-  padding: 8px;
-  text-align: center;
-}
-
-.table thead th {
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-  position: relative;
-  background: none;
-}
-
-.table thead th:first-child {
-  border-top-left-radius: 10px;
-}
-
-.table thead th:last-child {
-  border-top-right-radius: 10px;
-}
-
-.table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: 10px;
-}
-
-.table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 10px;
-}
 
 /* Modal */
 .modal {
@@ -632,13 +568,6 @@ export default {
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-}
-
-/* Modal de productos */
-.table-modal-container {
-  max-height: 400px;
-  overflow-y: auto;
-  width: 100%;
 }
 
 /* Scroll personalizado */
@@ -720,6 +649,121 @@ export default {
   }
 }
 
+.table-container {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  margin-top: 16px;
+  height: auto;
+  max-height: 480px;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table th,
+.table td {
+  padding: 8px;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  background-color: white;
+}
+
+.table thead th {
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.table tbody td {
+  text-align: center;
+  border-top: 1px solid #ddd;
+}
+
+.table thead th:first-child {
+  border-top-left-radius: 10px;
+}
+
+.table thead th:last-child {
+  border-top-right-radius: 10px;
+}
+
+.table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 10px;
+}
+
+.table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
+.dark .table-container {
+  background-color: #1e1e1e;
+  border-color: #374151;
+}
+
+.dark .table {
+  background-color: #1e1e1e;
+}
+
+.dark .table thead {
+  background-color: #111827;
+}
+
+.dark .table th {
+  background-color: #111827;
+  color: #e5e7eb;
+  border-bottom-color: #374151;
+}
+
+.dark .table td {
+  color: #e5e7eb;
+  border-bottom-color: #374151;
+}
+
+.dark .table tbody tr:hover {
+  background-color: #1f2937;
+}
+
+.dark .table-container::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.dark .table-container::-webkit-scrollbar-thumb {
+  background: #c09d62;
+}
+
+.dark .table-container::-webkit-scrollbar-thumb:hover {
+  background: #a38655;
+}
+
 /* Estilos específicos para el modal de productos */
 .product-list .modal-content {
   max-width: 800px;
@@ -727,35 +771,6 @@ export default {
   width: 90%;
   max-height: 80vh;
   /* Altura máxima del 80% del viewport */
-}
-
-.table-modal-container {
-  max-height: 60vh;
-  /* Aumentado para mostrar más registros */
-  overflow-y: auto;
-  width: 100%;
-  margin: 1rem 0;
-}
-
-/* Estilos para la tabla dentro del modal de productos */
-.table-modal {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table-modal th {
-  background-color: #e7e4e4;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding: 12px;
-  /* Padding aumentado */
-}
-
-.table-modal td {
-  padding: 10px;
-  /* Padding aumentado */
-  border-bottom: 1px solid #ddd;
 }
 
 /* Media query para pantallas más pequeñas */
@@ -785,38 +800,6 @@ export default {
   background-color: #2d2d2d;
   border-color: #404040;
   color: #fff;
-}
-
-.dark .table-container {
-  border-color: #404040;
-  background-color: #2d2d2d;
-}
-
-.dark .table {
-  background-color: #2d2d2d;
-}
-
-.dark .table thead {
-  background-color: #111827;
-}
-
-.dark .table th {
-  background-color: #111827;
-  color: #e5e7eb;
-  border-bottom-color: #374151;
-}
-
-.dark .table td {
-  color: #e5e7eb;
-  border-bottom-color: #374151;
-}
-
-.dark .table tbody tr {
-  background-color: #2d2d2d;
-}
-
-.dark .table tbody tr:hover {
-  background-color: #1f2937;
 }
 
 .dark .modal-content {

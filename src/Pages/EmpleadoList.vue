@@ -98,7 +98,7 @@
         </div>
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteUsuariol(empleado)"/>
+            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteUsuariol(empleado)" />
             <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
           </div>
         </div>
@@ -1068,23 +1068,31 @@ export default {
 }
 
 .dark .table-container {
-  border-color: #404040;
-  background-color: #2d2d2d;
+  background-color: #1e1e1e;
+  border-color: #374151;
+}
+
+.dark .table {
+  background-color: #1e1e1e;
 }
 
 .dark .table thead {
-  background-color: #2d2d2d;
+  background-color: #111827;
 }
 
 .dark .table th {
-  background-color: #383838;
-  color: #fff;
-  border-color: #404040;
+  background-color: #111827;
+  color: #e5e7eb;
+  border-bottom-color: #374151;
 }
 
 .dark .table td {
-  color: #fff;
-  border-color: #404040;
+  color: #e5e7eb;
+  border-bottom-color: #374151;
+}
+
+.dark .table tbody tr:hover {
+  background-color: #1f2937;
 }
 
 .dark .modal-usuario {
