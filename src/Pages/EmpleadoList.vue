@@ -88,28 +88,33 @@
     </div>
 
     <div class="modal" v-if="showConfirmModal">
-      <div class="modal-content">
-        <h2>Confirmación</h2>
-        <p>¿Estás seguro de que quieres eliminar este usuario?</p>
-        <div class="modal-actions">
-          <button class="btn modalShowConfirm-Si" @click="deleteUsuariol(empleado)">
-            Sí, eliminar
-          </button>
-          <button class="btn modalShowConfirm-no" @click="cancelDelete">
-            No, regresar
-          </button>
+      <div class="modal-confirm">
+
+        <div class="modal-header">
+          <h2>Confirmación</h2>
+        </div>
+        <div class="modal-body-confirm">
+          <p>¿Estás seguro de que quieres eliminar este usuario?</p>
+        </div>
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteUsuariol(empleado)"/>
+            <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Modal para agregar o editar empleados -->
     <div v-if="isModalOpen" class="modal">
-      <div id="modal-usuario" class="modal-content">
-        <h2 class="h2-modal-content">
-          {{ isEditing ? "Editar Usuario" : "Agregar Usuario" }}
-        </h2>
+      <div class="modal-usuario">
+        <div class="modal-header">
+          <h2 class="h2-modal-content">
+            {{ isEditing ? "Editar Usuario" : "Agregar Usuario" }}
+          </h2>
+        </div>
 
-        <div class="contenedor-principal">
+        <div class="modal-body">
           <div class="contenedor contenedor-izquierdo">
             <div class="form-group">
               <label>Nombre:</label>
@@ -186,14 +191,15 @@
             </div>
           </div>
         </div>
-        <div>
-          <btnGuardarModal id="btnGuardarM" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'"
-            @click="guardarUsuario" type="submit">
-          </btnGuardarModal>
-
-          <button class="btn editar-password" :disabled="!isEditing" @click="editarPassword">Editar Contraseña</button>
-
-          <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Usuario'" @click="guardarUsuario"
+              type="submit">
+            </btnGuardarModal>
+            <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+          </div>
+          <button class="btn editar-password" :disabled="!isEditing" @click="editarPassword">Editar
+            Contraseña</button>
         </div>
       </div>
     </div>
@@ -492,7 +498,7 @@ export default {
       this.roles = await getRolesUsuarioPage();
     } catch (error) {
       notis('error', error.message);
-    }finally{
+    } finally {
       this.isLoading = false;
     }
   }
@@ -517,8 +523,8 @@ export default {
 .tooltip {
   display: inline-block;
   position: absolute;
-  left: 20px;
-  top: 0;
+  left: 0;
+  top: 100%;
   background-color: #f9f9f9;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -542,36 +548,31 @@ export default {
   align-items: center;
 }
 
-.modalShowConfirm-Si {
-  background-color: #dc3545;
-  color: white;
-}
-
-.modalShowConfirm-no {
-  background-color: #6c757d;
-  color: white;
-}
-
-.modal-content {
+.modal-usuario {
+  background: white;
+  border-radius: 12px;
+  width: 50%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  width: 90%;
-  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   margin: 20px;
+  overflow: hidden;
 }
 
-#modal-usuario {
-  max-width: 60%;
-  min-width: 500px;
-  justify-content: center;
-  align-items: center;
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
 }
 
-.h2-modal-content {
-  margin-top: 0;
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 #AddUsuarioModal,
@@ -579,54 +580,131 @@ export default {
   width: 80%;
 }
 
-.contenedor-principal {
+.modal-body {
   display: flex;
   width: 100%;
   justify-content: space-around;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.form-row {
+  margin-bottom: 20px;
+}
+
+.form-columns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
 }
 
 .contenedor {
   width: 45%;
 }
 
+/* Form Groups */
 .form-group {
-  margin-bottom: 16px;
-  position: relative;
+  margin-bottom: 20px;
 }
 
 .form-group label {
-  display: flexbox;
-  margin-bottom: 8px;
+  display: block;
+  margin-bottom: 1px;
+  color: #333;
+  font-weight: 500;
 }
 
-.form-group-select {
-  min-width: 80%;
-  display: flexbox;
-  flex-direction: row;
+.modal-confirm {
+  background: white;
+  border-radius: 12px;
+  width: 25%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
 }
 
-.form-group input {
-  width: 95%;
-  height: 25%;
-  padding: 0.5rem;
+.modal-body-confirm {
+  padding: 24px;
+  overflow-y: auto;
+  background-color: white
+}
+
+.dark .modal-body-confirm {
+  background-color: #333;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  justify-content: center;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
 }
 
-.form-select {
-  width: 100%;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  padding: 8px 16px;
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+/* Dark Mode */
+.dark .modal-categoria {
+  background-color: #2d2d2d;
+}
+
+.dark .modal-header,
+.dark .modal-footer {
+  background-color: #1e1e1e;
+  border-color: #404040;
+}
+
+.dark .modal-header h2 {
+  color: #fff;
+}
+
+.dark .form-group label {
+  color: #fff;
+}
+
+.dark .form-group input,
+.dark .form-group textarea,
+.dark .form-group select {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
 }
 
 .btn {
   padding: 8px 16px;
+  margin: 4px;
   border: none;
   cursor: pointer;
-  border-radius: 5px;
 }
 
 .btn-success {
@@ -729,6 +807,33 @@ export default {
   background-color: #b72433;
   transform: scale(1.05);
   transition: all 0.3s ease;
+}
+
+.dark #btnAdd {
+  background-color: #c09d62;
+  color: black;
+}
+
+.dark #btnAdd:hover {
+  background-color: #a38655;
+}
+
+.dark #btnEditar {
+  background-color: #ffc107;
+  color: black;
+}
+
+.dark #btnEditar:hover {
+  background-color: #e8af06;
+}
+
+.dark #btnEliminar {
+  background-color: #dc3545;
+  color: black;
+}
+
+.dark #btnEliminar:hover {
+  background-color: #b72433;
 }
 
 .empleados-wrapper {
@@ -865,25 +970,16 @@ export default {
 }
 
 .phone-input-container select {
-  width: 110px;
-  margin: 0;
-  height: 35px;
-  padding: 0 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  width: 30%;
 }
 
 .phone-input-container input {
-  flex: 1;
-  height: 35px;
-  padding: 0 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  width: 70%;
 }
 
 /* Media Queries */
 @media screen and (max-width: 768px) {
-  .contenedor-principal {
+  .modal-body {
     flex-direction: column;
   }
 
@@ -892,7 +988,7 @@ export default {
     margin-bottom: 20px;
   }
 
-  #modal-usuario {
+  .modal-usuario {
     min-width: 90%;
     max-width: 95%;
   }
@@ -932,7 +1028,7 @@ export default {
 }
 
 @media screen and (max-width: 480px) {
-  .modal-content {
+  .modal-usuario {
     width: 95%;
     padding: 15px;
   }
@@ -991,7 +1087,7 @@ export default {
   border-color: #404040;
 }
 
-.dark .modal-content {
+.dark .modal-usuario {
   background-color: #2d2d2d;
   color: #fff;
 }

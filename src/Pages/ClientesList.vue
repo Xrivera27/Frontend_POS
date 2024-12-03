@@ -76,62 +76,72 @@
     </div>
 
     <div class="modal" v-if="showConfirmModal">
-      <div class="modal-content">
-        <h2>Confirmación</h2>
-        <p>¿Estás seguro de que quieres eliminar este cliente?</p>
-        <div class="modal-actions">
-          <button class="btn modalShowConfirm-Si" @click="deleteCliente()">
-            Sí, eliminar
-          </button>
-          <button class="btn modalShowConfirm-no" @click="cancelDelete">
-            No, regresar
-          </button>
+      <div class="modal-confirm">
+        <div class="modal-header">
+          <h2>Confirmación</h2>
+        </div>
+        <div class="modal-body-confirm">
+          <p>¿Estás seguro de que quieres eliminar este cliente?</p>
+        </div>
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteCliente()" />
+            <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
+          </div>
         </div>
       </div>
     </div>
 
+
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
-        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Cliente' : 'Agregar Cliente' }}</h2>
-
-        <div class="form-group">
-          <label>Nombre:</label>
-          <input v-model="clienteForm.nombre_completo" type="text" required>
+        <div class="modal-header">
+          <h2 class="h2-modal-content">{{ isEditing ? 'Editar Cliente' : 'Agregar Cliente' }}</h2>
         </div>
 
-        <div class="form-group">
-          <label>Correo:</label>
-          <input v-model="clienteForm.correo" type="email" required>
-        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Nombre:</label>
+            <input v-model="clienteForm.nombre_completo" type="text" required>
+          </div>
 
-        <div class="form-group">
-          <label>Dirección:</label>
-          <input v-model="clienteForm.direccion" type="text" required>
-        </div>
+          <div class="form-group">
+            <label>Correo:</label>
+            <input v-model="clienteForm.correo" type="email" required>
+          </div>
 
-        <div class="form-group">
-          <label>Teléfono:</label>
-          <div class="phone-input-container">
-            <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
-              <option value="">País</option>
-              <option v-for="(country, code) in countryData" :key="code" :value="code">
-                {{ country.emoji }} {{ country.code }}
-              </option>
-            </select>
-            <input v-model="clienteForm.telefono" type="text" class="input-phone"
-              :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+          <div class="form-group">
+            <label>Dirección:</label>
+            <input v-model="clienteForm.direccion" type="text" required>
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono:</label>
+            <div class="phone-input-container">
+              <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+                <option value="">País</option>
+                <option v-for="(country, code) in countryData" :key="code" :value="code">
+                  {{ country.emoji }} {{ country.code }}
+                </option>
+              </select>
+              <input v-model="clienteForm.telefono" type="text" class="input-phone"
+                :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>RTN:</label>
+            <input v-model="clienteForm.rtn" type="text" maxlength="14" required>
           </div>
         </div>
 
-        <div class="form-group">
-          <label>RTN:</label>
-          <input v-model="clienteForm.rtn" type="text" maxlength="14" required>
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Cliente'" @click="guardarCliente">
+            </btnGuardarModal>
+            <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+          </div>
         </div>
-
-        <btnGuardarModal id="btnAggCli" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Cliente'"
-          @click="guardarCliente">
-        </btnGuardarModal>
-        <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
       </div>
     </div>
   </div>
@@ -461,6 +471,139 @@ export default {
 
 #BtnCerrar {
   background-color: rgb(93, 100, 104);
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.modal-confirm {
+  background: white;
+  border-radius: 12px;
+  width: 25%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.modal-body-confirm {
+  padding: 24px;
+  overflow-y: auto;
+  background-color: white
+}
+
+.dark .modal-body-confirm {
+  background-color: #333;
+}
+
+/* Form Layout */
+.form-row {
+  margin-bottom: 20px;
+}
+
+.form-columns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+}
+
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Footer */
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Dark Mode */
+.dark .modal-categoria {
+  background-color: #2d2d2d;
+}
+
+.dark .modal-header,
+.dark .modal-footer {
+  background-color: #1e1e1e;
+  border-color: #404040;
+}
+
+.dark .modal-header h2 {
+  color: #fff;
+}
+
+.dark .form-group label {
+  color: #fff;
+}
+
+.dark .form-group input,
+.dark .form-group textarea,
+.dark .form-group select {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
 }
 
 /* Modal */
@@ -959,6 +1102,4 @@ export default {
   font-size: 1.1rem;
   color: #666;
 }
-
-
 </style>

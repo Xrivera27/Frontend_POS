@@ -1,5 +1,5 @@
 <template>
-  <button id="btnGuardar" class="btn btn-primary">
+  <button id="btnGuardar" class="btn-guardar">
     {{ texto }}
   </button>
 
@@ -18,15 +18,24 @@ export default {
 </script>
 
 <style>
-.btn {
-  padding: 8px 16px;
-  margin: 4px;
+.btn-guardar {
+  background-color: #9b7b44;
   border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
   cursor: pointer;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  color: white;
+.btn-guardar:hover {
+  background-color: #735f3c;
+}
+
+.btn-guardar i {
+  font-size: 1.2em;
 }
 </style>

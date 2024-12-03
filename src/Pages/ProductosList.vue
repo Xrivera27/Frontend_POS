@@ -38,8 +38,8 @@
     <!-- Tabla exportable -->
     <div class="table-container" v-pdf-export ref="table">
 
-       <!-- Indicador de carga -->
-       <div v-if="isLoading" class="loading-indicator">
+      <!-- Indicador de carga -->
+      <div v-if="isLoading" class="loading-indicator">
         Cargando productos...
       </div>
 
@@ -100,17 +100,25 @@
     </div>
 
     <div class="modal" v-if="showConfirmModal">
-      <div class="modal-content">
-        <h2>Confirmación</h2>
-        <p>¿Estás seguro de que quieres eliminar este producto?</p>
-        <div class="modal-actions">
-          <button class="btn modalShowConfirm-Si" @click="deleteProducto()">
-            Sí, eliminar
-          </button>
-          <button class="btn modalShowConfirm-no" @click="cancelDelete">
-            No, regresar
-          </button>
+      <div class="modal-confirm">
+        <div class="modal-header">
+          <h2>Confirmación</h2>
         </div>
+
+        <div class="modal-body-confirm">
+          <p v-if="productoToDelete.stock_actual > 0">Este producto actualmente tiene {{ productoToDelete.stock_actual
+            }}
+            unidades en stock. ¿Estás seguro de que quieres eliminarlo?</p>
+          <p v-else>¿Estás seguro de que quieres eliminar este producto?</p>
+        </div>
+
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteProducto()" />
+            <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -210,12 +218,8 @@
             Asignar categorías
           </button>
           <div id="btnCanc" class="action-buttons">
-            <button class="btn btn-secondary" @click="closeModal">
-              Cancelar
-            </button>
-            <button id="btnAggProd" class="btn btn-primary" @click="guardarProducto">
-              {{ isEditing ? "Guardar Cambios" : "Agregar Producto" }}
-            </button>
+            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Producto'" @click="guardarProducto" />
+            <btnCerrarModal texto="Cerrar" @click="closeModal" />
           </div>
         </div>
       </div>
@@ -223,69 +227,72 @@
 
     <!-- modal para mostrar categorias -->
     <div v-if="isModalCategoriaOpen" class="modal">
-      <div class="modal-content modal-categorias">
-        <div class="categoria-header">
-          <h3>Selecciona categorías del producto</h3>
-          <div class="search-container">
-            <input type="text" v-model="searchCategoria" placeholder="Buscar categoría..." class="search-input" />
+      <div class="modal dark">
+        <div class="modal-content modal-categorias">
+          <div class="categoria-header">
+            <h3>Selecciona categorías del producto</h3>
+            <div class="search-container">
+              <input type="text" v-model="searchCategoria" placeholder="Buscar categoría..." class="search-input" />
+            </div>
           </div>
-        </div>
 
-        <div class="categorias-container">
-          <div class="categorias-grid">
-            <label v-for="(categoria, index) in filteredCategorias" :key="index" class="categoria-checkbox">
-              <input type="checkbox" v-model="categoriasSeleccionadas" :value="categoria.id_categoria">
-              <span class="checkbox-text">{{ categoria.nombre_categoria }}</span>
-            </label>
+          <div class="categorias-container">
+            <div class="categorias-grid">
+              <label v-for="(categoria, index) in filteredCategorias" :key="index" class="categoria-checkbox">
+                <input type="checkbox" v-model="categoriasSeleccionadas" :value="categoria.id_categoria">
+                <span class="checkbox-text">{{ categoria.nombre_categoria }}</span>
+              </label>
+            </div>
           </div>
-        </div>
 
-        <div class="categoria-footer">
-          <btnCerrarModal :texto="'Cancelar'" @click="closeModalCategoria" />
-          <btnGuardarModal @click="guardarCategorias">
-            Guardar
-          </btnGuardarModal>
+          <div class="categoria-footer">
+            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Producto'" @click="guardarProducto">
+            </btnGuardarModal>
+            <btnCerrarModal :texto="'Cerrar'" @click="closeModalCategoria"></btnCerrarModal>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- modal para editar stocks min y max por sucursal -->
     <div v-if="isModalStockOpen" class="modal">
-      <div class="modal-content modal-content-stock">
-        <div class="sotck-encabezado">
+      <div class="modal-stock">
+        <div class="modal-header">
           <h3>Edite stock min y max por sucursal</h3>
-          <div class="search-bar form-group">
-          </div>
         </div>
-        <form class="form-form-stock">
-          <select class="custom-select select-sucursal-stock" @change="mostrarStockbySucursal(searchSucursalStock)"
-            v-model="searchSucursalStock" v-show="(sucursales.length > 1)">
-            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
-              sucursal.nombre_administrativo }}</option>
-          </select>
-          <div class="form-group-stock">
+
+        <div class="modal-body">
+          <div class="form-group">
+            <select class="custom-select select-sucursal-stock" @change="mostrarStockbySucursal(searchSucursalStock)"
+              v-model="searchSucursalStock" v-show="(sucursales.length > 1)">
+              <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
+                sucursal.nombre_administrativo }}</option>
+            </select>
+          </div>
+          <div class="form-group">
             <label for="stock-min">Codigo Producto:</label>
             <label class="label-stock-info">{{ codigoProductoStock }}</label>
           </div>
-          <div class="form-group-stock">
+          <div class="form-group">
             <label for="stock-min">Nombre Producto:</label>
             <label class="label-stock-info"> {{ nombreProductoStock }}</label>
           </div>
-          <div class="form-group-stock">
+          <div class="form-group">
             <label for="stock-min">Stock Min:</label>
             <input type="text" class="input" @keypress="soloNumeros($event)"
               placeholder="Ingrese stock minimo del producto " v-model="inputStockMin">
           </div>
 
-          <div class="form-group-stock">
+          <div class="form-group">
             <label for="stock-max">Stock Max:</label>
             <input type="text" class="input" @keypress="soloNumeros($event)"
               placeholder="Ingrese stock maximo del producto" v-model="inputStockMax">
           </div>
-        </form>
+        </div>
 
-        <div class="categoria-botones">
-          <btnGuardarModal @click="guardarStock(searchSucursalStock)">Guardar</btnGuardarModal>
+        <div class="modal-footer">
+          <btnGuardarModal :texto="'Guardar cambios'" @click="guardarStock(searchSucursalStock)">
+          </btnGuardarModal>
           <btnCerrarModal :texto="'Cerrar'" @click="closeModalStock"></btnCerrarModal>
         </div>
       </div>
@@ -300,8 +307,7 @@ import ExportButton from '../components/ExportButton.vue';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
 import { validacionesProductos } from '../../services/validarCampos.js';
-import { notificaciones } from '../../services/notificaciones.js';
-import { useToast } from "vue-toastification";
+import { notis } from '../../services/notificaciones.js';
 import ModalLoading from '@/components/ModalLoading.vue';
 
 // importando solicitudes
@@ -519,7 +525,7 @@ export default {
       };
 
       if (stock_max <= stock_min) {
-        notificaciones('error', 'Datos invalidos: Stock minimo no puede ser mayor o igual a stock maximo');
+        notis('error', 'Datos invalidos: Stock minimo no puede ser mayor o igual a stock maximo');
         return;
       }
 
@@ -528,9 +534,9 @@ export default {
         if (response instanceof Error) {
           throw response;
         }
-        notificaciones('success');
+        notis('success', 'Datos de stock guardados correctamente');
       } catch (error) {
-        notificaciones('error', error);
+        notis('error', error);
       }
 
       this.closeModalStock();
@@ -580,12 +586,12 @@ export default {
             this.productoForm.codigo_producto = '';
           const nuevoRegistro = await patchProducto(this.productoForm, this.productos[this.editIndex].id_producto);
           if (nuevoRegistro == true) {
-            notificaciones('success')
+            notis("success", "Actualizando datos del producto...");
             this.productoForm.codigo_producto = this.productos[this.editIndex].codigo_producto;
             Object.assign(this.productos[this.editIndex], this.productoForm);
           }
         } catch (error) {
-          notificaciones('error', error.message);
+          notis('error', error.message);
         } finally {
           this.isLoading = false;
         }
@@ -593,8 +599,9 @@ export default {
         try {
           const nuevoRegistro = await postProducto(this.productoForm);
           this.productos.push(nuevoRegistro[0]);
+          notis("success", "Producto agregado correctamente");
         } catch (error) {
-          notificaciones('error', error.message);
+          notis('error', error.message);
         } finally {
           this.isLoading = false;
         }
@@ -619,7 +626,7 @@ export default {
         this.editIndex = index;
         this.openModal();
       } catch (error) {
-        notificaciones('error', error.message);
+        notis('error', "Error al editar el producto");
       }
     },
 
@@ -630,21 +637,20 @@ export default {
         return;
       }
       this.isLoading = true;
-      const toast = useToast();
       try {
         const registroEliminado = await desactivarProducto(this.productoToDelete.id_producto);
 
         if (registroEliminado == true) {
           this.productos = this.productos.filter(item => item.id_producto !== this.productoToDelete.id_producto);
           this.isLoading = false;
-          notificaciones('success', 'Producto eliminado correctamente');
+          notis('success', 'Producto eliminado correctamente');
         } else {
           this.isLoading = false;
-          toast.error('Error al eliminar producto');
+          notis('error', 'Error al eliminar producto');
         }
       } catch (error) {
         console.error(error);
-        notificaciones('error', 'Error al eliminar el producto');
+        notis('error', 'Error al eliminar el producto');
       } finally {
         this.showConfirmModal = false;
         this.productoToDelete = null;
@@ -654,7 +660,7 @@ export default {
 
     cancelDelete() {
       this.showConfirmModal = false;
-      this.categoriaToDelete = null;
+      this.productoToDelete = null;
     },
 
     previousPage() {
@@ -747,7 +753,7 @@ export default {
   margin-bottom: 16px;
 }
 
-.form-group-stock {
+.form-group {
   margin: 10px 0;
   display: flex;
   align-items: center;
@@ -762,7 +768,7 @@ export default {
   margin-bottom: 8px;
 }
 
-.form-group-stock label {
+.form-group label {
   white-space: nowrap;
   margin-right: 5px;
 }
@@ -782,7 +788,7 @@ export default {
   justify-content: center;
 }
 
-.form-group-stock input {
+.form-group input {
   height: 25%;
   width: 100%;
   padding: 0.5rem;
@@ -829,7 +835,7 @@ export default {
 }
 
 .button-promocion {
-  background-color: #4cafaf;
+  background-color: #3d8d8d;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -843,15 +849,6 @@ export default {
 
 .export-button {
   margin: 0;
-}
-
-#btnAggProd {
-  background-color: #a38655;
-  border-radius: 8px;
-}
-
-#btnCanc {
-  border-radius: 8px;
 }
 
 #btnAdd:hover {
@@ -992,13 +989,18 @@ export default {
   color: white;
 }
 
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  width: 90%;
-  max-width: 500px;
-  margin: 20px;
+.modal-confirm {
+    background: white;
+    border-radius: 12px;
+    width: 25%;
+    max-width: 1000px;
+    max-height: 90vh;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    margin: 20px;
+    overflow: hidden;
 }
 
 .modal-content-categoria {
@@ -1012,14 +1014,6 @@ export default {
   min-width: 300px;
 }
 
-.modal-content-stock {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 400px;
-}
-
 .h2-modal-content {
   margin-top: 0px;
 }
@@ -1031,6 +1025,7 @@ export default {
   background-color: #163ef3;
   color: rgb(238, 238, 238);
   font-size: 15px;
+  cursor: pointer;
 }
 
 .custom-select {
@@ -1155,6 +1150,16 @@ export default {
   border-radius: 12px 12px 0 0;
 }
 
+.dark .categoria-header,
+.dark .categoria-footer {
+  background-color: #1e1e1e;
+  border-color: #404040;
+}
+
+.dark .categoria-header h3 {
+  color: white;
+}
+
 .categoria-header h3 {
   margin: 0 0 16px 0;
   color: #333;
@@ -1226,6 +1231,27 @@ export default {
   font-weight: 500;
 }
 
+.dark .categoria-checkbox {
+  background-color: #343a40;
+  /* Fondo oscuro */
+  border: 1px solid #495057;
+  /* Borde oscuro */
+}
+
+.dark .categoria-checkbox:hover {
+  background-color: #495057;
+}
+
+.dark .categoria-checkbox input[type="checkbox"] {
+  accent-color: #f8c927;
+  /* Color del checkbox en modo oscuro */
+}
+
+.dark .checkbox-text {
+  color: #e1e1e1;
+  /* Texto claro en modo oscuro */
+}
+
 .categoria-footer {
   padding: 16px 24px;
   border-top: 1px solid #e0e0e0;
@@ -1240,7 +1266,28 @@ export default {
 .modal-producto {
   background: white;
   border-radius: 12px;
-  width: 95%;
+  width: 90%;
+  max-width: 900px;
+  /* Reducido de 1000px */
+  max-height: 85vh;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  /* Cambiado de auto a hidden */
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-stock {
+  background: white;
+  border-radius: 12px;
+  width: 35%;
   max-width: 1000px;
   max-height: 90vh;
   padding: 0;
@@ -1264,9 +1311,18 @@ export default {
   font-weight: 600;
 }
 
-.modal-body {
+.modal-body-confirm {
   padding: 24px;
   overflow-y: auto;
+  background-color: white
+}
+
+.dark .modal-body-confirm {
+  background-color: #333;
+}
+
+.dark .modal-body {
+  background-color: #2d2d2d;
 }
 
 /* Form Layout */
@@ -1278,6 +1334,7 @@ export default {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
+  padding: 0;
   margin-bottom: 20px;
 }
 
@@ -1286,15 +1343,18 @@ export default {
 }
 
 /* Form Groups */
-.form-group {
-  margin-bottom: 20px;
-}
+
 
 .form-group label {
   display: block;
   margin-bottom: 8px;
   color: #333;
   font-weight: 500;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  width: 100%;
 }
 
 .form-group input,
@@ -1305,12 +1365,39 @@ export default {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 14px;
-  transition: all 0.3s ease;
-  background-color: white;
+  box-sizing: border-box;
+}
+
+.btn-categoria {
+  background-color: #c09d62;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.dark .btn-categoria {
+  background-color: #977c4f;
+}
+
+.dark .btn-categoria:hover {
+  background-color: #6b5939;
+}
+
+.btn-categoria:hover {
+  background-color: #696969;
+}
+
+.btn-categoria i {
+  font-size: 1.2em;
 }
 
 .form-group textarea {
-  height: 100px;
+  min-height: 100px;
   resize: vertical;
 }
 
@@ -1354,26 +1441,6 @@ export default {
 .action-buttons {
   display: flex;
   gap: 12px;
-}
-
-/* Buttons */
-.btn-categoria {
-  background-color: #c09d62;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 500;
-}
-
-.btn-categoria:hover {
-  background-color: #a38655;
-}
-
-.btn-categoria i {
-  font-size: 1.2em;
 }
 
 /* Focus States */
@@ -1519,8 +1586,7 @@ export default {
 
 @media screen and (max-width: 480px) {
 
-  .modal-content,
-  .modal-content-stock {
+  .modal-stock {
     width: 95%;
     padding: 15px;
   }
@@ -1536,7 +1602,7 @@ export default {
   }
 
   .form-group input,
-  .form-group-stock input {
+  .form-group input {
     width: 100%;
   }
 
@@ -1669,7 +1735,7 @@ export default {
 /* Botones en modo oscuro (manteniendo los colores originales) */
 .dark .button-promocion {
   background-color: #4cafaf;
-  color: white;
+  color: black;
 }
 
 .dark .button-unidad-medida {

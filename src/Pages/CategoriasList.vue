@@ -22,13 +22,10 @@
       </div>
     </div>
 
-    
-
     <div class="table-container">
 
-
-       <!-- Indicador de carga -->
-       <div v-if="isLoading" class="loading-indicator">
+      <!-- Indicador de carga -->
+      <div v-if="isLoading" class="loading-indicator">
         Cargando categorias...
       </div>
 
@@ -83,41 +80,56 @@
       </div>
     </div>
 
+    <!-- Modal de confirmación -->
     <div class="modal" v-if="showConfirmModal">
-      <div class="modal-content">
-        <h2>Confirmación</h2>
-        <p>¿Estás seguro de que quieres eliminar esta categoría?</p>
-        <div class="modal-actions">
-          <button class="btn modalShowConfirm-Si" @click="deleteCategoria()">
-            Sí, eliminar
-          </button>
-          <button class="btn modalShowConfirm-no" @click="cancelDelete">
-            No, regresar
-          </button>
+      <div class="modal-confirm">
+        <div class="modal-header">
+          <h2>Confirmación</h2>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que quieres eliminar esta categoría?</p>
+        </div>
+
+        <div class="modal-footer">
+          <btnGuardarModal :texto="'Si, eliminar'" style="background-color: red;" @click="deleteCategoria()">
+          </btnGuardarModal>
+          <btnCerrarModal :texto="'No, regresar'" @click="cancelDelete"></btnCerrarModal>
         </div>
       </div>
     </div>
 
+
     <!-- Modal para agregar o editar categorías -->
     <div v-if="isModalOpen" class="modal">
-      <div class="modal-content">
-        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Categoría' : 'Agregar Categoría' }}</h2>
-
-        <div class="form-group">
-          <label>Nombre:</label>
-          <input v-model="categoriaForm.nombre_categoria" type="text" required>
+      <div class="modal-categoria">
+        <div class="modal-header">
+          <h2>{{ isEditing ? 'Editar Categoría' : 'Agregar Categoría' }}</h2>
         </div>
 
-        <div class="form-group">
-          <label>Descripción:</label>
-          <textarea v-model="categoriaForm.descripcion" class="descriptionForm" required rows="4"></textarea>
+        <div class="modal-body">
+          <div class="form-row full-width">
+            <div class="form-group">
+              <label>Nombre:</label>
+              <input v-model="categoriaForm.nombre_categoria" type="text"
+                placeholder="Ingrese el nombre de la categoría" required>
+            </div>
+          </div>
+
+          <div class="form-row full-width">
+            <div class="form-group">
+              <label>Descripción:</label>
+              <textarea v-model="categoriaForm.descripcion" placeholder="Ingrese la descripción de la categoría"
+                required></textarea>
+            </div>
+          </div>
         </div>
 
-        <div class="contenedor-botones">
-          <btnGuardarModal id="btnAggC" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Categoría'"
-            @click="guardarCategoria">
-          </btnGuardarModal>
-          <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Categoría'" @click="guardarCategoria">
+            </btnGuardarModal>
+            <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+          </div>
         </div>
       </div>
     </div>
@@ -265,7 +277,7 @@ export default {
 
           if (response === true) {
             Object.assign(this.categorias[this.editIndex], this.categoriaForm);
-            notis("success", "Actualizando datos...");
+            notis("success", "Actualizando datos de la categoría...");
             this.closeModal();
           } else {
             throw new Error(response.message || 'Error al actualizar la categoría');
@@ -277,7 +289,7 @@ export default {
 
           if (response && response.length > 0) {
             this.categorias.push(response[0]);
-            notis("success", "Procesando guardado...");
+            notis("success", "Categoría guardada correctamente");
             this.closeModal();
           } else {
             throw new Error('Error al crear la categoría');
@@ -354,9 +366,16 @@ export default {
   width: 100%;
 }
 
+.btn {
+  padding: 8px 16px;
+  margin: 4px;
+  border: none;
+  cursor: pointer;
+}
+
 .button-promocion {
   background-color: #4cafaf;
-  color: white;
+  color: black;
   padding: 10px 20px;
   border: none;
   cursor: pointer;
@@ -493,6 +512,154 @@ export default {
   max-width: 500px;
   margin: 20px;
 }
+
+.modal-categoria {
+  background: white;
+  border-radius: 12px;
+  width: 50%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
+}
+
+.modal-confirm {
+  background: white;
+  border-radius: 12px;
+  width: 25%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Form Layout */
+.form-row {
+  margin-bottom: 20px;
+}
+
+.form-columns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+}
+
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Footer */
+.modal-footer {
+  justify-content: center;
+  padding: 20px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Dark Mode */
+.dark .modal-categoria {
+  background-color: #2d2d2d;
+}
+
+.dark .modal-confirm {
+  background-color: #2d2d2d;
+}
+
+.dark .modal-header,
+.dark .modal-footer {
+  background-color: #1e1e1e;
+  border-color: #404040;
+}
+
+.dark .modal-header h2 {
+  color: #fff;
+}
+
+.dark .form-group label {
+  color: #fff;
+}
+
+.dark .form-group input,
+.dark .form-group textarea,
+.dark .form-group select {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
 
 .h2-modal-content {
   margin-top: 0px;
@@ -733,6 +900,21 @@ export default {
   .pagination-container {
     justify-content: center;
   }
+
+  .form-columns {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 @media screen and (max-width: 480px) {
@@ -769,6 +951,4 @@ export default {
   font-size: 1.1rem;
   color: #666;
 }
-
-
 </style>

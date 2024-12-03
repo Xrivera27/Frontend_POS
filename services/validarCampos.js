@@ -497,6 +497,7 @@ const validacionesConfigPage = {
     // Solo validar contraseñas si isPassEdit es true
     if (isPassEdit) {
       // Agregar campos de contraseña al objeto campos solo si estamos en modo edición de contraseña
+
       campos.Contraseña = form.contraseña;
       campos["Contraseña nueva"] = form.contraseña_nueva;
       campos["Confirmar contraseña"] = form.contraseña_confirm;
