@@ -141,6 +141,46 @@ export default {
         }
     },
 
+    // Agregar este nuevo método en el objeto exportado
+async obtenerReporteCancelacion(ventaId) {
+    try {
+        console.log('Solicitando reporte de cancelación:', ventaId);
+        const url = `${homeUrl}/AdminVentas/ventas/${ventaId}/reporte-cancelacion`;
+        console.log('URL de petición:', url);
+        
+        const headers = getAuthHeaders();
+        // Eliminar Content-Type para respuesta blob
+        delete headers['Content-Type'];
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers,
+            responseType: 'blob'  // Importante para recibir el PDF
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            console.error('Error response:', text);
+            throw new Error(`Error al generar reporte de cancelación: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        console.log('Blob recibido:', {
+            size: blob.size,
+            type: blob.type
+        });
+
+        if (blob.size === 0) {
+            throw new Error('PDF recibido está vacío');
+        }
+
+        return blob;
+    } catch (error) {
+        console.error('Error al obtener reporte de cancelación:', error);
+        throw error;
+    }
+},
+
     async obtenerCompras() {
         try {
             const headers = getAuthHeaders();
