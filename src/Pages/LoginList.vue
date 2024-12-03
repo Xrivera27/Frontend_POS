@@ -89,68 +89,84 @@ export default {
 
         const data = await response.json();
 
-        if (response.ok) {
-          // Limpiar cualquier estado previo
-          localStorage.clear();
-
-          // Guardar datos en localStorage
-          localStorage.setItem('auth', data.token);
-          localStorage.setItem('role', data.role);
-
-          // Emitir eventos para actualizar el estado
-          window.dispatchEvent(new Event('roleChange'));
-
-          // Forzar una actualización del estado
-          this.$nextTick(() => {
-            this.$emit('auth-change');
-          });
+    if (response.ok) {
+      // El código existente para el login exitoso se mantiene igual
+      localStorage.clear();
+      localStorage.setItem('auth', data.token);
+      localStorage.setItem('role', data.role);
+      window.dispatchEvent(new Event('roleChange'));
+      
+      this.$nextTick(() => {
+        this.$emit('auth-change');
+      });
 
           this.isLoading = false;
 
-          // Redirigir según el rol
-          if (data.role === '3') {
-            await this.$router.push('/ventas');
-          } else {
-            await this.$router.push('/home');
-          }
-        } else {
-          this.isLoading = false;
-          toast.error(data.message, {
-            timeout: 5000
-          });
-        }
-      } catch (error) {
-        this.isLoading = false;
-        console.error('Error:', error);
-        toast.error('Error de red o servidor.', {
+      if (data.role === '3') {
+        await this.$router.push('/ventas');
+      } else {
+        await this.$router.push('/home');
+      }
+    } else {
+      this.isLoading = false;
+      // Aquí manejamos específicamente el caso de usuario inhabilitado
+      if (response.status === 403) {
+        toast.error('Usuario inhabilitado', {
+          timeout: 5000
+        });
+      } else {
+        toast.error(data.message, {
           timeout: 5000
         });
       }
-    },
-    async recoverPassword() {
-      try {
-        this.isLoading = true;
+    }
+  } catch (error) {
+    this.isLoading = false;
+    console.error('Error:', error);
+    toast.error('Error de red o servidor.', {
+      timeout: 5000
+    });
+  }
+},
+async recoverPassword() {
+  const toast = useToast();
+  try {
+    this.isLoading = true;
 
-        const response = await fetch('http://localhost:3000/api/recuperar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: this.recoveryEmail })
+    const response = await fetch('http://localhost:3000/api/recuperar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: this.recoveryEmail })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      toast.success('Correo enviado con la contraseña temporal.', {
+        timeout: 5000
+      });
+      this.isRecoveringPassword = false; // Volver a la vista de login
+      this.recoveryEmail = ''; // Limpiar el campo
+    } else {
+      if (response.status === 404) {
+        toast.error('Usuario no encontrado', {
+          timeout: 5000
         });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          alert(data.message); // Muestra el mensaje de éxito
-          this.isRecoveringPassword = false; // Volver a la vista de login
-        } else {
-          alert(data.message); // Muestra el mensaje de error
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        this.isLoading = false;
+      } else {
+        toast.error(data.message, {
+          timeout: 5000
+        });
       }
-    },
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    toast.error('Error de red o servidor.', {
+      timeout: 5000
+    });
+  } finally {
+    this.isLoading = false;
+  }
+},
 
     togglePasswordRecovery() {
       this.isRecoveringPassword = !this.isRecoveringPassword;
