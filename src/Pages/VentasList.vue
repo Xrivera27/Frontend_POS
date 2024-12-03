@@ -7,10 +7,13 @@
       @close="closeFacturaModal" />
 
       <CerrarCajaModal 
-    :isVisible="isCerrarCajaModalVisible" 
-    @confirm="confirmarCierreCaja"
-    @close="isCerrarCajaModalVisible = false"
-  />
+  :isVisible="isCerrarCajaModalVisible"
+  :totalEfectivo="totalEfectivo"
+  :totalTransferencia="totalTransferencia"
+  @confirm="confirmarCierreCaja"
+  @close="isCerrarCajaModalVisible = false"
+  @modal-focused="handleModalFocus"
+/>
 
     <div class="main-container">
       <div class="header-container">
@@ -185,7 +188,7 @@ import PaymentAnimationModal from '@/components/PaymentAnimationModal.vue';
 //import VentaPendienteModal from '@/components/modalesCrearVenta/VentaPendiente.vue';
 import AperturaCajaModal from '@/components/modalesCrearVenta/AperturaCajaModal.vue';
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, cajaUsuario, createCaja, cerrarCaja, pagar, pagarTranferir } from '../../services/ventasSolicitudes.js';
+import { getInfoBasic, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, cajaUsuario, createCaja, pagar, pagarTranferir } from '../../services/ventasSolicitudes.js';
 //cajaUsuario
 import FacturaModal from '@/components/FacturaModal.vue'; // Nuevo
 import CerrarCajaModal from '@/components/CierreCajaModal.vue';
@@ -221,6 +224,8 @@ export default {
       addQuery: "",
       totalCantidad: '',
       id_usuario: 0,
+      totalEfectivo: 0,
+      totalTransferencia: 0,
       prueba: 'prueba',
       info: '',
       isBuscarProductoModalVisible: false,
@@ -250,8 +255,7 @@ export default {
   },
 
   watch: {
-    // Observadores para mantener sincronizado el estado de los modales
-
+    // Observador para el modal de factura
     isFacturaModalVisible(newVal) {
       this.isAnyModalOpen = newVal;
       if (newVal) {
@@ -261,6 +265,7 @@ export default {
       }
     },
 
+    // Observador para el modal principal
     isModalVisible(newVal) {
       this.isAnyModalOpen = newVal;
       if (newVal) {
@@ -271,6 +276,7 @@ export default {
       }
     },
 
+    // Observador para el modal de pago
     isPagoModalVisible(newVal) {
       this.isAnyModalOpen = newVal;
       if (newVal) {
@@ -281,6 +287,7 @@ export default {
       }
     },
 
+    // Observador para el modal de búsqueda de producto
     isBuscarProductoModalVisible(newVal) {
       this.isAnyModalOpen = newVal;
       if (newVal) {
@@ -289,8 +296,17 @@ export default {
         this.resumeMainKeyboardEvents();
       }
     },
-  },
 
+    // Observador para el modal de cierre de caja
+    isCerrarCajaModalVisible(newVal) {
+      this.isAnyModalOpen = newVal;
+      if (newVal) {
+        this.pauseMainKeyboardEvents();
+      } else {
+        this.resumeMainKeyboardEvents();
+      }
+    }
+  },
   computed: {
     calcularTotal() {
       const total = this.productosLista.reduce((total, p) => total + (p.precio_final), 0);
@@ -334,36 +350,53 @@ export default {
       this.isAperturaCajaModalVisible = true;
       this.pauseMainKeyboardEvents();
     },
-    async confirmarCierreCaja() {
-  try {
-    console.log('Iniciando proceso de cierre de caja...');
-    this.isModalLoading = true;
-    this.loadingMessage = 'Cerrando caja...';
-    
-    const reporte = await cerrarCaja(this.id_usuario);
-    console.log('Reporte de cierre recibido:', reporte);
-    
-    // Solo intentar generar PDF si el cierre fue exitoso
-    if (reporte) {
-      try {
-        await this.generarPDFCierreCaja(reporte);
-        notis("success", "Caja cerrada y reporte generado exitosamente");
-      } catch (pdfError) {
-        console.error('Error al generar PDF:', pdfError);
-        notis("warning", "Caja cerrada pero hubo un error al generar el PDF");
-      }
-    }
-    
-    this.cajaAbierta = false;
-    this.isCerrarCajaModalVisible = false;
-  } catch (error) {
-    console.error('Error al cerrar caja:', error);
-    notis("error", "Error al cerrar caja");
-  } finally {
-    this.isModalLoading = false;
-  }
-},
+    async confirmarCierreCaja(datosCierre) {
+    try {
+        this.isModalLoading = true;
+        this.loadingMessage = 'Cerrando caja...';
 
+        const url = `${solicitudes.homeUrl}/ventas/cerrar-caja/${this.id_usuario}`;
+        console.log('URL de la petición:', url);
+
+        const token = localStorage.getItem('auth');
+        const response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                id_usuario: this.id_usuario,
+                dineroCaja: datosCierre.dineroEnCaja
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (data) {
+            try {
+                await this.generarPDFCierreCaja(data);
+                notis("success", "Caja cerrada y reporte generado exitosamente");
+            } catch (pdfError) {
+                console.error('Error al generar PDF:', pdfError);
+                notis("warning", "Caja cerrada pero hubo un error al generar el PDF");
+            }
+        }
+
+        this.cajaAbierta = false;
+        this.isCerrarCajaModalVisible = false;
+
+    } catch (error) {
+        console.error('Error al cerrar caja:', error);
+        notis("error", "Error al cerrar caja");
+    } finally {
+        this.isModalLoading = false;
+    }
+},
 async generarPDFCierreCaja(reporte) {
   console.log('Iniciando generación de PDF...');
   try {
@@ -425,9 +458,22 @@ async generarPDFCierreCaja(reporte) {
   }
 },
 
-    async cerrarCaja() {
-      this.abrirModalCerrarCaja();
-    },
+async cerrarCaja() {
+    try {
+        const { data: ventas } = await axios.get(`${solicitudes.homeUrl}/ventas/totales-caja/${this.id_usuario}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('auth')}`
+            }
+        });
+        
+        this.totalEfectivo = ventas.totalEfectivo;
+        this.totalTransferencia = ventas.totalTransferencia;
+        this.abrirModalCerrarCaja();
+    } catch (error) {
+        console.error('Error al obtener totales:', error);
+        notis("error", "Error al obtener totales de caja");
+    }
+},
 
     async handleAperturaCaja(monto) {
       try {

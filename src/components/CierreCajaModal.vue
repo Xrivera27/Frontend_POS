@@ -1,20 +1,38 @@
 <template>
   <div v-if="isVisible" class="modal-overlay">
     <div class="modal-content">
-      <h2 class="modal-title">Confirmar Cierre de Caja</h2>
-      <p class="modal-message">¿Está seguro que desea cerrar la caja?</p>
+      <h2 class="modal-title">Cerrar Caja</h2>
+      
+      <div class="form-section">
+        <label class="form-label">Ingrese el dinero total en caja:</label>
+        <div class="input-container">
+          <span class="currency-symbol">L.</span>
+          <input 
+            ref="montoInput"
+            type="text"
+            v-model="montoInput"
+            class="form-input"
+            placeholder="0.00"
+            @input="formatInput"
+            @keypress="soloNumeros"
+            @keydown.stop
+          />
+        </div>
+      </div>
+
       <div class="modal-buttons">
         <button 
-          class="confirm-button"
-          @click="$emit('confirm')"
+          class="verify-button"
+          @click="verificarMonto"
+          :disabled="!isValidAmount"
         >
-          <CheckCircle class="icon" /> Confirmar
+          Verificar
         </button>
         <button 
           class="cancel-button"
           @click="$emit('close')"
         >
-          <XCircle class="icon" /> Cancelar
+          Cancelar
         </button>
       </div>
     </div>
@@ -28,6 +46,88 @@ export default {
     isVisible: {
       type: Boolean,
       required: true
+    },
+    totalEfectivo: {
+      type: Number,
+      default: 0
+    },
+    totalTransferencia: {
+      type: Number,
+      default: 0
+    }
+  },
+  data() {
+    return {
+      montoInput: '',
+    }
+  },
+  computed: {
+    isValidAmount() {
+      const numero = parseFloat(this.montoInput);
+      return this.montoInput !== '' && !isNaN(numero) && numero >= 0;
+    }
+  },
+  methods: {
+    soloNumeros(e) {
+      e.stopPropagation(); // Detener la propagación del evento
+      
+      const codigoTecla = (e.which) ? e.which : e.keyCode;
+      if (codigoTecla === 46) {
+        if (this.montoInput.includes('.')) {
+          e.preventDefault();
+        }
+        return;
+      }
+      if (codigoTecla > 31 && (codigoTecla < 48 || codigoTecla > 57)) {
+        e.preventDefault();
+      }
+    },
+    formatInput(e) {
+      let valor = e.target.value;
+      valor = valor.replace(/[^\d.]/g, '');
+      
+      const partes = valor.split('.');
+      if (partes.length > 2) {
+        valor = partes[0] + '.' + partes.slice(1).join('');
+      }
+      
+      if (partes[1]?.length > 2) {
+        valor = partes[0] + '.' + partes[1].slice(0, 2);
+      }
+      
+      this.montoInput = valor;
+    },
+    verificarMonto() {
+      if (!this.isValidAmount) return;
+      
+      const monto = parseFloat(this.montoInput);
+      this.$emit('confirm', {
+        dineroEnCaja: monto,
+        totalSistema: this.totalEfectivo + this.totalTransferencia
+      });
+    },
+    reset() {
+      this.montoInput = '';
+    },
+    focusInput() {
+      // Asegurar que el input tome el foco
+      this.$nextTick(() => {
+        this.$refs.montoInput?.focus();
+      });
+    }
+  },
+  watch: {
+    isVisible(newVal) {
+      if (newVal) {
+        this.focusInput();
+      } else {
+        this.reset();
+      }
+    }
+  },
+  mounted() {
+    if (this.isVisible) {
+      this.focusInput();
     }
   }
 }
@@ -51,20 +151,107 @@ export default {
   background-color: white;
   padding: 2rem;
   border-radius: 8px;
-  max-width: 400px;
   width: 90%;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .modal-title {
   font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #333;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
-.modal-message {
+.form-section {
   margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 1rem;
   color: #666;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  padding-left: 2.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+
+.form-input:focus {
+  outline: 2px solid #4CAF50;
+  border-color: #4CAF50;
+}
+
+
+.resumen-section {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.resumen-section h3 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.resumen-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.resumen-item:last-child {
+  border-bottom: none;
+  font-weight: 600;
+}
+
+.monto {
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+.diferencia.faltante {
+  color: #dc3545;
+}
+
+.diferencia.sobrante {
+  color: #28a745;
+}
+
+.message-section {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.text-error {
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.text-success {
+  color: #28a745;
+  font-weight: 500;
 }
 
 .modal-buttons {
@@ -73,43 +260,51 @@ export default {
   gap: 1rem;
 }
 
-button {
-  padding: 0.5rem 1rem;
+.confirm-button, .cancel-button {
+  padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
 }
 
 .confirm-button {
-  background-color: #4CAF50;
+  background-color: #28a745;
   color: white;
+}
+
+.confirm-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .cancel-button {
-  background-color: #f44336;
+  background-color: #dc3545;
   color: white;
 }
 
-.icon {
-  width: 18px;
-  height: 18px;
-}
-
-/* Dark mode */
+/* Dark Mode */
 .dark .modal-content {
   background-color: #2d2d2d;
-  color: white;
-}
-
-.dark .modal-title {
   color: #fff;
 }
 
-.dark .modal-message {
-  color: #ccc;
+.dark .form-input {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .resumen-section {
+  background-color: #383838;
+}
+
+.dark .resumen-item {
+  border-bottom-color: #404040;
+}
+
+.dark .currency-symbol {
+  color: #aaa;
 }
 </style>

@@ -106,20 +106,15 @@ export const createCaja = async (id_usuario, valor_inicial) => {
     }
 }
 
-export const cerrarCaja = async(id_usuario) => {
-    
+export const cerrarCaja = async(id_usuario, dineroCaja) => {
     const datos = {
         id_usuario: id_usuario,
-
+        dineroCaja: dineroCaja
     }
-
     const parametros = `/ventas/cerrar-caja`;
     try {
-
         const response = await solicitudes.patchRegistroProducto(parametros, datos);
-
-            return response; 
-
+        return response; 
     } catch (error) {
         console.error('Error al cerrar caja:', error); 
         throw error;
