@@ -1,36 +1,48 @@
 <template>
     <Teleport to="body">
         <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
+            <ModalLoading :isLoading="isLoading" />
             <div class="modal-content">
                 <div class="header-container" tabindex="-1">
                     <h2 class="modal-title">Clientes</h2>
                     <input type="text" v-model="searchQuery" placeholder="Búsqueda por nombre" class="search-input" />
                 </div>
-                <div>
+                <div class="form-section" v-if="showForm">
                     <div class="form-container">
-                    <div class="form-group">
-                        <label>Nombre Completo:</label>
-                        <input type="text" v-model="newClient.nombre_completo" />
+                        <div class="form-group">
+                            <label>Nombre Completo:</label>
+                            <input type="text" v-model="newClient.nombre_completo" />
+                        </div>
+                        <div class="form-group">
+                            <label>Correo:</label>
+                            <input type="text" v-model="newClient.correo" />
+                        </div>
+                        <div class="form-group">
+                            <label>RTN:</label>
+                            <input type="text" v-model="newClient.rtn" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Teléfono:</label>
+                            <div class="phone-input-container">
+                                <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+                                    <option value="">País</option>
+                                    <option v-for="(country, code) in countryData" :key="code" :value="code">
+                                        {{ country.emoji }} {{ country.code }}
+                                    </option>
+                                </select>
+                                <input v-model="newClient.telefono" type="text" class="input-phone"
+                                    :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+                            </div>
+                        </div>
+
                     </div>
                     <div class="form-group">
-                        <label>Correo:</label>
-                        <input type="text" v-model="newClient.correo" />
-                    </div>
-                    <div class="form-group">
-                        <label>RTN:</label>
-                        <input type="text" v-model="newClient.rtn" />
-                    </div>
-                    <div class="form-group">
-                        <label>Teléfono:</label>
-                        <input type="text" v-model="newClient.telefono" />
-                    </div>
-                </div>
-                <div class="form-group">
                         <label>Direccion:</label>
                         <input type="text" v-model="newClient.direccion" />
                     </div>
                 </div>
-               
+
                 <div class="table-container">
                     <table>
                         <thead>
@@ -54,7 +66,10 @@
                 </div>
 
                 <div class="button-container">
-                    <button @click="addClient">Nuevo</button>
+                    <div>
+                        <button v-if="showForm" @click="addClient" style="margin-right: 15px">Guardar</button>
+                        <button @click="toggleForm">{{ showForm ? 'Cancelar' : 'Agregar nuevo cliente' }}</button>
+                    </div>
                     <button @click="closeModal">Salir</button>
                 </div>
             </div>
@@ -66,6 +81,8 @@
 // [Script section se mantiene igual]
 const { postCliente } = require('../../../services/clienteSolicitudes.js');
 import { notificaciones } from '../../../services/notificaciones.js';
+import { validacionesClientes } from '../../../services/validarCampos.js';
+import { COUNTRY_CODES } from "../../../services/countrySelector.js";
 export default {
     props: {
         isVisible: {
@@ -84,6 +101,11 @@ export default {
     data() {
         return {
             searchQuery: '',
+            selectedCountry: 'HN',
+            countryData: COUNTRY_CODES,
+            phoneLength: 8,
+            isLoading: false,
+            showForm: false,
             filteredClients: [],
             newClient: {
                 nombre_completo: '',
@@ -110,14 +132,27 @@ export default {
 
     },
     watch: {
-        clientes(newValue){
-            if(newValue){
-this.clients = newValue;
+        clientes(newValue) {
+            if (newValue) {
+                this.clients = newValue;
             }
-            
+
         }
     },
     methods: {
+
+        updatePhoneValidation() {
+            if (this.selectedCountry && this.countryData[this.selectedCountry]) {
+                this.phoneLength = this.countryData[this.selectedCountry].length;
+            }
+        },
+
+        toggleForm() {
+            this.showForm = !this.showForm;
+            if (!this.showForm) {
+                this.newClient = { nombre_completo: '', direccion: '', rtn: '', telefono: '', correo: '' };
+            }
+        },
         onFocus() {
             this.$emit('modal-focused');
         },
@@ -129,19 +164,23 @@ this.clients = newValue;
         selectClient(client) {
             this.$emit('client-selected', client);
         },
+
         async addClient() {
+            if (!validacionesClientes.validarCampos(this.newClient, this.selectedCountry)) {
+                return;
+            }
+            this.isLoading = true;
+
             try {
                 await postCliente(this.newClient, this.id_usuario);
-                const { nombre_completo, correo, direccion, rtn, telefono } = this.newClient;
-            if (!nombre_completo || !direccion || !rtn || !telefono || !correo) {
-                throw'Por favor, completa todos los campos.';
-            }
-            this.clients.unshift({ ...this.newClient });
-            this.newClient = { nombre_completo: '', direccion: '', rtn: '', telefono: '', correo: '' };
+                this.clients.unshift({ ...this.newClient });
+                this.newClient = { nombre_completo: '', direccion: '', rtn: '', telefono: '', correo: '' };
             } catch (error) {
-                notificaciones('error', error.message);
+                notificaciones('error', "Error al agregar el cliente");
+            } finally {
+                this.isLoading = false;
             }
-            
+
         },
     },
 };
@@ -238,6 +277,10 @@ td {
     margin: 0;
 }
 
+.form-section {
+    margin: 20px 0;
+}
+
 .form-container {
     display: flex;
     flex-wrap: wrap;
@@ -251,11 +294,16 @@ td {
     flex: 1;
 }
 
+.phone-input-container {
+    display: flex;
+    gap: 8px;
+}
+
 .header-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
+
 }
 
 .search-input {

@@ -184,7 +184,7 @@
 
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal :texto="'Guardar cambios'" @click="activarProm" type="submit">
+            <btnGuardarModal :texto="'Guardar cambios'" @click="agregarPromocion" type="submit">
             </btnGuardarModal>
             <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
           </div>

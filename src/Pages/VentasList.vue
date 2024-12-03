@@ -1,5 +1,6 @@
 <template>
   <div class="wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <AperturaCajaModal :isVisible="isAperturaCajaModalVisible" @confirmar="handleAperturaCaja" />
     <ModalLoading :isLoading="isModalLoading" />
     <PaymentAnimationModal :isVisible="isPaymentAnimationVisible" @complete="handlePaymentComplete" />
@@ -144,7 +145,7 @@
           @close="closeBuscarProductoModal" @product-selected="handleProductSelected"
           @modal-focused="handleModalFocus" />
         <button :disabled="!cajaAbierta" @click="openModal">Buscar cliente [F3]</button>
-        <button :disabled="!cajaAbierta" @click="consultarAnular">Consultar anular [F4]</button>
+        <!-- <button :disabled="!cajaAbierta" @click="consultarAnular">Consultar anular [F4]</button> -->
         <button :disabled="!cajaAbierta" @click="eliminarItem">Eliminar item [F5]</button>
         <EliminarItemsModal :isVisible="isEliminarModalVisible" :item="selectedItem" @close="closeEliminarModal"
           @confirm-delete="handleItemDelete" @modal-focused="handleModalFocus" />
@@ -156,8 +157,8 @@
         <button :disabled="!cajaAbierta" @click="recVenta">Rec. Venta [F9]</button>
         <RecuperarVentaModal :isVisible="isRecuperarVentaModalVisible" :ventas="ventasGuardadas"
           @close="isRecuperarVentaModalVisible = false" @venta-selected="handleVentaSelected" />
-        <button :disabled="!cajaAbierta" @click="descuentoGeneral">Dscto. Gen. [F10]</button>
-        <button :disabled="!cajaAbierta" @click="descuentoIndividual">Dscto. Ind. [F11]</button>
+        <!-- <button :disabled="!cajaAbierta" @click="descuentoGeneral">Dscto. Gen. [F10]</button>
+        <button :disabled="!cajaAbierta" @click="descuentoIndividual">Dscto. Ind. [F11]</button> -->
         <button :disabled="!cajaAbierta" @click="openPagoModal">Registrar Pago [F12]</button>
         <RegistrarPagoModal :isVisible="isPagoModalVisible" :factura="factura" @close="closePagoModal"
           @confirm-payment="realizarPago" @modal-focused="handleModalFocus" />
@@ -208,6 +209,7 @@ export default {
   data() {
     return {
       isAperturaCajaModalVisible: false,
+      isLoading: false,
       estadoCajaValidado: false,
       isCerrarCajaModalVisible: false,
       isFacturaModalVisible: false,  // Agregado para el modal de factura
@@ -346,6 +348,7 @@ export default {
       this.pauseMainKeyboardEvents();
     },
     async confirmarCierreCaja(datosCierre) {
+      this.isModalLoading = true;
       try {
         this.isModalLoading = true;
         this.loadingMessage = 'Cerrando caja...';
@@ -374,11 +377,14 @@ export default {
 
         if (data) {
           try {
+            this.isModalLoading = true;
             await this.generarPDFCierreCaja(data);
             notis("success", "Caja cerrada y reporte generado exitosamente");
           } catch (pdfError) {
             console.error('Error al generar PDF:', pdfError);
             notis("warning", "Caja cerrada pero hubo un error al generar el PDF");
+          } finally {
+            this.isModalLoading = false;
           }
         }
 
@@ -392,8 +398,10 @@ export default {
         this.isModalLoading = false;
       }
     },
+
     async generarPDFCierreCaja(reporte) {
       console.log('Iniciando generación de PDF...');
+      this.isModalLoading = true;
       try {
         console.log('Datos del reporte a enviar:', reporte);
 
@@ -450,10 +458,13 @@ export default {
           stack: error.stack
         });
         throw error;
+      } finally {
+        this.isModalLoading = false;
       }
     },
 
     async cerrarCaja() {
+      this.isModalLoading = true;
       try {
         const { data: ventas } = await axios.get(`${solicitudes.homeUrl}/ventas/totales-caja/${this.id_usuario}`, {
           headers: {
@@ -467,12 +478,14 @@ export default {
       } catch (error) {
         console.error('Error al obtener totales:', error);
         notis("error", "Error al obtener totales de caja");
+      } finally {
+        this.isModalLoading = false;
       }
     },
 
     async handleAperturaCaja(monto) {
+      this.isModalLoading = true;
       try {
-        this.isModalLoading = true;
         this.loadingMessage = 'Abriendo caja...';
 
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -557,16 +570,46 @@ export default {
     },
 
     eliminarItem() {
-      if (this.productos.length === 0) {
-        const toast = useToast();
-        toast.warning("No hay datos en la tabla.");
+      if (this.productosLista.length === 0) {
+        notis("info", "No hay datos en la tabla.");
         return;
       } else if (!this.selectedItem) {
-        const toast = useToast();
-        toast.warning("Seleccione un item para eliminar");
+        notis("info", "Seleccione un item para eliminar");
         return;
       }
       this.isEliminarModalVisible = true;
+    },
+
+    async limpiarPantalla() {
+      if (this.productosLista.length === 0) {
+        notis("info", "No hay datos en la tabla.");
+        return;
+      }
+
+      this.limpiarPantalla = true;
+      this.isModalLoading = true;
+      try {
+        for (const producto of this.productosLista) {
+          await eliminarProductoVenta(producto.id_producto, this.id_usuario);
+        }
+
+        this.productosLista = [];
+        this.selectedItem = null;
+        this.venta = [];
+        this.factura = [];
+        this.clienteSeleccionado = null;
+        this.addQuery = "";
+        this.totalCantidad = '';
+
+        notis("success", "Pantalla limpiada correctamente");
+
+      } catch (error) {
+        notis("error", "Error al limpiar la pantalla");
+        console.error(error);
+      } finally {
+        this.limpiarPantalla = false;
+        this.isModalLoading = false;
+      }
     },
 
     async handleItemDelete(item) {
@@ -596,6 +639,7 @@ export default {
     },
 
     async logout() {
+      this.isModalLoading = true;
       try {
         await axios.post('/api/logout', {}, {
           headers: {
@@ -609,6 +653,8 @@ export default {
         console.error("Error al cerrar sesión", error);
         localStorage.clear();
         this.$router.push('/login');
+      } finally {
+        this.isModalLoading = true;
       }
     },
 
@@ -644,6 +690,7 @@ export default {
         return;
       }
 
+      this.isModalLoading = true;
       try {
         if (datosPago.metodoPago === 'Efectivo') {
           pagando = await pagar(datosPago.montoEfectivo, this.venta.id_venta, datosPago.notas, this.id_usuario);
@@ -667,6 +714,8 @@ export default {
         this.isPaymentAnimationVisible = true;
       } catch (error) {
         notificaciones('error', error.message);
+      } finally {
+        this.isModalLoading = false;
       }
     },
 
@@ -860,7 +909,6 @@ export default {
       if (!nuevaCantidad || nuevaCantidad === 0 || nuevaCantidad === "") {
         nuevaCantidad = 1;
       }
-
       try {
         this.limpiar();
         const newProduct = this.productos.find((p) => p.codigo_producto === codigoValidar);
@@ -917,7 +965,9 @@ export default {
       }
 
     },
+
     async guardarVentainBD(nombre_completo) {
+      this.isModalLoading = true;
       try {
         const response = await guardarVenta(nombre_completo, this.id_usuario);
         if (response) {
@@ -930,11 +980,13 @@ export default {
       } catch (error) {
         console.log(error);
         notificaciones('error', error.message);
+      } finally {
+        this.isModalLoading = false;
       }
-
     },
 
     async handleVentaSelected(data) {
+      this.isModalLoading = true;
       try {
         //  console.log(`id de compra guardada: ${data.id_compra_guardada}`);
         const productosRec = await getRecProductoVenta(data.id_compra_guardada);
@@ -954,13 +1006,15 @@ export default {
 
       } catch (error) {
         notificaciones('error', "Error al recuperar venta. Intente de nuevo mas tarde.");
+      } finally {
+        this.isModalLoading = false;
       }
 
     },
 
     async RecventaPendiente(productosRec) {
+      this.isModalLoading = true;
       try {
-
         this.recuperandoVenta = true;
 
         for (const producto of productosRec) {
@@ -975,15 +1029,17 @@ export default {
 
       } catch (error) {
         notificaciones('error', "Error al recuperar venta. Intente de nuevo mas tarde.");
+      } finally {
+        this.isModalLoading = false;
       }
 
     },
 
     async handleSaveVenta(data) {
-      try {
-        this.isModalLoading = true;
-        this.loadingMessage = 'Guardando venta...';
+      this.isModalLoading = true;
+      this.loadingMessage = 'Guardando venta...';
 
+      try {
         this.guardarVentainBD(data);
 
       } catch (error) {
@@ -995,6 +1051,7 @@ export default {
     },
 
     async recVenta() {
+      this.isModalLoading = true;
       try {
         const ventasGuardadas = await getVentasGuardadas(this.id_usuario);
         this.ventasGuardadas = ventasGuardadas;
@@ -1002,18 +1059,21 @@ export default {
         this.isRecuperarVentaModalVisible = true;
       } catch (error) {
         notificaciones('error', error);
+      } finally {
+        this.isModalLoading = false;
       }
     },
 
-
-
     async recVenta2() {
+      this.isModalLoading = true;
       try {
         const ventasGuardadas = await getVentasGuardadas(this.id_usuario);
         console.log(ventasGuardadas);
 
       } catch (error) {
         notificaciones('error', error);
+      } finally {
+        this.isModalLoading = false;
       }
     },
 
@@ -1062,6 +1122,7 @@ export default {
   },
 
   async mounted() {
+    this.isModalLoading = true;
     let ventaRecuperada;
     window.addEventListener("keydown", this.handleKeyPress);
     document.title = "Crear Ventas";
@@ -1083,6 +1144,8 @@ export default {
     } catch (error) {
       notificaciones('error', error.message);
       this.estadoCajaValidado = true;
+    } finally {
+      this.isModalLoading = false;
     }
   },
 
@@ -1477,6 +1540,16 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #d1d1d1;
+  transition: background-color 0.2s ease;
+}
+
+.footer-container button:hover {
+  background-color: #b4b4b4;
+}
+
+.dark .footer-container button:hover {
+  background-color: #3b3b3b;
 }
 
 .subTotal {

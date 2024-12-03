@@ -244,6 +244,7 @@ export default {
     },
 
     async logout() {
+      
       try {
         console.log('Iniciando proceso de logout...');
         const token = localStorage.getItem('auth');
