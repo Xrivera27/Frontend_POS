@@ -112,4 +112,37 @@ export const getRegistrosClientes = async (id_usuario, fechaInicio, fechaFin) =>
      
  }
 
+ export const getRegistrosEmpleadosDesglose = async (id_usuario, fechaInicio, fechaFin) => {
+    try {
+     const response = solicitudes.fetchRegistros(`/reporte/reporte-empleado-desglose/${id_usuario}/${fechaInicio}/${fechaFin}`);
+     return response;
+    } catch (error) {
+     console.error(error);
+     throw 'Ocurrio un error al obtener registros de cajeros';
+    }
+     
+ }
+
+ export const getRegistrosClienteDesglose = async (id_cliente, fechaInicio, fechaFin) => {
+    try {
+     const response = solicitudes.fetchRegistros(`/reporte/reporte-cliente-desglose/${id_cliente}/${fechaInicio}/${fechaFin}`);
+     return response;
+    } catch (error) {
+     console.error(error);
+     throw 'Ocurrio un error al obtener registros de cajeros';
+    }
+     
+ }
+
+ export const getRegistrosSucursalDesglose = async (id_sucursal, fechaInicio, fechaFin) => {
+    try {
+     const response = solicitudes.fetchRegistros(`/reporte/reporte-sucursal-desglose/${id_sucursal}/${fechaInicio}/${fechaFin}`);
+     return response;
+    } catch (error) {
+     console.error(error);
+     throw 'Ocurrio un error al obtener registros de cajeros';
+    }
+     
+ }
+
 

@@ -21,7 +21,7 @@
               <label>{{ labelFiltro }}</label>
               <select v-model="valorFiltro" class="select-input">
                 <option value="">Todos</option>
-                <option v-for="opcion in opcionesFiltro" :key="opcion.id" :value="opcion.id">
+                <option v-for="opcion in opcionesFiltro" @click="mostrarReporteDesglose(opcion)" :key="opcion.id" :value="opcion.id">
                   {{ opcion.nombre }}
                 </option>
               </select>
@@ -160,7 +160,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import { notis } from '../../services/notificaciones.js';
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
 import solicitudes from "../../services/solicitudes.js";
-const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados, getRegistrosClientes, getRegistrosSucursales } = require('../../services/reporteSolicitudes.js');
+const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados, getRegistrosClientes, getRegistrosSucursales, getRegistrosEmpleadosDesglose, getRegistrosClienteDesglose, getRegistrosSucursalDesglose } = require('../../services/reporteSolicitudes.js');
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -230,7 +230,6 @@ export default {
         case 'ventas_cliente':
           return this.clientes;
         case 'ventas_sucursal':
-          console.log(this.sucursales);
           return this.sucursales;
         case 'ventas_empleado':
           return this.empleados;
@@ -303,6 +302,44 @@ export default {
       }
     },
 
+    async mostrarReporteDesglose(option){
+      if (!this.fechasValidas) {
+        notis('error', 'Por favor seleccione un intervalo de fechas válido');
+        return;
+      }
+
+      this.reiniciarTotales();
+
+try {
+  if(this.reporteSeleccionado === 'ventas_empleado'){
+    const response = await getRegistrosEmpleadosDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+  }
+
+  if(this.reporteSeleccionado === 'ventas_cliente'){
+    const response = await getRegistrosClienteDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+  }
+
+  if(this.reporteSeleccionado === 'ventas_sucursal'){
+    const response = await getRegistrosSucursalDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+  }
+
+  this.datosReporte.forEach(d => {
+    this.totales.exento += d.total_extento;
+    this.totales.gravado_15 += d.gravado_15;
+    this.totales.gravado_18 += d.gravado_18;
+    this.totales.total_isv += d.total_isv;
+    this.totales.total += d.total;
+  });
+
+} catch (error) {
+  console.log(error);
+  notis('error', 'Error al cargar datos. Intente de nuevo');
+}
+    },
+
     async mostrarReportes (){
       if (!this.fechasValidas) {
         notis('error', 'Por favor seleccione un intervalo de fechas válido');
@@ -349,37 +386,39 @@ try {
         return;
       }
 
-    //   this.cargando = true;
-    //   this.error = null;
+      console.log(formato);
 
-    //   try {
-    //     if (formato === 'preview') {
-    //       const response = await solicitudes.obtenerReporteVentas({
-    //         reporteSeleccionado: this.reporteSeleccionado,
-    //         fechaInicio: this.filtros.fechaInicio,
-    //         fechaFin: this.filtros.fechaFin,
-    //         valorFiltro: this.valorFiltro
-    //       });
+      // this.cargando = true;
+      // this.error = null;
 
-    //       this.datosReporte = response.datos;
-    //       this.totales = response.totales;
-    //     } else if (formato === 'pdf') {
-    //       await this.exportarPDF();
-    //     } else if (formato === 'excel') {
-    //       await this.exportarExcel();
-    //     }
-    //   } catch (error) {
-    //     console.error('Error al generar reporte:', error);
-    //     this.error = 'Error al generar el reporte';
-    //   } finally {
-    //     this.cargando = false;
-    //   }
-    // },
+      // try {
+      //   if (formato === 'preview') {
+      //     const response = await solicitudes.obtenerReporteVentas({
+      //       reporteSeleccionado: this.reporteSeleccionado,
+      //       fechaInicio: this.filtros.fechaInicio,
+      //       fechaFin: this.filtros.fechaFin,
+      //       valorFiltro: this.valorFiltro
+      //     });
 
-    // setHoy() {
-    //   const hoy = new Date().toISOString().split('T')[0];
-    //   this.filtros.fechaInicio = hoy;
-    //   this.filtros.fechaFin = hoy;
+      //     this.datosReporte = response.datos;
+      //     this.totales = response.totales;
+      //   } else if (formato === 'pdf') {
+      //     await this.exportarPDF();
+      //   } else if (formato === 'excel') {
+      //     await this.exportarExcel();
+      //   }
+      // } catch (error) {
+      //   console.error('Error al generar reporte:', error);
+      //   this.error = 'Error al generar el reporte';
+      // } finally {
+      //   this.cargando = false;
+      // }
+    },
+
+    setHoy() {
+      const hoy = new Date().toISOString().split('T')[0];
+      this.filtros.fechaInicio = hoy;
+      this.filtros.fechaFin = hoy;
     },
 
     validarFechas() {
