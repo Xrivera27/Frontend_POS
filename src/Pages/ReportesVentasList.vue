@@ -10,17 +10,18 @@
             <div class="filter-group">
               <label>Tipo de Reporte</label>
               <select v-model="reporteSeleccionado" class="select-input">
-                <option value="ventas_cliente">Ventas por Cliente</option>
-                <option value="ventas_sucursal">Ventas por Sucursal</option>
-                <option value="ventas_empleado">Ventas por Empleado</option>
+                <option  @click="mostrarReportes" value="ventas_cliente">Ventas por Cliente</option>
+                <option @click="mostrarReportes" v-if="esCeo" value="ventas_sucursal">Ventas por Sucursal</option>
+                <option @click="mostrarReportes" value="ventas_empleado">Ventas por Empleado</option>
+
               </select>
             </div>
 
             <div class="filter-group">
               <label>{{ labelFiltro }}</label>
               <select v-model="valorFiltro" class="select-input">
-                <option value="">Todos</option>
-                <option v-for="opcion in opcionesFiltro" :key="opcion.id" :value="opcion.id">
+                <option value="" @click="mostrarReportes" >Todos</option>
+                <option v-for="opcion in opcionesFiltro" @click="mostrarReporteDesglose(opcion)" :key="opcion.id" :value="opcion.id">
                   {{ opcion.nombre }}
                 </option>
               </select>
@@ -40,7 +41,7 @@
                   <input type="date" v-model="filtros.fechaFin" @change="validarFechas" :min="filtros.fechaInicio" />
                 </div>
               </div>
-              <button @click="showHeaderFooterModal = true" class="header-footer-btn">
+              <button @click="openModalHeaderFooter" :datosInstituto="datosBussines" class="header-footer-btn">
                 Configurar Header/Footer
               </button>
               <div class="button-group">
@@ -108,29 +109,30 @@
         <table>
           <thead>
             <tr>
-              <th>Fecha</th>
-              <th v-if="reporteSeleccionado === 'ventas_cliente'">Cliente</th>
-              <th v-if="reporteSeleccionado === 'ventas_sucursal'">Sucursal</th>
-              <th v-if="reporteSeleccionado === 'ventas_empleado'">Empleado</th>
-              <th>Factura</th>
-              <th>Valor Exonerado</th>
+              
+              <th  v-if="reporteSeleccionado === 'ventas_cliente' && !mostrandoDesglose ">Cliente</th>
+              <th v-if="reporteSeleccionado === 'ventas_sucursal' && !mostrandoDesglose">Sucursal</th>
+              <th v-if="reporteSeleccionado === 'ventas_empleado' && !mostrandoDesglose">Empleado</th>
+              <th v-if="mostrandoDesglose">Codigo factura</th>
+              
               <th>Valor Exento</th>
-              <th>Valor Gravado</th>
+              <th>Valor Gravado 15%</th>
+              <th>Valor Gravado 18%</th>
               <th>ISV</th>
               <th>Total</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(dato, index) in datosReporte" :key="index">
-              <td>{{ formatearFecha(dato.fecha) }}</td>
-              <td v-if="reporteSeleccionado === 'ventas_cliente'">{{ dato.cliente }}</td>
-              <td v-if="reporteSeleccionado === 'ventas_sucursal'">{{ dato.sucursal }}</td>
-              <td v-if="reporteSeleccionado === 'ventas_empleado'">{{ dato.empleado }}</td>
-              <td>{{ dato.numero_factura_sar }}</td>
-              <td>{{ formatearMoneda(dato.valor_exonerado) }}</td>
-              <td>{{ formatearMoneda(dato.valor_exento) }}</td>
-              <td>{{ formatearMoneda(dato.valor_gravado) }}</td>
-              <td>{{ formatearMoneda(dato.isv) }}</td>
+            
+              <td v-if="reporteSeleccionado === 'ventas_cliente'">{{ dato.nombre }}</td>
+              <td v-if="reporteSeleccionado === 'ventas_sucursal'">{{ dato.nombre }}</td>
+              <td v-if="reporteSeleccionado === 'ventas_empleado'">{{ dato.nombre }}</td>
+             
+              <td>{{ formatearMoneda(dato.valor_extento) }}</td>
+              <td>{{ formatearMoneda(dato.gravado_15) }}</td>
+              <td>{{ formatearMoneda(dato.gravado_18) }}</td>
+              <td>{{ formatearMoneda(dato.total_isv) }}</td>
               <td>{{ formatearMoneda(dato.total) }}</td>
             </tr>
           </tbody>
@@ -138,10 +140,10 @@
 
         <!-- Totales -->
         <div class="totals">
-          <div><strong>Total Exonerado:</strong> {{ formatearMoneda(totales.exonerado) }}</div>
           <div><strong>Total Exento:</strong> {{ formatearMoneda(totales.exento) }}</div>
-          <div><strong>Total Gravado:</strong> {{ formatearMoneda(totales.gravado) }}</div>
-          <div><strong>Total ISV:</strong> {{ formatearMoneda(totales.isv) }}</div>
+          <div><strong>Total Gravado 15%:</strong> {{ formatearMoneda(totales.gravado_15) }}</div>
+          <div><strong>Total Gravado 18%:</strong> {{ formatearMoneda(totales.gravado_18) }}</div>
+          <div><strong>Total ISV:</strong> {{ formatearMoneda(totales.total_isv) }}</div>
           <div><strong>Total General:</strong> {{ formatearMoneda(totales.total) }}</div>
         </div>
       </div>
@@ -156,8 +158,11 @@
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
+import { notis } from '../../services/notificaciones.js';
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
 import solicitudes from "../../services/solicitudes.js";
+const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados, getRegistrosClientes, getRegistrosSucursales, getRegistrosEmpleadosDesglose, getRegistrosClienteDesglose, getRegistrosSucursalDesglose, getDatosInstitucion } = require('../../services/reporteSolicitudes.js');
+const { esCeo } = require('../../services/usuariosSolicitudes');
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -170,12 +175,16 @@ export default {
   data() {
     return {
       titulo: 'Reportería',
+      id_usuario: '',
+      mostrandoDesglose: false,
       cargando: false,
+      esCeo: false,
       error: null,
       isDragging: false,
       logoUrl: null,
       reporteSeleccionado: 'ventas_cliente',
       showHeaderFooterModal: false,
+      datosBussines: [],
       filtros: {
         fechaInicio: '',
         fechaFin: '',
@@ -200,12 +209,14 @@ export default {
       clientes: [],
       sucursales: [],
       empleados: [],
+      productos: [],
       datosReporte: [],
+      reportes: [],
       totales: {
-        exonerado: 0,
         exento: 0,
-        gravado: 0,
-        isv: 0,
+        gravado_15: 0,
+        gravado_18: 0,
+        total_isv: 0,
         total: 0
       }
     }
@@ -225,6 +236,8 @@ export default {
           return this.sucursales;
         case 'ventas_empleado':
           return this.empleados;
+          case 'ventas_producto':
+          return this.productos;
         default:
           return [];
       }
@@ -238,6 +251,8 @@ export default {
           return 'Sucursal';
         case 'ventas_empleado':
           return 'Empleado';
+          case 'ventas_producto':
+          return 'Producto';
         default:
           return '';
       }
@@ -257,15 +272,21 @@ export default {
     async cargarDatos() {
       try {
         this.cargando = true;
-        const [clientes, sucursales, empleados] = await Promise.all([
-          solicitudes.obtenerClientesReporte(),
-          solicitudes.obtenerSucursalesReporte(),
-          solicitudes.obtenerEmpleadosReporte()
+        const [clientes, empleados, productos] = await Promise.all([
+          clientesReportes(this.id_usuario),
+          reportesEmpleados(this.id_usuario, this.esCeo),
+          reportesProductos(this.id_usuario, this.esCeo)
         ]);
 
         this.clientes = clientes;
-        this.sucursales = sucursales;
+        
         this.empleados = empleados;
+        this.productos = productos;
+
+        if(this.esCeo){
+          this.sucursales = await sucursalReportes(this.id_usuario);
+        }
+
       } catch (error) {
         console.error('Error al cargar datos:', error);
         this.error = 'Error al cargar los datos de filtros';
@@ -274,37 +295,147 @@ export default {
       }
     },
 
-    async generarReporte(formato = 'preview') {
+    reiniciarTotales(){
+      this.totales = {
+        exento: 0,
+        gravado_15: 0,
+        gravado_18: 0,
+        total_isv: 0,
+        total: 0
+      }
+    },
+
+    async mostrarReporteDesglose(option){
+      this.mostrandoDesglose = true;
+      if(this.filtros.fechaFin === '' || this.filtros.fechaInicio === ''){
+        return;
+      }
       if (!this.fechasValidas) {
-        alert('Por favor seleccione un intervalo de fechas válido');
+        notis('error', 'Por favor seleccione un intervalo de fechas válido');
         return;
       }
 
-      this.cargando = true;
-      this.error = null;
+      this.reiniciarTotales();
 
+try {
+  if(this.reporteSeleccionado === 'ventas_empleado'){
+    const response = await getRegistrosEmpleadosDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+  }
+
+  if(this.reporteSeleccionado === 'ventas_cliente'){
+    const response = await getRegistrosClienteDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+  }
+
+  if(this.reporteSeleccionado === 'ventas_sucursal'){
+    const response = await getRegistrosSucursalDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+  }
+
+  this.datosReporte.forEach(d => {
+    this.totales.exento += d.total_extento;
+    this.totales.gravado_15 += d.gravado_15;
+    this.totales.gravado_18 += d.gravado_18;
+    this.totales.total_isv += d.total_isv;
+    this.totales.total += d.total;
+  });
+
+} catch (error) {
+  console.log(error);
+  notis('error', 'Error al cargar datos. Intente de nuevo');
+}
+    },
+
+    async openModalHeaderFooter (){
       try {
-        if (formato === 'preview') {
-          const response = await solicitudes.obtenerReporteVentas({
-            reporteSeleccionado: this.reporteSeleccionado,
-            fechaInicio: this.filtros.fechaInicio,
-            fechaFin: this.filtros.fechaFin,
-            valorFiltro: this.valorFiltro
-          });
+        this.showHeaderFooterModal = true;
+        const response = await getDatosInstitucion(this.id_usuario, this.esCeo);
+        this.datosBussines = response;
 
-          this.datosReporte = response.datos;
-          this.totales = response.totales;
-        } else if (formato === 'pdf') {
-          await this.exportarPDF();
-        } else if (formato === 'excel') {
-          await this.exportarExcel();
-        }
       } catch (error) {
-        console.error('Error al generar reporte:', error);
-        this.error = 'Error al generar el reporte';
-      } finally {
-        this.cargando = false;
+        notis('error', 'Error al cargar datos de empresa');
       }
+    },
+
+    async mostrarReportes (){
+      this.mostrandoDesglose = false;
+      this.mostrandoDesglose = true;
+      if(this.filtros.fechaFin === '' || this.filtros.fechaInicio === ''){
+        return;
+      }
+      if (!this.fechasValidas) {
+        notis('error', 'Por favor seleccione un intervalo de fechas válido');
+        return;
+      }
+
+      this.reiniciarTotales();
+
+try {
+  if(this.reporteSeleccionado === 'ventas_empleado'){
+    const response = await getRegistrosEmpleados(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+  }
+
+  if(this.reporteSeleccionado === 'ventas_cliente'){
+    const response = await getRegistrosClientes(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+  }
+
+  if(this.reporteSeleccionado === 'ventas_sucursal'){
+    const response = await getRegistrosSucursales(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+    this.datosReporte = response;
+  }
+
+  this.datosReporte.forEach(d => {
+    this.totales.exento += d.total_extento;
+    this.totales.gravado_15 += d.gravado_15;
+    this.totales.gravado_18 += d.gravado_18;
+    this.totales.total_isv += d.total_isv;
+    this.totales.total += d.total;
+  });
+
+} catch (error) {
+  console.log(error);
+  notis('error', 'Error al cargar datos. Intente de nuevo');
+}
+    },
+
+    async generarReporte(formato = 'preview') {
+
+      if (!this.fechasValidas) {
+        alert('Por favor seleccione un intervalo de fechas válido');
+        console.log(formato);
+        return;
+      }
+
+      console.log(formato);
+
+      // this.cargando = true;
+      // this.error = null;
+
+      // try {
+      //   if (formato === 'preview') {
+      //     const response = await solicitudes.obtenerReporteVentas({
+      //       reporteSeleccionado: this.reporteSeleccionado,
+      //       fechaInicio: this.filtros.fechaInicio,
+      //       fechaFin: this.filtros.fechaFin,
+      //       valorFiltro: this.valorFiltro
+      //     });
+
+      //     this.datosReporte = response.datos;
+      //     this.totales = response.totales;
+      //   } else if (formato === 'pdf') {
+      //     await this.exportarPDF();
+      //   } else if (formato === 'excel') {
+      //     await this.exportarExcel();
+      //   }
+      // } catch (error) {
+      //   console.error('Error al generar reporte:', error);
+      //   this.error = 'Error al generar el reporte';
+      // } finally {
+      //   this.cargando = false;
+      // }
     },
 
     setHoy() {
@@ -631,10 +762,13 @@ export default {
 
   async mounted() {
     // Cargar logo guardado si existe
-    const savedLogo = localStorage.getItem('logoEmpresa');
+    try {
+      const savedLogo = localStorage.getItem('logoEmpresa');
     if (savedLogo) {
       this.logoUrl = savedLogo;
     }
+    this.id_usuario = await solicitudes.solicitarUsuarioToken();
+    this.esCeo = await esCeo(this.id_usuario);
     
     // Cargar datos iniciales
     await this.cargarDatos();
@@ -643,6 +777,11 @@ export default {
     if (this.fechasValidas) {
       await this.generarReporte('preview');
     }
+    } catch (error) {
+      console.log(error);
+      notis('error', 'Error al cargar datos. Intente de nuevo');
+    }
+   
   },
 
   watch: {
