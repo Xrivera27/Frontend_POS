@@ -175,7 +175,6 @@ export default {
             try {
                 const response = await postCliente(this.newClient, this.id_usuario);
                 this.newClient.id_cliente = response[0].id_cliente;
-                console.log(this.newClient);
 
                 this.clients.unshift({ ...this.newClient });
                 this.newClient = { nombre_completo: '', direccion: '', rtn: '', telefono: '', correo: '' };
