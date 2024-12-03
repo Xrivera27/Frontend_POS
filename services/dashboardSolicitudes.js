@@ -45,3 +45,13 @@ export const getAlertasPorPromocionProducto = async (id_usuario) => {
         throw new Error('No se pudo obtener las alertas de promoción de producto para el usuario especificado.');
     }
 };
+
+export const getVentasUltimosTresMeses = async (id_usuario) => {
+    try {
+        const response = await solicitudes.fetchRegistros(`/dashboard/ventas/ultimos-tres-meses/${id_usuario}`);
+        return response;
+    } catch (error) {
+        console.error('Error al obtener las ventas de los últimos tres meses:', error);
+        throw new Error('No se pudo obtener el historial de ventas para el usuario especificado.');
+    }
+};

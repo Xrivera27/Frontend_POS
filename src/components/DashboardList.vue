@@ -15,7 +15,7 @@
     </div>
 
     <div class="graphics-container">
-      <!-- Gráfico de ventas y Productos más vendidos (más pequeños) -->
+      <!-- Gráfico de ventas y Productos más vendidos -->
       <div class="charts-container">
         <div class="line-chart">
           <LineChart :chart-data="lineChartData" :options="lineChartOptions" />
@@ -61,6 +61,7 @@ const { getTotalVentasDia } = require('../../services/dashboardSolicitudes')
 const { getClientesPorEmpresa } = require('../../services/dashboardSolicitudes')
 const { getAlertasPorPromocion } = require('../../services/dashboardSolicitudes')
 const { getAlertasPorPromocionProducto } = require('../../services/dashboardSolicitudes')
+const { getVentasUltimosTresMeses } = require('../../services/dashboardSolicitudes')
 import solicitudes from "../../services/solicitudes.js";
 import {
   Chart as ChartJS,
@@ -101,20 +102,20 @@ export default {
       alertasPorPromocionProducto: 0,
       id_usuario: '',
       lineChartData: {
-        labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],
+        labels: [],
         datasets: [
           {
-            label: 'Laptops',
-            borderColor: '#FF6384',
-            data: [65, 59, 80, 81, 56],
+            label: 'Ventas Pagadas',
+            borderColor: '#36A2EB',
+            data: [],
             fill: false,
           },
           {
-            label: 'Tablets',
-            borderColor: '#36A2EB',
-            data: [28, 48, 40, 19, 86],
+            label: 'Ventas Canceladas',
+            borderColor: '#FF6384',
+            data: [],
             fill: false,
-          },
+          }
         ],
       },
       lineChartOptions: {
@@ -123,7 +124,26 @@ export default {
           legend: {
             position: 'top',
           },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.dataset.label || '';
+                return `${label}: ${context.raw}`;
+              }
+            }
+          }
         },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+              callback: function(value) {
+                return Math.floor(value);
+              }
+            }
+          }
+        }
       },
       pieChartData: {
         labels: ['Electrónicos', 'Hogar', 'Juguetería'],
@@ -215,14 +235,12 @@ export default {
       this.ventas = await getTotalVentasDia(this.id_usuario);
     },
     async obtenerNumeroClientes() {
-      // Nuevo método para obtener el número de clientes
       const clientes = await getClientesPorEmpresa(this.id_usuario);
-      this.clientesNumero = clientes.totalClientes; // Almacenar el número de clientes
+      this.clientesNumero = clientes.totalClientes;
     },
     async getAlertasPromocion() {
       try {
         this.alertasPorPromocion = await getAlertasPorPromocion(this.id_usuario);
-        console.log(this.alertasPorPromocion)
       } catch (error) {
         console.error(error);
       }
@@ -236,7 +254,6 @@ export default {
     async getAlertasPorPromocionProducto() {
       try {
         this.alertasPorPromocionProducto = await getAlertasPorPromocionProducto(this.id_usuario);
-        console.log(this.alertasPorPromocionProducto)
       } catch (error) {
         console.error(error);
       }
@@ -247,6 +264,20 @@ export default {
         return totalAlertasProducto;
       }
     },
+    async obtenerVentasUltimosTresMeses() {
+      try {
+        const response = await getVentasUltimosTresMeses(this.id_usuario);
+        if (response && response.chartData) {
+          this.lineChartData = response.chartData.lineChartData;
+          this.lineChartOptions = {
+            ...this.lineChartOptions,
+            ...response.chartData.lineChartOptions
+          };
+        }
+      } catch (error) {
+        console.error('Error al obtener ventas de los últimos 3 meses:', error);
+      }
+    }
   },
 
   async mounted() {
@@ -256,6 +287,7 @@ export default {
       await this.obtenerNumeroClientes();
       await this.getAlertasPromocion();
       await this.getAlertasPorPromocionProducto();
+      await this.obtenerVentasUltimosTresMeses();
     } catch (error) {
       console.log(error);
     }
