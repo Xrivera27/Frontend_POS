@@ -9,10 +9,10 @@
           <div class="filter-row">
             <div class="filter-group">
               <label>Tipo de Reporte</label>
-              <select v-model="reporteSeleccionado" @change="mostrarReportes" class="select-input">
-                <option value="ventas_cliente">Ventas por Cliente</option>
-                <option  v-if="esCeo" value="ventas_sucursal">Ventas por Sucursal</option>
-                <option value="ventas_empleado">Ventas por Empleado</option>
+              <select v-model="reporteSeleccionado" class="select-input">
+                <option  @click="mostrarReportes" value="ventas_cliente">Ventas por Cliente</option>
+                <option @click="mostrarReportes" v-if="esCeo" value="ventas_sucursal">Ventas por Sucursal</option>
+                <option @click="mostrarReportes" value="ventas_empleado">Ventas por Empleado</option>
 
               </select>
             </div>
@@ -20,7 +20,7 @@
             <div class="filter-group">
               <label>{{ labelFiltro }}</label>
               <select v-model="valorFiltro" class="select-input">
-                <option value="">Todos</option>
+                <option value="" @click="mostrarReportes" >Todos</option>
                 <option v-for="opcion in opcionesFiltro" @click="mostrarReporteDesglose(opcion)" :key="opcion.id" :value="opcion.id">
                   {{ opcion.nombre }}
                 </option>
@@ -110,9 +110,10 @@
           <thead>
             <tr>
               
-              <th v-if="reporteSeleccionado === 'ventas_cliente'">Cliente</th>
-              <th v-if="reporteSeleccionado === 'ventas_sucursal'">Sucursal</th>
-              <th v-if="reporteSeleccionado === 'ventas_empleado'">Empleado</th>
+              <th  v-if="reporteSeleccionado === 'ventas_cliente' && !mostrandoDesglose ">Cliente</th>
+              <th v-if="reporteSeleccionado === 'ventas_sucursal' && !mostrandoDesglose">Sucursal</th>
+              <th v-if="reporteSeleccionado === 'ventas_empleado' && !mostrandoDesglose">Empleado</th>
+              <th v-if="mostrandoDesglose">Codigo factura</th>
               
               <th>Valor Exento</th>
               <th>Valor Gravado 15%</th>
@@ -175,6 +176,7 @@ export default {
     return {
       titulo: 'Reportería',
       id_usuario: '',
+      mostrandoDesglose: false,
       cargando: false,
       esCeo: false,
       error: null,
@@ -303,6 +305,7 @@ export default {
     },
 
     async mostrarReporteDesglose(option){
+      this.mostrandoDesglose = true;
       if (!this.fechasValidas) {
         notis('error', 'Por favor seleccione un intervalo de fechas válido');
         return;
@@ -341,7 +344,9 @@ try {
     },
 
     async mostrarReportes (){
-      if (!this.fechasValidas) {
+      this.mostrandoDesglose = false;
+      
+      if (!this.fechasValidas && (this.filtros.fechaFin !== '' || this.filtros.fechaInicio !== '' )) {
         notis('error', 'Por favor seleccione un intervalo de fechas válido');
         return;
       }
