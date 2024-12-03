@@ -55,3 +55,13 @@ export const getVentasUltimosTresMeses = async (id_usuario) => {
         throw new Error('No se pudo obtener el historial de ventas para el usuario especificado.');
     }
 };
+
+export const getCategoriasPopulares = async (id_usuario) => {
+    try {
+        const response = await solicitudes.fetchRegistros(`/dashboard/categorias/mas-vendidas/${id_usuario}`);
+        return response;
+    } catch (error) {
+        console.error('Error al obtener las categorías más vendidas:', error);
+        throw new Error('No se pudo obtener las categorías más vendidas para el usuario especificado.');
+    }
+};

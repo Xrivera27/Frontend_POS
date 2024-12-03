@@ -46,8 +46,9 @@
             <td>{{ sale.fecha }}</td>
             <td>{{ sale.total }}</td>
             <td>
-              <a href="#">Ver más</a><span>|</span>
-              <button style="font-size: 1rem;">Descargar</button>
+              <a href="#">Ver más</a>
+              <!-- <span>|</span>
+              <button style="font-size: 1rem;">Descargar</button> -->
             </td>
           </tr>
         </tbody>
@@ -64,6 +65,7 @@ const { getAlertasPorPromocion } = require('../../services/dashboardSolicitudes'
 const { getAlertasPorPromocionProducto } = require('../../services/dashboardSolicitudes')
 import { notis } from '../../services/notificaciones.js';
 const { getVentasUltimosTresMeses } = require('../../services/dashboardSolicitudes')
+const { getCategoriasPopulares } = require('../../services/dashboardSolicitudes')
 import solicitudes from "../../services/solicitudes.js";
 import ModalLoading from '@/components/ModalLoading.vue';
 import {
@@ -151,23 +153,21 @@ export default {
         }
       },
       pieChartData: {
-        labels: ['Electrónicos', 'Hogar', 'Juguetería'],
-        datasets: [
-          {
-            data: [300, 50, 100],
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-            hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-          },
-        ],
-      },
-      pieChartOptions: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+            }]
         },
-      },
+        pieChartOptions: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        },
       sales: [
         {
           nombre: 'Gerson Rivera',
@@ -308,6 +308,28 @@ export default {
       } catch (error) {
         console.error('Error al obtener ventas de los últimos 3 meses:', error);
       }
+    },
+    async obtenerCategoriasPopulares() {
+        this.isLoading = true;
+        try {
+            const response = await getCategoriasPopulares(this.id_usuario);
+            if (response && response.topCategorias) {
+                // Actualizar el pieChartData con los datos de topCategorias
+                this.pieChartData = {
+                    labels: response.topCategorias.map(categoria => categoria.nombre),
+                    datasets: [{
+                        data: response.topCategorias.map(categoria => categoria.cantidadTotal),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                    }]
+                };
+            }
+        } catch (error) {
+            console.error('Error al obtener categorías populares:', error);
+            notis("error", "Error al obtener las categorías más vendidas");
+        } finally {
+            this.isLoading = false;
+        }
     }
   },
 
@@ -320,6 +342,7 @@ export default {
       await this.getAlertasPromocion();
       await this.getAlertasPorPromocionProducto();
       await this.obtenerVentasUltimosTresMeses();
+      await this.obtenerCategoriasPopulares();
     } catch (error) {
       console.log(error);
     } finally {
