@@ -310,7 +310,7 @@ export default {
         return;
       }
 
-      reiniciarTotales();
+      this.reiniciarTotales();
 
 try {
   if(this.reporteSeleccionado === 'ventas_empleado'){
