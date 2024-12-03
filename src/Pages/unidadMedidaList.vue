@@ -51,7 +51,7 @@
               <button id="btnEditar" class="btn btn-warning" @click="editUnidad(unidad)">
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button id="btnEliminar" class="btn btn-danger" @click="confirmDelete(index)">
+              <button id="btnEliminar" class="btn btn-danger" @click="confirmDelete(unidad)">
                 <b><i class="bi bi-x-lg"></i></b>
               </button>
             </td>
@@ -234,8 +234,8 @@ export default {
   },
 
   methods: {
-    confirmDelete(index) {
-      this.editIndex = index;
+    confirmDelete(unidad) {
+      this.editIndex = this.unidadesMedida.findIndex(u => u.id_medida === unidad.id_medida) ;
       this.showConfirmModal = true;
     },
 
@@ -289,19 +289,22 @@ export default {
       }
     },
 
-    async deleteUnidad(unidad) {
+    async deleteUnidad() {
       const toast = useToast();
-      if (unidad.totalProductos > 0) {
+      const unidadEliminar = this.unidadesMedida[this.editIndex];
+      if (unidadEliminar.totalProductos > 0) {
         toast.error('Productos existentes dentro de esta unidad');
         return;
       }
 
       this.isLoading = true;
       try {
-        const response = await eliminarUnidad(unidad.id_medida);
+        const response = await eliminarUnidad(unidadEliminar.id_medida);
         if (response === true) {
-          this.unidadesMedida = this.unidadesMedida.filter(item => item.id_medida !== unidad.id_medida);
+          this.unidadesMedida = this.unidadesMedida.filter(item => item.id_medida !== unidadEliminar.id_medida);
           notis('success', 'Unidad eliminada correctamente');
+          this.showConfirmModal = false;
+      this.editIndex = null;
         } else {
           throw new Error('Error al eliminar la unidad');
         }
