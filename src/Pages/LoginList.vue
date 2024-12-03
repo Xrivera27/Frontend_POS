@@ -77,17 +77,17 @@ export default {
   },
   methods: {
     async login() {
-  const toast = useToast();
-  try {
-    this.isLoading = true;
+      const toast = useToast();
+      try {
+        this.isLoading = true;
 
-    const response = await fetch('http://localhost:3000/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: this.username, password: this.password })
-    });
+        const response = await fetch('http://localhost:3000/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: this.username, password: this.password })
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
     if (response.ok) {
       // El código existente para el login exitoso se mantiene igual
@@ -100,7 +100,7 @@ export default {
         this.$emit('auth-change');
       });
 
-      this.isLoading = false;
+          this.isLoading = false;
 
       if (data.role === '3') {
         await this.$router.push('/ventas');
@@ -213,7 +213,7 @@ html {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url('@/../public/img/fondo-login.jpg');
+  background-image: url('../../src/assets/imgs/fondo-pixeles.jpg');
   background-size: cover;
   background-position: center;
   position: fixed;
@@ -239,7 +239,7 @@ html {
 
 /* Tarjeta de Login */
 .login-card {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.7);
   padding: clamp(1.5rem, 4vw, 2rem);
   border-radius: 12px;
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
@@ -421,6 +421,7 @@ input:focus {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -439,7 +440,7 @@ input:focus {
 
 /* Tarjeta de login */
 .dark .login-card {
-  background-color: rgba(45, 45, 45, 0.9);
+  background-color: rgba(19, 19, 19, 0.9);
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
 }
 
