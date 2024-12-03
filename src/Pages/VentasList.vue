@@ -6,14 +6,9 @@
     <FacturaModal :isVisible="isFacturaModalVisible" :idVenta="venta?.id_venta" :idUsuario="id_usuario"
       @close="closeFacturaModal" />
 
-      <CerrarCajaModal 
-  :isVisible="isCerrarCajaModalVisible"
-  :totalEfectivo="totalEfectivo"
-  :totalTransferencia="totalTransferencia"
-  @confirm="confirmarCierreCaja"
-  @close="isCerrarCajaModalVisible = false"
-  @modal-focused="handleModalFocus"
-/>
+    <CerrarCajaModal :isVisible="isCerrarCajaModalVisible" :totalEfectivo="totalEfectivo"
+      :totalTransferencia="totalTransferencia" @confirm="confirmarCierreCaja" @close="isCerrarCajaModalVisible = false"
+      @modal-focused="handleModalFocus" />
 
     <div class="main-container">
       <div class="header-container">
@@ -208,7 +203,7 @@ export default {
     RecuperarVentaModal,
     FacturaModal,
     CerrarCajaModal,
-    
+
   },
   data() {
     return {
@@ -351,7 +346,7 @@ export default {
       this.pauseMainKeyboardEvents();
     },
     async confirmarCierreCaja(datosCierre) {
-    try {
+      try {
         this.isModalLoading = true;
         this.loadingMessage = 'Cerrando caja...';
 
@@ -360,120 +355,120 @@ export default {
 
         const token = localStorage.getItem('auth');
         const response = await fetch(url, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                id_usuario: this.id_usuario,
-                dineroCaja: datosCierre.dineroEnCaja
-            })
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            id_usuario: this.id_usuario,
+            dineroCaja: datosCierre.dineroEnCaja
+          })
         });
 
         if (!response.ok) {
-            throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+          throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
 
         if (data) {
-            try {
-                await this.generarPDFCierreCaja(data);
-                notis("success", "Caja cerrada y reporte generado exitosamente");
-            } catch (pdfError) {
-                console.error('Error al generar PDF:', pdfError);
-                notis("warning", "Caja cerrada pero hubo un error al generar el PDF");
-            }
+          try {
+            await this.generarPDFCierreCaja(data);
+            notis("success", "Caja cerrada y reporte generado exitosamente");
+          } catch (pdfError) {
+            console.error('Error al generar PDF:', pdfError);
+            notis("warning", "Caja cerrada pero hubo un error al generar el PDF");
+          }
         }
 
         this.cajaAbierta = false;
         this.isCerrarCajaModalVisible = false;
 
-    } catch (error) {
+      } catch (error) {
         console.error('Error al cerrar caja:', error);
         notis("error", "Error al cerrar caja");
-    } finally {
+      } finally {
         this.isModalLoading = false;
-    }
-},
-async generarPDFCierreCaja(reporte) {
-  console.log('Iniciando generación de PDF...');
-  try {
-    console.log('Datos del reporte a enviar:', reporte);
-    
-    // Usar la URL base del proyecto
-    const url = `${solicitudes.homeUrl}/ventas/generar-pdf-cierre/${this.id_usuario}`;
-    console.log('URL de la petición:', url);
+      }
+    },
+    async generarPDFCierreCaja(reporte) {
+      console.log('Iniciando generación de PDF...');
+      try {
+        console.log('Datos del reporte a enviar:', reporte);
 
-    const token = localStorage.getItem('auth');
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // Agregar el token de autorización
-      },
-      body: JSON.stringify(reporte)
-    });
+        // Usar la URL base del proyecto
+        const url = `${solicitudes.homeUrl}/ventas/generar-pdf-cierre/${this.id_usuario}`;
+        console.log('URL de la petición:', url);
 
-    console.log('Respuesta del servidor:', response);
-    console.log('Status:', response.status);
-    
-    if (!response.ok) {
-      console.error('Respuesta no exitosa:', response.status, response.statusText);
-      const errorText = await response.text();
-      console.error('Detalle del error:', errorText);
-      throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
-    }
-
-    console.log('Obteniendo blob de la respuesta...');
-    const blob = await response.blob();
-    console.log('Blob recibido:', blob);
-
-    console.log('Creando URL del blob...');
-    const url_blob = window.URL.createObjectURL(blob);
-    console.log('URL creada:', url_blob);
-
-    console.log('Configurando descarga...');
-    const a = document.createElement('a');
-    a.href = url_blob;
-    a.download = `cierre_caja_${new Date().toISOString().split('T')[0]}.pdf`;
-    
-    console.log('Iniciando descarga...');
-    document.body.appendChild(a);
-    a.click();
-    
-    console.log('Limpiando recursos...');
-    window.URL.revokeObjectURL(url_blob);
-    document.body.removeChild(a);
-    
-    console.log('PDF generado y descargado exitosamente');
-  } catch (error) {
-    console.error('Error detallado en generarPDFCierreCaja:', {
-      mensaje: error.message,
-      error: error,
-      stack: error.stack
-    });
-    throw error;
-  }
-},
-
-async cerrarCaja() {
-    try {
-        const { data: ventas } = await axios.get(`${solicitudes.homeUrl}/ventas/totales-caja/${this.id_usuario}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('auth')}`
-            }
+        const token = localStorage.getItem('auth');
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // Agregar el token de autorización
+          },
+          body: JSON.stringify(reporte)
         });
-        
+
+        console.log('Respuesta del servidor:', response);
+        console.log('Status:', response.status);
+
+        if (!response.ok) {
+          console.error('Respuesta no exitosa:', response.status, response.statusText);
+          const errorText = await response.text();
+          console.error('Detalle del error:', errorText);
+          throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+        }
+
+        console.log('Obteniendo blob de la respuesta...');
+        const blob = await response.blob();
+        console.log('Blob recibido:', blob);
+
+        console.log('Creando URL del blob...');
+        const url_blob = window.URL.createObjectURL(blob);
+        console.log('URL creada:', url_blob);
+
+        console.log('Configurando descarga...');
+        const a = document.createElement('a');
+        a.href = url_blob;
+        a.download = `cierre_caja_${new Date().toISOString().split('T')[0]}.pdf`;
+
+        console.log('Iniciando descarga...');
+        document.body.appendChild(a);
+        a.click();
+
+        console.log('Limpiando recursos...');
+        window.URL.revokeObjectURL(url_blob);
+        document.body.removeChild(a);
+
+        console.log('PDF generado y descargado exitosamente');
+      } catch (error) {
+        console.error('Error detallado en generarPDFCierreCaja:', {
+          mensaje: error.message,
+          error: error,
+          stack: error.stack
+        });
+        throw error;
+      }
+    },
+
+    async cerrarCaja() {
+      try {
+        const { data: ventas } = await axios.get(`${solicitudes.homeUrl}/ventas/totales-caja/${this.id_usuario}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth')}`
+          }
+        });
+
         this.totalEfectivo = ventas.totalEfectivo;
         this.totalTransferencia = ventas.totalTransferencia;
         this.abrirModalCerrarCaja();
-    } catch (error) {
+      } catch (error) {
         console.error('Error al obtener totales:', error);
         notis("error", "Error al obtener totales de caja");
-    }
-},
+      }
+    },
 
     async handleAperturaCaja(monto) {
       try {
@@ -650,13 +645,13 @@ async cerrarCaja() {
       }
 
       try {
-        if( datosPago.metodoPago === 'Efectivo' ){
+        if (datosPago.metodoPago === 'Efectivo') {
           pagando = await pagar(datosPago.montoEfectivo, this.venta.id_venta, datosPago.notas, this.id_usuario);
         }
-        else if(datosPago.metodoPago === 'Transferencia'){
+        else if (datosPago.metodoPago === 'Transferencia') {
           pagando = await pagarTranferir(datosPago.montoTransferencia, this.venta.id_venta, datosPago.numeroTransferencia, datosPago.notas, this.id_usuario);
         }
-        
+
         if (!pagando) {
           throw 'No se realizo el pago';
         }
@@ -1574,142 +1569,144 @@ button {
    Modo Oscuro
 ======================================================= */
 /* Contenedor principal */
-.dark .wrapper {
-  background-color: #1e1e1e;
-  color: #fff;
+/* Dark mode styles */
+.dark {
+  background-color: #141414;
+  color: #e5e5e5;
 }
 
+.dark .wrapper,
 .dark .main-container {
-  background-color: #1e1e1e;
+  background-color: #141414;
 }
 
-/* Header y elementos de input */
 .dark .header-container {
-  border-color: #404040;
+  border-color: #2b2b2b;
 }
 
 .dark .cliente-input,
-.dark .rtn-input {
-  background-color: #383838;
-  border-color: #404040;
-  color: #fff;
+.dark .rtn-input,
+.dark .campo {
+  background-color: #141414;
+  border-color: #2b2b2b;
+  color: #e5e5e5;
 }
 
 .dark .search-button {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
+  background-color: #1a1a1a;
+  border-color: #2b2b2b;
+  color: #00ff95;
 }
 
 .dark .search-button:hover {
-  background-color: #383838;
+  background-color: #202020;
+  color: #00ffaa;
 }
 
-.dark .campo {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
-}
-
-/* Tabla */
 .dark .table-wrapper {
-  border-color: #404040;
-  background-color: #2d2d2d;
+  border-color: #2b2b2b;
+  background-color: #141414;
 }
 
-.dark .table {
-  background-color: #2d2d2d;
-}
-
+.dark .table,
 .dark .table thead {
-  background-color: #2d2d2d;
+  background-color: #141414;
 }
 
 .dark th {
-  background-color: #383838;
-  border-color: #404040;
-  color: #fff;
+  background-color: #1a1a1a;
+  border-color: #2b2b2b;
+  color: #00ff95;
 }
 
 .dark td {
-  border-color: #404040;
-  color: #fff;
+  border-color: #2b2b2b;
+  color: #e5e5e5;
 }
 
 .dark .table tbody tr:hover {
-  background-color: #383838;
+  background-color: #202020;
 }
 
 .dark .selected {
-  background-color: #004c77 !important;
+  background-color: #1d909b !important;
 }
 
 .dark .table tbody tr.selected:hover {
-  background-color: #005a8e !important;
+  background-color: #204060 !important;
 }
 
-/* Teclado numérico */
 .dark .numeric-keypad {
-  border-color: #404040;
+  border-color: #2b2b2b;
 }
 
 .dark button {
-  background-color: #2d2d2d;
-  color: #fff;
+  background-color: #1a1a1a;
+  border: 1px solid #2b2b2b;
+  color: #00ff95;
 }
 
-.dark button:hover {
-  background-color: #383838;
+.dark button:hover:not(:disabled) {
+  background-color: #202020;
+  color: #00ffaa;
 }
 
-/* Total container */
+.dark button:disabled {
+  background-color: #0f0f0f;
+  border-color: #1f1f1f;
+  color: #404040;
+}
+
 .dark .total-container {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
+  background-color: #141414;
+  border-color: #2b2b2b;
 }
 
 .dark .cantidad-input input {
-  background-color: #383838;
-  border-color: #404040;
-  color: #fff;
+  background-color: #141414;
+  border-color: #2b2b2b;
+  color: #e5e5e5;
 }
 
-/* Footer */
 .dark .footer-container {
-  background-color: #2d2d2d;
-  border-color: #404040;
+  background-color: #141414;
+  border-color: #2b2b2b;
 }
 
-/* Estados de facturación */
 .dark .facturando {
-  color: #00ff9d;
+  color: #00ff95;
 }
 
 .dark .no-facturando {
   color: #ff4444;
 }
 
-/* Scrollbar en modo oscuro */
 .dark .table-container::-webkit-scrollbar-track {
-  background: #2d2d2d;
+  background: #141414;
 }
 
 .dark .table-container::-webkit-scrollbar-thumb {
-  background: #c09d62;
+  background: #2b2b2b;
 }
 
 .dark .table-container::-webkit-scrollbar-thumb:hover {
-  background: #a38655;
+  background: #363636;
 }
 
-/* Input autofill en modo oscuro */
 .dark input:-webkit-autofill,
 .dark input:-webkit-autofill:hover,
 .dark input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #fff;
-  -webkit-box-shadow: 0 0 0px 1000px #383838 inset;
-  transition: background-color 5000s ease-in-out 0s;
+  -webkit-text-fill-color: #e5e5e5;
+  -webkit-box-shadow: 0 0 0px 1000px #141414 inset;
+}
+
+.dark .abrir-caja-button {
+  background-color: #00ff95;
+  color: #141414;
+}
+
+.dark .abrir-caja-button:hover {
+  background-color: #00ffaa;
 }
 
 button:disabled {
