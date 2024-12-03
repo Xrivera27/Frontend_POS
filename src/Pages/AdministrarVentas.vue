@@ -293,21 +293,40 @@ export default {
     },
 
     async handleCancelSale(ventaId, description) {
-      try {
+    try {
         const response = await AdminVentas.cancelarVenta(ventaId, description);
+        
         if (response.success) {
-          this.toast.success('Venta cancelada exitosamente');
-          await this.loadVentas();
+            this.toast.success('Venta cancelada exitosamente');
+            
+            try {
+                // Usar el nuevo método del servicio
+                const blob = await AdminVentas.obtenerReporteCancelacion(ventaId);
+                
+                // Crear y descargar el PDF
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cancelacion_venta_${ventaId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (reportError) {
+                console.error('Error al descargar reporte:', reportError);
+                this.toast.error('Error al generar el reporte de cancelación');
+            }
+
+            await this.loadVentas();
         } else {
-          throw new Error(response.message || 'Error al cancelar la venta');
+            throw new Error(response.message || 'Error al cancelar la venta');
         }
-      } catch (error) {
+    } catch (error) {
         console.error('Error:', error);
         this.toast.error('Error al cancelar la venta: ' + error.message);
         throw error;
-      }
-    },
-
+    }
+},
     generateRows() {
       this.rows = this.filteredRows;
     },

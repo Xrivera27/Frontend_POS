@@ -61,6 +61,7 @@ import { Line, Pie } from 'vue-chartjs';
 const { getTotalVentasDia } = require('../../services/dashboardSolicitudes')
 const { getClientesPorEmpresa } = require('../../services/dashboardSolicitudes')
 const { getAlertasPorPromocion } = require('../../services/dashboardSolicitudes')
+const { getAlertasPorPromocionProducto } = require('../../services/dashboardSolicitudes')
 import { notis } from '../../services/notificaciones.js';
 import solicitudes from "../../services/solicitudes.js";
 import ModalLoading from '@/components/ModalLoading.vue';
@@ -101,6 +102,7 @@ export default {
       ventas: 0,
       clientesNumero: 0,
       alertasPorPromocion: 0,
+      alertasPorPromocionProducto: 0,
       id_usuario: '',
       isLoading: false,
       lineChartData: {
@@ -205,7 +207,7 @@ export default {
         },
         {
           title: "Promociones Productos",
-          value: "35",
+          value: this.getAlertasPorPromocionProductoFormatted(),
           icon: "bi bi-megaphone",
           link: "/administrar-compras"
         },
@@ -262,6 +264,20 @@ export default {
         this.isLoading = false;
       }
     },
+    async getAlertasPorPromocionProducto() {
+      try {
+        this.alertasPorPromocionProducto = await getAlertasPorPromocionProducto(this.id_usuario);
+        console.log(this.alertasPorPromocionProducto)
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    getAlertasPorPromocionProductoFormatted() {
+      if (this.alertasPorPromocionProducto) {
+        const { totalAlertasProducto } = this.alertasPorPromocionProducto;
+        return totalAlertasProducto;
+      }
+    },
   },
 
   async mounted() {
@@ -271,6 +287,7 @@ export default {
       await this.devolverVenta();
       await this.obtenerNumeroClientes();
       await this.getAlertasPromocion();
+      await this.getAlertasPorPromocionProducto();
     } catch (error) {
       console.log(error);
     } finally {
