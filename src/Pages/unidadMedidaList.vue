@@ -66,7 +66,7 @@
           <div class="modal-header">
             <h2>Confirmación</h2>
           </div>
-          <div class="modal-body">
+          <div class="modal-body-confirm">
             <p>¿Estás seguro de que quieres eliminar esta unidad de medida?</p>
           </div>
           <div class="modal-footer">
@@ -98,17 +98,24 @@
     <!-- Modal para agregar o editar unidades -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
-        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Unidad' : 'Agregar Unidad' }}</h2>
-
-        <div class="form-group">
-          <label>Nombre de unidad de inventario:</label>
-          <input v-model="unidadForm.medida" type="text" required>
+        <div class="modal-header">
+          <h2 class="h2-modal-content">{{ isEditing ? 'Editar Unidad' : 'Agregar Unidad' }}</h2>
         </div>
-        <div class="contenedor-botones">
-          <btnGuardarModal id="AggUnid" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'"
-            @click="guardarUnidad">
-          </btnGuardarModal>
-          <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Nombre de unidad de inventario:</label>
+            <input v-model="unidadForm.medida" type="text" required>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal id="AggUnid" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'"
+              @click="guardarUnidad">
+            </btnGuardarModal>
+            <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+          </div>
         </div>
       </div>
     </div>
@@ -116,7 +123,9 @@
     <!-- Modal para mostrar productos con esa id medida -->
     <div v-if="isModalProductosOpen" class="modal product-list">
       <div class="modal-content">
-        <h2>Lista de productos</h2>
+        <div class="modal-header">
+          <h2>Lista de productos</h2>
+        </div>
         <div class="table-container table-modal-container">
           <table class="table table-modal">
             <thead>
@@ -134,7 +143,7 @@
           </table>
         </div>
 
-        <div class="contenedor-botones">
+        <div class="modal-footer">
           <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
         </div>
       </div>
@@ -235,7 +244,7 @@ export default {
 
   methods: {
     confirmDelete(unidad) {
-      this.editIndex = this.unidadesMedida.findIndex(u => u.id_medida === unidad.id_medida) ;
+      this.editIndex = this.unidadesMedida.findIndex(u => u.id_medida === unidad.id_medida);
       this.showConfirmModal = true;
     },
 
@@ -304,7 +313,7 @@ export default {
           this.unidadesMedida = this.unidadesMedida.filter(item => item.id_medida !== unidadEliminar.id_medida);
           notis('success', 'Unidad eliminada correctamente');
           this.showConfirmModal = false;
-      this.editIndex = null;
+          this.editIndex = null;
         } else {
           throw new Error('Error al eliminar la unidad');
         }
@@ -366,6 +375,173 @@ export default {
 * {
   font-family: 'Montserrat', sans-serif;
   box-sizing: border-box;
+}
+
+.modal {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.modal-confirm {
+  background: white;
+  border-radius: 12px;
+  width: 25%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
+}
+
+.modal-body-confirm {
+  padding: 24px;
+  overflow-y: auto;
+  background-color: white
+}
+
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
+}
+
+.dark .modal-usuario {
+  background-color: #2d2d2d;
+  color: #fff;
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.dark .modal-header,
+.dark .modal-footer {
+  background-color: #1e1e1e;
+  border-color: #404040;
+}
+
+.dark .modal-header h2 {
+  color: #fff;
+}
+
+.modal-body {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.modal-body-confirm {
+  padding: 24px;
+  overflow-y: auto;
+  background-color: white
+}
+
+.dark .modal-body-confirm {
+  background-color: #333;
+}
+
+.contenedor {
+  width: 90%;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 1px;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+}
+
+.dark .form-group label {
+  color: #fff;
+}
+
+.dark .form-group input,
+.dark .form-group textarea,
+.dark .form-group select {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .form-group input,
+.dark .form-group select {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.dark .modal-body-confirm {
+  background-color: #333;
 }
 
 .categorias-wrapper {
@@ -527,51 +703,6 @@ export default {
 }
 
 
-
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  width: 90%;
-  max-width: 400px;
-  min-height: 250px;
-  margin: 20px;
-}
-
-.form-group {
-  margin-bottom: 16px;
-  width: 100%;
-}
-
-.form-group label {
-  margin-bottom: 8px;
-  display: block;
-}
-
-.form-group input {
-  width: 100%;
-  height: 35px;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
 
 /* Scroll personalizado */
 ::-webkit-scrollbar {
@@ -771,7 +902,7 @@ export default {
 .product-list .modal-content {
   max-width: 800px;
   /* Aumentado de 400px */
-  width: 90%;
+  width: 100%;
   max-height: 80vh;
   /* Altura máxima del 80% del viewport */
 }
@@ -788,6 +919,13 @@ export default {
   }
 }
 
+.table-modal-container {
+  width: 90%;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
 /* Modo Oscuro */
 .dark .categorias-wrapper {
   background-color: #1e1e1e;
@@ -801,17 +939,6 @@ export default {
 
 .dark .busqueda {
   background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .modal-content {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
-.dark .form-group input {
-  background-color: #383838;
   border-color: #404040;
   color: #fff;
 }

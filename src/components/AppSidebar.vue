@@ -2,12 +2,7 @@
 <template>
     <div class="sidebar-container" :class="{ 'is-mobile': isMobile }">
         <div v-if="isMobile && expanded" class="sidebar-overlay" @click="toggleSidebar"></div>
-        <aside 
-            ref="sidebar" 
-            v-if="!isLoginRoute" 
-            class="sidebar" 
-            :class="{ expanded, dark: isDarkMode }"
-        >
+        <aside ref="sidebar" v-if="!isLoginRoute" class="sidebar" :class="{ expanded, dark: isDarkMode }">
             <!-- Toggle button for expanding/collapsing -->
             <!-- Toggle Sidebar Arrow -->
             <li class="nav-item toggle-btn" @click="toggleSidebar">
@@ -46,7 +41,7 @@
                 <!-- Categorías -->
                 <li v-if="hasPermission('Categorias')" class="nav-item">
                     <router-link @click="handleRouteChange" to="/categorias" class="nav-link"
-                        :class="{ active: isActive('/registro') }">
+                        :class="{ active: isActive('/categorias') }">
                         <i class="bi bi-tags-fill"></i>
                         <span v-if="expanded" class="tooltip-text">Categorías</span>
                     </router-link>
