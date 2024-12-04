@@ -351,49 +351,56 @@ export default {
     },
 
     async guardarUsuario() {
-      if (!validacionesUsuario.validarCampos(this.usuarioForm, this.isPassEdit, this.selectedCountry)) {
-        return;
+  if (!(await validacionesUsuario.validarCampos(
+    this.usuarioForm, 
+    this.isPassEdit, 
+    this.selectedCountry,
+    this.isEditing
+  ))) {
+    return;
+  }
+
+  this.isLoading = true;
+
+  try {
+    let response;
+    let parametros;
+
+    if (this.isEditing) {
+      parametros = `/usuario/actualizar/${this.empleados[this.editIndex].id_usuario}`;
+      response = await solicitudes.patchRegistro(
+        parametros,
+        this.limpiarForm(this.usuarioForm)
+      );
+
+      if (response === true) {
+        notis('success', "Actualizando datos del usuario...");
+        Object.assign(this.empleados[this.editIndex], this.usuarioForm);
+      } else {
+        notis('error', response);
       }
-      this.isLoading = true;
+    } else {
+      parametros = `/usuario/crear`;
+      response = await solicitudes.postRegistro(
+        parametros,
+        this.limpiarForm(this.usuarioForm)
+      );
 
-      let response;
-      let parametros;
-
-      try {
-        if (this.isEditing) {
-          parametros = `/usuario/actualizar/${this.empleados[this.editIndex].id_usuario}`;
-          response = await solicitudes.patchRegistro(
-            parametros,
-            this.limpiarForm(this.usuarioForm)
-          );
-
-          if (response == true) {
-            notis('success', "Actualizando datos del usuario...")
-            Object.assign(this.empleados[this.editIndex], this.usuarioForm);
-          } else {
-            notis('error', response);
-          }
-        } else {
-          parametros = `/usuario/crear`;
-          response = await solicitudes.postRegistro(
-            parametros,
-            this.limpiarForm(this.usuarioForm)
-          );
-
-          if (response.length > 0) {
-            notis('success', "Usuario guardado correctamente...")
-            this.empleados.push(response[0]);
-          } else {
-            throw response;
-          }
-        }
-        this.closeModal();
-      } catch (error) {
-        notis('error', error.message);
-      } finally {
-        this.isLoading = false;
+      if (response.length > 0) {
+        notis('success', "Usuario guardado correctamente...");
+        this.empleados.push(response[0]);
+      } else {
+        throw response;
       }
-    },
+    }
+    
+    this.closeModal();
+  } catch (error) {
+    notis('error', error.message);
+  } finally {
+    this.isLoading = false;
+  }
+},
 
     previousPage() {
       if (this.currentPage > 1) {
