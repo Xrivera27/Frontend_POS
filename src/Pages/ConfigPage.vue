@@ -35,13 +35,11 @@
               </div>
 
               <div class="contenedor-interno contenedor-derecho">
-
                 <button type="button" class="btn btn-password" :class="{ 'disabled': usuarioEditing }"
                   :disabled="usuarioEditing" @click="togglePasswordEdit">
                   {{ isPassEdit ? 'Cancelar cambio' : 'Cambiar contraseña' }}
                 </button>
 
-                <!-- Los inputs existentes con v-if -->
                 <template v-if="isPassEdit">
                   <label for="contrasena">Contraseña actual:</label>
                   <input v-model="userForm.contraseña" type="password" id="contraseña" name="contraseña" required />
@@ -55,7 +53,6 @@
                     name="contraseña_confirm" />
                 </template>
               </div>
-
             </div>
           </fieldset>
           <div class="botones-container">
@@ -105,7 +102,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import axios from 'axios';
@@ -160,14 +156,13 @@ export default {
     async getUserData() {
       this.isLoading = true;
       try {
-        const token = localStorage.getItem('auth'); // Usa 'auth' para obtener el token
+        const token = localStorage.getItem('auth');
 
-        const response = await axios.get('http://localhost:3000/api/usuarios', { // Cambia a '/usuarios'
+        const response = await axios.get('http://localhost:3000/api/usuarios', {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-        console.log(response.data);
 
         const userData = response.data;
         this.userForm.nombre_usuario = userData.nombre_usuario || '';
@@ -178,24 +173,32 @@ export default {
         this.userFormAdvanced.correo = userData.correo || '';
       } catch (error) {
         console.error('Error al obtener los datos del usuario:', error);
-        notis("error", 'No se pudo obtener la información del usuario.'); // Mensaje para el usuario
+        notis("error", 'No se pudo obtener la información del usuario.');
       } finally {
         this.isLoading = false;
       }
     },
 
     async updateUserData() {
-      //--------------------------------------------------------------------------------------------------
-      //*! Si se está cambiando la contraseña, verificar primero la contraseña actual 
+      if (!this.usuarioEditing) {
+        // Validar formulario básico
+        if (!await validacionesConfigPage.validarCamposConfiguracion(this.userForm, this.isPassEdit, this.selectedCountry)) {
+          return;
+        }
+      } else if (!this.usuarioAvancedEditing) {
+        // Validar formulario avanzado
+        if (!await validacionesConfigPage.validarCamposConfiguracionAvanzada(this.userFormAdvanced)) {
+          return;
+        }
+      }
 
+      // Si se está cambiando la contraseña, verificar primero la contraseña actual
       if (this.isPassEdit) {
         try {
           const token = localStorage.getItem('auth');
-          // Ajustar la URL para que coincida con el endpoint correcto del backend
           const verifyResponse = await axios.post('http://localhost:3000/api/verificar-password',
             {
               contraseña: this.userForm.contraseña,
-              // Posiblemente necesites enviar el ID del usuario u otros datos necesarios
               id_usuario: await solicitudes.solicitarUsuarioToken()
             },
             {
@@ -217,40 +220,37 @@ export default {
         }
       }
 
-      // Continuar con las validaciones normales
-      //--------------------------------------------------------------------------------------------------
-      if (!this.usuarioEditing) {
-        if (!validacionesConfigPage.validarCamposConfiguracion(this.userForm, this.isPassEdit, this.selectedCountry)) {
-          return;
-        }
-      } else if (!this.usuarioAvancedEditing) {
-        if (!validacionesConfigPage.validarCamposConfiguracionAvanzada(this.userFormAdvanced)) {
-          return;
-        }
-      }
-
-      // Si todo es válido, proceder con la actualización
+      // Proceder con la actualización
       this.isLoading = true;
       try {
         const token = localStorage.getItem('auth');
+        
+        // Preparar datos para la actualización
         const updatedData = {
           nombre_usuario: this.userForm.nombre_usuario,
           telefono: this.userForm.telefono,
           direccion: this.userForm.direccion,
-          contraseña: this.userForm.contraseña,
-          contraseña_nueva: this.userForm.contraseña_nueva || undefined,
-          contraseña_confirm: this.userForm.contraseña_confirm || undefined,
           nombre: this.userFormAdvanced.nombre,
           apellido: this.userFormAdvanced.apellido,
-          correo: this.userFormAdvanced.correo,
+          correo: this.userFormAdvanced.correo
         };
 
-        const response = await axios.put('http://localhost:3000/api/configuser', updatedData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        // Agregar datos de contraseña si es necesario
+        if (this.isPassEdit) {
+          updatedData.contraseña = this.userForm.contraseña;
+          updatedData.contraseña_nueva = this.userForm.contraseña_nueva;
+          updatedData.contraseña_confirm = this.userForm.contraseña_confirm;
+        }
+
+        const response = await axios.put('http://localhost:3000/api/configuser', 
+          updatedData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
         if (response.status === 200) {
           localStorage.setItem('showUpdateSuccess', 'true');
@@ -258,7 +258,21 @@ export default {
         }
       } catch (error) {
         console.error('Error al actualizar los datos del usuario:', error);
-        notis("error", 'Hubo un problema al guardar los datos.');
+        if (error.response && error.response.data) {
+          if (error.response.data.duplicados) {
+            const duplicados = error.response.data.duplicados;
+            if (duplicados.includes('nombre_usuario')) {
+              notis("error", "El nombre de usuario ya está en uso");
+            }
+            if (duplicados.includes('correo')) {
+              notis("error", "El correo electrónico ya está en uso");
+            }
+          } else {
+            notis("error", error.response.data.message || 'Error al actualizar los datos');
+          }
+        } else {
+          notis("error", 'Hubo un problema al guardar los datos.');
+        }
       } finally {
         this.isLoading = false;
       }
@@ -266,14 +280,13 @@ export default {
 
     togglePasswordEdit() {
       this.isPassEdit = !this.isPassEdit;
-      // Limpiar todos los campos relacionados con contraseña
-      this.userForm.contraseña = '';      // Limpiar contraseña actual
+      // Limpiar campos de contraseña
+      this.userForm.contraseña = '';
       this.userForm.contraseña_nueva = '';
       this.userForm.contraseña_confirm = '';
     },
 
     isEditing(orden) {
-      // Maneja los estados de edición
       switch (orden) {
         case 1:
           this.usuarioEditing = false;
@@ -286,6 +299,13 @@ export default {
         default:
           notis("error", 'Ha ocurrido un error');
       }
+    },
+
+    switchBools() {
+      this.showUser = !this.showUser;
+      this.userActive = !this.userActive;
+      this.userBoton = !this.userBoton;
+      this.companyBoton = !this.companyBoton;
     },
 
     changeFavicon(iconPath) {
@@ -301,10 +321,9 @@ export default {
     document.title = "Configuración de Usuario";
     this.changeFavicon('/img/spiderman.ico');
 
-    // Verificar si hay que mostrar la notificación
     if (localStorage.getItem('showUpdateSuccess')) {
       notis("success", 'Usuario actualizado exitosamente');
-      localStorage.removeItem('showUpdateSuccess'); // Limpiar el flag
+      localStorage.removeItem('showUpdateSuccess');
     }
   },
 };
@@ -723,4 +742,10 @@ input {
   -webkit-box-shadow: 0 0 0px 1000px #383838 inset;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+.configuracion-usuario {
+  padding: 16px;
+}
+
+
 </style>
