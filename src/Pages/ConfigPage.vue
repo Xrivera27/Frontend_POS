@@ -2,7 +2,6 @@
   <div class="configuracion-usuario">
     <div class="config-wrapper">
       <ModalLoading :isLoading="isLoading" />
-
       <PageHeader :titulo="titulo" />
       <div class="usuario-config" v-if="showUser">
         <!-- Formulario básico de usuario -->
