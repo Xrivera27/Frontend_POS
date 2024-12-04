@@ -263,8 +263,8 @@ export default {
           throw new Error('No se pudieron obtener las ventas');
         }
       } catch (error) {
-        console.error('Error al cargar ventas:', error);
-        this.error = 'Error al cargar las ventas. Por favor, intente nuevamente.';
+        console.error('No se encontraron ventas para mostrar.', error);
+        this.error = 'No se encontraron ventas para mostrar.';
         this.toast.error(this.error);
       } finally {
         this.loading = false;

@@ -84,8 +84,6 @@
                     <ul class="dropdown-menu" :class="{ 'show': openDropdowns.ventas }">
                         <li><router-link @click="handleRouteChange" to="/administrar-ventas"
                                 class="dropdown-item">Administrar ventas</router-link></li>
-                        <li><router-link @click="handleRouteChange" to="/ventas" class="dropdown-item">Crear
-                                venta</router-link></li>
                         <li><router-link @click="handleRouteChange" to="/reporte" class="dropdown-item">Reporte de
                                 ventas</router-link></li>
                     </ul>

@@ -312,8 +312,8 @@ export default {
           throw new Error('No se pudieron obtener las compras');
         }
       } catch (error) {
-        console.error('Error al cargar compras:', error);
-        this.error = 'Error al cargar las compras. Por favor, intente nuevamente.';
+        console.error('No se encontraron compras para mostrar.', error);
+        this.error = 'No se encontraron compras para mostrar.';
         this.toast.error(this.error);
       } finally {
         this.loading = false;

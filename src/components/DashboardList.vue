@@ -68,7 +68,7 @@ const { getVentasUltimosTresMeses } = require('../../services/dashboardSolicitud
 const { getCategoriasPopulares } = require('../../services/dashboardSolicitudes')
 const { getUltimasVentas } = require('../../services/dashboardSolicitudes')
 import solicitudes from "../../services/solicitudes.js";
-import ModalLoading from '@/components/ModalLoading.vue';
+//import ModalLoading from '@/components/ModalLoading.vue';
 import {
   Chart as ChartJS,
   Title,
@@ -98,7 +98,7 @@ export default {
   components: {
     LineChart: Line,
     PieChart: Pie,
-    ModalLoading
+   // ModalLoading
   },
 
   data() {
@@ -201,7 +201,7 @@ export default {
           title: "Promociones Productos",
           value: this.getAlertasPorPromocionProductoFormatted(),
           icon: "bi bi-megaphone",
-          link: "/administrar-compras"
+          link: "/promociones-producto"
         },
       ];
     }
