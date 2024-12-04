@@ -1,6 +1,7 @@
 <!-- Mi Sidebar :D -->
 <template>
     <div class="sidebar-container" :class="{ 'is-mobile': isMobile }">
+        <ModalLoading :isLoading="isLoading" />
         <div v-if="isMobile && expanded" class="sidebar-overlay" @click="toggleSidebar"></div>
         <aside ref="sidebar" v-if="!isLoginRoute" class="sidebar" :class="{ expanded, dark: isDarkMode }">
             <!-- Toggle button for expanding/collapsing -->
@@ -147,7 +148,8 @@ export default {
             isMobile: window.innerWidth <= 480,
             openDropdowns: {
                 ventas: false,
-                compras: false
+                compras: false,
+                isLoading: false,
             }
         }
     },
@@ -215,7 +217,9 @@ export default {
             return this.openDropdowns[menu];
         },
         logout() {
+            this.isLoading = true;
             this.$emit('logout');
+            this.isLoading = true;
         },
         toggleDarkMode() {
             this.$emit('toggle-dark-mode');

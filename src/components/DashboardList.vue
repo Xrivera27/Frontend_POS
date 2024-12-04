@@ -68,7 +68,7 @@ const { getVentasUltimosTresMeses } = require('../../services/dashboardSolicitud
 const { getCategoriasPopulares } = require('../../services/dashboardSolicitudes')
 const { getUltimasVentas } = require('../../services/dashboardSolicitudes')
 import solicitudes from "../../services/solicitudes.js";
-//import ModalLoading from '@/components/ModalLoading.vue';
+import ModalLoading from '@/components/ModalLoading.vue';
 import {
   Chart as ChartJS,
   Title,
@@ -98,7 +98,7 @@ export default {
   components: {
     LineChart: Line,
     PieChart: Pie,
-   // ModalLoading
+    ModalLoading
   },
 
   data() {
@@ -134,7 +134,7 @@ export default {
           },
           tooltip: {
             callbacks: {
-              label: function(context) {
+              label: function (context) {
                 const label = context.dataset.label || '';
                 return `${label}: ${context.raw}`;
               }
@@ -146,7 +146,7 @@ export default {
             beginAtZero: true,
             ticks: {
               stepSize: 1,
-              callback: function(value) {
+              callback: function (value) {
                 return Math.floor(value);
               }
             }
@@ -154,21 +154,21 @@ export default {
         }
       },
       pieChartData: {
-            labels: [],
-            datasets: [{
-                data: [],
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-                hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-            }]
-        },
-        pieChartOptions: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                }
-            }
-        },
+        labels: [],
+        datasets: [{
+          data: [],
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+          hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+        }]
+      },
+      pieChartOptions: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          }
+        }
+      },
       sales: [],
     };
   },
@@ -208,20 +208,18 @@ export default {
   },
 
   methods: {
+
     async devolverVenta() {
-      this.isLoading = true;
       try {
         this.ventas = await getTotalVentasDia(this.id_usuario);
       } catch (error) {
         notis("error", "Error al buscar ventas")
-      } finally {
-        this.isLoading = false;
       }
     },
+
     async obtenerNumeroClientes() {
-      this.isLoading = true;
       try {
-          const clientes = await getClientesPorEmpresa(this.id_usuario);
+        const clientes = await getClientesPorEmpresa(this.id_usuario);
         this.clientesNumero = clientes.totalClientes;
       } catch (error) {
         notis("error", "Error al buscar el total de clientes")
@@ -230,18 +228,15 @@ export default {
       }
     },
     async getAlertasPromocion() {
-      this.isLoading = true;
       try {
         this.alertasPorPromocion = await getAlertasPorPromocion(this.id_usuario);
       } catch (error) {
         console.error(error);
         notis("error", "Error al mostras las promociones de productos")
-      } finally {
-        this.isLoading = false;
       }
     },
+
     getAlertasPromocionFormatted() {
-      this.isLoading = true;
       try {
         if (this.alertasPorPromocion) {
           const { totalAlertas } = this.alertasPorPromocion;
@@ -250,10 +245,9 @@ export default {
       } catch (error) {
         console.error(error);
         notis("error", "Error al mostras las promociones de productos")
-      } finally {
-        this.isLoading = false;
       }
     },
+
     async getAlertasPorPromocionProducto() {
       try {
         this.alertasPorPromocionProducto = await getAlertasPorPromocionProducto(this.id_usuario);
@@ -261,12 +255,14 @@ export default {
         console.error(error);
       }
     },
+
     getAlertasPorPromocionProductoFormatted() {
       if (this.alertasPorPromocionProducto) {
         const { totalAlertasProducto } = this.alertasPorPromocionProducto;
         return totalAlertasProducto;
       }
     },
+
     async obtenerVentasUltimosTresMeses() {
       try {
         const response = await getVentasUltimosTresMeses(this.id_usuario);
@@ -281,53 +277,51 @@ export default {
         console.error('Error al obtener ventas de los últimos 3 meses:', error);
       }
     },
+
     async obtenerCategoriasPopulares() {
-        this.isLoading = true;
-        try {
-            const response = await getCategoriasPopulares(this.id_usuario);
-            if (response && response.topCategorias) {
-                // Actualizar el pieChartData con los datos de topCategorias
-                this.pieChartData = {
-                    labels: response.topCategorias.map(categoria => categoria.nombre),
-                    datasets: [{
-                        data: response.topCategorias.map(categoria => categoria.cantidadTotal),
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-                        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-                    }]
-                };
-            }
-        } catch (error) {
-            console.error('Error al obtener categorías populares:', error);
-            notis("error", "Error al obtener las categorías más vendidas");
-        } finally {
-            this.isLoading = false;
+      try {
+        const response = await getCategoriasPopulares(this.id_usuario);
+        if (response && response.topCategorias) {
+          // Actualizar el pieChartData con los datos de topCategorias
+          this.pieChartData = {
+            labels: response.topCategorias.map(categoria => categoria.nombre),
+            datasets: [{
+              data: response.topCategorias.map(categoria => categoria.cantidadTotal),
+              backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+              hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+            }]
+          };
         }
+      } catch (error) {
+        console.error('Error al obtener categorías populares:', error);
+        notis("error", "Error al obtener las categorías más vendidas");
+      }
     },
+
     async obtenerUltimasVentas() {
-        this.isLoading = true;
-        try {
-            const response = await getUltimasVentas(this.id_usuario);
-            if (response && response.sales) {
-                // Formatear la fecha antes de asignarla
-                this.sales = response.sales.map(venta => ({
-                    ...venta,
-                    fecha: new Date(venta.fecha).toLocaleString('es-HN', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                        hour12: false
-                    })
-                }));
-            }
-        } catch (error) {
-            console.error('Error al obtener últimas ventas:', error);
-            notis("error", "Error al obtener las últimas ventas");
-        } finally {
-            this.isLoading = false;
+      try {
+        const response = await getUltimasVentas(this.id_usuario);
+        if (response && response.sales) {
+          // Formatear la fecha antes de asignarla
+          this.sales = response.sales.map(venta => ({
+            ...venta,
+            fecha: new Date(venta.fecha).toLocaleString('es-HN', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            })
+          }));
         }
+      } catch (error) {
+        console.error('Error al obtener últimas ventas:', error);
+        notis("error", "Error al obtener las últimas ventas");
+      } finally {
+        this.isLoading = false;
+      }
     },
   },
 

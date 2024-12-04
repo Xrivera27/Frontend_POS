@@ -1,25 +1,26 @@
 <template>
   <div class="dashboard">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" titleColor="lightseagreen" />
 
     <div v-if="role === 1">
       <!-- Secciones visibles solo para Administrador -->
       <BarChart />
-      
+
     </div>
 
     <div v-if="role === 2">
       <!-- Secciones visibles solo para Gerente -->
       <h3>Panel de Gerente</h3>
       <BarChart />
-     
+
     </div>
 
     <div v-if="role === 4">
       <!-- Secciones visibles solo para Gerente -->
       <h3>Panel de Ceo</h3>
       <BarChart />
-    
+
 
     </div>
 
@@ -40,11 +41,13 @@
 <script>
 import BarChart from '../components/DashboardList.vue';
 import PageHeader from "@/components/PageHeader.vue";
+import ModalLoading from '@/components/ModalLoading.vue';
 
 export default {
   components: {
     PageHeader,
     BarChart,
+    ModalLoading,
   },
   data() {
     return {

@@ -10,7 +10,7 @@
             <div class="filter-group">
               <label>Tipo de Reporte</label>
               <select v-model="reporteSeleccionado" class="select-input">
-                <option  @click="mostrarReportes" value="ventas_cliente">Ventas por Cliente</option>
+                <option @click="mostrarReportes" value="ventas_cliente">Ventas por Cliente</option>
                 <option @click="mostrarReportes" v-if="esCeo" value="ventas_sucursal">Ventas por Sucursal</option>
                 <option @click="mostrarReportes" value="ventas_empleado">Ventas por Empleado</option>
 
@@ -20,8 +20,9 @@
             <div class="filter-group">
               <label>{{ labelFiltro }}</label>
               <select v-model="valorFiltro" class="select-input">
-                <option value="" @click="mostrarReportes" >Todos</option>
-                <option v-for="opcion in opcionesFiltro" @click="mostrarReporteDesglose(opcion)" :key="opcion.id" :value="opcion.id">
+                <option value="" @click="mostrarReportes">Todos</option>
+                <option v-for="opcion in opcionesFiltro" @click="mostrarReporteDesglose(opcion)" :key="opcion.id"
+                  :value="opcion.id">
                   {{ opcion.nombre }}
                 </option>
               </select>
@@ -45,9 +46,12 @@
                 Configurar Header/Footer
               </button>
               <div class="button-group">
-                <button @click="generarReporte('pdf')" class="btn pdf-btn" :disabled="!fechasValidas || cargando">PDF</button>
-                <button @click="generarReporte('excel')" class="btn excel-btn" :disabled="!fechasValidas || cargando">EXCEL</button>
-                <button @click="generarReporte('preview')" class="btn generate-btn" :disabled="!fechasValidas || cargando">
+                <button @click="generarReporte('pdf')" class="btn pdf-btn"
+                  :disabled="!fechasValidas || cargando">PDF</button>
+                <button @click="generarReporte('excel')" class="btn excel-btn"
+                  :disabled="!fechasValidas || cargando">EXCEL</button>
+                <button @click="generarReporte('preview')" class="btn generate-btn"
+                  :disabled="!fechasValidas || cargando">
                   {{ cargando ? 'Generando...' : 'Generar' }}
                 </button>
               </div>
@@ -88,8 +92,8 @@
                 </div>
               </div>
             </div>
-            <input type="file" ref="fileInput" @change="handleFileChange" accept="image/jpeg,image/jpg,image/png,image/webp"
-              class="hidden-input" />
+            <input type="file" ref="fileInput" @change="handleFileChange"
+              accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden-input" />
           </div>
         </div>
       </div>
@@ -109,12 +113,12 @@
         <table>
           <thead>
             <tr>
-              
-              <th  v-if="reporteSeleccionado === 'ventas_cliente' && !mostrandoDesglose ">Cliente</th>
+
+              <th v-if="reporteSeleccionado === 'ventas_cliente' && !mostrandoDesglose">Cliente</th>
               <th v-if="reporteSeleccionado === 'ventas_sucursal' && !mostrandoDesglose">Sucursal</th>
               <th v-if="reporteSeleccionado === 'ventas_empleado' && !mostrandoDesglose">Empleado</th>
               <th v-if="mostrandoDesglose">Codigo factura</th>
-              
+
               <th>Valor Exento</th>
               <th>Valor Gravado 15%</th>
               <th>Valor Gravado 18%</th>
@@ -124,11 +128,11 @@
           </thead>
           <tbody>
             <tr v-for="(dato, index) in datosReporte" :key="index">
-            
+
               <td v-if="reporteSeleccionado === 'ventas_cliente'">{{ dato.nombre }}</td>
               <td v-if="reporteSeleccionado === 'ventas_sucursal'">{{ dato.nombre }}</td>
               <td v-if="reporteSeleccionado === 'ventas_empleado'">{{ dato.nombre }}</td>
-             
+
               <td>{{ formatearMoneda(dato.valor_extento) }}</td>
               <td>{{ formatearMoneda(dato.gravado_15) }}</td>
               <td>{{ formatearMoneda(dato.gravado_18) }}</td>
@@ -224,8 +228,8 @@ export default {
 
   computed: {
     fechasValidas() {
-      return this.filtros.fechaInicio && this.filtros.fechaFin && 
-             new Date(this.filtros.fechaFin) >= new Date(this.filtros.fechaInicio);
+      return this.filtros.fechaInicio && this.filtros.fechaFin &&
+        new Date(this.filtros.fechaFin) >= new Date(this.filtros.fechaInicio);
     },
 
     opcionesFiltro() {
@@ -236,7 +240,7 @@ export default {
           return this.sucursales;
         case 'ventas_empleado':
           return this.empleados;
-          case 'ventas_producto':
+        case 'ventas_producto':
           return this.productos;
         default:
           return [];
@@ -251,7 +255,7 @@ export default {
           return 'Sucursal';
         case 'ventas_empleado':
           return 'Empleado';
-          case 'ventas_producto':
+        case 'ventas_producto':
           return 'Producto';
         default:
           return '';
@@ -279,11 +283,11 @@ export default {
         ]);
 
         this.clientes = clientes;
-        
+
         this.empleados = empleados;
         this.productos = productos;
 
-        if(this.esCeo){
+        if (this.esCeo) {
           this.sucursales = await sucursalReportes(this.id_usuario);
         }
 
@@ -295,7 +299,7 @@ export default {
       }
     },
 
-    reiniciarTotales(){
+    reiniciarTotales() {
       this.totales = {
         exento: 0,
         gravado_15: 0,
@@ -305,9 +309,9 @@ export default {
       }
     },
 
-    async mostrarReporteDesglose(option){
+    async mostrarReporteDesglose(option) {
       this.mostrandoDesglose = true;
-      if(this.filtros.fechaFin === '' || this.filtros.fechaInicio === ''){
+      if (this.filtros.fechaFin === '' || this.filtros.fechaInicio === '') {
         return;
       }
       if (!this.fechasValidas) {
@@ -317,37 +321,37 @@ export default {
 
       this.reiniciarTotales();
 
-try {
-  if(this.reporteSeleccionado === 'ventas_empleado'){
-    const response = await getRegistrosEmpleadosDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
-    this.datosReporte = response;
-  }
+      try {
+        if (this.reporteSeleccionado === 'ventas_empleado') {
+          const response = await getRegistrosEmpleadosDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+          this.datosReporte = response;
+        }
 
-  if(this.reporteSeleccionado === 'ventas_cliente'){
-    const response = await getRegistrosClienteDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
-    this.datosReporte = response;
-  }
+        if (this.reporteSeleccionado === 'ventas_cliente') {
+          const response = await getRegistrosClienteDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+          this.datosReporte = response;
+        }
 
-  if(this.reporteSeleccionado === 'ventas_sucursal'){
-    const response = await getRegistrosSucursalDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
-    this.datosReporte = response;
-  }
+        if (this.reporteSeleccionado === 'ventas_sucursal') {
+          const response = await getRegistrosSucursalDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+          this.datosReporte = response;
+        }
 
-  this.datosReporte.forEach(d => {
-    this.totales.exento += d.total_extento;
-    this.totales.gravado_15 += d.gravado_15;
-    this.totales.gravado_18 += d.gravado_18;
-    this.totales.total_isv += d.total_isv;
-    this.totales.total += d.total;
-  });
+        this.datosReporte.forEach(d => {
+          this.totales.exento += d.total_extento;
+          this.totales.gravado_15 += d.gravado_15;
+          this.totales.gravado_18 += d.gravado_18;
+          this.totales.total_isv += d.total_isv;
+          this.totales.total += d.total;
+        });
 
-} catch (error) {
-  console.log(error);
-  notis('error', 'Error al cargar datos. Intente de nuevo');
-}
+      } catch (error) {
+        console.log(error);
+        notis('error', 'Error al cargar datos. Intente de nuevo');
+      }
     },
 
-    async openModalHeaderFooter (){
+    async openModalHeaderFooter() {
       try {
         this.showHeaderFooterModal = true;
         const response = await getDatosInstitucion(this.id_usuario, this.esCeo);
@@ -358,10 +362,10 @@ try {
       }
     },
 
-    async mostrarReportes (){
+    async mostrarReportes() {
       this.mostrandoDesglose = false;
       this.mostrandoDesglose = true;
-      if(this.filtros.fechaFin === '' || this.filtros.fechaInicio === ''){
+      if (this.filtros.fechaFin === '' || this.filtros.fechaInicio === '') {
         return;
       }
       if (!this.fechasValidas) {
@@ -371,34 +375,34 @@ try {
 
       this.reiniciarTotales();
 
-try {
-  if(this.reporteSeleccionado === 'ventas_empleado'){
-    const response = await getRegistrosEmpleados(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
-    this.datosReporte = response;
-  }
+      try {
+        if (this.reporteSeleccionado === 'ventas_empleado') {
+          const response = await getRegistrosEmpleados(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+          this.datosReporte = response;
+        }
 
-  if(this.reporteSeleccionado === 'ventas_cliente'){
-    const response = await getRegistrosClientes(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
-    this.datosReporte = response;
-  }
+        if (this.reporteSeleccionado === 'ventas_cliente') {
+          const response = await getRegistrosClientes(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+          this.datosReporte = response;
+        }
 
-  if(this.reporteSeleccionado === 'ventas_sucursal'){
-    const response = await getRegistrosSucursales(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
-    this.datosReporte = response;
-  }
+        if (this.reporteSeleccionado === 'ventas_sucursal') {
+          const response = await getRegistrosSucursales(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+          this.datosReporte = response;
+        }
 
-  this.datosReporte.forEach(d => {
-    this.totales.exento += d.total_extento;
-    this.totales.gravado_15 += d.gravado_15;
-    this.totales.gravado_18 += d.gravado_18;
-    this.totales.total_isv += d.total_isv;
-    this.totales.total += d.total;
-  });
+        this.datosReporte.forEach(d => {
+          this.totales.exento += d.total_extento;
+          this.totales.gravado_15 += d.gravado_15;
+          this.totales.gravado_18 += d.gravado_18;
+          this.totales.total_isv += d.total_isv;
+          this.totales.total += d.total;
+        });
 
-} catch (error) {
-  console.log(error);
-  notis('error', 'Error al cargar datos. Intente de nuevo');
-}
+      } catch (error) {
+        console.log(error);
+        notis('error', 'Error al cargar datos. Intente de nuevo');
+      }
     },
 
     async generarReporte(formato = 'preview') {
@@ -411,31 +415,31 @@ try {
 
       console.log(formato);
 
-      // this.cargando = true;
-      // this.error = null;
+      this.cargando = true;
+      this.error = null;
 
-      // try {
-      //   if (formato === 'preview') {
-      //     const response = await solicitudes.obtenerReporteVentas({
-      //       reporteSeleccionado: this.reporteSeleccionado,
-      //       fechaInicio: this.filtros.fechaInicio,
-      //       fechaFin: this.filtros.fechaFin,
-      //       valorFiltro: this.valorFiltro
-      //     });
+      try {
+        if (formato === 'preview') {
+          const response = await solicitudes.obtenerReporteVentas({
+            reporteSeleccionado: this.reporteSeleccionado,
+            fechaInicio: this.filtros.fechaInicio,
+            fechaFin: this.filtros.fechaFin,
+            valorFiltro: this.valorFiltro
+          });
 
-      //     this.datosReporte = response.datos;
-      //     this.totales = response.totales;
-      //   } else if (formato === 'pdf') {
-      //     await this.exportarPDF();
-      //   } else if (formato === 'excel') {
-      //     await this.exportarExcel();
-      //   }
-      // } catch (error) {
-      //   console.error('Error al generar reporte:', error);
-      //   this.error = 'Error al generar el reporte';
-      // } finally {
-      //   this.cargando = false;
-      // }
+          this.datosReporte = response.datos;
+          this.totales = response.totales;
+        } else if (formato === 'pdf') {
+          await this.exportarPDF();
+        } else if (formato === 'excel') {
+          await this.exportarExcel();
+        }
+      } catch (error) {
+        console.error('Error al generar reporte:', error);
+        this.error = 'Error al generar el reporte';
+      } finally {
+        this.cargando = false;
+      }
     },
 
     setHoy() {
@@ -570,10 +574,7 @@ try {
     },
 
     async exportarPDF() {
-      if (!this.datosReporte.length) {
-        this.error = 'No hay datos disponibles para generar el reporte PDF.';
-        return;
-      }
+      if (!this.datosReporte.length) return;
 
       const doc = new jsPDF({
         orientation: 'portrait',
@@ -582,176 +583,149 @@ try {
       });
 
       const pageWidth = doc.internal.pageSize.width;
-      const pageHeight = doc.internal.pageSize.height;
-      const margin = {
-        top: 20,
-        right: 20,
-        bottom: 20,
-        left: 20
-      };
-
+      const margin = { top: 20, right: 20, bottom: 20, left: 20 };
       let currentY = margin.top;
 
-      // Agregar logo si existe
+      // Configuración de imagen
       if (this.logoUrl) {
-        try {
-          const maxLogoWidth = 30;
-          const maxLogoHeight = 30;
+        const dimensions = await this.getImageDimensions(this.logoUrl);
 
-          const originalDimensions = await this.getImageDimensions(this.logoUrl);
-          const dimensions = this.calculateDimensions(
-            originalDimensions.width,
-            originalDimensions.height,
-            maxLogoWidth,
-            maxLogoHeight
-          );
+        // Posicionar imagen en la esquina superior izquierda
+        const logoWidth = 45;
+        const logoHeight = (dimensions.height * logoWidth) / dimensions.width;
+        doc.addImage(this.logoUrl, 'PNG', margin.left, currentY, logoWidth, logoHeight);
 
-          doc.addImage(
-            this.logoUrl,
-            'PNG',
-            margin.left,
-            currentY,
-            dimensions.width,
-            dimensions.height
-          );
+        // Alinear texto del header a la derecha de la imagen
+        if (this.headerFooterConfig.header.enabled) {
+          const textStartX = margin.left + logoWidth + 10; // 10mm de espacio después del logo
 
-          const logoOffset = dimensions.width + 10;
-
-          // Información de la empresa
-          doc.setFontSize(14);
+          // Título de empresa
           doc.setFont('helvetica', 'bold');
-          const companyName = this.headerFooterConfig.header.companyName || 'Nombre de la Empresa';
-          doc.text(companyName, (pageWidth + logoOffset) / 2, currentY + 8, { align: 'center' });
+          doc.setFontSize(16);
+          doc.text(this.headerFooterConfig.header.companyName, textStartX, currentY + 8);
 
-          doc.setFontSize(10);
+          // Información de empresa
           doc.setFont('helvetica', 'normal');
-          const address = this.headerFooterConfig.header.address || 'Dirección de la empresa';
-          doc.text(address, (pageWidth + logoOffset) / 2, currentY + 14, { align: 'center' });
+          doc.setFontSize(11);
+          currentY += 15;
+          doc.text(this.headerFooterConfig.header.address, textStartX, currentY);
 
-          const phone = this.headerFooterConfig.header.phone || 'Teléfono: (XXX)XXX-XXXX';
-          doc.text(phone, (pageWidth + logoOffset) / 2, currentY + 20, { align: 'center' });
+          currentY += 6;
+          doc.text(this.headerFooterConfig.header.phone, textStartX, currentY);
 
-          currentY += dimensions.height + 15;
-        } catch (error) {
-          console.error('Error al procesar el logo:', error);
-          currentY += 30;
+          currentY += 6;
+          doc.text(this.headerFooterConfig.header.email, textStartX, currentY);
+
+          /// Título "Reporte de Ventas" alineado a la izquierda
+          currentY += 10;
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(14);
+          doc.text(this.headerFooterConfig.header.text, margin.left, currentY);
+        }
+
+        currentY += 15;
+      } else {
+        // Si no hay logo, centrar el header
+        if (this.headerFooterConfig.header.enabled) {
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(16);
+          doc.text(this.headerFooterConfig.header.companyName, pageWidth / 2, currentY, { align: 'center' });
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(11);
+          currentY += 8;
+          doc.text(this.headerFooterConfig.header.address, pageWidth / 2, currentY, { align: 'center' });
+
+          currentY += 6;
+          doc.text(this.headerFooterConfig.header.phone, pageWidth / 2, currentY, { align: 'center' });
+
+          currentY += 6;
+          doc.text(this.headerFooterConfig.header.email, pageWidth / 2, currentY, { align: 'center' });
+
+          currentY += 15;
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(14);
+          doc.text(this.headerFooterConfig.header.text, pageWidth / 2, currentY, { align: 'center' });
+
+          currentY += 15;
         }
       }
 
-      // Título del reporte
-      const titleText = this.headerFooterConfig.header.text || 'Reporte de Ventas';
-      doc.setDrawColor(0);
-      doc.setLineWidth(0.5);
-      doc.setFontSize(14);
-      const titleWidth = doc.getTextWidth(titleText);
-      const frameWidth = titleWidth + 20;
-      const frameHeight = 10;
-      const frameX = (pageWidth - frameWidth) / 2;
-
-      doc.rect(frameX, currentY, frameWidth, frameHeight);
-      doc.text(titleText, pageWidth / 2, currentY + 7, { align: 'center' });
-
-      currentY += frameHeight + 10;
-
-      // Información del filtro actual
+      // Información del reporte
+      doc.setFont('helvetica', 'italic');
       doc.setFontSize(11);
-      doc.text(`${this.labelFiltro}: ${this.valorFiltro || 'Todos'}`, margin.left, currentY);
-      currentY += 7;
+      doc.text(`Período: ${this.formatearFecha(this.filtros.fechaInicio)} - ${this.formatearFecha(this.filtros.fechaFin)}`,
+        margin.left, currentY);
 
-      // Fechas del reporte
-      doc.text(`Período: ${this.formatearFecha(this.filtros.fechaInicio)} - ${this.formatearFecha(this.filtros.fechaFin)}`, 
-               margin.left, currentY);
       currentY += 10;
 
-      // Configuración de la tabla
-      const headers = [
-        ['Fecha', 'Factura', 'Valor Exonerado', 'Valor Exento', 'Valor Gravado', 'ISV', 'Total']
-      ];
-
-      const data = this.datosReporte.map(item => [
-        this.formatearFecha(item.fecha),
-        item.numero_factura_sar,
-        this.formatearMoneda(item.valor_exonerado),
-        this.formatearMoneda(item.valor_exento),
-        this.formatearMoneda(item.valor_gravado),
-        this.formatearMoneda(item.isv),
-        this.formatearMoneda(item.total)
-      ]);
-
+      // Tabla de datos
       doc.autoTable({
-        head: headers,
-        body: data,
         startY: currentY,
-        margin,
-        theme: 'grid',
-        styles: {
-          fontSize: 8,
-          cellPadding: 2
-        },
+        head: [['Fecha', 'Factura', 'Exento', 'Gravado', 'ISV', 'Total']],
+        body: this.datosReporte.map(item => [
+          this.formatearFecha(item.fecha),
+          item.numero_factura_sar,
+          this.formatearMoneda(item.valor_exento),
+          this.formatearMoneda(item.valor_gravado),
+          this.formatearMoneda(item.isv),
+          this.formatearMoneda(item.total)
+        ]),
+        styles: { fontSize: 10 },
         headStyles: {
-          fillColor: [71, 71, 71],
-          textColor: [255, 255, 255],
-          fontSize: 8,
-          fontStyle: 'bold'
+          fillColor: [41, 128, 185],
+          textColor: 255,
+          fontStyle: 'bold',
+          halign: 'center'
         },
         columnStyles: {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 25 },
-          2: { cellWidth: 28, halign: 'right' },
-          3: { cellWidth: 28, halign: 'right' },
-          4: { cellWidth: 28, halign: 'right' },
-          5: { cellWidth: 25, halign: 'right' },
-          6: { cellWidth: 25, halign: 'right' }
+          0: { halign: 'left' },
+          1: { halign: 'center' },
+          2: { halign: 'right' },
+          3: { halign: 'right' },
+          4: { halign: 'right' },
+          5: { halign: 'right', fontStyle: 'bold' }
         },
+        margin,
         didDrawPage: (data) => {
-          // Agregar pie de página
-          if (this.headerFooterConfig?.footer?.enabled) {
-            const footerY = pageHeight - 15;
+          if (this.headerFooterConfig.footer.enabled) {
+            const footerY = doc.internal.pageSize.height - 15;
             doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
 
-            let footerText = '';
-            const now = new Date();
-            const fecha = now.toLocaleDateString();
-            const totalPages = doc.internal.getNumberOfPages();
+            const footerText = this.getFooterText(data.pageNumber, doc.getNumberOfPages());
+            const alignment = this.headerFooterConfig.footer.alignment || 'center';
+            const xPos = alignment === 'left' ? margin.left :
+              alignment === 'right' ? pageWidth - margin.right :
+                pageWidth / 2;
 
-            switch (this.headerFooterConfig.footer.template) {
-              case 'custom':
-                footerText = this.headerFooterConfig.footer.customText
-                  .replace('{FECHA}', fecha)
-                  .replace('{TOTAL_PAGINAS}', totalPages)
-                  .replace('{PAGINA}', data.pageNumber);
-                break;
-              case 'basic':
-                footerText = `Generado el ${fecha}`;
-                break;
-              case 'detailed':
-                footerText = `Generado el ${fecha} a las ${now.toLocaleTimeString()}`;
-                break;
-            }
-
-            let x;
-            switch (this.headerFooterConfig.footer.alignment) {
-              case 'left':
-                x = margin.left;
-                break;
-              case 'right':
-                x = pageWidth - margin.right;
-                break;
-              default:
-                x = pageWidth / 2;
-            }
-
-            doc.text(footerText, x, footerY, { 
-              align: this.headerFooterConfig.footer.alignment 
-            });
+            doc.text(footerText, xPos, footerY, { align: alignment });
           }
         }
       });
 
-      // Guardar el PDF
-      const fileName = `reporte_${this.reporteSeleccionado}_${this.filtros.fechaInicio}.pdf`;
-      doc.save(fileName);
+      doc.save(`reporte_${this.reporteSeleccionado}_${this.filtros.fechaInicio}.pdf`);
+    },
+
+    getFooterText(currentPage, totalPages) {
+      const now = new Date();
+      const fecha = now.toLocaleDateString();
+      const hora = now.toLocaleTimeString();
+
+      switch (this.headerFooterConfig.footer.template) {
+        case 'basic':
+          return `Generado el ${fecha}`;
+        case 'detailed':
+          return `Generado el ${fecha} a las ${hora}`;
+        case 'custom':
+          return this.headerFooterConfig.footer.customText
+            .replace('{FECHA}', fecha)
+            .replace('{HORA}', hora)
+            .replace('{PAGINA}', currentPage)
+            .replace('{TOTAL_PAGINAS}', totalPages);
+        default:
+          return `Generado el ${fecha}`;
+      }
     },
 
     async exportarExcel() {
@@ -764,24 +738,24 @@ try {
     // Cargar logo guardado si existe
     try {
       const savedLogo = localStorage.getItem('logoEmpresa');
-    if (savedLogo) {
-      this.logoUrl = savedLogo;
-    }
-    this.id_usuario = await solicitudes.solicitarUsuarioToken();
-    this.esCeo = await esCeo(this.id_usuario);
-    
-    // Cargar datos iniciales
-    await this.cargarDatos();
-    
-    // Si hay fechas por defecto, generar el reporte
-    if (this.fechasValidas) {
-      await this.generarReporte('preview');
-    }
+      if (savedLogo) {
+        this.logoUrl = savedLogo;
+      }
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      this.esCeo = await esCeo(this.id_usuario);
+
+      // Cargar datos iniciales
+      await this.cargarDatos();
+
+      // Si hay fechas por defecto, generar el reporte
+      if (this.fechasValidas) {
+        await this.generarReporte('preview');
+      }
     } catch (error) {
       console.log(error);
       notis('error', 'Error al cargar datos. Intente de nuevo');
     }
-   
+
   },
 
   watch: {
