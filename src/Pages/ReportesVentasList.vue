@@ -201,13 +201,15 @@ export default {
           companyName: '',
           address: '',
           phone: '',
-          email: ''
+          email: '',
+          showDivider: false  // añadido
         },
         footer: {
           enabled: true,
           template: 'basic',
           customText: 'Generado el {FECHA}',
-          alignment: 'center'
+          alignment: 'center',
+          showDivider: false  // añadido
         }
       },
       clientes: [],
@@ -583,92 +585,63 @@ export default {
       });
 
       const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
       const margin = { top: 20, right: 20, bottom: 20, left: 20 };
       let currentY = margin.top;
 
-      // Configuración de imagen
       if (this.logoUrl) {
         const dimensions = await this.getImageDimensions(this.logoUrl);
+        const maxLogoWidth = 40;
+        const maxLogoHeight = 40;
+        let logoWidth = maxLogoWidth;
+        let logoHeight = (dimensions.height * logoWidth) / dimensions.width;
 
-        // Posicionar imagen en la esquina superior izquierda
-        const logoWidth = 45;
-        const logoHeight = (dimensions.height * logoWidth) / dimensions.width;
+        if (logoHeight > maxLogoHeight) {
+          logoHeight = maxLogoHeight;
+          logoWidth = (dimensions.width * logoHeight) / dimensions.height;
+        }
+
         doc.addImage(this.logoUrl, 'PNG', margin.left, currentY, logoWidth, logoHeight);
 
-        // Alinear texto del header a la derecha de la imagen
         if (this.headerFooterConfig.header.enabled) {
-          const textStartX = margin.left + logoWidth + 10; // 10mm de espacio después del logo
-
-          // Título de empresa
+          const textStartX = margin.left + logoWidth + 10;
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(16);
-          doc.text(this.headerFooterConfig.header.companyName, textStartX, currentY + 8);
-
-          // Información de empresa
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(11);
-          currentY += 15;
-          doc.text(this.headerFooterConfig.header.address, textStartX, currentY);
-
-          currentY += 6;
-          doc.text(this.headerFooterConfig.header.phone, textStartX, currentY);
-
-          currentY += 6;
-          doc.text(this.headerFooterConfig.header.email, textStartX, currentY);
-
-          /// Título "Reporte de Ventas" alineado a la izquierda
-          currentY += 10;
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(14);
-          doc.text(this.headerFooterConfig.header.text, margin.left, currentY);
-        }
-
-        currentY += 15;
-      } else {
-        // Si no hay logo, centrar el header
-        if (this.headerFooterConfig.header.enabled) {
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(16);
-          doc.text(this.headerFooterConfig.header.companyName, pageWidth / 2, currentY, { align: 'center' });
+          doc.text(this.headerFooterConfig.header.companyName, textStartX, currentY + 7);
 
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(11);
-          currentY += 8;
-          doc.text(this.headerFooterConfig.header.address, pageWidth / 2, currentY, { align: 'center' });
+          doc.text(this.headerFooterConfig.header.address, textStartX, currentY + 14);
+          doc.text(this.headerFooterConfig.header.phone, textStartX, currentY + 21);
+          doc.text(this.headerFooterConfig.header.email, textStartX, currentY + 28);
 
-          currentY += 6;
-          doc.text(this.headerFooterConfig.header.phone, pageWidth / 2, currentY, { align: 'center' });
+          currentY += Math.max(logoHeight, 35);
 
-          currentY += 6;
-          doc.text(this.headerFooterConfig.header.email, pageWidth / 2, currentY, { align: 'center' });
+          if (this.headerFooterConfig.header.showDivider) {
+            doc.setDrawColor(0);
+            doc.setLineWidth(0.5);
+            doc.line(margin.left, currentY + 5, pageWidth - margin.right, currentY + 5);
+            currentY += 10;
+          }
 
-          currentY += 15;
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(14);
-          doc.text(this.headerFooterConfig.header.text, pageWidth / 2, currentY, { align: 'center' });
-
-          currentY += 15;
+          doc.text(this.headerFooterConfig.header.text, margin.left, currentY + 10);
+          currentY += 20;
         }
       }
-
-      // Información del reporte
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(11);
-      doc.text(`Período: ${this.formatearFecha(this.filtros.fechaInicio)} - ${this.formatearFecha(this.filtros.fechaFin)}`,
-        margin.left, currentY);
-
-      currentY += 10;
 
       // Tabla de datos
       doc.autoTable({
         startY: currentY,
-        head: [['Fecha', 'Factura', 'Exento', 'Gravado', 'ISV', 'Total']],
+        head: [['Fecha', 'Factura', 'Exento', 'Gravado 15%', 'Gravado 18%', 'ISV', 'Total']],
         body: this.datosReporte.map(item => [
-          this.formatearFecha(item.fecha),
-          item.numero_factura_sar,
-          this.formatearMoneda(item.valor_exento),
-          this.formatearMoneda(item.valor_gravado),
-          this.formatearMoneda(item.isv),
+          item.fecha ? this.formatearFecha(item.fecha) : 'N/A',
+          item.numero_factura_sar || 'N/A',
+          this.formatearMoneda(item.valor_extento),
+          this.formatearMoneda(item.gravado_15),
+          this.formatearMoneda(item.gravado_18),
+          this.formatearMoneda(item.total_isv),
           this.formatearMoneda(item.total)
         ]),
         styles: { fontSize: 10 },
@@ -684,25 +657,45 @@ export default {
           2: { halign: 'right' },
           3: { halign: 'right' },
           4: { halign: 'right' },
-          5: { halign: 'right', fontStyle: 'bold' }
+          5: { halign: 'right' },
+          6: { halign: 'right', fontStyle: 'bold' }
         },
         margin,
         didDrawPage: (data) => {
           if (this.headerFooterConfig.footer.enabled) {
-            const footerY = doc.internal.pageSize.height - 15;
+            const footerY = pageHeight - margin.bottom;
+
+            if (this.headerFooterConfig.footer.showDivider) {
+              doc.setDrawColor(0);
+              doc.setLineWidth(0.5);
+              doc.line(margin.left, footerY - 15, pageWidth - margin.right, footerY - 15);
+            }
+
             doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
-
             const footerText = this.getFooterText(data.pageNumber, doc.getNumberOfPages());
-            const alignment = this.headerFooterConfig.footer.alignment || 'center';
-            const xPos = alignment === 'left' ? margin.left :
-              alignment === 'right' ? pageWidth - margin.right :
-                pageWidth / 2;
 
-            doc.text(footerText, xPos, footerY, { align: alignment });
+            doc.text(
+              footerText,
+              this.headerFooterConfig.footer.alignment === 'left' ? margin.left :
+                this.headerFooterConfig.footer.alignment === 'right' ? pageWidth - margin.right :
+                  pageWidth / 2,
+              footerY - 5,
+              { align: this.headerFooterConfig.footer.alignment }
+            );
           }
         }
       });
+
+      // Totales
+      const finalY = doc.lastAutoTable.finalY || currentY;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text(`Total Exento: ${this.formatearMoneda(this.totales.exento)}`, pageWidth - margin.right, finalY + 10, { align: 'right' });
+      doc.text(`Total Gravado 15%: ${this.formatearMoneda(this.totales.gravado_15)}`, pageWidth - margin.right, finalY + 15, { align: 'right' });
+      doc.text(`Total Gravado 18%: ${this.formatearMoneda(this.totales.gravado_18)}`, pageWidth - margin.right, finalY + 20, { align: 'right' });
+      doc.text(`Total ISV: ${this.formatearMoneda(this.totales.total_isv)}`, pageWidth - margin.right, finalY + 25, { align: 'right' });
+      doc.text(`Total General: ${this.formatearMoneda(this.totales.total)}`, pageWidth - margin.right, finalY + 30, { align: 'right' });
 
       doc.save(`reporte_${this.reporteSeleccionado}_${this.filtros.fechaInicio}.pdf`);
     },

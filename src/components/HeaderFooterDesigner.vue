@@ -39,6 +39,16 @@
                         <label>Correo Electrónico</label>
                         <input type="text" v-model="localConfig.header.email" placeholder="Correo Electrónico">
                     </div>
+
+                    <div class="input-group">
+                        <div class="switch-group">
+                            <label>Línea divisoria del encabezado</label>
+                            <label class="switch">
+                                <input type="checkbox" v-model="localConfig.header.showDivider">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -80,6 +90,16 @@
                             <option value="center">Centro</option>
                             <option value="right">Derecha</option>
                         </select>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="switch-group">
+                            <label>Línea divisoria del pie de página</label>
+                            <label class="switch">
+                                <input type="checkbox" v-model="localConfig.footer.showDivider">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -123,25 +143,28 @@ export default {
                     companyName: '',
                     address: '',
                     phone: '',
-                    email: ''
+                    email: '',
+                    showDivider: false
                 },
                 footer: {
                     enabled: true,
                     template: 'basic',
                     customText: 'Generado el {FECHA}',
-                    alignment: 'center'
+                    alignment: 'center',
+                    showDivider: false
                 }
             })
         },
+
         datosInstituto: {
-        type: Object, // Especificamos que es un objeto
-        default: () => ({
-            nombre: '',
-            direccion: '',
-            correo: '',
-            telefono: ''
-        })
-    }
+            type: Object, // Especificamos que es un objeto
+            default: () => ({
+                nombre: '',
+                direccion: '',
+                correo: '',
+                telefono: ''
+            })
+        }
     },
 
     emits: ['update:modelValue', 'save'],
@@ -216,7 +239,6 @@ export default {
         },
 
         saveChanges() {
-            // Asegurarnos de que todos los campos necesarios existan
             const configToSave = {
                 header: {
                     enabled: this.localConfig.header.enabled,
@@ -224,13 +246,15 @@ export default {
                     companyName: this.localConfig.header.companyName || '',
                     address: this.localConfig.header.address || '',
                     phone: this.localConfig.header.phone || '',
-                    email: this.localConfig.header.email || ''
+                    email: this.localConfig.header.email || '',
+                    showDivider: this.localConfig.header.showDivider || false
                 },
                 footer: {
                     enabled: this.localConfig.footer.enabled,
                     template: this.localConfig.footer.template || 'basic',
                     customText: this.localConfig.footer.customText || 'Generado el {FECHA}',
-                    alignment: this.localConfig.footer.alignment || 'center'
+                    alignment: this.localConfig.footer.alignment || 'center',
+                    showDivider: this.localConfig.footer.showDivider || false
                 }
             };
 
@@ -464,6 +488,12 @@ select {
     background-color: white;
     transition: .4s;
     border-radius: 50%;
+}
+
+.switch-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 input:checked+.slider {
