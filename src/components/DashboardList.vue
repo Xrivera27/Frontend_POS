@@ -46,7 +46,7 @@
             <td>{{ sale.fecha }}</td>
             <td>{{ sale.total }}</td>
             <td>
-              <a href="#">Ver más</a>
+              <router-link to="/administrar-ventas" class="card-link">Ver más</router-link>
               <!-- <span>|</span>
               <button style="font-size: 1rem;">Descargar</button> -->
             </td>
