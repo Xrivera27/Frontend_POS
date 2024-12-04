@@ -68,7 +68,7 @@
                 <i class="bi bi-pencil-square"></i></button>
             </td>
             <td>{{ producto.precio_unitario }}</td>
-            <td>Inactivo</td>
+            <td>{{ producto.promocion }}</td>
             <td v-if="esCeo">
               <button id="btnEditar" class="btn btn-warning" @click="editProducto(producto, index)">
                 <i class="bi bi-pencil-fill"></i>

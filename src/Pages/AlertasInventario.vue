@@ -8,10 +8,25 @@
         v-for="(product, index) in sortedProducts" 
         :key="index"
         :class="getEstadoClass(product.puntaje)"
+        @click="openModal(product)"
       >
         <div class="product-name">{{ product.name }}</div>
         <div class="product-descripcion">Descripción: {{ product.descripcion }}</div>
         <div class="product-status">Estado: {{ getEstadoLabel(product.puntaje) }}</div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div v-if="selectedProduct" class="modal-overlay" @click.self="closeModal">
+      <div class="modal-content">
+        <button class="modal-close" @click="closeModal">&times;</button>
+        <h2 class="modal-title">{{ selectedProduct.name }}</h2>
+        <p class="modal-description">{{ selectedProduct.descripcion }}</p>
+        <div class="modal-status">
+          <span :class="getEstadoClass(selectedProduct.puntaje)">
+            Estado: {{ getEstadoLabel(selectedProduct.puntaje) }}
+          </span>
+        </div>
       </div>
     </div>
   </div>
@@ -30,9 +45,9 @@ export default {
   data() {
     return {
       titulo: "Alertas de Inventario",
-      alertas: [
-      ],
+      alertas: [],
       id_usuario: '',
+      selectedProduct: null
     };
   },
 
@@ -53,16 +68,21 @@ export default {
       if (puntaje >= 45  && puntaje < 80) return "atencion";
       if (puntaje < 45) return "normal";
     },
+    openModal(product) {
+      this.selectedProduct = product;
+    },
+    closeModal() {
+      this.selectedProduct = null;
+    }
   },
   async mounted() {
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
-    this.alertas = await getAlerts(this.id_usuario);
-    console.log(this.alertas);
+      this.alertas = await getAlerts(this.id_usuario);
+      console.log(this.alertas);
     } catch (error) {
       alert(error);
     }
-   
   }
 };
 </script>
@@ -173,6 +193,78 @@ body {
 
 .normal .product-status {
   color: #2ecc71;
+}
+
+/* Previous styles remain the same, adding modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 30px;
+  cursor: pointer;
+  color: #888;
+}
+
+.modal-title {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.modal-description {
+  margin-bottom: 15px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.modal-status {
+  font-weight: bold;
+  text-align: center;
+  margin-top: 15px;
+}
+
+/* ACTIVA EL DARKMODE EN EL MODAL DE DESCRIPCION */
+.dark .modal-content {
+  background: #2d2d2d;
+  color: #fff;
+}
+
+.dark .modal-close {
+  color: #b0b0b0;
+}
+
+.dark .modal-title {
+  color: #fff;
+}
+
+.dark .modal-description {
+  color: #b0b0b0;
 }
 
 @media (max-width: 768px) {
