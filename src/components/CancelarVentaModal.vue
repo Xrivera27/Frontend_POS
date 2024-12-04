@@ -42,8 +42,9 @@
       </div>
     </div>
   </template>
-  
-  <script>
+
+
+<script>
   export default {
     name: 'CancelSaleModal',
     props: {
