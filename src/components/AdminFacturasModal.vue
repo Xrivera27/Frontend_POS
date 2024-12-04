@@ -47,7 +47,7 @@
           :disabled="loading"
         >
           <i class="bi bi-files"></i>
-          {{ esCopia ? 'Facura Original' : 'Factura Copia' }}
+          {{ esCopia ? 'Factura Original' : 'Factura Copia' }}
         </button>
         <button 
           class="btn btn-descargar" 
@@ -108,7 +108,7 @@ export default {
     const retryCount = ref(0);
     const MAX_RETRIES = 3;
     const pdfLoadTimeout = ref(null);
-    const esCopia = ref(false);
+    const esCopia = ref(true); // Changed to true by default
 
     const handlePdfLoad = () => {
       if (pdfLoadTimeout.value) {
@@ -260,7 +260,7 @@ export default {
       error.value = false;
       errorMessage.value = '';
       retryCount.value = 0;
-      esCopia.value = false;
+      esCopia.value = true; // Reset to true instead of false
       emit('close');
     };
 
@@ -270,7 +270,7 @@ export default {
         errorMessage.value = '';
         lastResponse.value = null;
         retryCount.value = 0;
-        esCopia.value = false;
+        esCopia.value = true; // Reset to true instead of false
         if (pdfUrl.value) {
           URL.revokeObjectURL(pdfUrl.value);
           pdfUrl.value = null;
