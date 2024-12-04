@@ -75,64 +75,80 @@
     </div>
 
     <div class="modal" v-if="showConfirmModal">
-      <div class="modal-content">
-        <h2>Confirmación</h2>
-        <p>¿Estás seguro de que quieres eliminar este proveedor?</p>
-        <div class="modal-actions">
-          <button class="btn modalShowConfirm-Si" @click="deleteProveedor()">
-            Sí, eliminar
-          </button>
-          <button class="btn modalShowConfirm-no" @click="cancelDelete">
-            No, regresar
-          </button>
+      <div class="modal-confirm">
+        <div class="modal-header">
+          <h2>Confirmación</h2>
         </div>
+
+        <div class="modal-body-confirm">
+          <p>¿Estás seguro de que quieres eliminar este proveedor?</p>
+        </div>
+
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteProveedor()" />
+            <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
+          </div>
+        </div>
+
       </div>
     </div>
 
     <!-- Modal para agregar o editar proveedores -->
     <div v-if="isModalOpen" class="modal">
-      <div class="modal-content">
-        <h2 class="h2-modal-content">{{ isEditing ? 'Editar Proveedor' : 'Agregar Proveedor' }}</h2>
-
-        <div class="form-group">
-          <label>Nombre:</label>
-          <input v-model="proveedorForm.nombre" type="text" required>
+      <div class="modal-proveedores">
+        <div class="modal-header">
+          <h2 class="h2-modal-proveedores">{{ isEditing ? 'Editar Proveedor' : 'Agregar Proveedor' }}</h2>
         </div>
 
-        <div class="form-group">
-          <label>Teléfono:</label>
-          <div class="phone-input-container">
-            <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
-              <option value="">País</option>
-              <option v-for="(country, code) in countryData" :key="code" :value="code">
-                {{ country.emoji }} {{ country.code }}
-              </option>
-            </select>
-            <input v-model="proveedorForm.telefono" type="text" class="input-phone"
-              :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+        <div class="modal-body">
+          <div class="contenedor">
+            <div class="form-group">
+              <label>Nombre:</label>
+              <input v-model="proveedorForm.nombre" type="text" required>
+            </div>
+
+            <div class="form-group">
+              <label>Teléfono:</label>
+              <div class="phone-input-container">
+                <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+                  <option value="">País</option>
+                  <option v-for="(country, code) in countryData" :key="code" :value="code">
+                    {{ country.emoji }} {{ country.code }}
+                  </option>
+                </select>
+                <input v-model="proveedorForm.telefono" type="text" class="input-phone"
+                  :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Email:</label>
+              <input v-model="proveedorForm.correo" type="text" required>
+            </div>
+
+            <div class="form-group">
+              <label>Dirección:</label>
+              <input v-model="proveedorForm.direccion" type="text" required>
+            </div>
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Email:</label>
-          <input v-model="proveedorForm.correo" type="text" required>
+        <div class="modal-footer">
+          <div class="action-buttons">
+            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Proveedor'" @click="guardarProveedor">
+            </btnGuardarModal>
+            <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label>Dirección:</label>
-          <input v-model="proveedorForm.direccion" type="text" required>
-        </div>
-
-        <btnGuardarModal id="btnAggProv" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Proveedor'"
-          @click="guardarProveedor">
-        </btnGuardarModal>
-        <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+
 import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
@@ -372,6 +388,7 @@ export default {
   }
 };
 </script>
+
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
@@ -379,6 +396,163 @@ export default {
 * {
   font-family: 'Montserrat', sans-serif;
   box-sizing: border-box;
+}
+
+.modal {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-confirm {
+  background: white;
+  border-radius: 12px;
+  width: 25%;
+  max-width: 1000px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
+}
+
+.modal-body-confirm {
+  padding: 24px;
+  overflow-y: auto;
+  background-color: white
+}
+
+
+.modal-proveedores {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 20px;
+  overflow: hidden;
+}
+
+.dark .modal-usuario {
+  background-color: #2d2d2d;
+  color: #fff;
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.dark .modal-header,
+.dark .modal-footer {
+  background-color: #1e1e1e;
+  border-color: #404040;
+}
+
+.dark .modal-header h2 {
+  color: #fff;
+}
+
+.modal-body {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.modal-body-confirm {
+  padding: 24px;
+  overflow-y: auto;
+  background-color: white
+}
+
+.dark .modal-body-confirm {
+  background-color: #333;
+}
+
+.contenedor {
+  width: 90%;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 1px;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+}
+
+.dark .form-group label {
+  color: #fff;
+}
+
+.dark .form-group input,
+.dark .form-group textarea,
+.dark .form-group select {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .form-group input,
+.dark .form-group select {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f9fa;
 }
 
 /* Opciones */
@@ -591,55 +765,9 @@ select {
   color: white;
 }
 
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+.action-buttons {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modalShowConfirm-Si {
-  background-color: #dc3545;
-  color: white;
-}
-
-.modalShowConfirm-no {
-  background-color: #6c757d;
-  color: white;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 4px;
-  width: 90%;
-  max-width: 500px;
-  margin: 20px;
-}
-
-/* Estilo de formulario */
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-group label {
-  margin-bottom: 8px;
-  display: flex;
-}
-
-.form-group input {
-  width: 100%;
-  height: 35px;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  gap: 12px;
 }
 
 .phone-input-container {
@@ -674,12 +802,6 @@ select {
   color: #fff;
 }
 
-
-/* Otros estilos */
-.h2-modal-content {
-  margin-top: 0px;
-}
-
 /* Estilo para scroll personalizado */
 .table-container::-webkit-scrollbar {
   width: 8px;
@@ -700,11 +822,21 @@ select {
   background: #a38655;
 }
 
+
 /* Media Queries */
 @media screen and (max-width: 768px) {
   .opciones {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .modal-body {
+    flex-direction: column;
+  }
+
+  .contenedor {
+    width: 100%;
+    margin-bottom: 20px;
   }
 
   .busqueda,
@@ -734,7 +866,7 @@ select {
 
 @media screen and (max-width: 480px) {
 
-  .modal-content {
+  .modal-proveedores {
     width: 95%;
     padding: 15px;
   }
@@ -749,7 +881,7 @@ select {
     margin-bottom: 12px;
   }
 
-  .h2-modal-content {
+  .h2-modal-proveedores {
     font-size: 20px;
   }
 }
@@ -810,24 +942,6 @@ select {
   background-color: #1f2937;
 }
 
-
-/* Modal en modo oscuro */
-.dark .modal-content {
-  background-color: #2d2d2d;
-  color: #fff;
-}
-
-.dark .modal-content input,
-.dark .modal-content textarea {
-  background-color: #383838;
-  border-color: #404040;
-  color: #fff;
-}
-
-.dark .form-group label {
-  color: #fff;
-}
-
 /* Scroll personalizado en modo oscuro */
 .dark .table-container::-webkit-scrollbar-track {
   background: #2d2d2d;
@@ -877,16 +991,6 @@ select {
 
 .dark #btnEliminar:hover {
   background-color: #b72433;
-}
-
-.dark .modalShowConfirm-Si {
-  background-color: #dc3545;
-  color: white;
-}
-
-.dark .modalShowConfirm-no {
-  background-color: #6c757d;
-  color: white;
 }
 
 /* Agregar estos estilos en la sección <style> */

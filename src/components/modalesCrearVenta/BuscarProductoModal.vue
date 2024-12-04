@@ -89,6 +89,7 @@ export default {
                 return searchValue.includes(query);
             });
         },
+        
         validateQuantity(event) {
             const value = event.target.value;
             // Solo permitir números
@@ -97,6 +98,7 @@ export default {
             }
             this.cantidad = event.target.value ? Number(event.target.value) : 1; // Asegurarse de que la cantidad sea al menos 1
         },
+
         selectProduct(product) {
             console.log(product.precio_unitario);
             this.$emit('product-selected', {
@@ -128,7 +130,7 @@ export default {
         productos: {
             immediate: true,
             handler(newProducts) {
-               // console.log('Productos recibidos:', newProducts); // Para debugging
+                // console.log('Productos recibidos:', newProducts); // Para debugging
                 this.filteredProducts = [...newProducts];
             }
         },

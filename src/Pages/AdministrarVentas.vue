@@ -396,6 +396,7 @@ export default {
 /* Botón de exportación */
 .export-button {
   margin: 0;
+  z-index: 1000;
 }
 
 /* Botones de acción */
