@@ -33,9 +33,7 @@
             <button class="btn editar" @click.prevent="isEditing(3)" :disabled="!businessEditing">Editar</button>
             <button class="btn guardar" @click.prevent="updateempresa" :disabled="businessEditing">Guardar</button>
 
-            <router-link to="/config-sar">
-              <button type="button" class="btn SAR" :disabled="businessEditing">Config SAR</button>
-            </router-link>
+            
           </div>
         </form>
       </div>
@@ -45,6 +43,7 @@
       </router-link>
 
       <button class="btn boton-switch activo">Config. Empresa</button>
+
     </div>
   </div>
 </template>

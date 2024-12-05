@@ -92,12 +92,15 @@
         Config. Usuario
       </button>
 
-      <router-link to="/config-company">
+      <router-link to="/config-company" v-if="esCeo"  >
         <button :class="{ 'inactivo': userActive, 'activo': !userActive }" :disabled="companyBoton"
           class="btn boton-switch">
           Config. Empresa
         </button>
       </router-link>
+      <router-link to="/config-sar" v-if="!esCeo" >
+              <button type="button" class="btn SAR" >Config SAR</button>
+            </router-link>
     </div>
   </div>
 </template>
@@ -110,6 +113,7 @@ import { notis } from '../../services/notificaciones.js';
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
 import { validacionesConfigPage } from "../../services/validarCampos.js"
 import solicitudes from "../../services/solicitudes.js";
+const { esCeo  } = require('../../services/usuariosSolicitudes');
 
 export default {
   components: {
@@ -125,7 +129,9 @@ export default {
       isPassEdit: false,
       userBoton: true,
       companyBoton: false,
+      id_usuario: '',
       showUser: true,
+      esCeo: false,
       userActive: true,
       usuarioEditing: true,
       usuarioAvancedEditing: true,
@@ -315,14 +321,22 @@ export default {
       document.getElementsByTagName('head')[0].appendChild(link);
     }
   },
-  mounted() {
+  async mounted() {
     this.getUserData();
     document.title = "Configuración de Usuario";
     this.changeFavicon('/img/spiderman.ico');
 
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      this.esCeo = await esCeo(this.id_usuario);
+    } catch (error) {
+      notis('error', error.message);
+    }
+
     if (localStorage.getItem('showUpdateSuccess')) {
       notis("success", 'Usuario actualizado exitosamente');
       localStorage.removeItem('showUpdateSuccess');
+ 
     }
   },
 };
@@ -667,7 +681,7 @@ input {
   color: #fff;
 }
 
-.dark .SAR:disabled {
+.dark :disabled {
   background-color: #666;
   color: #999;
 }

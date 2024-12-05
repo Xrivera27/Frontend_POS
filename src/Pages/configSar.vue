@@ -37,13 +37,13 @@
             <button class="btn guardar" type="submit" :disabled="busisnessSarEditing"
               @click.prevent="updatesar">Guardar</button>
 
-            <router-link to="/config-company">
-              <button type="button" class="btn company">Config Empresa</button>
-            </router-link>
           </div>
         </form>
       </div>
     </div>
+    <router-link to="/config-page">
+              <button type="button" class="btn company">Config Usuario</button>
+            </router-link>
   </div>
 </template>
 
@@ -60,6 +60,7 @@ export default {
     return {
       titulo: 'Configuración SAR',
       busisnessSarEditing: true,
+      esCeo: false,
       configuracionSAR: {
         numero_CAI: '',
         rango_inicial: '',
