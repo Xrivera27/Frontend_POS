@@ -8,7 +8,6 @@
         Agregar Usuario
       </button>
 
-      <!-- Barra de búsqueda -->
       <div class="search-bar">
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar empleado..." />
       </div>
@@ -25,12 +24,10 @@
     </div>
 
     <div class="table-container">
-      <!-- Indicador de carga -->
       <div v-if="isLoading" class="loading-indicator">
         Cargando empleados...
       </div>
 
-      <!-- Mensaje si no hay datos -->
       <div v-else-if="paginatedEmpleados.length === 0" class="no-data">
         No se encontraron empleados para mostrar.
       </div>
@@ -69,7 +66,6 @@
         </tbody>
       </table>
 
-      <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
           Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize,
@@ -79,7 +75,6 @@
           <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
             Anterior
           </button>
-
           <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
             Siguiente
           </button>
@@ -89,7 +84,6 @@
 
     <div class="modal" v-if="showConfirmModal">
       <div class="modal-confirm">
-
         <div class="modal-header">
           <h2>Confirmación</h2>
         </div>
@@ -105,7 +99,6 @@
       </div>
     </div>
 
-    <!-- Modal para agregar o editar empleados -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-usuario">
         <div class="modal-header">
@@ -130,6 +123,7 @@
               <label>Nombre de Usuario:</label>
               <input v-model="usuarioForm.nombre_usuario" type="text" required />
             </div>
+
             <div class="form-group">
               <label>Correo:</label>
               <input v-model="usuarioForm.correo" type="text" required />
@@ -137,28 +131,42 @@
 
             <div class="form-group">
               <label for="rol">Selecciona rol:</label>
-
               <select class="form-select" id="rol" name="rol" value="default" v-model="usuarioForm.rol" required>
                 <option value="" disabled selected>Selecciona un rol</option>
                 <option v-for="(rol, index) in roles" :key="index" :value="rol.id_rol">{{ rol.cargo }}</option>
               </select>
             </div>
           </div>
+
           <div class="contenedor contenedor-derecho">
             <div class="form-group">
               <label>
                 <span class="info-icon" @mouseover="showTooltip = true" @mouseleave="showTooltip = false">ℹ️</span>
                 Contraseña:
               </label>
-              <input v-model="usuarioForm.password" type="text" required :disabled="!isPassEdit" />
+              <div class="password-wrapper">
+                <input v-model="usuarioForm.password" :type="showPassword ? 'text' : 'password'" required
+                  :disabled="!isPassEdit" />
+                <button type="button" class="toggle-password" @click="showPassword = !showPassword" :disabled="!isPassEdit">
+                  <i :class="showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'"></i>
+                </button>
+              </div>
               <div v-if="showTooltip" class="tooltip">
                 La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un
                 número y un símbolo.
               </div>
             </div>
+
             <div class="form-group">
               <label>Confirmar contraseña:</label>
-              <input v-model="usuarioForm.confirmPassword" type="text" required :disabled="!isPassEdit" />
+              <div class="password-wrapper">
+                <input v-model="usuarioForm.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" required
+                  :disabled="!isPassEdit" />
+                <button type="button" class="toggle-password" @click="showConfirmPassword = !showConfirmPassword"
+                  :disabled="!isPassEdit">
+                  <i :class="showConfirmPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'"></i>
+                </button>
+              </div>
             </div>
 
             <div class="form-group">
@@ -240,6 +248,7 @@ export default {
       isEditing: false,
       isPassEdit: true,
       showPassword: false,
+      showConfirmPassword: false,
       selectedCountry: 'HN',
       countryData: COUNTRY_CODES,
       phoneLength: 8,
@@ -265,7 +274,6 @@ export default {
       empleados: []
     };
   },
-
   computed: {
     filteredEmpleados() {
       return this.empleados
@@ -276,35 +284,28 @@ export default {
           empleado.nombre_usuario.toLowerCase().includes(this.searchQuery.toLowerCase())
         );
     },
-
     paginatedEmpleados() {
       const startIndex = (this.currentPage - 1) * this.pageSize;
       const endIndex = startIndex + this.pageSize;
       return this.filteredEmpleados.slice(startIndex, endIndex);
     },
-
     totalPages() {
       return Math.ceil(this.filteredEmpleados.length / this.pageSize);
     }
   },
-
   methods: {
     updatePhoneValidation() {
       if (this.selectedCountry && this.countryData[this.selectedCountry]) {
         this.phoneLength = this.countryData[this.selectedCountry].length;
       }
     },
-
-
     openModal() {
       this.isModalOpen = true;
     },
-
     closeModal() {
       this.isModalOpen = false;
       this.clearForm();
     },
-
     clearForm() {
       this.usuarioForm = {
         id_usuario: '',
@@ -322,98 +323,90 @@ export default {
       this.isEditing = false;
       this.editIndex = null;
       this.isPassEdit = true;
+      this.showPassword = false;
+      this.showConfirmPassword = false;
     },
-
     getRol(id_rol) {
       const rol = this.roles.find(rol => rol.id_rol === id_rol);
       return rol ? rol.cargo : 'Desconocido';
     },
-
     async getUsuarios(sucursales) {
       try {
         if (sucursales.length === 1) {
-
           this.empleados = await getUsuariosSucrusal(this.id_usuario, sucursales[0].id_sucursal);
           this.searchSucursal = sucursales[0].id_sucursal;
           this.usuarioForm.sucursal = sucursales[0].id_sucursal;
-        }
-
-        else {
+        } else {
           this.empleados = await getUsuariosEmpresa(this.id_usuario);
         }
       } catch (error) {
         notis('error', 'Error al obtener usuarios.');
       }
     },
-
     editarPassword() {
       this.isPassEdit = true;
     },
-
     async guardarUsuario() {
-  if (!(await validacionesUsuario.validarCampos(
-    this.usuarioForm, 
-    this.isPassEdit, 
-    this.selectedCountry,
-    this.isEditing
-  ))) {
-    return;
-  }
-
-  this.isLoading = true;
-
-  try {
-    let response;
-    let parametros;
-
-    if (this.isEditing) {
-      parametros = `/usuario/actualizar/${this.empleados[this.editIndex].id_usuario}`;
-      response = await solicitudes.patchRegistro(
-        parametros,
-        this.limpiarForm(this.usuarioForm)
-      );
-
-      if (response === true) {
-        notis('success', "Actualizando datos del usuario...");
-        Object.assign(this.empleados[this.editIndex], this.usuarioForm);
-      } else {
-        notis('error', response);
+      if (!(await validacionesUsuario.validarCampos(
+        this.usuarioForm,
+        this.isPassEdit,
+        this.selectedCountry,
+        this.isEditing
+      ))) {
+        return;
       }
-    } else {
-      parametros = `/usuario/crear`;
-      response = await solicitudes.postRegistro(
-        parametros,
-        this.limpiarForm(this.usuarioForm)
-      );
 
-      if (response.length > 0) {
-        notis('success', "Usuario guardado correctamente...");
-        this.empleados.push(response[0]);
-      } else {
-        throw response;
+      this.isLoading = true;
+
+      try {
+        let response;
+        let parametros;
+
+        if (this.isEditing) {
+          parametros = `/usuario/actualizar/${this.empleados[this.editIndex].id_usuario}`;
+          response = await solicitudes.patchRegistro(
+            parametros,
+            this.limpiarForm(this.usuarioForm)
+          );
+
+          if (response === true) {
+            notis('success', "Actualizando datos del usuario...");
+            Object.assign(this.empleados[this.editIndex], this.usuarioForm);
+          } else {
+            notis('error', response);
+          }
+        } else {
+          parametros = `/usuario/crear`;
+          response = await solicitudes.postRegistro(
+            parametros,
+            this.limpiarForm(this.usuarioForm)
+          );
+
+          if (response.length > 0) {
+            notis('success', "Usuario guardado correctamente...");
+            this.empleados.push(response[0]);
+          } else {
+            throw response;
+          }
+        }
+        
+        this.closeModal();
+      } catch (error) {
+        notis('error', error.message);
+      } finally {
+        this.isLoading = false;
       }
-    }
-    
-    this.closeModal();
-  } catch (error) {
-    notis('error', error.message);
-  } finally {
-    this.isLoading = false;
-  }
-},
-
+    },
     previousPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
-
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
     },
-
     async deleteUsuariol(empleado) {
       if (!this.showConfirmModal) {
         this.empleadoToDelete = empleado;
@@ -444,12 +437,10 @@ export default {
         this.empleadoToDelete = null;
       }
     },
-
     cancelDelete() {
       this.showConfirmModal = false;
       this.empleadoToDelete = null;
     },
-
     editEmpleado(empleado) {
       this.editIndex = this.empleados.findIndex(item => item.id_usuario === empleado.id_usuario);
       this.usuarioForm = { ...empleado };
@@ -459,7 +450,6 @@ export default {
       this.isPassEdit = false;
       this.openModal();
     },
-
     limpiarForm(formulario) {
       return {
         nombre: formulario.nombre,
@@ -473,7 +463,6 @@ export default {
         id_rol: formulario.rol,
       };
     },
-
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
@@ -482,7 +471,6 @@ export default {
       document.getElementsByTagName('head')[0].appendChild(link);
     },
   },
-
   watch: {
     searchQuery() {
       this.currentPage = 1;
@@ -491,7 +479,6 @@ export default {
       this.currentPage = 1;
     }
   },
-
   async mounted() {
     this.isLoading = true;
     document.title = "Usuarios";
@@ -1149,4 +1136,52 @@ export default {
 .dark .table-container::-webkit-scrollbar-thumb:hover {
   background: #a38655;
 }
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  padding-right: 40px;
+  width: 100%;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: #666;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-password:disabled {
+  color: #999;
+  cursor: not-allowed;
+}
+
+.toggle-password:hover:not(:disabled) {
+  color: #333;
+}
+
+/* Estilos para modo oscuro */
+.dark .toggle-password {
+  color: #aaa;
+}
+
+.dark .toggle-password:hover:not(:disabled) {
+  color: #fff;
+}
+
+.dark .toggle-password:disabled {
+  color: #666;
+}
+
+
 </style>

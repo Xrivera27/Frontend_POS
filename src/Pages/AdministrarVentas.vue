@@ -11,10 +11,22 @@
         <input type="date" id="end-date" v-model="endDate">
       </div>
 
+      <!-- Filtro de estado -->
+      <div class="status-filter">
+        <label for="status-select">Estado: </label>
+        <select 
+          id="status-select" 
+          v-model="selectedStatus"
+          class="status-select"
+        >
+          <option value="">Todos</option>
+          <option value="Pagada">Pagadas</option>
+          <option value="Cancelada">Canceladas</option>
+        </select>
+      </div>
+
       <!-- Botón de exportación PDF -->
       <ExportButton :columns="columns" :rows="filteredRows" fileName="Ventas.pdf" class="export-button" />
-
-     
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
@@ -160,6 +172,7 @@ export default {
       searchQuery: '',
       startDate: '',
       endDate: '',
+      selectedStatus: '',
       selectedVenta: null,
       selectedVentaForCancel: null,
       isFacturaModalOpen: false,
@@ -198,7 +211,10 @@ export default {
           (!this.startDate || ventaFecha >= new Date(this.startDate + 'T00:00:00')) &&
           (!this.endDate || ventaFecha <= new Date(this.endDate + 'T23:59:59'));
 
-        return matchesSearchQuery && matchesDateRange;
+        const matchesStatus = 
+          !this.selectedStatus || venta.estado === this.selectedStatus;
+
+        return matchesSearchQuery && matchesDateRange && matchesStatus;
       });
     },
     paginatedVentas() {
@@ -293,40 +309,39 @@ export default {
     },
 
     async handleCancelSale(ventaId, description) {
-    try {
+      try {
         const response = await AdminVentas.cancelarVenta(ventaId, description);
         
         if (response.success) {
-            this.toast.success('Venta cancelada exitosamente');
+          this.toast.success('Venta cancelada exitosamente');
+          
+          try {
+            const blob = await AdminVentas.obtenerReporteCancelacion(ventaId);
             
-            try {
-                // Usar el nuevo método del servicio
-                const blob = await AdminVentas.obtenerReporteCancelacion(ventaId);
-                
-                // Crear y descargar el PDF
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `cancelacion_venta_${ventaId}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            } catch (reportError) {
-                console.error('Error al descargar reporte:', reportError);
-                this.toast.error('Error al generar el reporte de cancelación');
-            }
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cancelacion_venta_${ventaId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          } catch (reportError) {
+            console.error('Error al descargar reporte:', reportError);
+            this.toast.error('Error al generar el reporte de cancelación');
+          }
 
-            await this.loadVentas();
+          await this.loadVentas();
         } else {
-            throw new Error(response.message || 'Error al cancelar la venta');
+          throw new Error(response.message || 'Error al cancelar la venta');
         }
-    } catch (error) {
+      } catch (error) {
         console.error('Error:', error);
         this.toast.error('Error al cancelar la venta: ' + error.message);
         throw error;
-    }
-},
+      }
+    },
+
     generateRows() {
       this.rows = this.filteredRows;
     },
@@ -347,6 +362,7 @@ export default {
       this.searchQuery = '';
       this.startDate = '';
       this.endDate = '';
+      this.selectedStatus = '';
       this.currentPage = 1;
     }
   },
@@ -361,9 +377,12 @@ export default {
       this.currentPage = 1;
     },
     startDate() {
-      this.currentPage = 1; 
+      this.currentPage = 1;
     },
     endDate() {
+      this.currentPage = 1;
+    },
+    selectedStatus() {
       this.currentPage = 1;
     }
   },
@@ -391,6 +410,28 @@ export default {
   border-width: 0.5px;
   width: 100%;
   max-width: 300px;
+}
+
+/* Filtro de estado */
+.status-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-select {
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #ced4da;
+  font-size: 14px;
+  min-width: 120px;
+  cursor: pointer;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
 /* Botón de exportación */
@@ -648,7 +689,9 @@ export default {
   }
 
   .busqueda,
-  .export-button {
+  .export-button,
+  .status-filter,
+  .status-select {
     width: 100%;
     margin: 8px 0;
   }

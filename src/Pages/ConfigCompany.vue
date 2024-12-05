@@ -15,6 +15,10 @@
                 <label for="nombre-company">Nombre de la empresa:</label>
                 <input v-model="companyForm.nombre" type="text" id="nombre-company" name="nombre-company" />
 
+                <label for="rtn-empresa">RTN:</label>
+                <input v-model="companyForm.rtn" type="text" id="rtn" name="rtn-empresa" 
+                       pattern="[0-9]{14}" maxlength="14" placeholder="Ingrese los 14 dígitos"/>
+
                 <label for="telefono-empresa">Teléfono principal:</label>
                 <input v-model="companyForm.telefono_principal" type="text" id="telefono_principal"
                   name="telefono_empresa" />
@@ -26,9 +30,8 @@
             </div>
           </fieldset>
           <div class="botones-container">
-            <!-- Asegúrate de prevenir el comportamiento predeterminado -->
             <button class="btn editar" @click.prevent="isEditing(3)" :disabled="!businessEditing">Editar</button>
-            <button class="btn guardar" :disabled="businessEditing">Guardar</button>
+            <button class="btn guardar" @click.prevent="updateempresa" :disabled="businessEditing">Guardar</button>
 
             <router-link to="/config-sar">
               <button type="button" class="btn SAR" :disabled="businessEditing">Config SAR</button>
@@ -57,10 +60,13 @@ export default {
   data() {
     return {
       titulo: 'Configuración',
-      businessEditing: true, // Establece el formulario como deshabilitado por defecto
+      businessEditing: true,
+      isLoading: false,
+      errorMessage: '',
 
       companyForm: {
         nombre: '',
+        rtn: '',
         telefono_principal: '',
         correo_principal: ''
       },
@@ -80,25 +86,51 @@ export default {
         const companyData = response.data.empresa;
 
         this.companyForm.nombre = companyData.nombre || '';
+        this.companyForm.rtn = companyData.rtn || '';
         this.companyForm.telefono_principal = companyData.telefono_principal || '';
         this.companyForm.correo_principal = companyData.correo_principal || '';
       } catch (error) {
         console.error('Error al obtener los datos de la empresa:', error);
-        alert('No se pudo obtener la información de la empresa.');
+        this.errorMessage = 'No se pudo obtener la información de la empresa.';
       }
     },
 
+    validateForm() {
+      if (!this.companyForm.nombre.trim()) {
+        alert('El nombre de la empresa es requerido');
+        return false;
+      }
+      if (!this.companyForm.rtn.trim()) {
+        alert('El RTN de la empresa es requerido');
+        return false;
+      }
+      if (!/^\d{14}$/.test(this.companyForm.rtn)) {
+        alert('El RTN debe contener exactamente 14 dígitos numéricos');
+        return false;
+      }
+      if (!this.companyForm.correo_principal.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        alert('Por favor ingrese un correo válido');
+        return false;
+      }
+      return true;
+    },
+
     isEditing(orden) {
-      // Cambia businessEditing según la acción de editar
       this.businessEditing = orden !== 3;
     },
 
     async updateempresa() {
+      if (!this.validateForm()) return;
+      
+      this.isLoading = true;
+      this.errorMessage = '';
+      
       try {
         const token = localStorage.getItem('auth');
 
         const updatedData = {
           nombre: this.companyForm.nombre,
+          rtn: this.companyForm.rtn,
           telefono_principal: this.companyForm.telefono_principal,
           correo_principal: this.companyForm.correo_principal,
         };
@@ -112,11 +144,14 @@ export default {
 
         if (response.status === 200) {
           alert('Empresa actualizada exitosamente');
-          window.location.reload(); // Recargar la página después de guardar
+          window.location.reload();
         }
       } catch (error) {
         console.error('Error al actualizar los datos de la empresa:', error);
+        this.errorMessage = 'Hubo un problema al guardar los datos.';
         alert('Hubo un problema al guardar los datos.');
+      } finally {
+        this.isLoading = false;
       }
     },
   },
@@ -127,8 +162,6 @@ export default {
 };
 </script>
 
-
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
 
@@ -137,12 +170,10 @@ export default {
   font-family: 'Montserrat', sans-serif;
 }
 
-/* Configuración del usuario */
 .configuracion-usuario {
   padding: 16px;
 }
 
-/* Contenedores principales */
 .config-wrapper {
   padding: 16px;
   width: 100%;
@@ -171,7 +202,6 @@ export default {
   padding: 0 2%;
 }
 
-/* Formularios */
 form {
   border: 1px solid rgb(110, 109, 109);
   padding: 3% 0 2% 0;
@@ -197,7 +227,6 @@ fieldset:disabled input {
   color: #858585;
 }
 
-/* Estilos de entrada */
 input {
   padding: 0.5rem;
   border: 1px solid #ddd;
@@ -211,7 +240,6 @@ input {
   margin-bottom: 4%;
 }
 
-/* Títulos */
 .titulo-form {
   position: absolute;
   top: -11.5%;
@@ -220,7 +248,6 @@ input {
   color: #858585;
 }
 
-/* Botones */
 .botones-container {
   display: flex;
   justify-content: end;
@@ -262,7 +289,6 @@ input {
   color: rgb(255, 255, 255);
 }
 
-/* Botones de cambio */
 .boton-switch {
   padding: 10px 18px;
   transition: all 0.3s ease;
@@ -282,7 +308,6 @@ input {
   color: white;
 }
 
-/* Media Queries */
 @media screen and (max-width: 1024px) {
   .contenedor-principal {
     flex-direction: column;
@@ -329,7 +354,6 @@ input {
 }
 
 @media screen and (max-width: 480px) {
-
   .configuracion-usuario {
     padding: 8px;
   }
@@ -357,7 +381,6 @@ input {
   }
 }
 
-/* Scroll personalizado si es necesario */
 .config-wrapper::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -377,6 +400,7 @@ input {
   background: #a38655;
 }
 
+/* Dark Mode Styles */
 .dark .configuracion-usuario {
   background-color: #1e1e1e;
   color: #fff;
@@ -387,7 +411,6 @@ input {
   color: #fff;
 }
 
-/* Formularios */
 .dark form {
   border-color: #404040;
   background-color: #2d2d2d;
@@ -398,7 +421,6 @@ input {
   color: #fff;
 }
 
-/* Inputs y campos de formulario */
 .dark input {
   background-color: #383838;
   border-color: #404040;
@@ -409,14 +431,12 @@ input {
   border-color: #c09d62;
 }
 
-/* Campos deshabilitados */
 .dark fieldset:disabled label,
 .dark fieldset:disabled input {
   color: #666;
   background-color: #2d2d2d;
 }
 
-/* Botones */
 .dark .guardar {
   background-color: #00b81a;
   color: #fff;
@@ -447,7 +467,6 @@ input {
   color: #999;
 }
 
-/* Botones de cambio */
 .dark .boton-switch.activo {
   background-color: #00b81a;
   color: #fff;
@@ -458,7 +477,6 @@ input {
   color: #fff;
 }
 
-/* Scroll personalizado en modo oscuro */
 .dark .config-wrapper::-webkit-scrollbar-track {
   background: #2d2d2d;
 }
@@ -471,7 +489,6 @@ input {
   background: #a38655;
 }
 
-/* Otros elementos en modo oscuro */
 .dark label {
   color: #fff;
 }
@@ -488,7 +505,6 @@ input {
   color: #666;
 }
 
-/* Input autofill en modo oscuro */
 .dark input:-webkit-autofill,
 .dark input:-webkit-autofill:hover,
 .dark input:-webkit-autofill:focus {

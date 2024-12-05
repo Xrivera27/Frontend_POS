@@ -266,6 +266,19 @@ export default {
 
         console.log("Pasó validación");
 
+        // Verificar si existe una categoría con el mismo nombre
+        const nombreNormalizado = this.categoriaForm.nombre_categoria.toLowerCase().trim();
+        const categoriaExistente = this.categorias.find(cat => 
+          cat.nombre_categoria.toLowerCase().trim() === nombreNormalizado &&
+          (!this.isEditing || cat.id_categoria !== this.categoriaForm.id_categoria)
+        );
+
+        if (categoriaExistente) {
+          notis('error', 'Ya existe una categoría con este nombre');
+          this.isLoading = false;
+          return false;
+        }
+
         let response;
         let parametros;
         this.categoriaForm.id_usuario = this.id_usuario;
