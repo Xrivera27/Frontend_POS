@@ -90,22 +90,22 @@
                     </ul>
                 </li>
 
-                <!-- Compras Dropdown -->
-                <li v-if="hasPermission('Compra')" class="nav-item dropdown" ref="comprasDropdown">
-                    <a href="#" class="nav-link" @click.prevent="toggleDropdown('compras')">
-                        <i class="bi bi-cart-plus-fill"></i>
-                        <span v-if="expanded" class="tooltip-text">Compras</span>
-                        <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': openDropdowns.compras }"></i>
-                    </a>
-                    <ul class="dropdown-menu" :class="{ 'show': openDropdowns.compras }">
-                        <li><router-link @click="handleRouteChange" to="/administrar-compras"
-                                class="dropdown-item">Administrar compras</router-link></li>
-                        <li><router-link @click="handleRouteChange" to="/compras" class="dropdown-item">Crear
-                                compra</router-link></li>
-                        <li><router-link @click="handleRouteChange" to="/admin-invenario" class="dropdown-item">
-                                Alertas de inventario</router-link></li>
-                    </ul>
-                </li>
+               <!-- Compras Dropdown -->
+<li v-if="hasPermission('Compra')" class="nav-item dropdown" ref="comprasDropdown">
+    <a href="#" class="nav-link" @click.prevent="toggleDropdown('compras')">
+        <i class="bi bi-cart-plus-fill"></i>
+        <span v-if="expanded" class="tooltip-text">Compras</span>
+        <i class="bi bi-chevron-down dropdown-arrow" :class="{ 'rotated': openDropdowns.compras }"></i>
+    </a>
+    <ul class="dropdown-menu" :class="{ 'show': openDropdowns.compras }">
+        <li><router-link @click="handleRouteChange" to="/administrar-compras"
+                class="dropdown-item">Administrar compras</router-link></li>
+        <li v-if="getCurrentRole !== '4'"><router-link @click="handleRouteChange" to="/compras" 
+                class="dropdown-item">Crear compra</router-link></li>
+        <li><router-link @click="handleRouteChange" to="/admin-invenario" class="dropdown-item">
+                Alertas de inventario</router-link></li>
+    </ul>
+</li>
             </ul>
 
             <div id="aside-line"></div>
@@ -238,6 +238,12 @@ export default {
             this.openDropdowns.compras = false;
         }
     },
+
+    computed: {
+    getCurrentRole() {
+        return localStorage.getItem('role') || '';
+    }
+},
 
     mounted() {
         document.addEventListener('click', this.closeDropdowns);

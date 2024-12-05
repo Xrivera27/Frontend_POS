@@ -39,7 +39,7 @@
             <th>Nombre</th>
             <th>Apellido</th>
             <th>Nombre Usuario</th>
-            <th>Telefono</th>
+            <th>Teléfono</th>
             <th>Email</th>
             <th>Rol</th>
             <th>Acciones</th>
@@ -184,7 +184,7 @@
             </div>
 
             <div class="form-group">
-              <label>Direccion:</label>
+              <label>Dirección:</label>
               <input v-model="usuarioForm.direccion" type="text" required />
             </div>
 

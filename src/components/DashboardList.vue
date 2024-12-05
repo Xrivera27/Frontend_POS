@@ -192,7 +192,7 @@ export default {
           link: "/clientes"
         },
         {
-          title: "Alertas Promocion",
+          title: "Alertas Promoción",
           value: this.getAlertasPromocionFormatted(),
           icon: "bi bi-tags",
           link: "/admin-invenario"

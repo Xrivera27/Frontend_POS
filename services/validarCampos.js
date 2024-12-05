@@ -152,10 +152,12 @@ const validacionesComunes = {
 const validacionesUsuario = {
   async validarDuplicados(form, isEditing = false) {
     try {
-      const parametros = `/usuario/validar${isEditing ? '/' + form.id_usuario : ''}`;
+      const parametros = `/usuario/validar${
+        isEditing ? "/" + form.id_usuario : ""
+      }`;
       const response = await solicitudes.postRegistro(parametros, {
         nombre_usuario: form.nombre_usuario,
-        correo: form.correo
+        correo: form.correo,
       });
 
       if (response && response.error) {
@@ -164,16 +166,22 @@ const validacionesUsuario = {
       }
 
       if (response && response.duplicados) {
-        if (response.duplicados.includes('nombre_usuario')) {
-          notis("warning", "El nombre de usuario ya está registrado en el sistema");
+        if (response.duplicados.includes("nombre_usuario")) {
+          notis(
+            "warning",
+            "El nombre de usuario ya está registrado en el sistema"
+          );
           return false;
         }
-        if (response.duplicados.includes('correo')) {
-          notis("warning", "El correo electrónico ya está registrado en el sistema");
+        if (response.duplicados.includes("correo")) {
+          notis(
+            "warning",
+            "El correo electrónico ya está registrado en el sistema"
+          );
           return false;
         }
       }
-      
+
       return true;
     } catch (error) {
       notis("error", "Error al validar la información del usuario");
@@ -250,8 +258,15 @@ const validacionesUsuario = {
     if (!validacionesComunes.validarSelect(campos.Rol, "Rol")) return false;
 
     if (isPassEdit) {
-      if (!validacionesComunes.validarPasswordSegura(campos.Contraseña)) return false;
-      if (!validacionesComunes.validarPass(campos.Contraseña, campos["Confirmar Contraseña"])) return false;
+      if (!validacionesComunes.validarPasswordSegura(campos.Contraseña))
+        return false;
+      if (
+        !validacionesComunes.validarPass(
+          campos.Contraseña,
+          campos["Confirmar Contraseña"]
+        )
+      )
+        return false;
     }
 
     if (!validacionesComunes.validarTelefono(campos.Telefono, selectedCountry))
@@ -334,7 +349,14 @@ const validacionesProductos = {
       return false;
     }
 
-    if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
+    const nombrePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-()]+$/;
+    if (!nombrePattern.test(campos.Nombre)) {
+      notis(
+        "warning",
+        "El nombre solo puede contener letras, números, guiones y paréntesis"
+      );
+      return false;
+    }
 
     if (!validacionesComunes.validarDescripcion(campos.Descripción))
       return false;
@@ -345,23 +367,50 @@ const validacionesProductos = {
     if (!validacionesComunes.validarSelect(campos.Proveedor, "Proveedor"))
       return false;
 
-    if (!validacionesComunes.validarNumero(campos["Precio Unitario"], "Precio Unitario"))
-      return false;
-      
-    if (!validacionesComunes.validarNumero(campos["Precio Mayorista"], "Precio Mayorista"))
+    if (
+      !validacionesComunes.validarNumero(
+        campos["Precio Unitario"],
+        "Precio Unitario"
+      )
+    )
       return false;
 
-    if (parseFloat(campos["Precio Mayorista"]) >= parseFloat(campos["Precio Unitario"])) {
-      notis("warning", "El precio mayorista debe ser menor que el precio unitario");
+    if (
+      !validacionesComunes.validarNumero(
+        campos["Precio Mayorista"],
+        "Precio Mayorista"
+      )
+    )
+      return false;
+
+    if (
+      parseFloat(campos["Precio Mayorista"]) >=
+      parseFloat(campos["Precio Unitario"])
+    ) {
+      notis(
+        "warning",
+        "El precio mayorista debe ser menor que el precio unitario"
+      );
       return false;
     }
 
-    if (!Number.isInteger(Number(campos["Cantidad Mayoreo"])) || Number(campos["Cantidad Mayoreo"]) <= 0) {
-      notis("warning", "La cantidad para activar precio mayorista debe ser un número entero positivo");
+    if (
+      !Number.isInteger(Number(campos["Cantidad Mayoreo"])) ||
+      Number(campos["Cantidad Mayoreo"]) <= 0
+    ) {
+      notis(
+        "warning",
+        "La cantidad para activar precio mayorista debe ser un número entero positivo"
+      );
       return false;
     }
 
-    if (!validacionesComunes.validarSelect(campos["Unidad de Medida"], "unidad de medida"))
+    if (
+      !validacionesComunes.validarSelect(
+        campos["Unidad de Medida"],
+        "unidad de medida"
+      )
+    )
       return false;
 
     return true;
@@ -396,7 +445,8 @@ const validacionesClientes = {
     if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
     if (!validacionesComunes.validarEmail(campos.Correo)) return false;
     if (!validacionesComunes.validarDireccion(campos.Direccion)) return false;
-    if (!validacionesComunes.validarTelefono(campos.Telefono, selectedCountry)) return false;
+    if (!validacionesComunes.validarTelefono(campos.Telefono, selectedCountry))
+      return false;
     if (!validacionesComunes.validarRTN(campos.RTN)) return false;
 
     return true;
@@ -414,7 +464,8 @@ const validacionesProveedores = {
 
     if (!validacionesComunes.validarEmpty(campos)) return false;
     if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
-    if (!validacionesComunes.validarTelefono(campos.Telefono, selectedCountry)) return false;
+    if (!validacionesComunes.validarTelefono(campos.Telefono, selectedCountry))
+      return false;
     if (!validacionesComunes.validarEmail(campos.Correo)) return false;
     if (!validacionesComunes.validarDireccion(campos.Direccion)) return false;
 
@@ -496,7 +547,7 @@ const validacionesConfigPage = {
     if (!validacionesComunes.validarEmpty(campos)) return false;
 
     if (!validacionesComunes.validarNombre(campos.Nombre)) return false;
-    
+
     const nombrePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,50}$/;
     if (!nombrePattern.test(form.apellido)) {
       notis(
@@ -505,9 +556,9 @@ const validacionesConfigPage = {
       );
       return false;
     }
-    
+
     if (!validacionesComunes.validarEmail(campos.Correo)) return false;
-    
+
     return true;
   },
 };
