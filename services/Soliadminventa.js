@@ -42,6 +42,31 @@ export default {
         }
     },
 
+    async obtenerVentasCeo(id_sucursal) {
+        try {
+            const headers = getAuthHeaders();
+            const url = `${homeUrl}/AdminVentas/ventas-ceo/${id_sucursal}`;
+            console.log('Haciendo petición a:', url);
+    
+            const response = await fetch(url, { 
+                method: 'GET',
+                headers
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            console.log('Datos recibidos:', data);
+            return data.data;
+        } catch (error) {
+            console.error('Error al obtener ventas:', error);
+            throw error;
+        }
+    },
+
     async obtenerDetalleVenta(idVenta) {
         try {
             console.log('Solicitando detalle de venta:', idVenta);

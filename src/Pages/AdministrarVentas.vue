@@ -33,6 +33,10 @@
         <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar venta..." />
       </div>
     </div>
+    <select class="custom-select" v-model="searchSucursal" v-show="esCeo" >
+            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal" @click="obtenerVentas(sucursal.id_sucursal)" >
+              {{ sucursal.nombre_administrativo }}</option>
+          </select>
 
     <!-- Tabla exportable -->
     <div class="table-container" ref="table">
@@ -152,7 +156,10 @@ import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
 import AdminFacturaModal from '../components/AdminFacturasModal.vue';
 import CancelSaleModal from '../components/CancelarVentaModal.vue';
+import solicitudes from "../../services/solicitudes.js";
 import AdminVentas from '../../services/Soliadminventa';
+import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
+const { esCeo } = require('../../services/usuariosSolicitudes');
 
 export default {
   name: 'AdministrarVentas',
@@ -172,6 +179,10 @@ export default {
       searchQuery: '',
       startDate: '',
       endDate: '',
+      id_usuario: '',
+      esCeo: '',
+      searchSucursal: '',
+      sucursales: '',
       selectedStatus: '',
       selectedVenta: null,
       selectedVentaForCancel: null,
@@ -269,6 +280,36 @@ export default {
         minute: '2-digit',
         hour12: true
       }).replace(',', '');
+    },
+
+    async obtenerVentas(id_sucursal) {
+      this.loading = true;
+      this.error = null;
+      try {
+        console.log('Iniciando carga de ventas...');
+        const response = await AdminVentas.obtenerVentasCeo(id_sucursal);
+        console.log('Respuesta del servidor:', response);
+        
+        const ventasData = response.data || response;
+        if (ventasData) {
+          this.ventas = ventasData.map(venta => ({
+            ...venta,
+            id_venta: venta.id_venta || venta.idVenta,
+            id_usuario: venta.id_usuario || venta.idUsuario,
+            estado: venta.estado || 'Pagada'
+          }));
+          console.log('Ventas procesadas:', this.ventas);
+          this.generateRows();
+        } else {
+          throw new Error('No se pudieron obtener las ventas');
+        }
+      } catch (error) {
+        console.error('No se encontraron ventas para mostrar.', error);
+        this.error = 'No se encontraron ventas para mostrar.';
+        this.toast.error(this.error);
+      } finally {
+        this.loading = false;
+      }
     },
 
     async loadVentas() {
@@ -409,9 +450,21 @@ export default {
     }
   },
   async mounted() {
-    await this.loadVentas();
     document.title = "Administrar Ventas";
     this.changeFavicon('/img/spiderman.ico');
+
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      this.esCeo = await esCeo(this.id_usuario);
+      this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
+      this.searchSucursal = this.sucursales[0].id_sucursal;
+
+      this.obtenerVentas(this.searchSucursal);
+
+    } catch (error) {
+      alert(error);
+    }
+
   }
 };
 </script>
@@ -439,6 +492,15 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.custom-select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  padding: 10px;
+  background-color: #fff;
+  cursor: pointer;
 }
 
 .status-select {
