@@ -16,10 +16,21 @@
                 <input v-model="configuracionSAR.numero_CAI" type="text" id="numero_CAI" required />
 
                 <label for="rango_inicial">Rango Inicial:</label>
-                <input v-model="configuracionSAR.rango_inicial" type="number" id="rango_inicial" required />
+                <input 
+                  v-model="configuracionSAR.rango_inicial" 
+                  type="text" 
+                  id="rango_inicial" 
+                  required 
+                />
 
                 <label for="rango_final">Rango Final:</label>
-                <input v-model="configuracionSAR.rango_final" type="number" id="rango_final" required />
+                <input 
+                  v-model="configuracionSAR.rango_final" 
+                  type="text" 
+                  id="rango_final" 
+                 
+                  required 
+                />
               </div>
               <div class="contenedor-interno contenedor-derecho">
                 <label for="fecha_autorizacion">Fecha de autorización:</label>
@@ -27,7 +38,6 @@
 
                 <label for="fecha_vencimiento">Fecha de vencimiento:</label>
                 <input v-model="configuracionSAR.fecha_vencimiento" type="date" id="fecha_vencimiento" required />
-
               </div>
             </div>
           </fieldset>
@@ -36,21 +46,20 @@
             <button class="btn editar" @click="isEditing(4)" :disabled="!busisnessSarEditing">Editar</button>
             <button class="btn guardar" type="submit" :disabled="busisnessSarEditing"
               @click.prevent="updatesar">Guardar</button>
-
           </div>
         </form>
       </div>
     </div>
     <router-link to="/config-page">
-              <button type="button" class="btn company">Config Usuario</button>
-            </router-link>
+      <button type="button" class="btn company">Config Usuario</button>
+    </router-link>
   </div>
 </template>
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import axios from 'axios';
-
+import { useToast } from "vue-toastification";
 
 export default {
   components: {
@@ -71,10 +80,13 @@ export default {
     };
   },
 
-
   methods: {
+    validateSARNumber(number) {
+      return /^\d{16}$/.test(number);
+    },
 
     async getConfiguracionSAR() {
+      const toast = useToast();
       try {
         const token = localStorage.getItem('auth');
         const response = await axios.get('http://localhost:3000/api/sar', {
@@ -83,9 +95,8 @@ export default {
           },
         });
 
-        const sarData = response.data.datosSAR; // Asegúrate de que este es el nombre correcto de la respuesta
-
-        // Asigna los datos a configuracionSAR
+        const sarData = response.data.datosSAR;
+        
         this.configuracionSAR.numero_CAI = sarData.numero_CAI || '';
         this.configuracionSAR.rango_inicial = sarData.rango_inicial || '';
         this.configuracionSAR.rango_final = sarData.rango_final || '';
@@ -93,23 +104,50 @@ export default {
         this.configuracionSAR.fecha_vencimiento = sarData.fecha_vencimiento || '';
       } catch (error) {
         console.error('Error al obtener la configuración SAR:', error);
-        alert('No se pudo obtener la configuración SAR.');
+        toast.error('No se pudo obtener la configuración SAR.', {
+          timeout: 5000
+        });
       }
     },
 
     async updatesar() {
+      const toast = useToast();
       try {
-        const token = localStorage.getItem('auth');
+        // Validar el rango inicial
+        if (!this.validateSARNumber(this.configuracionSAR.rango_inicial)) {
+          toast.error('El Rango Inicial debe tener exactamente 16 dígitos numéricos', {
+            timeout: 5000
+          });
+          return;
+        }
 
+        // Validar el rango final
+        if (!this.validateSARNumber(this.configuracionSAR.rango_final)) {
+          toast.error('El Rango Final debe tener exactamente 16 dígitos numéricos', {
+            timeout: 5000
+          });
+          return;
+        }
+
+        // Validar que el rango final sea mayor que el inicial
+        if (parseInt(this.configuracionSAR.rango_final) <= parseInt(this.configuracionSAR.rango_inicial)) {
+          toast.error('El Rango Final debe ser mayor que el Rango Inicial', {
+            timeout: 5000
+          });
+          return;
+        }
+
+        const token = localStorage.getItem('auth');
         const updatedData = {
           numero_CAI: this.configuracionSAR.numero_CAI,
           rango_inicial: this.configuracionSAR.rango_inicial,
           rango_final: this.configuracionSAR.rango_final,
           fecha_autorizacion: this.configuracionSAR.fecha_autorizacion,
-          fecha_vencimiento: this.configuracionSAR.fecha_vencimiento
+          fecha_vencimiento: this.configuracionSAR.fecha_vencimiento,
+          numero_actual_SAR: this.configuracionSAR.rango_inicial
         };
 
-        const response = await axios.put('http://localhost:3000/api/updsar', updatedData, {
+        const response = await axios.post('http://localhost:3000/api/sar/create', updatedData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -117,15 +155,28 @@ export default {
         });
 
         if (response.status === 200) {
-          alert('Datos Sar actualizada exitosamente');
-          window.location.reload(); // Recargar la página después de guardar
+          toast.success('Datos SAR actualizados exitosamente', {
+            timeout: 5000
+          });
+          window.location.reload();
         }
       } catch (error) {
-        console.error('Error al actualizar los datos de la empresa:', error);
-        alert('Hubo un problema al guardar los datos.');
+        console.error('Error al actualizar los datos SAR:', error);
+        if (error.response) {
+          toast.error(error.response.data.message || 'Hubo un problema al guardar los datos.', {
+            timeout: 5000
+          });
+        } else if (error.request) {
+          toast.error('Error de conexión con el servidor.', {
+            timeout: 5000
+          });
+        } else {
+          toast.error('Hubo un problema al guardar los datos.', {
+            timeout: 5000
+          });
+        }
       }
     },
-
 
     pushEsc(event) {
       if (event.key === "Esc" || event.key === "Escape") {
@@ -136,44 +187,40 @@ export default {
       }
     },
 
-    switchBools() {
-      this.userBoton = !this.userBoton;
-      this.companyBoton = !this.companyBoton;
-      this.showUser = !this.showUser;
-      this.showCompany = !this.showCompany;
-      this.userActive = !this.userActive;
-    },
-
     isEditing(orden) {
+      const toast = useToast();
       switch (orden) {
-        case 1: this.usuarioEditing = false;
+        case 1:
+          this.usuarioEditing = false;
           this.busisnessSarEditing = true;
           this.businessEditing = true;
           this.usuarioAvancedEditing = true;
           break;
-
-        case 2: this.usuarioEditing = true;
+        case 2:
+          this.usuarioEditing = true;
           this.busisnessSarEditing = true;
           this.businessEditing = true;
           this.usuarioAvancedEditing = false;
           break;
-
-        case 3: this.usuarioEditing = true;
+        case 3:
+          this.usuarioEditing = true;
           this.busisnessSarEditing = true;
           this.businessEditing = false;
           this.usuarioAvancedEditing = true;
           break;
-
-        case 4: this.usuarioEditing = true;
+        case 4:
+          this.usuarioEditing = true;
           this.busisnessSarEditing = false;
           this.businessEditing = true;
           this.usuarioAvancedEditing = true;
           break;
-
         default:
-          alert("Ha ocurrido un error");
+          toast.error("Ha ocurrido un error", {
+            timeout: 5000
+          });
       }
     },
+
     changeFavicon(iconPath) {
       const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
       link.type = 'image/x-icon';
@@ -184,18 +231,15 @@ export default {
   },
 
   mounted() {
-
     this.getConfiguracionSAR();
-    // Añade el manejador de eventos cuando el componente se monta
     window.addEventListener("keydown", this.pushEsc);
     document.title = "Configuración";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
-  },
-  beforeUnmount() {
-    // Elimina el manejador de eventos cuando el componente se destruye
-    window.removeEventListener("keydown", this.pushEsc);
+    this.changeFavicon('/img/spiderman.ico');
   },
 
+  beforeUnmount() {
+    window.removeEventListener("keydown", this.pushEsc);
+  },
 };
 </script>
 

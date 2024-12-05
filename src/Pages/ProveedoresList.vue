@@ -343,7 +343,7 @@ export default {
           notis('success', 'Proveedor eliminado correctamente');
         }
       } catch (error) {
-        notis('error', 'Error al eliminar el proveedor');
+        notis('error', 'Error al eliminar el proveedor, hay productos asignados con el proveedor');
       } finally {
         this.showConfirmModal = false;
         this.proveedorToDelete = null;

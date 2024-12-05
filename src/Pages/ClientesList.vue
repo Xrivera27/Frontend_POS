@@ -661,8 +661,7 @@ export default {
   margin-top: 16px;
   height: auto;
   max-height: 480px;
-  overflow-x: auto;
-  overflow-y: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .table {

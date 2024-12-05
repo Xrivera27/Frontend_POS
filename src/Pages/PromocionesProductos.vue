@@ -523,53 +523,53 @@ export default {
       return true;
     },
     async agregarPromocion() {
-      this.isLoading = true;
-      console.log('Método agregarPromocion ejecutado');
+  this.isLoading = true;
+  console.log('Método agregarPromocion ejecutado');
+  try {
+    if (!this.validarFormulario()) {
+      console.log('Validación del formulario falló');
+      return;
+    }
+
+    const formData = this.isEditing ? this.promFormModal : this.promForm;
+    console.log('Datos del formulario:', formData);
+
+    if (!this.isEditing) {
       try {
-        if (!this.validarFormulario()) {
-          console.log('Validación del formulario falló');
+        console.log('Intentando crear nueva promoción');
+        const datos = {
+          producto_id: formData.producto_id,
+          promocion_nombre: formData.promocion_nombre,
+          porcentaje_descuento: formData.porcentaje_descuento,
+          fecha_inicio: new Date(formData.fecha_inicio + 'T00:00:00').toISOString().split('T')[0],
+          fecha_final: new Date(formData.fecha_final + 'T00:00:00').toISOString().split('T')[0],
+          force_create: false  // Importante: siempre false en la creación inicial
+        };
+        console.log('Datos a enviar:', datos);
+
+        const response = await solicitudes.postRegistro(
+          '/promocionesP/crear-promocion',
+          datos
+        );
+
+        if (response.length > 0) {
+          await this.cargarPromociones();
+          notis("success", "Promoción creada exitosamente");
+          this.clearForm();
+          this.isShowModal = false;
+          this.activeForm = false;
+        }
+      } catch (error) {
+        if (error.response?.status === 409) {
+          console.log('Conflicto detectado:', error.response.data);
+          this.tempPromocionData = { ...formData };
+          this.conflictingPromocion = error.response.data.promocion_existente;
+          this.showConflictModal = true;
+          notis("warning", "Hay una promoción activa que coincide con las fechas indicadas");
           return;
         }
-
-        const formData = this.isEditing ? this.promFormModal : this.promForm;
-        console.log('Datos del formulario:', formData);
-
-        if (!this.isEditing) {
-          try {
-            console.log('Intentando crear nueva promoción');
-            const datos = {
-              producto_id: formData.producto_id,
-              promocion_nombre: formData.promocion_nombre,
-              porcentaje_descuento: formData.porcentaje_descuento,
-              fecha_inicio: new Date(formData.fecha_inicio + 'T00:00:00').toISOString().split('T')[0],
-              fecha_final: new Date(formData.fecha_final + 'T00:00:00').toISOString().split('T')[0]
-            };
-            console.log('Datos a enviar:', datos);
-
-            const response = await solicitudes.postRegistro(
-              '/promocionesP/crear-promocion',
-              datos
-            );
-
-            if (response.length > 0) {
-              await this.cargarPromociones();
-              notis("success", "Promoción creada exitosamente");
-              this.clearForm();
-              this.isShowModal = false;
-              this.activeForm = false;
-            }
-          } catch (error) {
-            if (error.response?.status === 409) {
-              this.tempPromocionData = { ...formData };
-              this.conflictingPromocion = error.response.data.promocion_existente;
-
-              notis("warning", "Hay una promoción activa que coincide con las fechas indicadas");
-
-              this.showConflictModal = true;
-              return;
-            }
-            throw error;
-          }
+        throw error;
+      }
         } else {
           console.log('Actualizando promoción existente');
           const datos = {
@@ -600,133 +600,118 @@ export default {
     },
 
     async activarProm(promocionId) {
-      this.isLoading = true;
-      try {
-        // Usar filterPromociones en lugar de promociones
-        const promocionAActivar = this.filterPromociones.find(p => p.id === promocionId);
-        if (!promocionAActivar) {
-          throw new Error('Promoción no encontrada');
+  this.isLoading = true;
+  try {
+    // Usar filterPromociones para encontrar la promoción correcta
+    const promocionAActivar = this.promociones.find(p => p.id === promocionId);
+    if (!promocionAActivar) {
+      throw new Error('Promoción no encontrada');
+    }
+
+    // Buscar promociones activas del mismo producto
+    const promocionActivaMismoProducto = this.promociones.find(p => 
+      p.producto_Id === promocionAActivar.producto_Id && 
+      p.manejo_automatico === true &&
+      p.id !== promocionId &&
+      this.hayConflictoFechas(p, promocionAActivar)
+    );
+
+    if (promocionActivaMismoProducto) {
+      // Si hay conflicto, mostrar modal
+      this.tempPromocionData = promocionAActivar;
+      this.conflictingPromocion = promocionActivaMismoProducto;
+      this.showConflictModal = true;
+      notis("warning", "Ya existe una promoción activa para este producto en las fechas seleccionadas");
+      return;
+    }
+
+    // Si no hay conflicto, activar directamente
+    const response = await solicitudes.patchRegistro(
+      `/promocionesP/cambiar-estado-promocion/${promocionId}`,
+      { manejo_automatico: true }
+    );
+
+    if (response) {
+      await this.cargarPromociones();
+      notis("success", "Promoción activada exitosamente");
+    }
+  } catch (error) {
+    console.error('Error al activar promoción:', error);
+    notis("error", "Error al activar la promoción");
+  } finally {
+    this.isLoading = false;
+  }
+},
+
+// Método auxiliar para verificar conflicto de fechas
+hayConflictoFechas(promo1, promo2) {
+  const inicio1 = new Date(promo1.fecha_inicio);
+  const final1 = new Date(promo1.fecha_final);
+  const inicio2 = new Date(promo2.fecha_inicio);
+  const final2 = new Date(promo2.fecha_final);
+
+  return (
+    (inicio2 <= final1 && inicio2 >= inicio1) ||
+    (final2 >= inicio1 && final2 <= final1) ||
+    (inicio2 <= inicio1 && final2 >= final1)
+  );
+},
+
+async createAnywayPromocion() {
+  this.isLoading = true;
+  try {
+    if (this.tempPromocionData) {
+      // Si es una nueva promoción (no tiene ID)
+      if (!this.tempPromocionData.id) {
+        // Crear la nueva promoción con force_create
+        const datos = {
+          producto_id: this.tempPromocionData.producto_id,
+          promocion_nombre: this.tempPromocionData.promocion_nombre,
+          porcentaje_descuento: this.tempPromocionData.porcentaje_descuento,
+          fecha_inicio: new Date(this.tempPromocionData.fecha_inicio + 'T00:00:00').toISOString().split('T')[0],
+          fecha_final: new Date(this.tempPromocionData.fecha_final + 'T00:00:00').toISOString().split('T')[0],
+          force_create: true
+        };
+
+        const response = await solicitudes.postRegistro(
+          '/promocionesP/crear-promocion',
+          datos
+        );
+
+        if (response.length > 0) {
+          await this.cargarPromociones();
+          notis("success", "Nueva promoción creada y promoción anterior desactivada exitosamente");
+          this.clearForm();
+          this.closeConflictModal();
+          this.activeForm = false;
         }
-
-        console.log('Intentando activar promoción:', {
-          id: promocionAActivar.id,
-          producto: promocionAActivar.producto?.nombre || promocionAActivar.producto,
-          producto_Id: promocionAActivar.producto_Id
-        });
-
-        // Buscar promociones activas solo del mismo producto
-        const promocionActivaMismoProducto = this.promociones.find(p => {
-          const esMismoProducto = p.producto_Id === promocionAActivar.producto_Id;
-
-          if (!esMismoProducto) {
-            console.log('Productos diferentes:', {
-              productoActual: promocionAActivar.producto_Id,
-              productoComparado: p.producto_Id
-            });
-            return false;
-          }
-
-          const estaActiva = p.manejo_automatico === true;
-          const esDistinta = p.id !== promocionId;
-
-          if (!estaActiva || !esDistinta) {
-            return false;
-          }
-
-          const fechaInicioActual = new Date(promocionAActivar.fecha_inicio);
-          const fechaFinalActual = new Date(promocionAActivar.fecha_final);
-          const fechaInicioExistente = new Date(p.fecha_inicio);
-          const fechaFinalExistente = new Date(p.fecha_final);
-
-          const hayConflicto = (
-            fechaInicioActual <= fechaFinalExistente &&
-            fechaFinalActual >= fechaInicioExistente
-          );
-
-          console.log('Comparando promoción del mismo producto:', {
-            id: p.id,
-            producto: p.producto?.nombre || p.producto,
-            estaActiva,
-            hayConflicto,
-            fechas: {
-              promocionActual: {
-                inicio: fechaInicioActual,
-                fin: fechaFinalActual
-              },
-              promocionExistente: {
-                inicio: fechaInicioExistente,
-                fin: fechaFinalExistente
-              }
-            }
-          });
-
-          return hayConflicto;
-        });
-
-        if (promocionActivaMismoProducto) {
-          console.log('Se encontró conflicto:', promocionActivaMismoProducto);
-          this.tempPromocionData = promocionAActivar;
-          this.conflictingPromocion = promocionActivaMismoProducto;
-
-          notis("warning", "Ya existe una promoción activa para este producto en las fechas seleccionadas");
-
-          this.showConflictModal = true;
-          return;
-        }
+      } else {
+        // Es una promoción existente, usar el flujo de activación
+        await solicitudes.patchRegistro(
+          `/promocionesP/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
+          { manejo_automatico: false }
+        );
 
         const response = await solicitudes.patchRegistro(
-          `/promocionesP/cambiar-estado-promocion/${promocionId}`,
+          `/promocionesP/cambiar-estado-promocion/${this.tempPromocionData.id}`,
           { manejo_automatico: true }
         );
 
         if (response) {
           await this.cargarPromociones();
-          notis("success", "Promoción activada exitosamente");
+          notis("success", "Nueva promoción activada y promoción anterior desactivada exitosamente");
+          this.closeConflictModal();
         }
-      } catch (error) {
-        console.error('Error al activar promoción:', error);
-        notis("error", "Error al activar la promoción");
-      } finally {
-        this.isLoading = false;
       }
-    },
-    // Actualizar el método createAnywayPromocion para manejar la activación forzada
-    async createAnywayPromocion() {
-      this.isLoading = true;
-      try {
-        console.log('Procesando promoción con conflicto');
-        if (this.tempPromocionData) {
-          // Primero desactivar la promoción existente
-          const desactivarResponse = await solicitudes.patchRegistro(
-            `/promocionesP/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
-            { manejo_automatico: false }
-          );
-
-          if (desactivarResponse) {
-            // Luego activar la nueva promoción
-            const activarResponse = await solicitudes.patchRegistro(
-              `/promocionesP/cambiar-estado-promocion/${this.tempPromocionData.id}`,
-              { manejo_automatico: true }
-            );
-
-            if (activarResponse) {
-              await this.cargarPromociones();
-              notis("success", "Nueva promoción activada y promoción anterior desactivada exitosamente");
-              this.clearForm();
-              this.isShowModal = false;
-              this.activeForm = false;
-              this.closeConflictModal();
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error al procesar la promoción:', error);
-        notis("error", "Error al procesar las promociones");
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
+    }
+  } catch (error) {
+    console.error('Error al procesar la promoción:', error);
+    notis("error", "Error al procesar las promociones");
+  } finally {
+    this.isLoading = false;
+  }
+},
+  
     async desactivarProm(index) {
       this.isLoading = true;
       try {
