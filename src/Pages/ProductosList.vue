@@ -51,11 +51,11 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Codigo</th>
+            <th>Código</th>
             <th>Nombre</th>
             <th>Stock</th>
             <th>Precio Unitario</th>
-            <th>Promocion Activa</th>
+            <th>Promoción Activa</th>
             <th v-if="esCeo">Acciones</th>
           </tr>
         </thead>
