@@ -206,6 +206,31 @@ async obtenerReporteCancelacion(ventaId) {
         }
     },
 
+    async obtenerComprasCeo(id_sucursal) {
+        try {
+            const headers = getAuthHeaders();
+            const url = `${homeUrl}/AdminCompras/compras-ceo/${id_sucursal}`;
+            console.log('Haciendo petición a:', url);
+    
+            const response = await fetch(url, { 
+                method: 'GET',
+                headers
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            console.log('Datos recibidos:', data);
+            return data.data;
+        } catch (error) {
+            console.error('Error al obtener compras:', error);
+            throw error;
+        }
+    },
+
     async obtenerDetalleCompra(idCompra) {
         try {
             console.log('Solicitando detalle de compra:', idCompra);

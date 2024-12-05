@@ -28,7 +28,13 @@
           placeholder="Buscar compra..." 
         />
       </div>
+      <select class="custom-select" v-model="searchSucursal" v-show="esCeo" >
+            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal" @click="obtenesCompras(sucursal.id_sucursal)" >
+              {{ sucursal.nombre_administrativo }}</option>
+          </select>
     </div>
+
+   
 
     <!-- Tabla exportable -->
     <div class="table-container" ref="table">
@@ -196,7 +202,10 @@
 import { useToast } from "vue-toastification";
 import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
+import solicitudes from "../../services/solicitudes.js";
+const { esCeo } = require('../../services/usuariosSolicitudes');
 import AdminCompras from '../../services/Soliadminventa';
+import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
 
 export default {
   name: 'AdministrarCompras',
@@ -214,6 +223,10 @@ export default {
       searchQuery: '',
       startDate: '',
       endDate: '',
+      id_usuario: '',
+      esCeo: '',
+      searchSucursal: '',
+      sucursales: '',
       selectedCompra: null,
       isDetallesModalOpen: false,
       compras: [],
@@ -342,6 +355,29 @@ export default {
       }
     },
 
+    async obtenesCompras(id_sucursal){
+      try {
+        console.log('Iniciando carga de compras...');
+        const response = await AdminCompras.obtenerComprasCeo(id_sucursal);
+        console.log('Respuesta del servidor:', response);
+        
+        const comprasData = response.data || response;
+        if (comprasData) {
+          this.compras = comprasData;
+          console.log('Compras procesadas:', this.compras);
+          this.generateRows();
+        } else {
+          throw new Error('No se pudieron obtener las compras');
+        }
+      } catch (error) {
+        console.error('No se encontraron compras para mostrar.', error);
+        this.error = 'No se encontraron compras para mostrar.';
+        this.toast.error(this.error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
     closeDetallesModal() {
       this.isDetallesModalOpen = false;
       this.selectedCompra = null;
@@ -388,8 +424,19 @@ export default {
     }
   },
   async mounted() {
-    await this.loadCompras();
-    document.title = "Administrar Compras";
+
+    try {
+      this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      this.esCeo = await esCeo(this.id_usuario);
+      this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
+      this.searchSucursal = this.sucursales[0].id_sucursal;
+
+      this.obtenesCompras(this.searchSucursal);
+
+    } catch (error) {
+      alert(error);
+    }
+
   }
 };
 </script>
@@ -517,6 +564,16 @@ export default {
   display: inline-block;
   background-color: #e8f5e9;
   color: #2e7d32;
+}
+
+.custom-select {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  padding: 10px;
+  background-color: #fff;
+  cursor: pointer;
+
 }
 
 /* Contenedor de la tabla */
