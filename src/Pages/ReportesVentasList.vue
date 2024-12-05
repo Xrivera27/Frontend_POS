@@ -396,11 +396,18 @@ export default {
     },
 
     async openModalHeaderFooter() {
+      this.showHeaderFooterModal = true;
+
       try {
-        this.showHeaderFooterModal = true;
+        // Obtener los datos de la empresa o sucursal
         const response = await getDatosInstitucion(this.id_usuario, this.esCeo);
         this.datosBussines = response;
 
+        // Llenar los campos del header/footer config
+        this.headerFooterConfig.header.companyName = this.datosBussines.nombre;
+        this.headerFooterConfig.header.address = this.datosBussines.direccion;
+        this.headerFooterConfig.header.phone = this.datosBussines.telefono;
+        this.headerFooterConfig.header.email = this.datosBussines.correo;
       } catch (error) {
         notis('error', 'Error al cargar datos de empresa');
       }
@@ -857,7 +864,7 @@ export default {
     } catch (error) {
       console.log(error);
       notis('error', 'Error al cargar datos. Intente de nuevo');
-    }finally{
+    } finally {
       this.isLoading = false;
     }
 
