@@ -163,7 +163,7 @@ export default {
       try {
         const token = localStorage.getItem('auth');
 
-        const response = await axios.get('http://localhost:3000/api/usuarios', {
+        const response = await axios.get('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/usuarios', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -201,7 +201,7 @@ export default {
       if (this.isPassEdit) {
         try {
           const token = localStorage.getItem('auth');
-          const verifyResponse = await axios.post('http://localhost:3000/api/verificar-password',
+          const verifyResponse = await axios.post('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/verificar-password',
             {
               contraseña: this.userForm.contraseña,
               id_usuario: await solicitudes.solicitarUsuarioToken()
@@ -247,7 +247,7 @@ export default {
           updatedData.contraseña_confirm = this.userForm.contraseña_confirm;
         }
 
-        const response = await axios.put('http://localhost:3000/api/configuser', 
+        const response = await axios.put('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/configuser', 
           updatedData,
           {
             headers: {

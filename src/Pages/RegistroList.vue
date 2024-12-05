@@ -99,7 +99,7 @@ const categorias = ref([]);
 // Función para cargar las categorías desde el backend
 const fetchCategorias = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/categoria');
+    const response = await fetch('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/categoria');
     const data = await response.json();
     categorias.value = data; // Asigna las categorías a la variable reactiva
   } catch (error) {
@@ -115,7 +115,7 @@ onMounted(() => {
 // Función para manejar el envío del formulario
 const handleSubmit = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/empresa', { 
+    const response = await fetch('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/empresa', { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

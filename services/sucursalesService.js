@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/sucursales'; // Cambia la URL según tu configuración
+const API_URL = 'http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/sucursales'; // Cambia la URL según tu configuración
 
 export const getSucursales = () => {
   return axios.get(API_URL);

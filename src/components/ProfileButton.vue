@@ -36,7 +36,7 @@ export default {
             try {
                 this.loading = true;
                 const token = localStorage.getItem('auth');
-                const response = await axios.get('http://localhost:3000/api/perfil', {
+                const response = await axios.get('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/perfil', {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

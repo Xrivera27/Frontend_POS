@@ -1,5 +1,5 @@
 import axios from 'axios';
-  const homeUrl = 'http://localhost:3000/api';
+  const homeUrl = 'http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api';
  // const nextUrl = '/sesion-user';
 
  

@@ -80,7 +80,7 @@ export default {
       try {
         const token = localStorage.getItem('auth');
 
-        const response = await axios.get('http://localhost:3000/api/configempresa', {
+        const response = await axios.get('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/configempresa', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -158,7 +158,7 @@ export default {
           direccion: this.companyForm.direccion
         };
 
-        const response = await axios.put('http://localhost:3000/api/updateempresa', updatedData, {
+        const response = await axios.put('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/updateempresa', updatedData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "dev": "concurrently \"npm run start\" \"npm run serve\""
+    "dev": "concurrently \"npm run start\" \"npm run serve\"",
+    "build": "vue-cli-service build",
+  "start": "vue-cli-service serve"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",

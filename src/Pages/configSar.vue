@@ -89,7 +89,7 @@ export default {
       const toast = useToast();
       try {
         const token = localStorage.getItem('auth');
-        const response = await axios.get('http://localhost:3000/api/sar', {
+        const response = await axios.get('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/sar', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -147,7 +147,7 @@ export default {
           numero_actual_SAR: this.configuracionSAR.rango_inicial
         };
 
-        const response = await axios.post('http://localhost:3000/api/sar/create', updatedData, {
+        const response = await axios.post('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/sar/create', updatedData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
