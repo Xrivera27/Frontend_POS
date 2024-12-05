@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "dev": "concurrently \"npm run start\" \"npm run serve\"",
     "build": "vue-cli-service build",
-  "start": "vue-cli-service serve"
+    "start": "cross-env PORT=3001 vue-cli-service serve"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
@@ -33,6 +33,7 @@
     "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
     "concurrently": "^9.0.1",
+    "cross-env": "^7.0.3",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
     "nodemon": "^3.1.7"
