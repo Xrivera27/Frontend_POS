@@ -246,7 +246,7 @@
           </div>
 
           <div class="categoria-footer">
-            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Producto'" @click="guardarProducto">
+            <btnGuardarModal :texto="'Agregar Categoría'" @click="guardarCategorias">
             </btnGuardarModal>
             <btnCerrarModal :texto="'Cerrar'" @click="closeModalCategoria"></btnCerrarModal>
           </div>
