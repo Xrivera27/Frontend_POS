@@ -681,6 +681,11 @@ input {
   color: #fff;
 }
 
+.SAR {
+  background-color: #0031c7;
+  color: #fff;
+}
+
 .dark :disabled {
   background-color: #666;
   color: #999;

@@ -19,6 +19,10 @@
                 <input v-model="companyForm.rtn" type="text" id="rtn" name="rtn-empresa" 
                        pattern="[0-9]{14}" maxlength="14" placeholder="Ingrese los 14 dígitos"/>
 
+                <label for="direccion">Dirección:</label>
+                <input v-model="companyForm.direccion" type="text" id="direccion" 
+                       name="direccion" placeholder="Ingrese la dirección completa"/>
+
                 <label for="telefono-empresa">Teléfono principal:</label>
                 <input v-model="companyForm.telefono_principal" type="text" id="telefono_principal"
                   name="telefono_empresa" />
@@ -32,8 +36,6 @@
           <div class="botones-container">
             <button class="btn editar" @click.prevent="isEditing(3)" :disabled="!businessEditing">Editar</button>
             <button class="btn guardar" @click.prevent="updateempresa" :disabled="businessEditing">Guardar</button>
-
-            
           </div>
         </form>
       </div>
@@ -43,7 +45,6 @@
       </router-link>
 
       <button class="btn boton-switch activo">Config. Empresa</button>
-
     </div>
   </div>
 </template>
@@ -51,6 +52,7 @@
 <script>
 import axios from 'axios';
 import PageHeader from "@/components/PageHeader.vue";
+import { useToast } from "vue-toastification";
 
 export default {
   components: {
@@ -67,12 +69,14 @@ export default {
         nombre: '',
         rtn: '',
         telefono_principal: '',
-        correo_principal: ''
+        correo_principal: '',
+        direccion: ''
       },
     };
   },
   methods: {
     async getCompanyData() {
+      const toast = useToast();
       try {
         const token = localStorage.getItem('auth');
 
@@ -88,27 +92,45 @@ export default {
         this.companyForm.rtn = companyData.rtn || '';
         this.companyForm.telefono_principal = companyData.telefono_principal || '';
         this.companyForm.correo_principal = companyData.correo_principal || '';
+        this.companyForm.direccion = companyData.direccion || '';
       } catch (error) {
         console.error('Error al obtener los datos de la empresa:', error);
-        this.errorMessage = 'No se pudo obtener la información de la empresa.';
+        toast.error('No se pudo obtener la información de la empresa', {
+          timeout: 5000
+        });
       }
     },
 
     validateForm() {
+      const toast = useToast();
       if (!this.companyForm.nombre.trim()) {
-        alert('El nombre de la empresa es requerido');
+        toast.error('El nombre de la empresa es requerido', {
+          timeout: 5000
+        });
         return false;
       }
       if (!this.companyForm.rtn.trim()) {
-        alert('El RTN de la empresa es requerido');
+        toast.error('El RTN de la empresa es requerido', {
+          timeout: 5000
+        });
         return false;
       }
       if (!/^\d{14}$/.test(this.companyForm.rtn)) {
-        alert('El RTN debe contener exactamente 14 dígitos numéricos');
+        toast.error('El RTN debe contener exactamente 14 dígitos numéricos', {
+          timeout: 5000
+        });
+        return false;
+      }
+      if (!this.companyForm.direccion.trim()) {
+        toast.error('La dirección de la empresa es requerida', {
+          timeout: 5000
+        });
         return false;
       }
       if (!this.companyForm.correo_principal.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        alert('Por favor ingrese un correo válido');
+        toast.error('Por favor ingrese un correo válido', {
+          timeout: 5000
+        });
         return false;
       }
       return true;
@@ -119,6 +141,7 @@ export default {
     },
 
     async updateempresa() {
+      const toast = useToast();
       if (!this.validateForm()) return;
       
       this.isLoading = true;
@@ -132,6 +155,7 @@ export default {
           rtn: this.companyForm.rtn,
           telefono_principal: this.companyForm.telefono_principal,
           correo_principal: this.companyForm.correo_principal,
+          direccion: this.companyForm.direccion
         };
 
         const response = await axios.put('http://localhost:3000/api/updateempresa', updatedData, {
@@ -142,13 +166,16 @@ export default {
         });
 
         if (response.status === 200) {
-          alert('Empresa actualizada exitosamente');
+          toast.success('Empresa actualizada exitosamente', {
+            timeout: 5000
+          });
           window.location.reload();
         }
       } catch (error) {
         console.error('Error al actualizar los datos de la empresa:', error);
-        this.errorMessage = 'Hubo un problema al guardar los datos.';
-        alert('Hubo un problema al guardar los datos.');
+        toast.error('Hubo un problema al guardar los datos', {
+          timeout: 5000
+        });
       } finally {
         this.isLoading = false;
       }
