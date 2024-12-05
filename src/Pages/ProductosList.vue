@@ -56,6 +56,7 @@
             <th>Stock</th>
             <th>Precio Unitario</th>
             <th>Promocion Activa</th>
+            
             <th v-if="esCeo">Acciones</th>
           </tr>
         </thead>
@@ -246,7 +247,7 @@
           </div>
 
           <div class="categoria-footer">
-            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Producto'" @click="guardarProducto">
+            <btnGuardarModal :texto="'Agregar Categoría'" @click="guardarCategorias">
             </btnGuardarModal>
             <btnCerrarModal :texto="'Cerrar'" @click="closeModalCategoria"></btnCerrarModal>
           </div>
