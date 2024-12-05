@@ -235,6 +235,7 @@ export default {
       empleados: [],
       productos: [],
       datosReporte: [], // Base data
+      datosAgrupados: [],
       desglosesCache: {}, // Cache for desglose data
       reportes: [],
       totales: {
