@@ -1,5 +1,6 @@
 <template>
   <div class="report-wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
 
     <div class="report-body">
@@ -178,6 +179,7 @@
 import PageHeader from "@/components/PageHeader.vue";
 import { notis } from '../../services/notificaciones.js';
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
+import ModalLoading from '@/components/ModalLoading.vue';
 import solicitudes from "../../services/solicitudes.js";
 const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados, getRegistrosClientes, getRegistrosSucursales, getRegistrosEmpleadosDesglose, getRegistrosClienteDesglose, getRegistrosSucursalDesglose, getDatosInstitucion } = require('../../services/reporteSolicitudes.js');
 const { esCeo } = require('../../services/usuariosSolicitudes');
@@ -188,11 +190,13 @@ export default {
   name: 'ReporteVentas',
   components: {
     PageHeader,
-    HeaderFooterDesigner
+    HeaderFooterDesigner,
+    ModalLoading
   },
   data() {
     return {
       titulo: 'Reportería',
+      isLoading: false,
       id_usuario: '',
       mostrandoDesglose: false,
       cargando: false,
@@ -254,8 +258,6 @@ export default {
         default: return '';
       }
     },
-
-
 
     fechasValidas() {
       return this.filtros.fechaInicio && this.filtros.fechaFin &&
@@ -485,6 +487,7 @@ export default {
       this.cargando = true;
       this.error = null;
 
+      this.isLoading = true;
       try {
         if (formato === 'preview') {
           const response = await solicitudes.obtenerReporteVentas({
@@ -498,14 +501,19 @@ export default {
           this.totales = response.totales;
         } else if (formato === 'pdf') {
           await this.exportarPDF();
+          notis('success', 'PDF generado con éxito');
         } else if (formato === 'excel') {
           await this.exportarExcel();
         }
       } catch (error) {
-        console.error('Error al generar reporte:', error);
-        this.error = 'Error al generar el reporte';
+        // Solo mostrar error si realmente falla algo
+        if (!this.datosAgrupados.length) {
+          notis('error', 'Error al generar el reporte');
+          this.error = 'Error al generar el reporte';
+        }
       } finally {
         this.cargando = false;
+        this.isLoading = false;
       }
     },
 
@@ -641,132 +649,163 @@ export default {
     },
 
     async exportarPDF() {
-      if (!this.datosReporte.length) return;
+      if (!this.datosAgrupados.length) return;
 
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
+      const doc = new jsPDF('p', 'mm', 'a4');
       const pageWidth = doc.internal.pageSize.width;
       const pageHeight = doc.internal.pageSize.height;
       const margin = { top: 20, right: 20, bottom: 20, left: 20 };
       let currentY = margin.top;
 
+      // Add logo and header
       if (this.logoUrl) {
         const dimensions = await this.getImageDimensions(this.logoUrl);
-        const maxLogoWidth = 40;
-        const maxLogoHeight = 40;
-        let logoWidth = maxLogoWidth;
-        let logoHeight = (dimensions.height * logoWidth) / dimensions.width;
-
-        if (logoHeight > maxLogoHeight) {
-          logoHeight = maxLogoHeight;
-          logoWidth = (dimensions.width * logoHeight) / dimensions.height;
-        }
-
+        const { width: logoWidth, height: logoHeight } = this.calculateDimensions(
+          dimensions.width,
+          dimensions.height,
+          40,
+          40
+        );
         doc.addImage(this.logoUrl, 'PNG', margin.left, currentY, logoWidth, logoHeight);
 
         if (this.headerFooterConfig.header.enabled) {
-          const textStartX = margin.left + logoWidth + 10;
-          doc.setFont('helvetica', 'bold');
+          const headerX = margin.left + logoWidth + 10;
           doc.setFontSize(16);
-          doc.text(this.headerFooterConfig.header.companyName, textStartX, currentY + 7);
+          doc.text(this.headerFooterConfig.header.companyName, headerX, currentY + 7);
 
-          doc.setFont('helvetica', 'normal');
           doc.setFontSize(11);
-          doc.text(this.headerFooterConfig.header.address, textStartX, currentY + 14);
-          doc.text(this.headerFooterConfig.header.phone, textStartX, currentY + 21);
-          doc.text(this.headerFooterConfig.header.email, textStartX, currentY + 28);
+          doc.text(this.headerFooterConfig.header.address, headerX, currentY + 14);
+          doc.text(this.headerFooterConfig.header.phone, headerX, currentY + 21);
+          doc.text(this.headerFooterConfig.header.email, headerX, currentY + 28);
 
           currentY += Math.max(logoHeight, 35);
-
-          if (this.headerFooterConfig.header.showDivider) {
-            doc.setDrawColor(0);
-            doc.setLineWidth(0.5);
-            doc.line(margin.left, currentY + 5, pageWidth - margin.right, currentY + 5);
-            currentY += 10;
-          }
-
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(14);
-          doc.text(this.headerFooterConfig.header.text, margin.left, currentY + 10);
-          currentY += 20;
-
-
-          doc.setFont('helvetica', 'italic');
-          doc.setFontSize(8);
-          const periodoText = `Período: ${this.formatearFecha(this.filtros.fechaInicio)} - ${this.formatearFecha(this.filtros.fechaFin)}`;
-          doc.text(periodoText, margin.left, currentY - 5);
         }
       }
 
-      // Tabla de datos
-      doc.autoTable({
-        startY: currentY,
-        head: [['Fecha', 'Factura', 'Exento', 'Gravado 15%', 'Gravado 18%', 'ISV', 'Total']],
-        body: this.datosReporte.map(item => [
-          item.fecha ? this.formatearFecha(item.fecha) : 'N/A',
-          item.numero_factura_sar || 'N/A',
-          this.formatearMoneda(item.valor_extento),
-          this.formatearMoneda(item.gravado_15),
-          this.formatearMoneda(item.gravado_18),
-          this.formatearMoneda(item.total_isv),
-          this.formatearMoneda(item.total)
-        ]),
-        styles: { fontSize: 10 },
-        headStyles: {
-          fillColor: [41, 128, 185],
-          textColor: 255,
-          fontStyle: 'bold',
-          halign: 'center'
-        },
-        columnStyles: {
-          0: { halign: 'left' },
-          1: { halign: 'center' },
-          2: { halign: 'right' },
-          3: { halign: 'right' },
-          4: { halign: 'right' },
-          5: { halign: 'right' },
-          6: { halign: 'right', fontStyle: 'bold' }
-        },
-        margin,
-        didDrawPage: (data) => {
-          if (this.headerFooterConfig.footer.enabled) {
-            const footerY = pageHeight - margin.bottom;
+      // Add report title and period
+      doc.setFontSize(14);
+      doc.text('Reporte de Ventas', margin.left, currentY + 10);
+      // Añade el texto del período en cursiva
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic'); // Cambia a cursiva
 
-            if (this.headerFooterConfig.footer.showDivider) {
-              doc.setDrawColor(0);
-              doc.setLineWidth(0.5);
-              doc.line(margin.left, footerY - 15, pageWidth - margin.right, footerY - 15);
-            }
 
-            doc.setFontSize(8);
-            doc.setFont('helvetica', 'normal');
-            const footerText = this.getFooterText(data.pageNumber, doc.getNumberOfPages());
+      if (this.headerFooterConfig.header.showDivider) {
+        doc.setDrawColor(0);
+        doc.setLineWidth(0.5);
+        doc.line(margin.left, currentY + 12, pageWidth - margin.right, currentY + 12);
+        currentY + 3; // Espacio más reducido después de la línea
+      }
 
-            doc.text(
-              footerText,
-              this.headerFooterConfig.footer.alignment === 'left' ? margin.left :
-                this.headerFooterConfig.footer.alignment === 'right' ? pageWidth - margin.right :
-                  pageWidth / 2,
-              footerY - 5,
-              { align: this.headerFooterConfig.footer.alignment }
-            );
-          }
+      doc.text(
+        `Período: ${this.formatearFecha(this.filtros.fechaInicio)} - ${this.formatearFecha(this.filtros.fechaFin)}`,
+        margin.left,
+        currentY + 20
+      );
+      doc.setFont('helvetica', 'normal'); // Regresa a normal para el resto del documento
+      currentY += 25;
+
+      // Prepare table data
+      const tableData = [];
+      this.datosAgrupados.forEach(grupo => {
+        // Add group header
+        tableData.push([
+          grupo.nombre,
+          this.formatearMoneda(grupo.valor_exento),
+          this.formatearMoneda(grupo.gravado_15),
+          this.formatearMoneda(grupo.gravado_18),
+          this.formatearMoneda(grupo.total_isv),
+          this.formatearMoneda(grupo.total)
+        ]);
+
+        // Add details if especificacion is enabled
+        if (this.especificacion && grupo.desglose) {
+          grupo.desglose.forEach(factura => {
+            tableData.push([
+              factura.numero_factura_sar,
+              this.formatearMoneda(factura.valor_exento),
+              this.formatearMoneda(factura.gravado_15),
+              this.formatearMoneda(factura.gravado_18),
+              this.formatearMoneda(factura.total_isv),
+              this.formatearMoneda(factura.total)
+            ]);
+          });
         }
       });
 
-      // Totales
-      const finalY = doc.lastAutoTable.finalY || currentY;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.text(`Total Exento: ${this.formatearMoneda(this.totales.exento)}`, pageWidth - margin.right, finalY + 10, { align: 'right' });
-      doc.text(`Total Gravado 15%: ${this.formatearMoneda(this.totales.gravado_15)}`, pageWidth - margin.right, finalY + 15, { align: 'right' });
-      doc.text(`Total Gravado 18%: ${this.formatearMoneda(this.totales.gravado_18)}`, pageWidth - margin.right, finalY + 20, { align: 'right' });
-      doc.text(`Total ISV: ${this.formatearMoneda(this.totales.total_isv)}`, pageWidth - margin.right, finalY + 25, { align: 'right' });
-      doc.text(`Total General: ${this.formatearMoneda(this.totales.total)}`, pageWidth - margin.right, finalY + 30, { align: 'right' });
+      // Add table
+      // En autoTable, elimina la sección didDrawPage
+      doc.autoTable({
+        startY: currentY,
+        head: [[
+          this.getColumnTitle,
+          'Valor Exento',
+          'Valor Gravado 15%',
+          'Valor Gravado 18%',
+          'ISV',
+          'Total'
+        ]],
+        body: tableData,
+        theme: 'grid',
+        styles: {
+          fontSize: 8,
+          cellPadding: 2
+        },
+        headStyles: {
+          fillColor: [41, 128, 185],
+          textColor: 255,
+          fontSize: 9
+        },
+        columnStyles: {
+          0: { cellWidth: 'auto' },
+          1: { cellWidth: 'auto', halign: 'right' },
+          2: { cellWidth: 'auto', halign: 'right' },
+          3: { cellWidth: 'auto', halign: 'right' },
+          4: { cellWidth: 'auto', halign: 'right' },
+          5: { cellWidth: 'auto', halign: 'right' }
+        },
+        margin: { ...margin, bottom: 20 }
+      });
+
+      // Add totals
+      const finalY = doc.lastAutoTable.finalY + 10;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+
+      const totalesTexts = [
+        `Total Exento: ${this.formatearMoneda(this.totales.exento)}`,
+        `Total Gravado 15%: ${this.formatearMoneda(this.totales.gravado_15)}`,
+        `Total Gravado 18%: ${this.formatearMoneda(this.totales.gravado_18)}`,
+        `Total ISV: ${this.formatearMoneda(this.totales.total_isv)}`,
+        `Total General: ${this.formatearMoneda(this.totales.total)}`
+      ];
+
+      totalesTexts.forEach((text, index) => {
+        doc.text(text, pageWidth - margin.right, finalY + (index * 5), { align: 'right' });
+      });
+
+      // Add footer if enabled
+      if (this.headerFooterConfig.footer.enabled) {
+        const footerY = pageHeight - margin.bottom;
+        if (this.headerFooterConfig.footer.showDivider) {
+          doc.setDrawColor(0);
+          doc.setLineWidth(0.5);
+          doc.line(margin.left, footerY - 10, pageWidth - margin.right, footerY - 10);
+        }
+
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'normal');
+        const footerText = this.getFooterText(doc.internal.getNumberOfPages(), doc.internal.getNumberOfPages());
+
+        doc.text(
+          footerText,
+          this.headerFooterConfig.footer.alignment === 'left' ? margin.left :
+            this.headerFooterConfig.footer.alignment === 'right' ? pageWidth - margin.right :
+              pageWidth / 2,
+          footerY - 5,
+          { align: this.headerFooterConfig.footer.alignment }
+        );
+      }
 
       doc.save(`reporte_${this.reporteSeleccionado}_${this.filtros.fechaInicio}.pdf`);
     },
@@ -793,13 +832,13 @@ export default {
     },
 
     async exportarExcel() {
-      // Esta función se implementaría si se requiere exportar a Excel
-      // Por ahora usa la función del backend que devuelve el archivo Excel
+
     }
   },
 
   async mounted() {
     // Cargar logo guardado si existe
+    this.isLoading = true;
     try {
       const savedLogo = localStorage.getItem('logoEmpresa');
       if (savedLogo) {
@@ -818,6 +857,8 @@ export default {
     } catch (error) {
       console.log(error);
       notis('error', 'Error al cargar datos. Intente de nuevo');
+    }finally{
+      this.isLoading = false;
     }
 
   },
