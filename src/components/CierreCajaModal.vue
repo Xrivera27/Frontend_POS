@@ -274,6 +274,17 @@ export default {
   color: white;
 }
 
+.verify-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  background-color: #4CAF50;  /* Verde */
+  color: white;
+}
+
 .confirm-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
