@@ -1,5 +1,6 @@
 <template>
   <div class="compras-wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
@@ -177,19 +178,20 @@
 
 <script>
 import { useToast } from "vue-toastification";
-import { notis } from '../../services/notificaciones.js';
 import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
 import solicitudes from "../../services/solicitudes.js";
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import AdminCompras from '../../services/Soliadminventa';
 import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
+import ModalLoading from '@/components/ModalLoading.vue';
 
 export default {
   name: 'AdministrarCompras',
   components: {
     PageHeader,
-    ExportButton
+    ExportButton,
+    ModalLoading
   },
   setup() {
     const toast = useToast();
@@ -207,6 +209,7 @@ export default {
       sucursales: '',
       selectedCompra: null,
       isDetallesModalOpen: false,
+      isLoading: false,
       compras: [],
       currentPage: 1,
       pageSize: 10,
@@ -299,6 +302,8 @@ export default {
     async loadCompras() {
       this.loading = true;
       this.error = null;
+
+      this.isLoading = true;
       try {
         console.log('Iniciando carga de compras...');
         const response = await AdminCompras.obtenerCompras();
@@ -318,10 +323,12 @@ export default {
         this.toast.error(this.error);
       } finally {
         this.loading = false;
+        this.isLoading = false;
       }
     },
 
     async showDetalles(compra) {
+      this.isLoading = true;
       try {
         console.log('Mostrando detalles para:', compra);
         const detalles = await AdminCompras.obtenerDetalleCompra(compra.id_compra);
@@ -330,10 +337,13 @@ export default {
       } catch (error) {
         console.error('Error al obtener detalles:', error);
         this.toast.error('Error al obtener los detalles de la compra');
+      } finally {
+        this.isLoading = false;
       }
     },
 
     async obtenesCompras(id_sucursal) {
+      this.isLoading = true;
       try {
         console.log('Iniciando carga de compras...');
         const response = await AdminCompras.obtenerComprasCeo(id_sucursal);
@@ -345,16 +355,15 @@ export default {
           console.log('Compras procesadas:', this.compras);
           this.generateRows();
         } else {
-          notis("error", "No se pudieron obtener las compras");
           throw new Error('No se pudieron obtener las compras');
         }
       } catch (error) {
         console.error('No se encontraron compras para mostrar.', error);
-        notis("error", "No se encontraron compras para mostrar");
         this.error = 'No se encontraron compras para mostrar.';
         this.toast.error(this.error);
       } finally {
         this.loading = false;
+        this.isLoading = false;
       }
     },
 
@@ -404,7 +413,7 @@ export default {
     }
   },
   async mounted() {
-
+    this.isLoading = true;
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.esCeo = await esCeo(this.id_usuario);
@@ -414,7 +423,9 @@ export default {
       this.obtenesCompras(this.searchSucursal);
 
     } catch (error) {
-      notis("error", error);
+      alert(error);
+    } finally {
+      this.isLoading = false;
     }
 
   }
@@ -424,20 +435,17 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
-/* Estilos globales */
 * {
   font-family: 'Montserrat', sans-serif;
   box-sizing: border-box;
 }
 
-/* Contenedor principal */
 .compras-wrapper {
   padding: 16px;
   width: 100%;
   overflow-x: hidden;
 }
 
-/* Barra de búsqueda */
 .busqueda {
   padding: 10px;
   font-size: 14px;
@@ -447,13 +455,11 @@ export default {
   max-width: 300px;
 }
 
-/* Botón de exportación */
 .export-button {
   margin: 0;
   z-index: 1000;
 }
 
-/* Opciones y filtros */
 .opciones {
   display: flex;
   align-items: center;
@@ -462,7 +468,6 @@ export default {
   margin-bottom: 16px;
 }
 
-/* Filtro de fechas */
 .date-filter {
   display: flex;
   align-items: center;
@@ -484,7 +489,6 @@ export default {
   width: auto;
 }
 
-/* Botones de acción */
 .btn {
   font-size: 18px;
   width: 50px;
@@ -536,7 +540,6 @@ export default {
   transform: none !important;
 }
 
-/* Estado badge */
 .estado-badge {
   padding: 4px 12px;
   border-radius: 16px;
@@ -553,10 +556,8 @@ export default {
   padding: 10px;
   background-color: #fff;
   cursor: pointer;
-
 }
 
-/* Contenedor de la tabla */
 .table-container {
   display: flex;
   flex-direction: column;
@@ -567,7 +568,6 @@ export default {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilos de la tabla */
 .table {
   width: 100%;
   min-width: 800px;
@@ -591,7 +591,6 @@ export default {
   z-index: 1;
 }
 
-/* Acciones columna */
 .actions-column {
   text-align: center;
   vertical-align: middle;
@@ -601,7 +600,6 @@ export default {
   font-size: 20px;
 }
 
-/* Loading y No Data */
 .loading-indicator,
 .no-data {
   text-align: center;
@@ -615,7 +613,6 @@ export default {
   border-radius: 4px;
 }
 
-/* Modal Styles */
 .modal {
   position: fixed;
   top: 0;
@@ -630,18 +627,22 @@ export default {
 }
 
 .modal-content {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: white;
+  border-radius: 12px;
   width: 90%;
   max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: 85vh;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
 }
 
 .modal-header {
-  padding: 1rem;
-  border-bottom: 1px solid #dee2e6;
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -649,59 +650,69 @@ export default {
 
 .modal-title {
   margin: 0;
-  font-size: 1.25rem;
+  color: #333;
+  font-size: 1.5rem;
   font-weight: 600;
-}
-
-.modal-footer {
-  padding: 1rem;
-  border-top: 1px solid #dee2e6;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
 }
 
 .btn-close {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 24px;
+  color: #666;
   cursor: pointer;
   padding: 0;
-  color: #6c757d;
+  transition: color 0.2s ease;
 }
 
-/* Detalles Info */
+.btn-close:hover {
+  color: #333;
+}
+
 .detalles-info {
-  padding: 1rem;
+  padding: 24px;
   background-color: #f8f9fa;
-  margin: 1rem;
-  border-radius: 4px;
+  margin: 0;
 }
 
 .info-section {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  gap: 16px;
 }
 
 .info-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 8px;
 }
 
 .info-item strong {
-  color: #495057;
+  color: #333;
+  font-weight: 600;
+}
+
+.table-responsive {
+  padding: 24px;
+  overflow-x: auto;
 }
 
 .total-section {
-  padding: 1rem;
+  padding: 20px 24px;
+  background-color: #f8f9fa;
   text-align: right;
-  font-size: 1.25rem;
-  color: #495057;
+  border-top: 1px solid #e0e0e0;
 }
 
-/* Paginación */
+.modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background-color: #f8f9fa;
+}
+
 .pagination-wrapper {
   display: flex;
   justify-content: space-between;
@@ -739,7 +750,6 @@ export default {
   opacity: 0.6;
 }
 
-/* Media Queries */
 @media screen and (max-width: 768px) {
   .opciones {
     flex-direction: column;
@@ -818,20 +828,17 @@ export default {
   }
 }
 
-/* Modo oscuro para el componente completo */
 .dark .compras-wrapper {
   background-color: #1a1a1a;
   color: #e0e0e0;
 }
 
-/* Título en modo oscuro */
 .dark h1,
 .dark .page-header h1,
 .dark .page-header .titulo {
   color: #ffffff !important;
 }
 
-/* Inputs en modo oscuro */
 .dark .busqueda,
 .dark .date-filter input {
   background-color: #2d2d2d;
@@ -839,7 +846,6 @@ export default {
   color: #e0e0e0;
 }
 
-/* Tabla en modo oscuro */
 .dark .table-container {
   background-color: #2d2d2d;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -856,7 +862,6 @@ export default {
   color: #e0e0e0;
 }
 
-/* Estado badges en modo oscuro */
 .dark .estado-badge {
   opacity: 0.9;
 }
@@ -876,35 +881,31 @@ export default {
   color: #ff9999;
 }
 
-/* Modal en modo oscuro */
 .dark .modal-content {
   background-color: #2d2d2d;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .dark .modal-header,
-.dark .modal-footer {
+.dark .modal-footer,
+.dark .detalles-info,
+.dark .total-section {
+  background-color: #1e1e1e;
   border-color: #404040;
 }
 
-.dark .modal-title {
-  color: #e0e0e0;
+.dark .modal-title,
+.dark .info-item strong {
+  color: #fff;
 }
 
 .dark .btn-close {
-  color: #e0e0e0;
+  color: #aaa;
 }
 
-/* Detalles info en modo oscuro */
-.dark .detalles-info {
-  background-color: #383838;
+.dark .btn-close:hover {
+  color: #fff;
 }
 
-.dark .info-item strong {
-  color: #e0e0e0;
-}
-
-/* Paginación en modo oscuro */
 .dark .pagination-button {
   background-color: #383838;
   border-color: #404040;
@@ -924,14 +925,12 @@ export default {
   color: #b0b0b0;
 }
 
-/* Loading y No Data en modo oscuro */
 .dark .loading-indicator,
 .dark .no-data {
   color: #b0b0b0;
   background-color: #2d2d2d;
 }
 
-/* Scroll personalizado en modo oscuro */
 .dark .table-container::-webkit-scrollbar-track {
   background: #383838;
 }
@@ -944,7 +943,6 @@ export default {
   background: #707070;
 }
 
-/* Botones en modo oscuro */
 .dark .btn-info {
   background-color: #0f7285;
 }
