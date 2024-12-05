@@ -157,7 +157,8 @@ export const getRegistrosClientes = async (id_usuario, fechaInicio, fechaFin) =>
        datosInstitucion = {
         nombre: response.nombre,
         correo: response.correo_principal,
-        telefono: response.telefono_principal
+        telefono: response.telefono_principal,
+        direccion: response.direccion
        }
        }
        else{
