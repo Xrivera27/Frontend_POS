@@ -14,13 +14,10 @@
       <!-- Botones de exportación -->
       <ExportButton 
         :columns="columns" 
-        :rows="filteredRows" 
+        :rows="allFilteredRows" 
         fileName="Compras.pdf" 
         class="export-button" 
       />
-
-      <!-- Botón generar reporte -->
-     
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
@@ -62,7 +59,7 @@
         </thead>
         <tbody>
           <tr v-for="(compra, index) in paginatedCompras" :key="index">
-            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
+            <td>{{ String(((currentPage - 1) * pageSize) + index + 1).padStart(3, ' ') }}</td>
             <td>{{ compra.codigo }}</td>
             <td>{{ compra.nombre }}</td>
             <td>{{ compra.proveedor }}</td>
@@ -263,9 +260,9 @@ export default {
     totalPages() {
       return Math.ceil(this.filteredCompras.length / this.pageSize);
     },
-    filteredRows() {
-      return this.paginatedCompras.map((compra, index) => ({
-        index: ((this.currentPage - 1) * this.pageSize) + index + 1,
+    allFilteredRows() {
+      return this.filteredCompras.map((compra, index) => ({
+        index: index + 1,
         codigo: compra.codigo,
         nombre: compra.nombre,
         proveedor: compra.proveedor,
@@ -275,7 +272,20 @@ export default {
         metodo_pago: compra.metodo_pago,
         fechaHora: this.formatDateTime(compra.fechaHora)
       }));
-    }
+    },
+    filteredRows() {
+  return this.paginatedCompras.map((compra, index) => ({
+    index: ((this.currentPage - 1) * this.pageSize) + index + 1, // Aquí estaba el error
+    codigo: compra.codigo,
+    nombre: compra.nombre,
+    proveedor: compra.proveedor,
+    cantidad: compra.cantidad,
+    total: this.formatCurrency(compra.total),
+    estado: compra.estado,
+    metodo_pago: compra.metodo_pago,
+    fechaHora: this.formatDateTime(compra.fechaHora)
+  }));
+}
   },
   methods: {
     formatCurrency(value) {
@@ -335,34 +345,6 @@ export default {
     closeDetallesModal() {
       this.isDetallesModalOpen = false;
       this.selectedCompra = null;
-    },
-
-    async generarReporte() {
-      if (!this.startDate || !this.endDate) {
-        this.toast.warning('Seleccione un rango de fechas');
-        return;
-      }
-
-      try {
-        this.loading = true;
-        const blob = await AdminCompras.generarReporteCompras(this.startDate, this.endDate);
-        
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `reporte-compras-${this.startDate}-${this.endDate}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-
-        this.toast.success('Reporte generado exitosamente');
-      } catch (error) {
-        console.error('Error al generar reporte:', error);
-        this.toast.error('Error al generar el reporte');
-      } finally {
-        this.loading = false;
-      }
     },
 
     generateRows() {
@@ -441,6 +423,7 @@ export default {
 /* Botón de exportación */
 .export-button {
   margin: 0;
+  z-index: 1000;
 }
 
 /* Opciones y filtros */

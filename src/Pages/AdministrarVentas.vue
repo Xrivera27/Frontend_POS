@@ -26,7 +26,7 @@
       </div>
 
       <!-- Botón de exportación PDF -->
-      <ExportButton :columns="columns" :rows="filteredRows" fileName="Ventas.pdf" class="export-button" />
+      <ExportButton :columns="columns" :rows="allFilteredRows" fileName="Ventas.pdf" class="export-button" />
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
@@ -64,7 +64,7 @@
         </thead>
         <tbody>
           <tr v-for="(venta, index) in paginatedVentas" :key="index">
-            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
+            <td>{{ String(((currentPage - 1) * pageSize) + index + 1).padStart(3, ' ') }}</td>
             <td>{{ venta.codigo }}</td>
             <td>{{ venta.nombre }}</td>
             <td>{{ venta.cliente }}</td>
@@ -225,6 +225,20 @@ export default {
     totalPages() {
       return Math.ceil(this.filteredVentas.length / this.pageSize);
     },
+    allFilteredRows() {
+      return this.filteredVentas.map((venta, index) => ({
+        index: index + 1,
+        codigo: venta.codigo,
+        nombre: venta.nombre,
+        cliente: venta.cliente,
+        subtotal: this.formatCurrency(venta.subtotal),
+        descuento: this.formatCurrency(venta.descuento),
+        total: this.formatCurrency(venta.total),
+        total_impuesto: this.formatCurrency(venta.total_impuesto),
+        estado: venta.estado || 'Pagada',
+        fechaHora: this.formatDateTime(venta.fechaHora)
+      }));
+    },
     filteredRows() {
       return this.paginatedVentas.map((venta, index) => ({
         index: ((this.currentPage - 1) * this.pageSize) + index + 1,
@@ -364,7 +378,15 @@ export default {
       this.endDate = '';
       this.selectedStatus = '';
       this.currentPage = 1;
-    }
+    },
+
+    changeFavicon(iconPath) {
+      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = iconPath;
+      document.getElementsByTagName('head')[0].appendChild(link);
+    },
   },
   watch: {
     paginatedVentas: {
@@ -389,10 +411,10 @@ export default {
   async mounted() {
     await this.loadVentas();
     document.title = "Administrar Ventas";
+    this.changeFavicon('/img/spiderman.ico');
   }
 };
 </script>
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
@@ -541,6 +563,27 @@ export default {
   min-width: 800px;
   border-collapse: collapse;
   margin-bottom: 20px;
+  table-layout: fixed;
+}
+
+/* Ajuste específico para la columna # */
+.table th:first-child,
+.table td:first-child {
+  min-width: 60px;
+  width: 60px;
+  text-align: center;
+}
+
+/* Ajuste para la columna de Número Factura */
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  min-width: 120px;
+  text-align: center;
+}
+
+/* Ajuste para columnas numéricas */
+.table td {
+  white-space: nowrap;
 }
 
 .table th,
@@ -548,6 +591,8 @@ export default {
   border: 1px solid #dee2e6;
   padding: 8px;
   text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .table th {
@@ -556,6 +601,24 @@ export default {
   top: 0;
   background-color: white;
   z-index: 1;
+}
+
+/* Ajuste para la columna de estado */
+.table th:nth-child(9),
+.table td:nth-child(9) {
+  min-width: 100px;
+}
+
+/* Ajuste para la columna de fecha */
+.table th:nth-child(10),
+.table td:nth-child(10) {
+  min-width: 140px;
+}
+
+/* Ajuste para la columna de acciones */
+.table th:last-child,
+.table td:last-child {
+  min-width: 120px;
 }
 
 /* Filtro de fechas */
