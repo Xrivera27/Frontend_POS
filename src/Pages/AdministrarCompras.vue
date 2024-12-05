@@ -12,29 +12,20 @@
       </div>
 
       <!-- Botones de exportación -->
-      <ExportButton 
-        :columns="columns" 
-        :rows="allFilteredRows" 
-        fileName="Compras.pdf" 
-        class="export-button" 
-      />
+      <ExportButton :columns="columns" :rows="allFilteredRows" fileName="Compras.pdf" class="export-button" />
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
-        <input 
-          class="busqueda" 
-          type="text" 
-          v-model="searchQuery" 
-          placeholder="Buscar compra..." 
-        />
+        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar compra..." />
       </div>
-      <select class="custom-select" v-model="searchSucursal" v-show="esCeo" >
-            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal" @click="obtenesCompras(sucursal.id_sucursal)" >
-              {{ sucursal.nombre_administrativo }}</option>
-          </select>
+      <select class="custom-select" v-model="searchSucursal" v-show="esCeo">
+        <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal"
+          @click="obtenesCompras(sucursal.id_sucursal)">
+          {{ sucursal.nombre_administrativo }}</option>
+      </select>
     </div>
 
-   
+
 
     <!-- Tabla exportable -->
     <div class="table-container" ref="table">
@@ -72,26 +63,19 @@
             <td>{{ compra.cantidad }}</td>
             <td>{{ formatCurrency(compra.total) }}</td>
             <td>
-              <span 
-                :class="{
-                  'estado-badge': true,
-                  'estado-completado': compra.estado === 'Completado',
-                  'estado-pendiente': compra.estado === 'Pendiente',
-                  'estado-cancelado': compra.estado === 'Cancelado'
-                }"
-              >
+              <span :class="{
+                'estado-badge': true,
+                'estado-completado': compra.estado === 'Completado',
+                'estado-pendiente': compra.estado === 'Pendiente',
+                'estado-cancelado': compra.estado === 'Cancelado'
+              }">
                 {{ compra.estado }}
               </span>
             </td>
             <td>{{ compra.metodo_pago }}</td>
             <td>{{ formatDateTime(compra.fechaHora) }}</td>
             <td class="actions-column">
-              <button 
-                id="btnDetalles" 
-                class="btn btn-info" 
-                @click="showDetalles(compra)" 
-                title="Ver Detalles"
-              >
+              <button id="btnDetalles" class="btn btn-info" @click="showDetalles(compra)" title="Ver Detalles">
                 <i class="bi bi-eye-fill"></i>
               </button>
             </td>
@@ -102,22 +86,15 @@
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredCompras.length) }} de {{ filteredCompras.length }} registros
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredCompras.length)
+          }} de {{ filteredCompras.length }} registros
         </div>
         <div class="pagination-container">
-          <button 
-            class="pagination-button" 
-            :disabled="currentPage === 1"
-            @click="previousPage"
-          >
+          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
             Anterior
           </button>
-          
-          <button 
-            class="pagination-button" 
-            :disabled="currentPage === totalPages"
-            @click="nextPage"
-          >
+
+          <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
             Siguiente
           </button>
         </div>
@@ -200,6 +177,7 @@
 
 <script>
 import { useToast } from "vue-toastification";
+import { notis } from '../../services/notificaciones.js';
 import PageHeader from "@/components/PageHeader.vue";
 import ExportButton from '../components/ExportButton.vue';
 import solicitudes from "../../services/solicitudes.js";
@@ -252,13 +230,13 @@ export default {
     filteredCompras() {
       return this.compras.filter(compra => {
         const compraFecha = new Date(compra.fechaHora);
-        
-        const matchesSearchQuery = 
+
+        const matchesSearchQuery =
           String(compra.codigo).toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           compra.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           compra.proveedor.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-        const matchesDateRange = 
+        const matchesDateRange =
           (!this.startDate || compraFecha >= new Date(this.startDate + 'T00:00:00')) &&
           (!this.endDate || compraFecha <= new Date(this.endDate + 'T23:59:59'));
 
@@ -287,18 +265,18 @@ export default {
       }));
     },
     filteredRows() {
-  return this.paginatedCompras.map((compra, index) => ({
-    index: ((this.currentPage - 1) * this.pageSize) + index + 1, // Aquí estaba el error
-    codigo: compra.codigo,
-    nombre: compra.nombre,
-    proveedor: compra.proveedor,
-    cantidad: compra.cantidad,
-    total: this.formatCurrency(compra.total),
-    estado: compra.estado,
-    metodo_pago: compra.metodo_pago,
-    fechaHora: this.formatDateTime(compra.fechaHora)
-  }));
-}
+      return this.paginatedCompras.map((compra, index) => ({
+        index: ((this.currentPage - 1) * this.pageSize) + index + 1, // Aquí estaba el error
+        codigo: compra.codigo,
+        nombre: compra.nombre,
+        proveedor: compra.proveedor,
+        cantidad: compra.cantidad,
+        total: this.formatCurrency(compra.total),
+        estado: compra.estado,
+        metodo_pago: compra.metodo_pago,
+        fechaHora: this.formatDateTime(compra.fechaHora)
+      }));
+    }
   },
   methods: {
     formatCurrency(value) {
@@ -325,7 +303,7 @@ export default {
         console.log('Iniciando carga de compras...');
         const response = await AdminCompras.obtenerCompras();
         console.log('Respuesta del servidor:', response);
-        
+
         const comprasData = response.data || response;
         if (comprasData) {
           this.compras = comprasData;
@@ -355,22 +333,24 @@ export default {
       }
     },
 
-    async obtenesCompras(id_sucursal){
+    async obtenesCompras(id_sucursal) {
       try {
         console.log('Iniciando carga de compras...');
         const response = await AdminCompras.obtenerComprasCeo(id_sucursal);
         console.log('Respuesta del servidor:', response);
-        
+
         const comprasData = response.data || response;
         if (comprasData) {
           this.compras = comprasData;
           console.log('Compras procesadas:', this.compras);
           this.generateRows();
         } else {
+          notis("error", "No se pudieron obtener las compras");
           throw new Error('No se pudieron obtener las compras');
         }
       } catch (error) {
         console.error('No se encontraron compras para mostrar.', error);
+        notis("error", "No se encontraron compras para mostrar");
         this.error = 'No se encontraron compras para mostrar.';
         this.toast.error(this.error);
       } finally {
@@ -434,7 +414,7 @@ export default {
       this.obtenesCompras(this.searchSucursal);
 
     } catch (error) {
-      alert(error);
+      notis("error", error);
     }
 
   }
@@ -584,7 +564,7 @@ export default {
   overflow-x: auto;
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Estilos de la tabla */
@@ -812,6 +792,7 @@ export default {
 }
 
 @media screen and (max-width: 480px) {
+
   .table th,
   .table td {
     padding: 6px;

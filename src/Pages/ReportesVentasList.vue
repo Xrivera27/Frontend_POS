@@ -48,11 +48,11 @@
               </button>
               <div class="button-group">
                 <button @click="generarReporte('pdf')" class="btn pdf-btn"
-                  :disabled="!fechasValidas || cargando">PDF</button>
+                  :disabled="!fechasValidas || cargando || !datosReporte.length">PDF</button>
                 <button @click="generarReporte('excel')" class="btn excel-btn"
-                  :disabled="!fechasValidas || cargando">EXCEL</button>
+                  :disabled="!fechasValidas || cargando || !datosReporte.length">EXCEL</button>
                 <button @click="generarReporte('preview')" class="btn generate-btn"
-                  :disabled="!fechasValidas || cargando">
+                  :disabled="!fechasValidas || cargando || !datosReporte.length">
                   {{ cargando ? 'Generando...' : 'Generar' }}
                 </button>
               </div>
@@ -114,7 +114,6 @@
           <span class="checkbox-text">Especificación</span>
         </label>
       </div>
-
 
       <!-- Tabla de resultados -->
       <div v-if="!cargando && datosReporte.length" class="report-table">
@@ -397,20 +396,6 @@ export default {
 
     async openModalHeaderFooter() {
       this.showHeaderFooterModal = true;
-
-      try {
-        // Obtener los datos de la empresa o sucursal
-        const response = await getDatosInstitucion(this.id_usuario, this.esCeo);
-        this.datosBussines = response;
-
-        // Llenar los campos del header/footer config
-        this.headerFooterConfig.header.companyName = this.datosBussines.nombre;
-        this.headerFooterConfig.header.address = this.datosBussines.direccion;
-        this.headerFooterConfig.header.phone = this.datosBussines.telefono;
-        this.headerFooterConfig.header.email = this.datosBussines.correo;
-      } catch (error) {
-        notis('error', 'Error al cargar datos de empresa');
-      }
     },
 
     async mostrarReportes() {
@@ -681,9 +666,9 @@ export default {
           doc.text(this.headerFooterConfig.header.companyName, headerX, currentY + 7);
 
           doc.setFontSize(11);
-          doc.text(this.headerFooterConfig.header.address, headerX, currentY + 14);
-          doc.text(this.headerFooterConfig.header.phone, headerX, currentY + 21);
-          doc.text(this.headerFooterConfig.header.email, headerX, currentY + 28);
+          doc.text("Dirección: " + this.headerFooterConfig.header.address, headerX, currentY + 14);
+          doc.text("Teléfono: " + this.headerFooterConfig.header.phone, headerX, currentY + 21);
+          doc.text("Correo: " + this.headerFooterConfig.header.email, headerX, currentY + 28);
 
           currentY += Math.max(logoHeight, 35);
         }
@@ -857,6 +842,20 @@ export default {
       // Cargar datos iniciales
       await this.cargarDatos();
 
+      try {
+        // Obtener los datos de la empresa o sucursal
+        const response = await getDatosInstitucion(this.id_usuario, this.esCeo);
+        this.datosBussines = response;
+
+        // Llenar los campos del header/footer config
+        this.headerFooterConfig.header.companyName = this.datosBussines.nombre;
+        this.headerFooterConfig.header.address = this.datosBussines.direccion;
+        this.headerFooterConfig.header.phone = this.datosBussines.telefono;
+        this.headerFooterConfig.header.email = this.datosBussines.correo;
+      } catch (error) {
+        notis('error', 'Error al cargar datos de empresa');
+      }
+
       // Si hay fechas por defecto, generar el reporte
       if (this.fechasValidas) {
         await this.generarReporte('preview');
@@ -872,11 +871,27 @@ export default {
 
   watch: {
     reporteSeleccionado() {
-      this.valorFiltro = '';
+      if (this.valorFiltro !== '') {
+        this.especificacion = true;
+      } else {
+        this.especificacion = false;
+      }
       if (this.fechasValidas) {
         this.generarReporte('preview');
       }
     },
+
+    valorFiltro: {
+      handler(newValue) {
+        if (newValue !== '') {
+          this.mostrarReporteDesglose({ id: newValue });
+        } else {
+          this.mostrarReportes();
+        }
+      },
+      immediate: true
+    },
+
     especificacion: {
       immediate: true,
       async handler() {
