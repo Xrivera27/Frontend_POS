@@ -163,6 +163,7 @@
           <div><strong>Total Gravado 18%:</strong> {{ formatearMoneda(totales.gravado_18) }}</div>
           <div><strong>Total ISV:</strong> {{ formatearMoneda(totales.total_isv) }}</div>
           <div><strong>Total General:</strong> {{ formatearMoneda(totales.total) }}</div>
+          <div><strong>Total Canceladas:</strong> {{ formatearMoneda(totales.total_canceladas) }}</div>
         </div>
       </div>
 
@@ -206,6 +207,7 @@ export default {
       logoUrl: null,
       reporteSeleccionado: 'ventas_cliente',
       showHeaderFooterModal: false,
+      isDesgloseActive: false,
       datosBussines: [],
       filtros: {
         fechaInicio: '',
@@ -243,7 +245,8 @@ export default {
         gravado_15: 0,
         gravado_18: 0,
         total_isv: 0,
-        total: 0
+        total: 0,
+        total_canceladas: 0,
       }
     }
   },
@@ -337,7 +340,8 @@ export default {
         gravado_15: 0,
         gravado_18: 0,
         total_isv: 0,
-        total: 0
+        total: 0,
+        total_canceladas: 0,
       }
     },
 
@@ -351,7 +355,7 @@ export default {
         switch (this.reporteSeleccionado) {
           case 'ventas_empleado':
             response = option.id ?
-              await getRegistrosEmpleadosDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin) :
+              await getRegistrosEmpleadosDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin):
               await getRegistrosEmpleados(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
             break;
 
@@ -380,19 +384,23 @@ export default {
     },
 
     calcularTotales(datos) {
+
       this.totales = datos.reduce((acc, curr) => ({
         exento: acc.exento + (curr.valor_extento || 0),
         gravado_15: acc.gravado_15 + (curr.gravado_15 || 0),
         gravado_18: acc.gravado_18 + (curr.gravado_18 || 0),
         total_isv: acc.total_isv + (curr.total_isv || 0),
-        total: acc.total + (curr.total || 0)
+        total: acc.total + (curr.total || 0),
+        total_canceladas: acc.total_canceladas + (curr.total_canceladas || 0),
       }), {
         exento: 0,
         gravado_15: 0,
         gravado_18: 0,
         total_isv: 0,
-        total: 0
+        total: 0,
+        total_canceladas: 0,
       });
+
     },
 
     async openModalHeaderFooter() {
