@@ -21,6 +21,7 @@
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.3",
     "libphonenumber-js": "^1.11.15",
+    "serve": "^14.2.4",
     "validator": "^13.12.0",
     "vue": "^3.2.13",
     "vue-chartjs": "^4.1.1",
