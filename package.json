@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "dev": "concurrently \"npm run start\" \"npm run serve\"",
+    "dev": "npm run serve",
     "build": "vue-cli-service build",
-    "start": "cross-env PORT=3001 vue-cli-service serve"
+    "lint": "vue-cli-service lint",
+    "start": "serve -s dist",
+    "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
@@ -22,6 +24,7 @@
     "validator": "^13.12.0",
     "vue": "^3.2.13",
     "vue-chartjs": "^4.1.1",
+    "vue-cli-service": "^5.0.10",
     "vue-router": "^4.4.3",
     "vue-toastification": "^2.0.0-rc.5",
     "xlsx": "^0.18.5"
