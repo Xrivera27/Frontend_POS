@@ -9,6 +9,7 @@ const getApi = () => {
             return 'http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api' 
         }
         else {
+            console.log(environment);
             console.log('No fue detectado el entorno de ejecución');
         }
     } catch (error) {
