@@ -5,9 +5,9 @@ const environment = process.env.NODE_ENV;
 const getApi = () => {
     try {
         if(environment === 'development'){
-            console.log('Estas en desarrollo');
+            return 'localhost//300'
         }
-        else{
+        else if(environment === 'production'){
             console.log('no Estas en desarrollo');   
         }
     } catch (error) {
