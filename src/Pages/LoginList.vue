@@ -50,6 +50,7 @@
 <script>
 import ModalLoading from '@/components/ModalLoading.vue';
 import { useToast } from "vue-toastification"; // Importación para el popup
+const { getApi } = require('../../config/getApiUrl.js');
 
 export default {
   components: {
@@ -81,7 +82,7 @@ export default {
       try {
         this.isLoading = true;
 
-        const response = await fetch('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/login', {
+        const response = await fetch(`${getApi()}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: this.username, password: this.password })
@@ -133,7 +134,7 @@ async recoverPassword() {
   try {
     this.isLoading = true;
 
-    const response = await fetch('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/recuperar', {
+    const response = await fetch(`${getApi()}/recuperar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: this.recoveryEmail })

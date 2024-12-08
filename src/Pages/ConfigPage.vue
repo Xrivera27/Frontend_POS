@@ -114,6 +114,7 @@ import { COUNTRY_CODES } from "../../services/countrySelector.js";
 import { validacionesConfigPage } from "../../services/validarCampos.js"
 import solicitudes from "../../services/solicitudes.js";
 const { esCeo  } = require('../../services/usuariosSolicitudes');
+const { getApi } = require('../../config/getApiUrl.js');
 
 export default {
   components: {
@@ -163,7 +164,7 @@ export default {
       try {
         const token = localStorage.getItem('auth');
 
-        const response = await axios.get('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/usuarios', {
+        const response = await axios.get(`${getApi()}/usuarios`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -201,7 +202,7 @@ export default {
       if (this.isPassEdit) {
         try {
           const token = localStorage.getItem('auth');
-          const verifyResponse = await axios.post('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/verificar-password',
+          const verifyResponse = await axios.post(`${getApi()}/verificar-password`,
             {
               contraseña: this.userForm.contraseña,
               id_usuario: await solicitudes.solicitarUsuarioToken()
@@ -247,7 +248,7 @@ export default {
           updatedData.contraseña_confirm = this.userForm.contraseña_confirm;
         }
 
-        const response = await axios.put('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/configuser', 
+        const response = await axios.put(`${getApi()}/configuser`, 
           updatedData,
           {
             headers: {

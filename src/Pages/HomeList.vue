@@ -42,7 +42,7 @@
 import BarChart from '../components/DashboardList.vue';
 import PageHeader from "@/components/PageHeader.vue";
 import ModalLoading from '@/components/ModalLoading.vue';
-const { getApi } = require('../../config/getApiUrl');
+
 
 export default {
   components: {
@@ -59,7 +59,7 @@ export default {
   mounted() {
     document.title = "Inicio";
     this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
-    getApi();
+
   },
   methods: {
     changeFavicon(iconPath) {

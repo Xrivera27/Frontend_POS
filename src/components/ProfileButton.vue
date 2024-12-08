@@ -20,6 +20,7 @@
 
 <script>
 import axios from 'axios';
+const { getApi } = require('../../config/getApiUrl.js');
 
 export default {
     data() {
@@ -36,7 +37,7 @@ export default {
             try {
                 this.loading = true;
                 const token = localStorage.getItem('auth');
-                const response = await axios.get('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/perfil', {
+                const response = await axios.get(`${getApi()}/perfil`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

@@ -60,6 +60,7 @@
 import PageHeader from "@/components/PageHeader.vue";
 import axios from 'axios';
 import { useToast } from "vue-toastification";
+const { getApi } = require('../../config/getApiUrl.js');
 
 export default {
   components: {
@@ -89,7 +90,7 @@ export default {
       const toast = useToast();
       try {
         const token = localStorage.getItem('auth');
-        const response = await axios.get('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/sar', {
+        const response = await axios.get(`${getApi()}/sar`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -147,7 +148,7 @@ export default {
           numero_actual_SAR: this.configuracionSAR.rango_inicial
         };
 
-        const response = await axios.post('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/sar/create', updatedData, {
+        const response = await axios.post(`${getApi()}/sar/create`, updatedData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

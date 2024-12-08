@@ -1,8 +1,7 @@
 import axios from 'axios';
-  const homeUrl = 'http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api';
+const { getApi } = require('../config/getApiUrl');
+  const homeUrl = getApi();
  // const nextUrl = '/sesion-user';
-
- 
 
   export default  {
     homeUrl,

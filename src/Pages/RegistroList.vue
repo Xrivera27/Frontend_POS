@@ -68,6 +68,7 @@
 
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
+const { getApi } = require('../../config/getApiUrl.js');
 
 const form = reactive({
   nombre: '',
@@ -99,7 +100,7 @@ const categorias = ref([]);
 // Función para cargar las categorías desde el backend
 const fetchCategorias = async () => {
   try {
-    const response = await fetch('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/categoria');
+    const response = await fetch(`${getApi()}/categoria`);
     const data = await response.json();
     categorias.value = data; // Asigna las categorías a la variable reactiva
   } catch (error) {
@@ -115,7 +116,7 @@ onMounted(() => {
 // Función para manejar el envío del formulario
 const handleSubmit = async () => {
   try {
-    const response = await fetch('http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api/empresa', { 
+    const response = await fetch(`${getApi()}/empresa`, { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

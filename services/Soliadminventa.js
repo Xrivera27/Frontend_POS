@@ -1,4 +1,5 @@
-const homeUrl = 'http://uc0skkosgswkwkgosowwoocs.34.16.113.40.sslip.io/api';
+const { getApi } = require('../config/getApiUrl');
+  const homeUrl = getApi();
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('auth');
