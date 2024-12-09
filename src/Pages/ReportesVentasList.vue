@@ -185,6 +185,7 @@ const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   name: 'ReporteVentas',
@@ -840,6 +841,7 @@ export default {
   async mounted() {
     // Cargar logo guardado si existe
     this.isLoading = true;
+    setPageTitle('Reportes');
     try {
       const savedLogo = localStorage.getItem('logoEmpresa');
       if (savedLogo) {

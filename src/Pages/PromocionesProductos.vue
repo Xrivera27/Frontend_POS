@@ -260,6 +260,7 @@ import ModalLoading from '@/components/ModalLoading.vue';
 import { notis } from '../../services/notificaciones.js';
 import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
 import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   name: 'PromocionesProducto',
@@ -317,8 +318,7 @@ export default {
   async mounted() {
     this.isLoading = true;
     try {
-      document.title = "Promociones Productos";
-      this.changeFavicon('/img/spiderman.ico');
+      setPageTitle('Promociones por Producto');
       const result = await Promise.all([
         this.cargarPromociones(),
         this.cargarProductos(),

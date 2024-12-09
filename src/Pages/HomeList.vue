@@ -42,7 +42,7 @@
 import BarChart from '../components/DashboardList.vue';
 import PageHeader from "@/components/PageHeader.vue";
 import ModalLoading from '@/components/ModalLoading.vue';
-
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   components: {
@@ -57,9 +57,7 @@ export default {
     };
   },
   mounted() {
-    document.title = "Inicio";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
-
+    setPageTitle('Inicio');
   },
   methods: {
     changeFavicon(iconPath) {

@@ -51,6 +51,7 @@
 import ModalLoading from '@/components/ModalLoading.vue';
 import { useToast } from "vue-toastification"; // Importación para el popup
 const { getApi } = require('../../config/getApiUrl.js');
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   components: {
@@ -73,8 +74,7 @@ export default {
     }
   },
   mounted() {
-    document.title = "Login";
-    this.changeFavicon('/img/spiderman.ico'); // Usar la ruta correcta
+    setPageTitle('Inicio de Sesión');
   },
   methods: {
     async login() {
@@ -90,84 +90,84 @@ export default {
 
         const data = await response.json();
 
-    if (response.ok) {
-      // El código existente para el login exitoso se mantiene igual
-      localStorage.clear();
-      localStorage.setItem('auth', data.token);
-      localStorage.setItem('role', data.role);
-      window.dispatchEvent(new Event('roleChange'));
-      
-      this.$nextTick(() => {
-        this.$emit('auth-change');
-      });
+        if (response.ok) {
+          // El código existente para el login exitoso se mantiene igual
+          localStorage.clear();
+          localStorage.setItem('auth', data.token);
+          localStorage.setItem('role', data.role);
+          window.dispatchEvent(new Event('roleChange'));
+
+          this.$nextTick(() => {
+            this.$emit('auth-change');
+          });
 
           this.isLoading = false;
 
-      if (data.role === '3') {
-        await this.$router.push('/ventas');
-      } else {
-        await this.$router.push('/home');
-      }
-    } else {
-      this.isLoading = false;
-      // Aquí manejamos específicamente el caso de usuario inhabilitado
-      if (response.status === 403) {
-        toast.error('Usuario inhabilitado', {
-          timeout: 5000
-        });
-      } else {
-        toast.error(data.message, {
-          timeout: 5000
-        });
-      }
-    }
-  } catch (error) {
-    this.isLoading = false;
-    console.error('Error:', error);
-    toast.error('Error de red o servidor.', {
-      timeout: 5000
-    });
-  }
-},
-async recoverPassword() {
-  const toast = useToast();
-  try {
-    this.isLoading = true;
-
-    const response = await fetch(`${getApi()}/recuperar`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: this.recoveryEmail })
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      toast.success('Correo enviado con la contraseña temporal.', {
-        timeout: 5000
-      });
-      this.isRecoveringPassword = false; // Volver a la vista de login
-      this.recoveryEmail = ''; // Limpiar el campo
-    } else {
-      if (response.status === 404) {
-        toast.error('Usuario no encontrado', {
-          timeout: 5000
-        });
-      } else {
-        toast.error(data.message, {
+          if (data.role === '3') {
+            await this.$router.push('/ventas');
+          } else {
+            await this.$router.push('/home');
+          }
+        } else {
+          this.isLoading = false;
+          // Aquí manejamos específicamente el caso de usuario inhabilitado
+          if (response.status === 403) {
+            toast.error('Usuario inhabilitado', {
+              timeout: 5000
+            });
+          } else {
+            toast.error(data.message, {
+              timeout: 5000
+            });
+          }
+        }
+      } catch (error) {
+        this.isLoading = false;
+        console.error('Error:', error);
+        toast.error('Error de red o servidor.', {
           timeout: 5000
         });
       }
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    toast.error('Error de red o servidor.', {
-      timeout: 5000
-    });
-  } finally {
-    this.isLoading = false;
-  }
-},
+    },
+    async recoverPassword() {
+      const toast = useToast();
+      try {
+        this.isLoading = true;
+
+        const response = await fetch(`${getApi()}/recuperar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: this.recoveryEmail })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          toast.success('Correo enviado con la contraseña temporal.', {
+            timeout: 5000
+          });
+          this.isRecoveringPassword = false; // Volver a la vista de login
+          this.recoveryEmail = ''; // Limpiar el campo
+        } else {
+          if (response.status === 404) {
+            toast.error('Usuario no encontrado', {
+              timeout: 5000
+            });
+          } else {
+            toast.error(data.message, {
+              timeout: 5000
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error('Error de red o servidor.', {
+          timeout: 5000
+        });
+      } finally {
+        this.isLoading = false;
+      }
+    },
 
     togglePasswordRecovery() {
       this.isRecoveringPassword = !this.isRecoveringPassword;

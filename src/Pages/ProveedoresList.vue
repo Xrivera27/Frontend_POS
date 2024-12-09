@@ -158,6 +158,7 @@ import { COUNTRY_CODES } from "../../services/countrySelector.js";
 import { validacionesProveedores } from '../../services/validarCampos.js';
 import solicitudes from "../../services/solicitudes.js";
 import ModalLoading from '@/components/ModalLoading.vue';
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   name: 'AdministrarProveedores',
@@ -373,8 +374,7 @@ export default {
 
   async mounted() {
     this.isLoading = true;
-    document.title = "Proveedores";
-    this.changeFavicon('/img/spiderman.ico');
+    setPageTitle('Proveedores');
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();

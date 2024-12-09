@@ -2,7 +2,7 @@
   <div class="configuracion-usuario">
     <div class="config-wrapper">
       <PageHeader :titulo="titulo" />
-      
+
       <div class="company-config">
         <form @submit.prevent="guardarConfiguracionSAR" autocomplete="off" class="formulario form-company-SAR">
           <fieldset :disabled="busisnessSarEditing">
@@ -16,21 +16,10 @@
                 <input v-model="configuracionSAR.numero_CAI" type="text" id="numero_CAI" required />
 
                 <label for="rango_inicial">Rango Inicial:</label>
-                <input 
-                  v-model="configuracionSAR.rango_inicial" 
-                  type="text" 
-                  id="rango_inicial" 
-                  required 
-                />
+                <input v-model="configuracionSAR.rango_inicial" type="text" id="rango_inicial" required />
 
                 <label for="rango_final">Rango Final:</label>
-                <input 
-                  v-model="configuracionSAR.rango_final" 
-                  type="text" 
-                  id="rango_final" 
-                 
-                  required 
-                />
+                <input v-model="configuracionSAR.rango_final" type="text" id="rango_final" required />
               </div>
               <div class="contenedor-interno contenedor-derecho">
                 <label for="fecha_autorizacion">Fecha de autorización:</label>
@@ -61,6 +50,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import axios from 'axios';
 import { useToast } from "vue-toastification";
 const { getApi } = require('../../config/getApiUrl.js');
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   components: {
@@ -97,7 +87,7 @@ export default {
         });
 
         const sarData = response.data.datosSAR;
-        
+
         this.configuracionSAR.numero_CAI = sarData.numero_CAI || '';
         this.configuracionSAR.rango_inicial = sarData.rango_inicial || '';
         this.configuracionSAR.rango_final = sarData.rango_final || '';
@@ -234,8 +224,7 @@ export default {
   mounted() {
     this.getConfiguracionSAR();
     window.addEventListener("keydown", this.pushEsc);
-    document.title = "Configuración";
-    this.changeFavicon('/img/spiderman.ico');
+    setPageTitle('Configuración');
   },
 
   beforeUnmount() {

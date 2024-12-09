@@ -115,6 +115,7 @@ import { validacionesConfigPage } from "../../services/validarCampos.js"
 import solicitudes from "../../services/solicitudes.js";
 const { esCeo  } = require('../../services/usuariosSolicitudes');
 const { getApi } = require('../../config/getApiUrl.js');
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   components: {
@@ -324,8 +325,7 @@ export default {
   },
   async mounted() {
     this.getUserData();
-    document.title = "Configuración de Usuario";
-    this.changeFavicon('/img/spiderman.ico');
+    setPageTitle('Configuración de Usuario');
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();

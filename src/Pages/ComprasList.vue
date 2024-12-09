@@ -5,34 +5,18 @@
     <div class="main-container">
       <form @submit.prevent="agregarProducto" autocomplete="off">
 
-        
+
         <div class="input-container input-superior">
           <div class="div-modal-resumen">
             <label for="referencia" class="label-input">Referencia de Compra:</label>
-  <input 
-    type="text" 
-    id="referencia"
-    class="campo"
-    v-model="referenciaPago"
-    placeholder="Ingrese referencia de compra"
-  />
-</div>
+            <input type="text" id="referencia" class="campo" v-model="referenciaPago"
+              placeholder="Ingrese referencia de compra" />
+          </div>
           <div class="input-container" id="div_codigo">
             <label for="codigo-busqueda" class="label-input">Código del producto:</label>
-            <input 
-              list="codigosList"
-              name="codigo-busqueda" 
-              ref="codigo" 
-              type="text" 
-              class="campo" 
-              id="campo_codigo" 
-              tabindex="1" 
-              required
-              v-model="addQuery" 
-              placeholder="Ingresar código" 
-              :disabled="isEditing"
-              @input="handleCodigoInput"
-            />
+            <input list="codigosList" name="codigo-busqueda" ref="codigo" type="text" class="campo" id="campo_codigo"
+              tabindex="1" required v-model="addQuery" placeholder="Ingresar código" :disabled="isEditing"
+              @input="handleCodigoInput" />
             <datalist id="codigosList">
               <option v-for="producto in productos" :key="producto.id_producto" :value="producto.codigo_producto">
                 {{ producto.codigo_producto }} - {{ producto.nombre }}
@@ -42,15 +26,8 @@
 
           <div class="input-container" id="div_nombre">
             <label class="label-input">Buscar por nombre:</label>
-            <input 
-              list="productosList" 
-              class="campo" 
-              id="campo_nombre" 
-              :disabled="isEditing" 
-              v-model="searchQuery"
-              placeholder="Ingresar nombre" 
-              @input="handleSearchInput"
-            >
+            <input list="productosList" class="campo" id="campo_nombre" :disabled="isEditing" v-model="searchQuery"
+              placeholder="Ingresar nombre" @input="handleSearchInput">
             <datalist id="productosList">
               <option v-for="producto in productos" :key="producto.id_producto" :value="producto.nombre">
                 {{ producto.codigo_producto }} - {{ producto.nombre }}
@@ -62,46 +39,23 @@
         <div class="input-container-exterior">
           <div class="input-container">
             <label for="cantidad" class="label-input">Cant. Unitaria:</label>
-            <input 
-              name="cantidad" 
-              class="campo" 
-              type="number" 
-              tabindex="3" 
-              placeholder="Cantidad unitaria"
-              v-model="addQuantity" 
-              min="1"
-            />
+            <input name="cantidad" class="campo" type="number" tabindex="3" placeholder="Cantidad unitaria"
+              v-model="addQuantity" min="1" />
           </div>
 
           <div class="input-container">
             <label for="cantidad" class="label-input">Cant. paquetes:</label>
-            <input 
-              name="cantidad_paquetes" 
-              class="campo" 
-              type="number" 
-              tabindex="4" 
-              placeholder="Cantidad total de paquetes"
-              v-model="addQuantityPackage" 
-              min="1"
-            />
+            <input name="cantidad_paquetes" class="campo" type="number" tabindex="4"
+              placeholder="Cantidad total de paquetes" v-model="addQuantityPackage" min="1" />
           </div>
 
           <div class="input-container">
             <label for="total-compra" class="label-input">Prec./paquete:</label>
-            <input 
-              name="total-compra" 
-              class="campo" 
-              type="number" 
-              step="0.01" 
-              tabindex="5"
-              placeholder="Total compra por paquete" 
-              required 
-              v-model="addtotalPrice" 
-              min="0.01"
-            />
+            <input name="total-compra" class="campo" type="number" step="0.01" tabindex="5"
+              placeholder="Total compra por paquete" required v-model="addtotalPrice" min="0.01" />
           </div>
 
-          
+
 
           <div class="boton-container">
             <button class="btn btn-success agregar-producto" type="submit">
@@ -246,10 +200,11 @@
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import solicompras from "../../services/solicompras";
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   name: 'ComprasView',
-  
+
   components: {
     PageHeader,
   },
@@ -326,13 +281,13 @@ export default {
         console.log('Productos cargados:', this.productos);
       } catch (error) {
         console.error('Error completo al cargar productos:', error);
-        
+
         if (error.message.includes('No hay token')) {
           console.log('Token no encontrado, redirigiendo a login');
           this.$router.push('/login');
           return;
         }
-        
+
         alert('Error al cargar la lista de productos');
       }
     },
@@ -356,7 +311,7 @@ export default {
     },
 
     async agregarProducto() {
-    try {
+      try {
         this.validarDatos();
 
         // Guardar la referencia actual antes de limpiar
@@ -366,46 +321,46 @@ export default {
         const cantidadPaquetes = this.addQuantityPackage || "1";
 
         const productoExistente = this.productos.find(p => p.codigo_producto === this.addQuery);
-        
+
         if (!productoExistente) {
-            throw new Error('Producto no encontrado');
+          throw new Error('Producto no encontrado');
         }
 
         const productoEnLista = this.productosLista.find(p => p.codigo === this.addQuery);
 
         if (!this.isEditing) {
-            if (productoEnLista) {
-                productoEnLista.cantidad = Number(cantidad);
-                productoEnLista.paquetes = Number(cantidadPaquetes);
-                productoEnLista.total_compra = Number(this.addtotalPrice);
-            } else {
-                this.productosLista.push({
-                    codigo: productoExistente.codigo_producto,
-                    nombre: productoExistente.nombre,
-                    cantidad: Number(cantidad),
-                    paquetes: Number(cantidadPaquetes),
-                    proveedor: productoExistente.proveedor,
-                    total_compra: Number(this.addtotalPrice)
-                });
-            }
-        } else {
+          if (productoEnLista) {
             productoEnLista.cantidad = Number(cantidad);
             productoEnLista.paquetes = Number(cantidadPaquetes);
             productoEnLista.total_compra = Number(this.addtotalPrice);
-            this.isEditing = false;
+          } else {
+            this.productosLista.push({
+              codigo: productoExistente.codigo_producto,
+              nombre: productoExistente.nombre,
+              cantidad: Number(cantidad),
+              paquetes: Number(cantidadPaquetes),
+              proveedor: productoExistente.proveedor,
+              total_compra: Number(this.addtotalPrice)
+            });
+          }
+        } else {
+          productoEnLista.cantidad = Number(cantidad);
+          productoEnLista.paquetes = Number(cantidadPaquetes);
+          productoEnLista.total_compra = Number(this.addtotalPrice);
+          this.isEditing = false;
         }
 
         this.reiniciarInputs();
         // Restaurar la referencia
         this.$nextTick(() => {
-            this.referenciaPago = referenciaActual;
+          this.referenciaPago = referenciaActual;
         });
-        
+
         this.$refs.codigo.focus();
-    } catch (error) {
+      } catch (error) {
         alert(error.message);
-    }
-},
+      }
+    },
 
     isEditingTrue(index) {
       const producto = this.productosLista[index];
@@ -448,43 +403,43 @@ export default {
       this.isEditing = false;
     },
     limpiarTodo() {
-    this.addQuery = "";
-    this.searchQuery = "";
-    this.addQuantity = "";
-    this.addtotalPrice = "";
-    this.addQuantityPackage = "";
-    this.referenciaPago = "";
-    this.isEditing = false;
-},
+      this.addQuery = "";
+      this.searchQuery = "";
+      this.addQuantity = "";
+      this.addtotalPrice = "";
+      this.addQuantityPackage = "";
+      this.referenciaPago = "";
+      this.isEditing = false;
+    },
 
-async confirmPayment() {
-    if (!this.referenciaPago) {
+    async confirmPayment() {
+      if (!this.referenciaPago) {
         alert('Por favor ingrese una referencia de compra');
         return;
-    }
+      }
 
-    try {
+      try {
         this.loading = true;
         const datosCompra = {
-            productosLista: this.productosLista,
-            total: this.calcularTotal,
-            referenciaPago: this.referenciaPago.trim() // Aseguramos que se envíe
+          productosLista: this.productosLista,
+          total: this.calcularTotal,
+          referenciaPago: this.referenciaPago.trim() // Aseguramos que se envíe
         };
 
         console.log('Enviando compra:', datosCompra);
         await solicompras.registrarCompra(datosCompra);
-        
+
         this.confirmModal = true;
         this.payModal = false;
         this.productosLista = [];
         this.limpiarTodo();
-    } catch (error) {
+      } catch (error) {
         console.error('Error al confirmar la compra:', error);
         alert(error.message);
-    } finally {
+      } finally {
         this.loading = false;
-    }
-},
+      }
+    },
 
     payModalOpen() {
       if (this.productosLista.length > 0) {
@@ -524,11 +479,11 @@ async confirmPayment() {
     },
 
     confirmCancel() {
-    this.productosLista = [];
-    this.showConfirmModal = false;
-    this.limpiarTodo(); // Usamos el nuevo método aquí también
-    this.$refs.codigo.focus();
-},
+      this.productosLista = [];
+      this.showConfirmModal = false;
+      this.limpiarTodo(); // Usamos el nuevo método aquí también
+      this.$refs.codigo.focus();
+    },
     cancelCancel() {
       this.showConfirmModal = false;
     },
@@ -612,8 +567,7 @@ async confirmPayment() {
     window.addEventListener("keydown", this.pushEsc);
     window.addEventListener("keydown", this.pushF12);
     this.$refs.codigo.focus();
-    document.title = "Crear Compras";
-    this.changeFavicon('/img/spiderman.ico');
+    setPageTitle('Crear Compras');
   },
 
   beforeUnmount() {
@@ -634,11 +588,14 @@ async confirmPayment() {
 
 /* Layout Principal */
 .wrapper {
-  padding: 8px; /* Reducido el padding */
+  padding: 8px;
+  /* Reducido el padding */
   display: flex;
-  height: 90%; /* Aumentado ligeramente */
+  height: 90%;
+  /* Aumentado ligeramente */
   flex-direction: column;
-  justify-content: flex-start; /* Alineación hacia arriba */
+  justify-content: flex-start;
+  /* Alineación hacia arriba */
 }
 
 /* Contenedores de Input */
@@ -646,7 +603,8 @@ async confirmPayment() {
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin: 5px; /* Reducido el margen */
+  margin: 5px;
+  /* Reducido el margen */
 }
 
 .input-container label {
@@ -658,7 +616,8 @@ async confirmPayment() {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 0.5%; /* Reducido el margen inferior */
+  margin-bottom: 0.5%;
+  /* Reducido el margen inferior */
 }
 
 .input-container-exterior {
@@ -669,18 +628,23 @@ async confirmPayment() {
 
 #div_nombre {
   width: 80%;
-  padding-left: 10px; /* Reducido el padding */
+  padding-left: 10px;
+  /* Reducido el padding */
 }
 
 /* Campos de entrada */
 .campo {
-  padding: 5px 8px; /* Reducido el padding */
+  padding: 5px 8px;
+  /* Reducido el padding */
   width: 100%;
   font-size: 14px;
-  min-height: 28px; /* Reducido ligeramente */
-  border-radius: 8px; /* Más compacto */
+  min-height: 28px;
+  /* Reducido ligeramente */
+  border-radius: 8px;
+  /* Más compacto */
   border: 1px solid #ddd;
-  width: 180px; /* Reducido el ancho */
+  width: 180px;
+  /* Reducido el ancho */
 }
 
 .label-input {

@@ -151,6 +151,8 @@ import PageHeader from "@/components/PageHeader.vue";
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
 import { validacionesSucursal } from '../../services/validarCampos.js';
 import solicitudes from "../../services/solicitudes.js";
+import { setPageTitle } from '@/components/pageMetadata';
+
 export default {
   components: {
     ExportButton,
@@ -363,13 +365,11 @@ export default {
   },
   async mounted() {
     this.isLoading = true;
+    setPageTitle('Sucursales');
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.sucursales = await solicitudes.fetchRegistros(`/sucursales/empresa/${this.id_usuario}`);
       this.generateRows();
-
-      document.title = "Sucursales";
-      this.changeFavicon("/img/spiderman.ico");
     } catch (error) {
       console.error(error);
     } finally {

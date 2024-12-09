@@ -192,6 +192,7 @@ import FacturaModal from '@/components/FacturaModal.vue'; // Nuevo
 import CerrarCajaModal from '@/components/CierreCajaModal.vue';
 const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
 const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   components: {
@@ -1131,8 +1132,7 @@ export default {
     this.isModalLoading = true;
     let ventaRecuperada;
     window.addEventListener("keydown", this.handleKeyPress);
-    document.title = "Crear Ventas";
-    this.changeFavicon('/img/spiderman.ico');
+    setPageTitle('Crear Ventas');
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();

@@ -322,9 +322,8 @@ import { getInfoExtra, getProductoSucursal, postProducto, patchProducto, desacti
 import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
 import { getCategoriaProductosEmpresa } from '../../services/categoriaSolicitudes.js';
 const { esCeo } = require('../../services/usuariosSolicitudes');
-
-//recursos
 const { impuestos } = require('../resources/impuestos.js');
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   components: {
@@ -393,10 +392,10 @@ export default {
   computed: {
 
     hasChanges() {
-    if (!this.productoOriginal) return false;
-    const changedFields = this.getChangedFields();
-    return Object.keys(changedFields).length > 0;
-  },
+      if (!this.productoOriginal) return false;
+      const changedFields = this.getChangedFields();
+      return Object.keys(changedFields).length > 0;
+    },
 
     filteredProductos() {
       return this.productos.filter(producto =>
@@ -555,23 +554,23 @@ export default {
     },
 
     clearForm() {
-  this.productoForm = {
-    codigo_producto: '',
-    nombre: '',
-    descripcion: '',
-    unidad_medida: 'default',
-    impuesto: impuestos[0]?.id || null,
-    proveedor: 'default',
-    precio_unitario: "",
-    precio_mayorista: "",
-    cantidad_activar_mayorista: "",
-    categorias: []
-  };
-  this.productoOriginal = null;
-  this.isEditing = false;
-  this.editIndex = null;
-  this.categoriasSeleccionadas = [];
-},
+      this.productoForm = {
+        codigo_producto: '',
+        nombre: '',
+        descripcion: '',
+        unidad_medida: 'default',
+        impuesto: impuestos[0]?.id || null,
+        proveedor: 'default',
+        precio_unitario: "",
+        precio_mayorista: "",
+        cantidad_activar_mayorista: "",
+        categorias: []
+      };
+      this.productoOriginal = null;
+      this.isEditing = false;
+      this.editIndex = null;
+      this.categoriasSeleccionadas = [];
+    },
     cargarImpuestos() {
       return impuestos;
     },
@@ -582,112 +581,112 @@ export default {
     },
 
     async guardarProducto() {
-  if (!validacionesProductos.validarCampos(this.productoForm)) {
-    return;
-  }
-
-  this.isLoading = true;
-
-  try {
-    if (this.isEditing) {
-      const changedFields = this.getChangedFields();
-      
-      // Si no hay cambios, cerrar modal
-      if (Object.keys(changedFields).length === 0) {
-        this.closeModal();
+      if (!validacionesProductos.validarCampos(this.productoForm)) {
         return;
       }
 
-      // Agregar id_usuario si es necesario
-      changedFields.id_usuario = this.id_usuario;
+      this.isLoading = true;
 
-      // Si el código no cambió, no lo enviamos
-      if (changedFields.codigo_producto === this.productos[this.editIndex].codigo_producto) {
-        delete changedFields.codigo_producto;
-      }
+      try {
+        if (this.isEditing) {
+          const changedFields = this.getChangedFields();
 
-      const nuevoRegistro = await patchProducto(changedFields, this.productos[this.editIndex].id_producto);
-      
-      if (nuevoRegistro === true) {
-        notis("success", "Actualizando datos del producto...");
-        // Actualizar solo los campos modificados en el array de productos
-        Object.assign(this.productos[this.editIndex], changedFields);
+          // Si no hay cambios, cerrar modal
+          if (Object.keys(changedFields).length === 0) {
+            this.closeModal();
+            return;
+          }
+
+          // Agregar id_usuario si es necesario
+          changedFields.id_usuario = this.id_usuario;
+
+          // Si el código no cambió, no lo enviamos
+          if (changedFields.codigo_producto === this.productos[this.editIndex].codigo_producto) {
+            delete changedFields.codigo_producto;
+          }
+
+          const nuevoRegistro = await patchProducto(changedFields, this.productos[this.editIndex].id_producto);
+
+          if (nuevoRegistro === true) {
+            notis("success", "Actualizando datos del producto...");
+            // Actualizar solo los campos modificados en el array de productos
+            Object.assign(this.productos[this.editIndex], changedFields);
+          }
+        } else {
+          // Lógica para nuevo producto
+          this.productoForm.id_usuario = this.id_usuario;
+          const nuevoRegistro = await postProducto(this.productoForm);
+          this.productos.push(nuevoRegistro[0]);
+          notis("success", "Producto agregado correctamente");
+        }
+      } catch (error) {
+        notis('error', error.message);
+      } finally {
+        this.isLoading = false;
+        this.closeModal();
       }
-    } else {
-      // Lógica para nuevo producto
-      this.productoForm.id_usuario = this.id_usuario;
-      const nuevoRegistro = await postProducto(this.productoForm);
-      this.productos.push(nuevoRegistro[0]);
-      notis("success", "Producto agregado correctamente");
-    }
-  } catch (error) {
-    notis('error', error.message);
-  } finally {
-    this.isLoading = false;
-    this.closeModal();
-  }
-},
+    },
 
     async editProducto(producto, index) {
-  // Inicializar el form solo con datos básicos
-  this.productoForm = {
-    codigo_producto: producto.codigo_producto || '',
-    nombre: producto.nombre || '',
-    descripcion: producto.descripcion || '',
-    precio_unitario: producto.precio_unitario || '',
-    precio_mayorista: '',
-    proveedor: 'default',
-    unidad_medida: 'default',
-    impuesto: impuestos[0]?.id || null,
-    cantidad_activar_mayorista: '',
-    categorias: []
-  };
+      // Inicializar el form solo con datos básicos
+      this.productoForm = {
+        codigo_producto: producto.codigo_producto || '',
+        nombre: producto.nombre || '',
+        descripcion: producto.descripcion || '',
+        precio_unitario: producto.precio_unitario || '',
+        precio_mayorista: '',
+        proveedor: 'default',
+        unidad_medida: 'default',
+        impuesto: impuestos[0]?.id || null,
+        cantidad_activar_mayorista: '',
+        categorias: []
+      };
 
-  try {
-    // Obtener info extra y solo actualizar los campos necesarios
-    const infoExtra = await getInfoExtra(producto.id_producto);
-    
-    // Solo actualizar campos si son diferentes
-    if (infoExtra.impuesto !== undefined) {
-      this.productoForm.impuesto = infoExtra.impuesto;
-    }
-    if (infoExtra.id_unidad_medida) {
-      this.productoForm.unidad_medida = infoExtra.id_unidad_medida;
-    }
-    if (infoExtra.id_proveedor) {
-      this.productoForm.proveedor = infoExtra.id_proveedor;
-    }
-    if (infoExtra.precio_mayorista !== undefined) {
-      this.productoForm.precio_mayorista = infoExtra.precio_mayorista;
-    }
-    if (infoExtra.cantidad_activar_mayorista !== undefined) {
-      this.productoForm.cantidad_activar_mayorista = infoExtra.cantidad_activar_mayorista;
-    }
-    if (infoExtra.categorias) {
-      this.categoriasSeleccionadas = infoExtra.categorias;
-    }
+      try {
+        // Obtener info extra y solo actualizar los campos necesarios
+        const infoExtra = await getInfoExtra(producto.id_producto);
 
-    this.isEditing = true;
-    this.editIndex = index;
-    this.productoOriginal = { ...this.productoForm }; // Guardar estado original
-    this.openModal();
-    
-  } catch (error) {
-    notis('error', "Error al editar el producto");
-    console.error(error);
-  }
-},
+        // Solo actualizar campos si son diferentes
+        if (infoExtra.impuesto !== undefined) {
+          this.productoForm.impuesto = infoExtra.impuesto;
+        }
+        if (infoExtra.id_unidad_medida) {
+          this.productoForm.unidad_medida = infoExtra.id_unidad_medida;
+        }
+        if (infoExtra.id_proveedor) {
+          this.productoForm.proveedor = infoExtra.id_proveedor;
+        }
+        if (infoExtra.precio_mayorista !== undefined) {
+          this.productoForm.precio_mayorista = infoExtra.precio_mayorista;
+        }
+        if (infoExtra.cantidad_activar_mayorista !== undefined) {
+          this.productoForm.cantidad_activar_mayorista = infoExtra.cantidad_activar_mayorista;
+        }
+        if (infoExtra.categorias) {
+          this.categoriasSeleccionadas = infoExtra.categorias;
+        }
 
-getChangedFields() {
-  const changedFields = {};
-  Object.keys(this.productoForm).forEach(key => {
-    // Comparar con los valores originales
-    if (this.productoForm[key] !== this.productoOriginal[key]) {
-      changedFields[key] = this.productoForm[key];
-    }
-  });
-  return changedFields;
-},
+        this.isEditing = true;
+        this.editIndex = index;
+        this.productoOriginal = { ...this.productoForm }; // Guardar estado original
+        this.openModal();
+
+      } catch (error) {
+        notis('error', "Error al editar el producto");
+        console.error(error);
+      }
+    },
+
+    getChangedFields() {
+      const changedFields = {};
+      Object.keys(this.productoForm).forEach(key => {
+        // Comparar con los valores originales
+        if (this.productoForm[key] !== this.productoOriginal[key]) {
+          changedFields[key] = this.productoForm[key];
+        }
+      });
+      return changedFields;
+    },
 
     async deleteProducto(producto) {
       if (!this.showConfirmModal) {
@@ -772,8 +771,7 @@ getChangedFields() {
   async mounted() {
     this.isLoading = true;
     this.generateRows();
-    document.title = "Productos";
-    this.changeFavicon('/img/spiderman.ico');
+    setPageTitle('Productos');
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();

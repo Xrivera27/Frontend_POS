@@ -36,6 +36,7 @@
 import PageHeader from "@/components/PageHeader.vue";
 import { getAlerts } from '../../services/alertasSolicitudes.js';
 import solicitudes from "../../services/solicitudes.js";
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   components: {
@@ -76,6 +77,8 @@ export default {
     }
   },
   async mounted() {
+    setPageTitle('Alertas de Inventario');
+    
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.alertas = await getAlerts(this.id_usuario);

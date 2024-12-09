@@ -54,6 +54,7 @@ import axios from 'axios';
 import PageHeader from "@/components/PageHeader.vue";
 import { useToast } from "vue-toastification";
 const { getApi } = require('../../config/getApiUrl.js');
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   components: {
@@ -184,6 +185,7 @@ export default {
   },
 
   mounted() {
+    setPageTitle('Configuración de Empresa');
     this.getCompanyData();
   },
 };

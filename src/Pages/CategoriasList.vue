@@ -147,6 +147,7 @@ import solicitudes from "../../services/solicitudes.js";
 const { deleteCategoria } = require('../../services/categoriaSolicitudes');
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import ModalLoading from '@/components/ModalLoading.vue';
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   components: {
@@ -341,8 +342,7 @@ export default {
   },
   async mounted() {
     this.isLoading = true;
-    document.title = "Categorías";
-    this.changeFavicon('/img/spiderman.ico');
+    setPageTitle('Categorías');
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();

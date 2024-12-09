@@ -225,6 +225,7 @@ import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitude
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
 import { validacionesUsuario } from '../../services/validarCampos.js';
 import ModalLoading from '@/components/ModalLoading.vue';
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   name: 'AdministrarEmpleados',
@@ -481,8 +482,7 @@ export default {
   },
   async mounted() {
     this.isLoading = true;
-    document.title = "Usuarios";
-    this.changeFavicon('/img/spiderman.ico');
+    setPageTitle('Usuarios');
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();

@@ -185,6 +185,7 @@ const { esCeo } = require('../../services/usuariosSolicitudes');
 import AdminCompras from '../../services/Soliadminventa';
 import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
 import ModalLoading from '@/components/ModalLoading.vue';
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   name: 'AdministrarCompras',
@@ -413,13 +414,13 @@ export default {
     }
   },
   async mounted() {
+    setPageTitle('Administrar Compras');
     this.isLoading = true;
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.esCeo = await esCeo(this.id_usuario);
       this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
       this.searchSucursal = this.sucursales[0].id_sucursal;
-
       this.obtenesCompras(this.searchSucursal);
 
     } catch (error) {

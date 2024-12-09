@@ -228,7 +228,7 @@ export default {
 
   async mounted() {
     this.isLoading = true;
-    document.title = "Presentaciones";
+    document.title = "Unidades de medida";
     this.changeFavicon('/img/spiderman.ico');
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();

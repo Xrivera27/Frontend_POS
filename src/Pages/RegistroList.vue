@@ -69,6 +69,7 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 const { getApi } = require('../../config/getApiUrl.js');
+import { setPageTitle } from '@/components/pageMetadata';
 
 const form = reactive({
   nombre: '',
@@ -110,6 +111,7 @@ const fetchCategorias = async () => {
 
 // Cargar las categorías cuando el componente se monte
 onMounted(() => {
+  setPageTitle('Registro');
   fetchCategorias();
 });
 

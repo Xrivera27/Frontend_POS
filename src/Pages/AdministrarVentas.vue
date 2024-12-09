@@ -160,6 +160,7 @@ import solicitudes from "../../services/solicitudes.js";
 import AdminVentas from '../../services/Soliadminventa';
 import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
 const { esCeo } = require('../../services/usuariosSolicitudes');
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   name: 'AdministrarVentas',
@@ -450,8 +451,7 @@ export default {
     }
   },
   async mounted() {
-    document.title = "Administrar Ventas";
-    this.changeFavicon('/img/spiderman.ico');
+    setPageTitle('Administrar Ventas');
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();

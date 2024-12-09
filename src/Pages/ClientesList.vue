@@ -159,6 +159,7 @@ const { getClientesbyEmpresa, postCliente, patchCliente, desactivarCliente } = r
 const { esCeo } = require('../../services/usuariosSolicitudes');
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
 import ModalLoading from '@/components/ModalLoading.vue';
+import { setPageTitle } from '@/components/pageMetadata';
 
 export default {
   components: {
@@ -198,8 +199,7 @@ export default {
   },
   async mounted() {
     this.isLoading = true;
-    document.title = "Clientes";
-    this.changeFavicon('/img/spiderman.ico');
+    setPageTitle('Clientes');
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.clientes = await getClientesbyEmpresa(this.id_usuario);
@@ -526,7 +526,7 @@ export default {
   grid-column: 1 / -1;
 }
 
-.modal-body{
+.modal-body {
   margin-top: 15px;
 }
 
