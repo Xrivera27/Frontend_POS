@@ -81,7 +81,7 @@ export default {
       try {
         const token = localStorage.getItem('auth');
 
-        const response = await axios.get(`getApi/configempresa`, {
+        const response = await axios.get(`${getApi()}/configempresa`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
