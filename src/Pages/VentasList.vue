@@ -620,7 +620,7 @@ export default {
       try {
         const index = this.productosLista.findIndex(p => p === item);
         if (index !== -1) {
-          const eliminando = await eliminarProductoVenta(this.productosLista[index].id_producto, this.id_usuario);
+          const eliminando = await eliminarProductoVenta(this.productosLista[index].id_producto, 'La12345678#', this.id_usuario);
           if (!eliminando) {
             throw 'Ocurrio un error al eliminar Item';
           }
@@ -630,7 +630,7 @@ export default {
           toast.success("Item eliminado correctamente");
         }
       } catch (error) {
-        notificaciones('error', error.message);
+        notificaciones('error', 'Contraseña no reconocida.');
       } finally {
         this.isModalLoading = false;
       }

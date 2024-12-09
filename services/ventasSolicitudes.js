@@ -141,10 +141,11 @@ export const agregarProductoCodigo = async (cantidad, codigo, id_usuario) => {
     }
 }
 
-export const eliminarProductoVenta = async (id_producto, id_usuario) => {
+export const eliminarProductoVenta = async (id_producto, passwordTry, id_usuario) => {
 
     const datos = {
-        id_producto:id_producto
+        id_producto:id_producto,
+        passwordTry: passwordTry
     }
 
     const parametros = `/ventas/eliminar-producto/${id_usuario}`;
