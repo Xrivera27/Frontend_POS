@@ -669,6 +669,9 @@ export default {
       try {
         this.clientes = await getClientesbyEmpresa(this.id_usuario);
         this.isModalVisible = true;
+      }
+      catch (error) {
+        notificaciones('error', error.message);
       } finally {
         this.isModalLoading = false;
       }
