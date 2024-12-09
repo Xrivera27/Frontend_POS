@@ -7,13 +7,7 @@ export const getClientesbyEmpresa = async (id_usuario) => {
 
         const response = await solicitudes.fetchRegistros(parametros);
 
-        if (response && Object.keys(response).length > 0) {
-
             return response; // Retorna el registro creado o la respuesta completa
-
-        } else {
-            throw new Error('No se hizo el get');
-        }
 
     } catch (error) {
         console.error('Error en get registro:', error); // Registra el error para depuración
