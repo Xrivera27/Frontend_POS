@@ -21,9 +21,8 @@
             <div class="filter-group">
               <label>{{ labelFiltro }}</label>
               <select v-model="valorFiltro" class="select-input">
-                <option value="" @click="mostrarReportes">Todos</option>
-                <option v-for="opcion in opcionesFiltro" @click="mostrarReporteDesglose(opcion)" :key="opcion.id"
-                  :value="opcion.id">
+                <option value="">Todos</option>
+                <option v-for="opcion in opcionesFiltro" :key="opcion.id" :value="opcion.id">
                   {{ opcion.nombre }}
                 </option>
               </select>
@@ -47,12 +46,10 @@
                 Configurar Header/Footer
               </button>
               <div class="button-group">
-                <button @click="generarReporte('pdf')" class="btn pdf-btn"
-                  :disabled="!fechasValidas || cargando || !datosReporte.length">PDF</button>
+                <button @click="generarReporte('pdf')" class="btn pdf-btn" :disabled="!canExportReport">PDF</button>
                 <button @click="generarReporte('excel')" class="btn excel-btn"
-                  :disabled="!fechasValidas || cargando || !datosReporte.length">EXCEL</button>
-                <button @click="generarReporte('preview')" class="btn generate-btn"
-                  :disabled="!fechasValidas || cargando || !datosReporte.length">
+                  :disabled="!canExportReport">EXCEL</button>
+                <button @click="generarReporte('preview')" class="btn generate-btn" :disabled="!canGenerateReport">
                   {{ cargando ? 'Generando...' : 'Generar' }}
                 </button>
               </div>
@@ -299,12 +296,23 @@ export default {
     },
 
     valorFiltro: {
-      get() {
-        return this.filtros.valorFiltro;
+      handler(newValue) {
+        // Solo actualizar especificación, no generar reporte
+        if (newValue !== '') {
+          this.especificacion = true;
+        } else {
+          this.especificacion = false;
+        }
       },
-      set(value) {
-        this.filtros.valorFiltro = value;
-      }
+      immediate: true
+    },
+
+    canExportReport() {
+      return this.datosReporte.length > 0 && !this.cargando;
+    },
+
+    canGenerateReport() {
+      return this.fechasValidas && !this.cargando;
     }
   },
 
@@ -355,30 +363,24 @@ export default {
 
         switch (this.reporteSeleccionado) {
           case 'ventas_empleado':
-            response = option.id ?
-              await getRegistrosEmpleadosDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin):
-              await getRegistrosEmpleados(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+            response = await getRegistrosEmpleadosDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
             break;
-
           case 'ventas_cliente':
-            response = option.id ?
-              await getRegistrosClienteDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin) :
-              await getRegistrosClientes(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+            response = await getRegistrosClienteDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
             break;
-
           case 'ventas_sucursal':
-            response = option.id ?
-              await getRegistrosSucursalDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin) :
-              await getRegistrosSucursales(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+            response = await getRegistrosSucursalDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
             break;
         }
 
         this.datosReporte = response;
         this.calcularTotales(response);
+        return response;
 
       } catch (error) {
         console.error(error);
         notis('error', 'Error al cargar datos. Intente de nuevo');
+        throw error;
       } finally {
         this.cargando = false;
       }
@@ -477,38 +479,32 @@ export default {
     },
 
     async generarReporte(formato = 'preview') {
-
       if (!this.fechasValidas) {
         alert('Por favor seleccione un intervalo de fechas válido');
-        console.log(formato);
         return;
       }
 
-      console.log(formato);
-
       this.cargando = true;
       this.error = null;
-
       this.isLoading = true;
-      try {
-        if (formato === 'preview') {
-          const response = await solicitudes.obtenerReporteVentas({
-            reporteSeleccionado: this.reporteSeleccionado,
-            fechaInicio: this.filtros.fechaInicio,
-            fechaFin: this.filtros.fechaFin,
-            valorFiltro: this.valorFiltro
-          });
 
-          this.datosReporte = response.datos;
-          this.totales = response.totales;
-        } else if (formato === 'pdf') {
+      try {
+        // Si es preview, cargar los datos según el filtro
+        if (formato === 'preview') {
+          if (this.valorFiltro) {
+            await this.mostrarReporteDesglose({ id: this.valorFiltro });
+          } else {
+            await this.mostrarReportes();
+          }
+        }
+        // Generar los reportes según el formato
+        else if (formato === 'pdf') {
           await this.exportarPDF();
           notis('success', 'PDF generado con éxito');
         } else if (formato === 'excel') {
           await this.exportarExcel();
         }
       } catch (error) {
-        // Solo mostrar error si realmente falla algo
         if (!this.datosAgrupados.length) {
           notis('error', 'Error al generar el reporte');
           this.error = 'Error al generar el reporte';
@@ -834,12 +830,116 @@ export default {
     },
 
     async exportarExcel() {
+      if (!this.datosAgrupados.length) return;
 
+      try {
+        // Importar XLSX dinámicamente
+        const XLSX = await import('xlsx');
+
+        // Preparar los datos para el Excel
+        const excelData = [];
+
+        // Agregar encabezado del reporte
+        excelData.push([`Reporte de Ventas - ${this.getColumnTitle}`]);
+        excelData.push([`Período: ${this.formatearFecha(this.filtros.fechaInicio)} - ${this.formatearFecha(this.filtros.fechaFin)}`]);
+        excelData.push([]); // Línea en blanco
+
+        // Agregar encabezados de la tabla
+        excelData.push([
+          this.getColumnTitle,
+          'Valor Exento',
+          'Valor Gravado 15%',
+          'Valor Gravado 18%',
+          'ISV',
+          'Total'
+        ]);
+
+        // Agregar datos
+        this.datosAgrupados.forEach(grupo => {
+          // Agregar fila del grupo
+          excelData.push([
+            grupo.nombre,
+            grupo.valor_exento || 0,
+            grupo.gravado_15 || 0,
+            grupo.gravado_18 || 0,
+            grupo.total_isv || 0,
+            grupo.total || 0
+          ]);
+
+          // Si especificación está activa, agregar detalles
+          if (this.especificacion && grupo.desglose) {
+            grupo.desglose.forEach(factura => {
+              excelData.push([
+                factura.numero_factura_sar,
+                factura.valor_exento || 0,
+                factura.gravado_15 || 0,
+                factura.gravado_18 || 0,
+                factura.total_isv || 0,
+                factura.total || 0
+              ]);
+            });
+          }
+        });
+
+        // Agregar línea en blanco
+        excelData.push([]);
+
+        // Agregar totales
+        excelData.push(['Totales']);
+        excelData.push(['Total Exento', this.totales.exento || 0]);
+        excelData.push(['Total Gravado 15%', this.totales.gravado_15 || 0]);
+        excelData.push(['Total Gravado 18%', this.totales.gravado_18 || 0]);
+        excelData.push(['Total ISV', this.totales.total_isv || 0]);
+        excelData.push(['Total General', this.totales.total || 0]);
+        excelData.push(['Total Canceladas', this.totales.total_canceladas || 0]);
+
+        // Crear libro de trabajo y hoja
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+        // Configurar ancho de columnas
+        const columnWidths = [
+          { wch: 30 }, // Nombre/Código
+          { wch: 15 }, // Valor Exento
+          { wch: 15 }, // Gravado 15%
+          { wch: 15 }, // Gravado 18%
+          { wch: 15 }, // ISV
+          { wch: 15 }  // Total
+        ];
+        ws['!cols'] = columnWidths;
+
+        // Aplicar estilos básicos
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; R++) {
+          for (let C = range.s.c; C <= range.e.c; C++) {
+            const cell_address = { c: C, r: R };
+            const cell_ref = XLSX.utils.encode_cell(cell_address);
+            if (!ws[cell_ref]) continue;
+
+            // Añadir formato de número para columnas numéricas
+            if (C > 0 && R > 3) { // Después de los encabezados y para columnas numéricas
+              ws[cell_ref].z = '#,##0.00';
+            }
+          }
+        }
+
+        // Agregar la hoja al libro
+        XLSX.utils.book_append_sheet(wb, ws, 'Reporte de Ventas');
+
+        // Generar el archivo
+        const fecha = new Date().toISOString().split('T')[0];
+        const fileName = `reporte_${this.reporteSeleccionado}_${fecha}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+
+        notis('success', 'Excel generado con éxito');
+      } catch (error) {
+        console.error('Error al generar Excel:', error);
+        notis('error', 'Error al generar el archivo Excel');
+      }
     }
   },
 
   async mounted() {
-    // Cargar logo guardado si existe
     this.isLoading = true;
     setPageTitle('Reportes');
     try {
@@ -854,11 +954,9 @@ export default {
       await this.cargarDatos();
 
       try {
-        // Obtener los datos de la empresa o sucursal
         const response = await getDatosInstitucion(this.id_usuario, this.esCeo);
         this.datosBussines = response;
 
-        // Llenar los campos del header/footer config
         this.headerFooterConfig.header.companyName = this.datosBussines.nombre;
         this.headerFooterConfig.header.address = this.datosBussines.direccion;
         this.headerFooterConfig.header.phone = this.datosBussines.telefono;
@@ -867,31 +965,23 @@ export default {
         notis('error', 'Error al cargar datos de empresa');
       }
 
-      // Si hay fechas por defecto, generar el reporte
-      if (this.fechasValidas) {
-        await this.generarReporte('preview');
-      }
     } catch (error) {
       console.log(error);
       notis('error', 'Error al cargar datos. Intente de nuevo');
     } finally {
       this.isLoading = false;
     }
-
   },
 
   watch: {
     reporteSeleccionado() {
+      // Remover la generación automática
       if (this.valorFiltro !== '') {
         this.especificacion = true;
       } else {
         this.especificacion = false;
       }
-      if (this.fechasValidas) {
-        this.generarReporte('preview');
-      }
     },
-
     valorFiltro: {
       handler(newValue) {
         if (newValue !== '') {

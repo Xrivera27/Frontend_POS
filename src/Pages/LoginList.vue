@@ -59,7 +59,7 @@ export default {
   },
   data() {
     return {
-      isLoading: false,
+      isLoading: true,
       username: '',
       password: '',
       rememberMe: false,
@@ -75,6 +75,11 @@ export default {
   },
   mounted() {
     setPageTitle('Inicio de Sesión');
+    window.onload = () => {
+      setTimeout(() => {
+        this.isLoading = false;
+      }, 500)
+    }
   },
   methods: {
     async login() {
@@ -176,14 +181,6 @@ export default {
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     },
-
-    changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
-      link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    }
   }
 
 };
