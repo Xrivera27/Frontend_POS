@@ -28,6 +28,7 @@
                                 <th>Nombre</th>
                                 <th>Descripción</th>
                                 <th>Precio</th>
+                                <th>Stock Actual</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -37,6 +38,7 @@
                                 <td>{{ product.nombre }}</td>
                                 <td>{{ product.descripcion }}</td>
                                 <td>{{ formatPrice(product.precio_unitario) }}</td>
+                                <td>{{ product.stock_actual }}</td>
                             </tr>
                         </tbody>
                     </table>
