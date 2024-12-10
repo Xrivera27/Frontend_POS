@@ -169,11 +169,14 @@
                 id="cantidad"
                 type="number"
                 v-model="totalCantidad"
-                readonly
+                min="0"
+                step="1"
+                @blur="handleCantidadBlur"
+                @focus="handleCantidadFocus"
               />
             </div>
             <div class="total-input">
-              <label for="total">S/:</label>
+              <label for="total">Total:</label>
               <label class="subTotal" id="total">{{ calcularTotal }}</label>
             </div>
           </div>
@@ -744,6 +747,25 @@ export default {
       this.closeBuscarProductoModal();
     },
 
+    handleCantidadFocus() {
+      // Pausar temporalmente los eventos del teclado mientras el input de cantidad tiene el focus
+      this.pauseMainKeyboardEvents();
+    },
+
+    handleCantidadBlur() {
+      // Al perder el focus del input de cantidad
+      this.$nextTick(() => {
+        // Asegurarnos que el valor es un número válido
+        if (this.totalCantidad === "" || isNaN(this.totalCantidad)) {
+          this.totalCantidad = "";
+        }
+        // Devolver el focus al input principal
+        this.$refs.codigoRef?.focus();
+        // Reanudar los eventos del teclado
+        this.resumeMainKeyboardEvents();
+      });
+    },
+
     setConsumidorFinal() {
       this.clienteSeleccionado = null; // Restablece la selección del cliente
     },
@@ -754,12 +776,15 @@ export default {
         producto.cantidad_activar_mayorista > 0 &&
         producto.cantidad >= producto.cantidad_activar_mayorista
       ) {
-        producto.precio_final =
-          producto.cantidad * producto.precioImpuestoMayorista;
+        producto.precio_final = +(
+          producto.cantidad * producto.precioImpuestoMayorista
+        ).toFixed(2);
       } else {
-        producto.precio_final = producto.cantidad * producto.precioImpuesto;
+        producto.precio_final = +(
+          producto.cantidad * producto.precioImpuesto
+        ).toFixed(2);
       }
-      return producto.precio_final;
+      return producto.precio_final.toFixed(2);
     },
 
     mostrarPrecioFinal(producto) {
@@ -779,7 +804,13 @@ export default {
     },
 
     handleRowDoubleClick(item) {
-      this.selectedItem = item;
+      // Si el item clickeado es el mismo que ya está seleccionado, lo deseleccionamos
+      if (this.selectedItem === item) {
+        this.selectedItem = null;
+      } else {
+        // Si es un item diferente o no hay ninguno seleccionado, lo seleccionamos
+        this.selectedItem = item;
+      }
     },
 
     eliminarItem() {
@@ -1163,6 +1194,7 @@ export default {
     limpiar() {
       this.addQuery = "";
       this.totalCantidad = "";
+      this.$refs.codigoRef?.focus();
     },
 
     limpiarPagado() {
@@ -1799,7 +1831,8 @@ button {
 }
 
 .cantidad-input input {
-  width: clamp(80px, 15vw, 120px);
+  width: 100px;
+  height: 30px;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -2028,6 +2061,13 @@ button {
   background-color: #141414;
   border-color: #2b2b2b;
   color: #e5e5e5;
+}
+
+input:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 
 .dark .footer-container {
