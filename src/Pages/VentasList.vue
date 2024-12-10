@@ -284,11 +284,13 @@
           @modal-focused="handleModalFocus"
         />
         <button :disabled="!cajaAbierta" @click="openModal">
-          Buscar/agregar cliente [F3]
+          Buscar/agregar cliente <br />
+          [F3]
         </button>
         <!-- <button :disabled="!cajaAbierta" @click="consultarAnular">Consultar anular [F4]</button> -->
         <button :disabled="!cajaAbierta" @click="eliminarItem">
-          Eliminar item [F4]
+          Eliminar item <br />
+          [F4]
         </button>
         <EliminarItemsModal
           :isVisible="isEliminarModalVisible"
@@ -307,7 +309,8 @@
           @modal-focused="handleModalFocus"
         />
         <button :disabled="!cajaAbierta" @click="guardarVenta">
-          Guardar venta [F6]
+          Guardar venta <br />
+          [F6]
         </button>
         <GuardarVentaModal
           :isVisible="isGuardarVentaModalVisible"
@@ -328,7 +331,8 @@
         <!-- <button :disabled="!cajaAbierta" @click="descuentoGeneral">Dscto. Gen. [F10]</button>
         <button :disabled="!cajaAbierta" @click="descuentoIndividual">Dscto. Ind. [F11]</button> -->
         <button :disabled="!cajaAbierta" @click="openPagoModal">
-          Registrar Pago [F12]
+          Registrar Pago <br />
+          [F12]
         </button>
         <RegistrarPagoModal
           :isVisible="isPagoModalVisible"
@@ -337,7 +341,7 @@
           @confirm-payment="realizarPago"
           @modal-focused="handleModalFocus"
         />
-        <button @click="salir">Salir [ALT] + [S]</button>
+        <button @click="salir">Salir<br />[ALT] + [S]</button>
       </div>
     </div>
   </div>
@@ -1860,10 +1864,14 @@ button {
   border-radius: 0%;
   font-size: clamp(10px, 1.5vw, 12px);
   display: flex;
+  flex-direction: column; /* Añadido para apilar el contenido verticalmente */
   align-items: center;
   justify-content: center;
   background-color: #d1d1d1;
   transition: background-color 0.2s ease;
+  white-space: pre-line; /* Añadido para respetar los saltos de línea */
+  line-height: 1.2; /* Añadido para mejorar el espaciado entre líneas */
+  text-align: center; /* Añadido para centrar el texto */
 }
 
 .footer-container button:hover {
