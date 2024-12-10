@@ -66,7 +66,7 @@
                   <th class="col-descripcion">Descripción</th>
                   <th class="col-cantidad">Cantidad</th>
                   <th class="col-precio">Precio</th>
-                  <th class="col-precio">Descuento/Unidad</th>
+                  <!-- <th class="col-precio">Descuento/Unidad</th> -->
                   <th class="col-importe">Total</th>
                 </tr>
               </thead>
@@ -79,7 +79,7 @@
                   <td class="col-descripcion">{{ producto.nombre }}</td>
                   <td class="col-cantidad">{{ producto.cantidad }}</td>
                   <td class="col-precio">{{ mostrarPrecioFinal(producto) }}</td>
-                  <td class="col-descuento">{{ parseFloat(producto.precioDescuento.toFixed(2)) }}</td>
+                  <!-- <td class="col-descuento">{{ parseFloat(producto.precioDescuento.toFixed(2)) }}</td> -->
                   <td class="col-importe">{{ calcularImporte(producto) }}</td>
                 </tr>
                 <!-- Filas vacías para llenar el espacio -->
