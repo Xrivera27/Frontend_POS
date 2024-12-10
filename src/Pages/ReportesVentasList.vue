@@ -11,10 +11,9 @@
             <div class="filter-group">
               <label>Tipo de Reporte</label>
               <select v-model="reporteSeleccionado" class="select-input">
-                <option @click="mostrarReportes" value="ventas_cliente">Ventas por Cliente</option>
-                <option @click="mostrarReportes" v-if="esCeo" value="ventas_sucursal">Ventas por Sucursal</option>
-                <option @click="mostrarReportes" value="ventas_empleado">Ventas por Empleado</option>
-
+                <option value="ventas_cliente">Ventas por Cliente</option>
+                <option v-if="esCeo" value="ventas_sucursal">Ventas por Sucursal</option>
+                <option value="ventas_empleado">Ventas por Empleado</option>
               </select>
             </div>
 
@@ -295,18 +294,6 @@ export default {
       }
     },
 
-    valorFiltro: {
-      handler(newValue) {
-        // Solo actualizar especificación, no generar reporte
-        if (newValue !== '') {
-          this.especificacion = true;
-        } else {
-          this.especificacion = false;
-        }
-      },
-      immediate: true
-    },
-
     canExportReport() {
       return this.datosReporte.length > 0 && !this.cargando;
     },
@@ -354,47 +341,133 @@ export default {
       }
     },
 
+    // En generarReporte
+    async generarReporte(formato = 'preview') {
+      if (!this.fechasValidas) {
+        alert('Por favor seleccione un intervalo de fechas válido');
+        return;
+      }
+
+      this.cargando = true;
+      this.error = null;
+      this.isLoading = true;
+
+      try {
+        if (formato === 'preview') {
+          // Verificar el valor del filtro y el cliente seleccionado
+          console.log('Valor del filtro:', this.valorFiltro);
+          console.log('Opciones de filtro:', this.opcionesFiltro);
+
+          if (this.valorFiltro && this.valorFiltro !== '') {
+            // Buscar la opción seleccionada
+            const opcionSeleccionada = this.opcionesFiltro.find(opt => opt.id === this.valorFiltro);
+            console.log('Opción seleccionada:', opcionSeleccionada);
+
+            if (opcionSeleccionada) {
+              // Llamar a mostrarReporteDesglose con la información correcta
+              await this.mostrarReporteDesglose(opcionSeleccionada);
+            } else {
+              console.error('No se encontró la opción seleccionada');
+            }
+          } else {
+            await this.mostrarReportes();
+          }
+        } else if (formato === 'pdf') {
+          await this.exportarPDF();
+          notis('success', 'PDF generado con éxito');
+        } else if (formato === 'excel') {
+          await this.exportarExcel();
+        }
+      } catch (error) {
+        console.error('Error en generarReporte:', error);
+        notis('error', 'Error al generar el reporte');
+        this.error = 'Error al generar el reporte';
+      } finally {
+        this.cargando = false;
+        this.isLoading = false;
+      }
+    },
+
+    // En mostrarReporteDesglose
     async mostrarReporteDesglose(option) {
       if (!this.fechasValidas) return;
 
       try {
-        let response;
         this.cargando = true;
+        let response;
 
+        // Obtener los datos según el tipo de reporte
         switch (this.reporteSeleccionado) {
-          case 'ventas_empleado':
-            response = await getRegistrosEmpleadosDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
-            break;
           case 'ventas_cliente':
-            response = await getRegistrosClienteDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+            response = await getRegistrosClienteDesglose(
+              option.id,
+              this.filtros.fechaInicio,
+              this.filtros.fechaFin
+            );
+            break;
+          case 'ventas_empleado':
+            response = await getRegistrosEmpleadosDesglose(
+              option.id,
+              this.filtros.fechaInicio,
+              this.filtros.fechaFin
+            );
             break;
           case 'ventas_sucursal':
-            response = await getRegistrosSucursalDesglose(option.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+            response = await getRegistrosSucursalDesglose(
+              option.id,
+              this.filtros.fechaInicio,
+              this.filtros.fechaFin
+            );
             break;
         }
 
-        this.datosReporte = response;
-        this.calcularTotales(response);
-        return response;
+        if (response && response.data) {
+          // Formatear los datos asegurándonos de que todos los campos necesarios existan
+          const formattedData = {
+            nombre: option.nombre,
+            valor_exento: response.data.valor_exento || 0,
+            gravado_15: response.data.gravado_15 || 0,
+            gravado_18: response.data.gravado_18 || 0,
+            total_isv: response.data.total_isv || 0,
+            total: response.data.total || 0,
+            desglose: Array.isArray(response.data.desglose) ? response.data.desglose : []
+          };
+
+          // Actualizar el estado
+          this.datosReporte = [formattedData];
+          this.datosAgrupados = [formattedData];
+
+          // Calcular totales
+          this.reiniciarTotales();
+          this.calcularTotales([formattedData]);
+        } else {
+          // Si no hay datos, limpiar los arrays y totales
+          this.datosReporte = [];
+          this.datosAgrupados = [];
+          this.reiniciarTotales();
+          notis('warning', 'No se encontraron datos para el período seleccionado');
+        }
 
       } catch (error) {
-        console.error(error);
-        notis('error', 'Error al cargar datos. Intente de nuevo');
-        throw error;
+        console.error('Error en mostrarReporteDesglose:', error);
+        notis('error', 'Error al cargar datos del cliente');
+        this.datosReporte = [];
+        this.datosAgrupados = [];
+        this.reiniciarTotales();
       } finally {
         this.cargando = false;
       }
     },
 
+    // Método actualizado para calcular totales
     calcularTotales(datos) {
-
       this.totales = datos.reduce((acc, curr) => ({
-        exento: acc.exento + (curr.valor_extento || 0),
-        gravado_15: acc.gravado_15 + (curr.gravado_15 || 0),
-        gravado_18: acc.gravado_18 + (curr.gravado_18 || 0),
-        total_isv: acc.total_isv + (curr.total_isv || 0),
-        total: acc.total + (curr.total || 0),
-        total_canceladas: acc.total_canceladas + (curr.total_canceladas || 0),
+        exento: acc.exento + (parseFloat(curr.valor_exento) || 0),
+        gravado_15: acc.gravado_15 + (parseFloat(curr.gravado_15) || 0),
+        gravado_18: acc.gravado_18 + (parseFloat(curr.gravado_18) || 0),
+        total_isv: acc.total_isv + (parseFloat(curr.total_isv) || 0),
+        total: acc.total + (parseFloat(curr.total) || 0),
+        total_canceladas: acc.total_canceladas + (parseFloat(curr.total_canceladas) || 0),
       }), {
         exento: 0,
         gravado_15: 0,
@@ -403,8 +476,27 @@ export default {
         total: 0,
         total_canceladas: 0,
       });
-
     },
+
+    // calcularTotales(datos) {
+
+    //   this.totales = datos.reduce((acc, curr) => ({
+    //     exento: acc.exento + (curr.valor_extento || 0),
+    //     gravado_15: acc.gravado_15 + (curr.gravado_15 || 0),
+    //     gravado_18: acc.gravado_18 + (curr.gravado_18 || 0),
+    //     total_isv: acc.total_isv + (curr.total_isv || 0),
+    //     total: acc.total + (curr.total || 0),
+    //     total_canceladas: acc.total_canceladas + (curr.total_canceladas || 0),
+    //   }), {
+    //     exento: 0,
+    //     gravado_15: 0,
+    //     gravado_18: 0,
+    //     total_isv: 0,
+    //     total: 0,
+    //     total_canceladas: 0,
+    //   });
+
+    // },
 
     async openModalHeaderFooter() {
       this.showHeaderFooterModal = true;
@@ -475,43 +567,6 @@ export default {
         notis('error', 'Error al cargar datos');
       } finally {
         this.cargando = false;
-      }
-    },
-
-    async generarReporte(formato = 'preview') {
-      if (!this.fechasValidas) {
-        alert('Por favor seleccione un intervalo de fechas válido');
-        return;
-      }
-
-      this.cargando = true;
-      this.error = null;
-      this.isLoading = true;
-
-      try {
-        // Si es preview, cargar los datos según el filtro
-        if (formato === 'preview') {
-          if (this.valorFiltro) {
-            await this.mostrarReporteDesglose({ id: this.valorFiltro });
-          } else {
-            await this.mostrarReportes();
-          }
-        }
-        // Generar los reportes según el formato
-        else if (formato === 'pdf') {
-          await this.exportarPDF();
-          notis('success', 'PDF generado con éxito');
-        } else if (formato === 'excel') {
-          await this.exportarExcel();
-        }
-      } catch (error) {
-        if (!this.datosAgrupados.length) {
-          notis('error', 'Error al generar el reporte');
-          this.error = 'Error al generar el reporte';
-        }
-      } finally {
-        this.cargando = false;
-        this.isLoading = false;
       }
     },
 
@@ -975,22 +1030,15 @@ export default {
 
   watch: {
     reporteSeleccionado() {
-      // Remover la generación automática
-      if (this.valorFiltro !== '') {
-        this.especificacion = true;
-      } else {
-        this.especificacion = false;
-      }
+      this.valorFiltro = '';
+      this.especificacion = false;
     },
+
     valorFiltro: {
       handler(newValue) {
-        if (newValue !== '') {
-          this.mostrarReporteDesglose({ id: newValue });
-        } else {
-          this.mostrarReportes();
-        }
-      },
-      immediate: true
+        // Solo actualizar especificación
+        this.especificacion = newValue !== '';
+      }
     },
 
     especificacion: {
