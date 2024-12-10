@@ -190,20 +190,6 @@ export default {
   z-index: 1000;
 }
 
-.modal-confirm {
-  background: white;
-  border-radius: 12px;
-  width: 25%;
-  max-width: 1000px;
-  max-height: 90vh;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  margin: 20px;
-  overflow: hidden;
-}
-
 .modal-content {
   background-color: white;
   border-radius: 8px;
@@ -218,11 +204,29 @@ export default {
   background-color: #f8f9fa;
 }
 
+.modal-confirm {
+  background: #1e1e1e; /* Fondo oscuro para el modal */
+  border-radius: 8px;
+  width: 350px; /* Ancho fijo más pequeño */
+  max-width: 90%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
 .modal-body-confirm {
-  padding: 24px;
-  overflow-y: auto;
-  background-color: white;
-  box-sizing: border-box;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra el contenido horizontalmente */
+}
+
+input:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 
 .dark .modal-body-confirm {
@@ -256,11 +260,14 @@ export default {
 
 input[type="password"] {
   width: 100%;
-  padding: 8px;
+  max-width: 250px; /* Limita el ancho máximo */
+  padding: 8px 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 16px;
-  margin-top: 5px;
+  font-size: 14px;
+  margin: 10px 0;
+  background-color: #2a2a2a; /* Para modo oscuro */
+  color: #fff; /* Para el texto en modo oscuro */
 }
 
 input[type="password"].error {
