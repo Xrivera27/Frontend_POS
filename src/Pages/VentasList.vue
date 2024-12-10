@@ -1,15 +1,30 @@
 <template>
   <div class="wrapper">
     <ModalLoading :isLoading="isLoading" />
-    <AperturaCajaModal :isVisible="isAperturaCajaModalVisible" @confirmar="handleAperturaCaja" />
+    <AperturaCajaModal
+      :isVisible="isAperturaCajaModalVisible"
+      @confirmar="handleAperturaCaja"
+    />
     <ModalLoading :isLoading="isModalLoading" />
-    <PaymentAnimationModal :isVisible="isPaymentAnimationVisible" @complete="handlePaymentComplete" />
-    <FacturaModal :isVisible="isFacturaModalVisible" :idVenta="venta?.id_venta" :idUsuario="id_usuario"
-      @close="closeFacturaModal" />
+    <PaymentAnimationModal
+      :isVisible="isPaymentAnimationVisible"
+      @complete="handlePaymentComplete"
+    />
+    <FacturaModal
+      :isVisible="isFacturaModalVisible"
+      :idVenta="venta?.id_venta"
+      :idUsuario="id_usuario"
+      @close="closeFacturaModal"
+    />
 
-    <CerrarCajaModal :isVisible="isCerrarCajaModalVisible" :totalEfectivo="totalEfectivo"
-      :totalTransferencia="totalTransferencia" @confirm="confirmarCierreCaja" @close="isCerrarCajaModalVisible = false"
-      @modal-focused="handleModalFocus" />
+    <CerrarCajaModal
+      :isVisible="isCerrarCajaModalVisible"
+      :totalEfectivo="totalEfectivo"
+      :totalTransferencia="totalTransferencia"
+      @confirm="confirmarCierreCaja"
+      @close="isCerrarCajaModalVisible = false"
+      @modal-focused="handleModalFocus"
+    />
 
     <div class="main-container">
       <div class="header-container">
@@ -19,22 +34,52 @@
           <div class="input-button-container">
             <div class="inputs-container">
               <template v-if="!clienteSeleccionado">
-                <input type="text" value="Consumidor final" readonly class="cliente-input single">
+                <input
+                  type="text"
+                  value="Consumidor final"
+                  readonly
+                  class="cliente-input single"
+                />
               </template>
               <template v-else>
-                <input type="text" :value="clienteSeleccionado.nombre_completo" readonly class="cliente-input">
-                <input type="text" :value="clienteSeleccionado.rtn" readonly class="rtn-input">
+                <input
+                  type="text"
+                  :value="clienteSeleccionado.nombre_completo"
+                  readonly
+                  class="cliente-input"
+                />
+                <input
+                  type="text"
+                  :value="clienteSeleccionado.rtn"
+                  readonly
+                  class="rtn-input"
+                />
               </template>
             </div>
             <div class="buttons-header">
-              <button :disabled="!cajaAbierta" class="search-button" @click="openModal">
+              <button
+                :disabled="!cajaAbierta"
+                class="search-button"
+                @click="openModal"
+              >
                 Buscar
               </button>
-              <ClienteModal :isVisible="isModalVisible" :clientes="clientes" :id_usuario="id_usuario"
-                @close="closeModal" @client-selected="handleClientSelected" />
+              <ClienteModal
+                ref="clienteModal"
+                :isVisible="isModalVisible"
+                :clientes="clientes"
+                :id_usuario="id_usuario"
+                @close="closeModal"
+                @client-selected="handleClientSelected"
+              />
               <!-- Botón para volver a "Consumidor final" -->
-              <button v-if="clienteSeleccionado" class="search-button" @click="setConsumidorFinal">Consumidor
-                final</button>
+              <button
+                v-if="clienteSeleccionado"
+                class="search-button"
+                @click="setConsumidorFinal"
+              >
+                Consumidor final
+              </button>
             </div>
           </div>
         </div>
@@ -42,16 +87,27 @@
         <div class="informacion-1">
           <label for="sucursal">Sucursal: {{ info.nombreSucursal }}</label>
           <br />
-          <label v-if="!isCajaAbierta" class="no-facturando">Abrir caja antes de facturar!</label>
+          <label v-if="!isCajaAbierta" class="no-facturando"
+            >Abrir caja antes de facturar!</label
+          >
           <label v-else for="usuario">Usuario: {{ info.nombre_usuario }}</label>
         </div>
 
         <div class="informacion-2">
-          <label for="numTicket" :class="sucursalActivaFactura ? 'facturando' : 'no-facturando'">
-            {{ sucursalActivaFactura ? 'Sucursal facturando' : 'Datos SAR Sucursal desactualizados' }}
+          <label
+            for="numTicket"
+            :class="sucursalActivaFactura ? 'facturando' : 'no-facturando'"
+          >
+            {{
+              sucursalActivaFactura
+                ? "Sucursal facturando"
+                : "Datos SAR Sucursal desactualizados"
+            }}
           </label>
           <br />
-          <label>Fecha: <span>{{ info.fecha }}</span></label>
+          <label
+            >Fecha: <span>{{ info.fecha }}</span></label
+          >
         </div>
       </div>
 
@@ -73,19 +129,29 @@
               </thead>
               <tbody>
                 <!-- Productos reales -->
-                <tr v-for="(producto, index) in productosLista" :key="index" @dblclick="handleRowDoubleClick(producto)"
-                  :class="{ 'selected': selectedItem === producto }">
+                <tr
+                  v-for="(producto, index) in productosLista"
+                  :key="index"
+                  @dblclick="handleRowDoubleClick(producto)"
+                  :class="{ selected: selectedItem === producto }"
+                >
                   <td class="col-item">{{ index + 1 }}</td>
                   <td class="col-codigo">{{ producto.codigo_producto }}</td>
                   <td class="col-descripcion">{{ producto.nombre }}</td>
                   <td class="col-cantidad">{{ producto.cantidad }}</td>
                   <td class="col-precio">{{ mostrarPrecioFinal(producto) }}</td>
-                  <td class="col-precio">{{ producto.precioImpuesto.toFixed(2) }}</td>
+                  <td class="col-precio">
+                    {{ producto.precioImpuesto.toFixed(2) }}
+                  </td>
                   <!-- <td class="col-descuento">{{ parseFloat(producto.precioDescuento.toFixed(2)) }}</td> -->
                   <td class="col-importe">{{ calcularImporte(producto) }}</td>
                 </tr>
                 <!-- Filas vacías para llenar el espacio -->
-                <tr v-for="n in remainingRows" :key="`empty-${n}`" class="empty-row">
+                <tr
+                  v-for="n in remainingRows"
+                  :key="`empty-${n}`"
+                  class="empty-row"
+                >
                   <td class="col-item">&nbsp;</td>
                   <td class="col-codigo">&nbsp;</td>
                   <td class="col-descripcion">&nbsp;</td>
@@ -99,7 +165,12 @@
           <div class="total-container">
             <div class="cantidad-input">
               <label for="cantidad">Cant:</label>
-              <input id="cantidad" type="number" v-model="totalCantidad" readonly />
+              <input
+                id="cantidad"
+                type="number"
+                v-model="totalCantidad"
+                readonly
+              />
             </div>
             <div class="total-input">
               <label for="total">S/:</label>
@@ -109,64 +180,160 @@
         </div>
         <div class="right-section">
           <div class="numeric-keypad">
-            <input name="codigo-producto" autocomplete="off0" ref="codigoRef" type="text" class="campo"
-              v-model="addQuery" tabindex="1" :disabled="!cajaAbierta || isModalFocused || isModalVisible" required />
+            <input
+              name="codigo-producto"
+              autocomplete="off0"
+              ref="codigoRef"
+              type="text"
+              class="campo"
+              v-model="addQuery"
+              tabindex="1"
+              :disabled="!cajaAbierta || isModalFocused || isModalVisible"
+              required
+            />
 
             <div class="keypad">
-              <button :disabled="!cajaAbierta" @click="agregarNumero(1)">1</button>
-              <button :disabled="!cajaAbierta" @click="agregarNumero(2)">2</button>
-              <button :disabled="!cajaAbierta" @click="agregarNumero(3)">3</button>
-              <button :disabled="!cajaAbierta" @click="agregarNumero(4)">4</button>
-              <button :disabled="!cajaAbierta" @click="agregarNumero(5)">5</button>
-              <button :disabled="!cajaAbierta" @click="agregarNumero(6)">6</button>
-              <button :disabled="!cajaAbierta" @click="agregarNumero(7)">7</button>
-              <button :disabled="!cajaAbierta" @click="agregarNumero(8)">8</button>
-              <button :disabled="!cajaAbierta" @click="agregarNumero(9)">9</button>
-              <button :disabled="!cajaAbierta" @click="agregarNumero(0)">0</button>
-              <button :disabled="!cajaAbierta" @click="agregarNumero('.')">.</button>
-              <button :disabled="!cajaAbierta" @click="agregarNumero('*')">*</button>
-              <button :disabled="!cajaAbierta" class="borrar" @click="borrarUltimo">←</button>
-              <button :disabled="!cajaAbierta" class="limpiar" @click="limpiar">Limpiar</button>
-              <button :disabled="!cajaAbierta" class="enter" @click="procesarEnter">Enter</button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(1)">
+                1
+              </button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(2)">
+                2
+              </button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(3)">
+                3
+              </button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(4)">
+                4
+              </button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(5)">
+                5
+              </button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(6)">
+                6
+              </button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(7)">
+                7
+              </button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(8)">
+                8
+              </button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(9)">
+                9
+              </button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero(0)">
+                0
+              </button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero('.')">
+                .
+              </button>
+              <button :disabled="!cajaAbierta" @click="agregarNumero('*')">
+                *
+              </button>
+              <button
+                :disabled="!cajaAbierta"
+                class="borrar"
+                @click="borrarUltimo"
+              >
+                ←
+              </button>
+              <button :disabled="!cajaAbierta" class="limpiar" @click="limpiar">
+                Limpiar
+              </button>
+              <button
+                :disabled="!cajaAbierta"
+                class="enter"
+                @click="procesarEnter"
+              >
+                Enter
+              </button>
             </div>
           </div>
 
           <!-- <div v-if="!estadoCajaValidado"> -->
           <!-- </div> -->
-          <button v-if="!cajaAbierta" class="abrir-caja-button" @click="abrirCaja">
+          <button
+            v-if="!cajaAbierta"
+            class="abrir-caja-button"
+            @click="abrirCaja"
+          >
             Abrir caja
           </button>
-          <button v-if="cajaAbierta" class="abrir-caja-button" @click="cerrarCaja" style="background-color: crimson;">
+          <button
+            v-if="cajaAbierta"
+            class="abrir-caja-button"
+            @click="cerrarCaja"
+            style="background-color: crimson"
+          >
             Cerrar caja
           </button>
-
         </div>
       </div>
 
       <div class="footer-container">
-        <button :disabled="!cajaAbierta" @click="buscarProducto">Buscar producto [F2]</button>
-        <BuscarProductoModal :isVisible="isBuscarProductoModalVisible" :productos="productos"
-          @close="closeBuscarProductoModal" @product-selected="handleProductSelected"
-          @modal-focused="handleModalFocus" />
-        <button :disabled="!cajaAbierta" @click="openModal">Buscar cliente [F3]</button>
+        <button :disabled="!cajaAbierta" @click="buscarProducto">
+          Buscar producto [F2]
+        </button>
+        <BuscarProductoModal
+          :isVisible="isBuscarProductoModalVisible"
+          :productos="productos"
+          @close="closeBuscarProductoModal"
+          @product-selected="handleProductSelected"
+          @modal-focused="handleModalFocus"
+        />
+        <button :disabled="!cajaAbierta" @click="openModal">
+          Buscar/agregar cliente [F3]
+        </button>
         <!-- <button :disabled="!cajaAbierta" @click="consultarAnular">Consultar anular [F4]</button> -->
-        <button :disabled="!cajaAbierta" @click="eliminarItem">Eliminar item [F5]</button>
-        <EliminarItemsModal :isVisible="isEliminarModalVisible" :item="selectedItem" @close="closeEliminarModal"
-          @confirm-delete="handleItemDelete" @modal-focused="handleModalFocus" />
-        <button :disabled="!cajaAbierta" @click="limpiarPantalla">Limpiar pantalla [F6]</button>
-        <button :disabled="!cajaAbierta" @click="guardarVenta">Guardar venta [F8]</button>
-        <GuardarVentaModal :isVisible="isGuardarVentaModalVisible" :isConsumidorFinal="!clienteSeleccionado"
-          @close="isGuardarVentaModalVisible = false" @cliente-temporal="handleSaveVenta"
-          @modal-focused="handleModalFocus" />
-        <button :disabled="!cajaAbierta" @click="recVenta">Rec. Venta [F9]</button>
-        <RecuperarVentaModal :isVisible="isRecuperarVentaModalVisible" :ventas="ventasGuardadas"
-          @close="isRecuperarVentaModalVisible = false" @venta-selected="handleVentaSelected" />
+        <button :disabled="!cajaAbierta" @click="eliminarItem">
+          Eliminar item [F4]
+        </button>
+        <EliminarItemsModal
+          :isVisible="isEliminarModalVisible"
+          :item="selectedItem"
+          @close="closeEliminarModal"
+          @confirm-delete="handleItemDelete"
+          @modal-focused="handleModalFocus"
+        />
+        <button :disabled="!cajaAbierta" @click="limpiarPantalla">
+          Limpiar pantalla [F5]
+        </button>
+        <LimpiarPantallaModal
+          :isVisible="isLimpiarPantallaModalVisible"
+          @close="closeLimpiarPantallaModal"
+          @confirm-limpiar="handleLimpiarPantalla"
+          @modal-focused="handleModalFocus"
+        />
+        <button :disabled="!cajaAbierta" @click="guardarVenta">
+          Guardar venta [F6]
+        </button>
+        <GuardarVentaModal
+          :isVisible="isGuardarVentaModalVisible"
+          :isConsumidorFinal="!clienteSeleccionado"
+          @close="isGuardarVentaModalVisible = false"
+          @cliente-temporal="handleSaveVenta"
+          @modal-focused="handleModalFocus"
+        />
+        <button :disabled="!cajaAbierta" @click="recVenta">
+          Rec. Venta [F7]
+        </button>
+        <RecuperarVentaModal
+          :isVisible="isRecuperarVentaModalVisible"
+          :ventas="ventasGuardadas"
+          @close="isRecuperarVentaModalVisible = false"
+          @venta-selected="handleVentaSelected"
+        />
         <!-- <button :disabled="!cajaAbierta" @click="descuentoGeneral">Dscto. Gen. [F10]</button>
         <button :disabled="!cajaAbierta" @click="descuentoIndividual">Dscto. Ind. [F11]</button> -->
-        <button :disabled="!cajaAbierta" @click="openPagoModal">Registrar Pago [F12]</button>
-        <RegistrarPagoModal :isVisible="isPagoModalVisible" :factura="factura" @close="closePagoModal"
-          @confirm-payment="realizarPago" @modal-focused="handleModalFocus" />
-        <button :disabled="!cajaAbierta" @click="nuevoCliente">Nuevo Cliente [ALT] + [C]</button>
+        <button :disabled="!cajaAbierta" @click="openPagoModal">
+          Registrar Pago [F12]
+        </button>
+        <RegistrarPagoModal
+          :isVisible="isPagoModalVisible"
+          :factura="factura"
+          @close="closePagoModal"
+          @confirm-payment="realizarPago"
+          @modal-focused="handleModalFocus"
+        />
         <button @click="salir">Salir [ALT] + [S]</button>
       </div>
     </div>
@@ -174,27 +341,46 @@
 </template>
 
 <script>
-import axios from 'axios';
-import ClienteModal from '../components/modalesCrearVenta/ClienteModal.vue';
-import RegistrarPagoModal from '../components/modalesCrearVenta/RegistrarPagoModal.vue';
-import EliminarItemsModal from '../components/modalesCrearVenta/EliminarItemsModal.vue';
-import BuscarProductoModal from '../components/modalesCrearVenta/BuscarProductoModal.vue';
+import axios from "axios";
+import ClienteModal from "../components/modalesCrearVenta/ClienteModal.vue";
+import RegistrarPagoModal from "../components/modalesCrearVenta/RegistrarPagoModal.vue";
+import EliminarItemsModal from "../components/modalesCrearVenta/EliminarItemsModal.vue";
+import BuscarProductoModal from "../components/modalesCrearVenta/BuscarProductoModal.vue";
 import { useToast } from "vue-toastification";
-import { notificaciones, notis } from '../../services/notificaciones.js';
-import ModalLoading from '@/components/ModalLoading.vue';
-import GuardarVentaModal from '@/components/modalesCrearVenta/GuardarVentaModal.vue';
-import RecuperarVentaModal from '@/components/modalesCrearVenta/RecuperarVentaModal.vue';
-import PaymentAnimationModal from '@/components/PaymentAnimationModal.vue';
+import { notificaciones, notis } from "../../services/notificaciones.js";
+import ModalLoading from "@/components/ModalLoading.vue";
+import GuardarVentaModal from "@/components/modalesCrearVenta/GuardarVentaModal.vue";
+import RecuperarVentaModal from "@/components/modalesCrearVenta/RecuperarVentaModal.vue";
+import PaymentAnimationModal from "@/components/PaymentAnimationModal.vue";
 //import VentaPendienteModal from '@/components/modalesCrearVenta/VentaPendiente.vue';
-import AperturaCajaModal from '@/components/modalesCrearVenta/AperturaCajaModal.vue';
+import AperturaCajaModal from "@/components/modalesCrearVenta/AperturaCajaModal.vue";
 import solicitudes from "../../services/solicitudes.js";
-import { getInfoBasic, getProductos, agregarProductoCodigo, getVentaPendiente, guardarVenta, getVentasGuardadas, getRecProductoVenta, postVenta, eliminarVenta, eliminarProductoVenta, cajaUsuario, createCaja, pagar, pagarTranferir } from '../../services/ventasSolicitudes.js';
+import LimpiarPantallaModal from "@/components/modalesCrearVenta/LimpiarPantallaModal.vue";
+
+import {
+  getInfoBasic,
+  getProductos,
+  agregarProductoCodigo,
+  getVentaPendiente,
+  guardarVenta,
+  getVentasGuardadas,
+  getRecProductoVenta,
+  postVenta,
+  eliminarVenta,
+  eliminarProductoVenta,
+  cajaUsuario,
+  createCaja,
+  pagar,
+  pagarTranferir,
+} from "../../services/ventasSolicitudes.js";
 //cajaUsuario
-import FacturaModal from '@/components/FacturaModal.vue'; // Nuevo
-import CerrarCajaModal from '@/components/CierreCajaModal.vue';
-const { getClientesbyEmpresa } = require('../../services/clienteSolicitudes.js');
-const { sucursalSar } = require('../../services/sucursalesSolicitudes.js');
-import { setPageTitle } from '@/components/pageMetadata';
+import FacturaModal from "@/components/FacturaModal.vue"; // Nuevo
+import CerrarCajaModal from "@/components/CierreCajaModal.vue";
+const {
+  getClientesbyEmpresa,
+} = require("../../services/clienteSolicitudes.js");
+const { sucursalSar } = require("../../services/sucursalesSolicitudes.js");
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
   components: {
@@ -203,33 +389,35 @@ export default {
     PaymentAnimationModal,
     RegistrarPagoModal,
     EliminarItemsModal,
+    LimpiarPantallaModal,
     BuscarProductoModal,
     ModalLoading,
     GuardarVentaModal,
     RecuperarVentaModal,
     FacturaModal,
     CerrarCajaModal,
-
   },
   data() {
     return {
       isAperturaCajaModalVisible: false,
+      isLimpiarPantallaModalVisible: false,
+      itemTemp: null,
       isLoading: false,
       estadoCajaValidado: false,
       isCerrarCajaModalVisible: false,
-      isFacturaModalVisible: false,  // Agregado para el modal de factura
-      facturaActual: '',
+      isFacturaModalVisible: false, // Agregado para el modal de factura
+      facturaActual: "",
       cajaAbierta: false,
       minRows: 15,
-      numTicket: '000-001-01-00000001',
+      numTicket: "000-001-01-00000001",
       fecha: new Date().toLocaleDateString(),
       addQuery: "",
-      totalCantidad: '',
+      totalCantidad: "",
       id_usuario: 0,
       totalEfectivo: 0,
       totalTransferencia: 0,
-      prueba: 'prueba',
-      info: '',
+      prueba: "prueba",
+      info: "",
       isBuscarProductoModalVisible: false,
       isEditing: false,
       isModalVisible: false,
@@ -246,14 +434,13 @@ export default {
       factura: [],
       usaSAR: false,
       isModalLoading: false,
-      loadingMessage: '',
+      loadingMessage: "",
       recuperandoVenta: false,
       isGuardarVentaModalVisible: false,
       isRecuperarVentaModalVisible: false,
       ventaPendiente: false,
       isPaymentAnimationVisible: false,
     };
-
   },
 
   watch: {
@@ -307,12 +494,18 @@ export default {
       } else {
         this.resumeMainKeyboardEvents();
       }
-    }
+    },
   },
   computed: {
     calcularTotal() {
-      const total = this.productosLista.reduce((total, p) => total + (p.precio_final), 0);
-      return total.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const total = this.productosLista.reduce(
+        (total, p) => total + p.precio_final,
+        0
+      );
+      return total.toLocaleString("es-HN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
     },
 
     // Actualizamos esta propiedad para que dependa de cajaAbierta
@@ -323,8 +516,7 @@ export default {
     // Movemos isCajaAbierta a computed properties
     isCajaAbierta() {
       return this.cajaAbierta;
-    }
-
+    },
   },
 
   remainingRows() {
@@ -343,7 +535,6 @@ export default {
       });
     },
 
-
     async salir() {
       this.logout();
     },
@@ -356,26 +547,28 @@ export default {
       this.isModalLoading = true;
       try {
         this.isModalLoading = true;
-        this.loadingMessage = 'Cerrando caja...';
+        this.loadingMessage = "Cerrando caja...";
 
         const url = `${solicitudes.homeUrl}/ventas/cerrar-caja/${this.id_usuario}`;
-        console.log('URL de la petición:', url);
+        console.log("URL de la petición:", url);
 
-        const token = localStorage.getItem('auth');
+        const token = localStorage.getItem("auth");
         const response = await fetch(url, {
-          method: 'PATCH',
+          method: "PATCH",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             id_usuario: this.id_usuario,
-            dineroCaja: datosCierre.dineroEnCaja
-          })
+            dineroCaja: datosCierre.dineroEnCaja,
+          }),
         });
 
         if (!response.ok) {
-          throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+          throw new Error(
+            `Error del servidor: ${response.status} ${response.statusText}`
+          );
         }
 
         const data = await response.json();
@@ -386,8 +579,11 @@ export default {
             await this.generarPDFCierreCaja(data);
             notis("success", "Caja cerrada y reporte generado exitosamente");
           } catch (pdfError) {
-            console.error('Error al generar PDF:', pdfError);
-            notis("warning", "Caja cerrada pero hubo un error al generar el PDF");
+            console.error("Error al generar PDF:", pdfError);
+            notis(
+              "warning",
+              "Caja cerrada pero hubo un error al generar el PDF"
+            );
           } finally {
             this.isModalLoading = false;
           }
@@ -395,9 +591,8 @@ export default {
 
         this.cajaAbierta = false;
         this.isCerrarCajaModalVisible = false;
-
       } catch (error) {
-        console.error('Error al cerrar caja:', error);
+        console.error("Error al cerrar caja:", error);
         notis("error", "Error al cerrar caja");
       } finally {
         this.isModalLoading = false;
@@ -405,62 +600,70 @@ export default {
     },
 
     async generarPDFCierreCaja(reporte) {
-      console.log('Iniciando generación de PDF...');
+      console.log("Iniciando generación de PDF...");
       this.isModalLoading = true;
       try {
-        console.log('Datos del reporte a enviar:', reporte);
+        console.log("Datos del reporte a enviar:", reporte);
 
         // Usar la URL base del proyecto
         const url = `${solicitudes.homeUrl}/ventas/generar-pdf-cierre/${this.id_usuario}`;
-        console.log('URL de la petición:', url);
+        console.log("URL de la petición:", url);
 
-        const token = localStorage.getItem('auth');
+        const token = localStorage.getItem("auth");
         const response = await fetch(url, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Agregar el token de autorización
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Agregar el token de autorización
           },
-          body: JSON.stringify(reporte)
+          body: JSON.stringify(reporte),
         });
 
-        console.log('Respuesta del servidor:', response);
-        console.log('Status:', response.status);
+        console.log("Respuesta del servidor:", response);
+        console.log("Status:", response.status);
 
         if (!response.ok) {
-          console.error('Respuesta no exitosa:', response.status, response.statusText);
+          console.error(
+            "Respuesta no exitosa:",
+            response.status,
+            response.statusText
+          );
           const errorText = await response.text();
-          console.error('Detalle del error:', errorText);
-          throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+          console.error("Detalle del error:", errorText);
+          throw new Error(
+            `Error del servidor: ${response.status} ${response.statusText}`
+          );
         }
 
-        console.log('Obteniendo blob de la respuesta...');
+        console.log("Obteniendo blob de la respuesta...");
         const blob = await response.blob();
-        console.log('Blob recibido:', blob);
+        console.log("Blob recibido:", blob);
 
-        console.log('Creando URL del blob...');
+        console.log("Creando URL del blob...");
         const url_blob = window.URL.createObjectURL(blob);
-        console.log('URL creada:', url_blob);
+        console.log("URL creada:", url_blob);
 
-        console.log('Configurando descarga...');
-        const a = document.createElement('a');
+        console.log("Configurando descarga...");
+        const a = document.createElement("a");
         a.href = url_blob;
-        a.download = `cierre_caja_${new Date().toISOString().split('T')[0]}.pdf`;
+        a.download = `cierre_caja_${
+          new Date().toISOString().split("T")[0]
+        }.pdf`;
 
-        console.log('Iniciando descarga...');
+        console.log("Iniciando descarga...");
         document.body.appendChild(a);
         a.click();
 
-        console.log('Limpiando recursos...');
+        console.log("Limpiando recursos...");
         window.URL.revokeObjectURL(url_blob);
         document.body.removeChild(a);
 
-        console.log('PDF generado y descargado exitosamente');
+        console.log("PDF generado y descargado exitosamente");
       } catch (error) {
-        console.error('Error detallado en generarPDFCierreCaja:', {
+        console.error("Error detallado en generarPDFCierreCaja:", {
           mensaje: error.message,
           error: error,
-          stack: error.stack
+          stack: error.stack,
         });
         throw error;
       } finally {
@@ -471,17 +674,20 @@ export default {
     async cerrarCaja() {
       this.isModalLoading = true;
       try {
-        const { data: ventas } = await axios.get(`${solicitudes.homeUrl}/ventas/totales-caja/${this.id_usuario}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth')}`
+        const { data: ventas } = await axios.get(
+          `${solicitudes.homeUrl}/ventas/totales-caja/${this.id_usuario}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("auth")}`,
+            },
           }
-        });
+        );
 
         this.totalEfectivo = ventas.totalEfectivo;
         this.totalTransferencia = ventas.totalTransferencia;
         this.abrirModalCerrarCaja();
       } catch (error) {
-        console.error('Error al obtener totales:', error);
+        console.error("Error al obtener totales:", error);
         notis("error", "Error al obtener totales de caja");
       } finally {
         this.isModalLoading = false;
@@ -491,9 +697,9 @@ export default {
     async handleAperturaCaja(monto) {
       this.isModalLoading = true;
       try {
-        this.loadingMessage = 'Abriendo caja...';
+        this.loadingMessage = "Abriendo caja...";
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         await createCaja(this.id_usuario, monto);
 
         // Actualizamos el estado de la caja
@@ -514,7 +720,7 @@ export default {
 
     async buscarProducto() {
       this.isModalLoading = true;
-      this.loadingMessage = 'Cargando productos...';
+      this.loadingMessage = "Cargando productos...";
       try {
         this.productos = await getProductos(this.id_usuario);
         this.isBuscarProductoModalVisible = true;
@@ -543,27 +749,29 @@ export default {
     },
 
     calcularImporte(producto) {
-      if ((producto.precio_mayorista > 0 && producto.cantidad_activar_mayorista > 0) &&
-        (producto.cantidad >= producto.cantidad_activar_mayorista)) {
-        producto.precio_final = producto.cantidad * producto.precioImpuestoMayorista;
-
-      }
-      else {
+      if (
+        producto.precio_mayorista > 0 &&
+        producto.cantidad_activar_mayorista > 0 &&
+        producto.cantidad >= producto.cantidad_activar_mayorista
+      ) {
+        producto.precio_final =
+          producto.cantidad * producto.precioImpuestoMayorista;
+      } else {
         producto.precio_final = producto.cantidad * producto.precioImpuesto;
       }
       return producto.precio_final;
     },
 
     mostrarPrecioFinal(producto) {
-      if ((producto.precio_mayorista > 0 && producto.cantidad_activar_mayorista > 0) &&
-        (producto.cantidad >= producto.cantidad_activar_mayorista)) {
+      if (
+        producto.precio_mayorista > 0 &&
+        producto.cantidad_activar_mayorista > 0 &&
+        producto.cantidad >= producto.cantidad_activar_mayorista
+      ) {
         return producto.precio_mayorista;
-
-      }
-      else {
+      } else {
         return producto.precio_unitario;
       }
-
     },
 
     handleModalFocus(isFocused) {
@@ -590,12 +798,23 @@ export default {
         notis("info", "No hay datos en la tabla.");
         return;
       }
+      this.isLimpiarPantallaModalVisible = true;
+    },
 
-      this.limpiarPantalla = true;
+    // Añade el método para manejar la confirmación:
+    async handleLimpiarPantalla(data) {
       this.isModalLoading = true;
       try {
         for (const producto of this.productosLista) {
-          await eliminarProductoVenta(producto.id_producto, this.id_usuario);
+          const eliminando = await eliminarProductoVenta(
+            producto.id_producto,
+            data.clave,
+            this.id_usuario
+          );
+
+          if (!eliminando) {
+            throw "Ocurrió un error al limpiar la pantalla";
+          }
         }
 
         this.productosLista = [];
@@ -604,28 +823,35 @@ export default {
         this.factura = [];
         this.clienteSeleccionado = null;
         this.addQuery = "";
-        this.totalCantidad = '';
+        this.totalCantidad = "";
 
         notis("success", "Pantalla limpiada correctamente");
-
       } catch (error) {
-        notis("error", "Error al limpiar la pantalla");
         console.error(error);
+        notificaciones("error", "Contraseña no reconocida.");
       } finally {
-        this.limpiarPantalla = false;
         this.isModalLoading = false;
       }
     },
 
-    async handleItemDelete(item) {
+    // Añade método para cerrar el modal:
+    closeLimpiarPantallaModal() {
+      this.isLimpiarPantallaModalVisible = false;
+    },
+
+    async handleItemDelete(data) {
       this.isModalLoading = true;
-      this.loadingMessage = 'Eliminando item...';
+      this.loadingMessage = "Eliminando item...";
       try {
-        const index = this.productosLista.findIndex(p => p === item);
+        const index = this.productosLista.findIndex((p) => p === data.item);
         if (index !== -1) {
-          const eliminando = await eliminarProductoVenta(this.productosLista[index].id_producto, 'La12345678#', this.id_usuario);
+          const eliminando = await eliminarProductoVenta(
+            this.productosLista[index].id_producto,
+            data.clave, // Usamos la clave ingresada en el modal
+            this.id_usuario
+          );
           if (!eliminando) {
-            throw 'Ocurrio un error al eliminar Item';
+            throw "Ocurrió un error al eliminar Item";
           }
           this.productosLista.splice(index, 1);
           this.selectedItem = null;
@@ -633,7 +859,7 @@ export default {
           toast.success("Item eliminado correctamente");
         }
       } catch (error) {
-        notificaciones('error', 'Contraseña no reconocida.');
+        notificaciones("error", "Contraseña no reconocida.");
       } finally {
         this.isModalLoading = false;
       }
@@ -646,18 +872,22 @@ export default {
     async logout() {
       this.isModalLoading = true;
       try {
-        await axios.post('/api/logout', {}, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth')}`
+        await axios.post(
+          "/api/logout",
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("auth")}`,
+            },
           }
-        });
+        );
 
         localStorage.clear();
-        this.$router.push('/login');
+        this.$router.push("/login");
       } catch (error) {
         console.error("Error al cerrar sesión", error);
         localStorage.clear();
-        this.$router.push('/login');
+        this.$router.push("/login");
       } finally {
         this.isModalLoading = true;
       }
@@ -670,13 +900,12 @@ export default {
 
     async openModal() {
       this.isModalLoading = true;
-      this.loadingMessage = 'Cargando clientes...';
+      this.loadingMessage = "Cargando clientes...";
       try {
-        this.clientes = await getClientesbyEmpresa(this.id_usuario)
+        this.clientes = await getClientesbyEmpresa(this.id_usuario);
         this.isModalVisible = true;
-      }
-      catch (error) {
-        notificaciones('error', error.message);
+      } catch (error) {
+        notificaciones("error", error.message);
       } finally {
         this.isModalLoading = false;
       }
@@ -687,6 +916,23 @@ export default {
       this.$nextTick(() => {
         this.$refs.codigoRef?.focus();
       });
+    },
+
+    async nuevoCliente() {
+      this.isModalLoading = true;
+      this.loadingMessage = "Cargando clientes...";
+      try {
+        this.clientes = await getClientesbyEmpresa(this.id_usuario);
+        this.isModalVisible = true;
+        // Emitir un evento para que el modal sepa que debe mostrar el formulario
+        this.$nextTick(() => {
+          this.$refs.clienteModal.abrirFormularioDirectamente();
+        });
+      } catch (error) {
+        notificaciones("error", error.message);
+      } finally {
+        this.isModalLoading = false;
+      }
     },
 
     async realizarPago(datosPago) {
@@ -700,19 +946,32 @@ export default {
 
       this.isModalLoading = true;
       try {
-        if (datosPago.metodoPago === 'Efectivo') {
-          pagando = await pagar(datosPago.montoEfectivo, this.venta.id_venta, datosPago.notas, this.id_usuario);
-        }
-        else if (datosPago.metodoPago === 'Transferencia') {
-          pagando = await pagarTranferir(datosPago.montoTransferencia, this.venta.id_venta, datosPago.numeroTransferencia, datosPago.notas, this.id_usuario);
+        if (datosPago.metodoPago === "Efectivo") {
+          pagando = await pagar(
+            datosPago.montoEfectivo,
+            this.venta.id_venta,
+            datosPago.notas,
+            this.id_usuario
+          );
+        } else if (datosPago.metodoPago === "Transferencia") {
+          pagando = await pagarTranferir(
+            datosPago.montoTransferencia,
+            this.venta.id_venta,
+            datosPago.numeroTransferencia,
+            datosPago.notas,
+            this.id_usuario
+          );
         }
 
         if (!pagando) {
-          throw 'No se realizo el pago';
+          throw "No se realizo el pago";
         }
 
         // Guardar el número de factura
-        this.facturaActual = this.venta?.facturas?.[0]?.factura_SAR?.[0]?.numero_factura_SAR || pagando.numero_factura || '';
+        this.facturaActual =
+          this.venta?.facturas?.[0]?.factura_SAR?.[0]?.numero_factura_SAR ||
+          pagando.numero_factura ||
+          "";
 
         // Cerrar el modal de pago y mostrar factura
         this.isPagoModalVisible = false;
@@ -721,35 +980,36 @@ export default {
         // La animación de pago se mostrará después de cerrar la factura
         this.isPaymentAnimationVisible = true;
       } catch (error) {
-        notificaciones('error', error.message);
+        notificaciones("error", error.message);
       } finally {
         this.isModalLoading = false;
       }
     },
 
-
     handlePaymentComplete() {
       this.isPaymentAnimationVisible = false;
       this.limpiarPagado();
-      this.facturaActual = '';
+      this.facturaActual = "";
     },
 
     async openPagoModal() {
-
       const toast = useToast();
       if (this.productosLista.length === 0) {
         toast.warning("No hay productos en la tabla de ventas.");
         return;
       }
 
-      const totalNumero = this.productosLista.reduce((total, p) => total + (p.precio_final), 0);
+      const totalNumero = this.productosLista.reduce(
+        (total, p) => total + p.precio_final,
+        0
+      );
 
       if (!this.clienteSeleccionado && totalNumero > 10000) {
         toast.warning("Agregue un cliente para compras mayores a L. 10,0000");
         return;
       }
       this.isModalLoading = true;
-      this.loadingMessage = 'Procesando venta...';
+      this.loadingMessage = "Procesando venta...";
 
       try {
         console.log(this.clienteSeleccionado);
@@ -757,9 +1017,9 @@ export default {
           this.venta = await postVenta(
             this.productosLista,
             this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0,
-            this.id_usuario);
-        }
-        else if (this.venta.factura.total !== this.calcularTotal) {
+            this.id_usuario
+          );
+        } else if (this.venta.factura.total !== this.calcularTotal) {
           const id_venta = this.venta.id_venta;
           const id_factura = this.venta.factura.id_factura;
 
@@ -767,15 +1027,19 @@ export default {
             eliminarVenta(id_venta, id_factura),
             postVenta(
               this.productosLista,
-              this.clienteSeleccionado ? this.clienteSeleccionado.id_cliente : 0,
-              this.id_usuario)
+              this.clienteSeleccionado
+                ? this.clienteSeleccionado.id_cliente
+                : 0,
+              this.id_usuario
+            ),
           ];
 
           const resultados = await Promise.all(promesas);
-          const { resultado: resultadoEliVenta, message: messageElimVenta } = resultados[0];
+          const { resultado: resultadoEliVenta, message: messageElimVenta } =
+            resultados[0];
 
           if (!resultadoEliVenta) {
-            console.error('Ocurrio un error de servidor', messageElimVenta);
+            console.error("Ocurrio un error de servidor", messageElimVenta);
           }
 
           this.venta = resultados[1];
@@ -785,14 +1049,14 @@ export default {
         this.isPagoModalVisible = true;
 
         this.$nextTick(() => {
-          const pagoModalElement = document.querySelector('.modal-content');
+          const pagoModalElement = document.querySelector(".modal-content");
           if (pagoModalElement) {
             pagoModalElement.focus();
           }
         });
       } catch (error) {
         console.log(error);
-        toast.error('Ocurrio un error al registrar venta.');
+        toast.error("Ocurrio un error al registrar venta.");
       } finally {
         this.isModalLoading = false;
       }
@@ -834,13 +1098,23 @@ export default {
       const key = event.key;
 
       // Cancela la acción predeterminada si se presiona una tecla específica
-      if (key === "F3" || key === "F12" || key === "F4" || key === "F5" || key === "F6" || key === "F8" || key === "F9" || key === "F10" || key === "F11") {
+      if (
+        key === "F3" ||
+        key === "F12" ||
+        key === "F4" ||
+        key === "F5" ||
+        key === "F6" ||
+        key === "F8" ||
+        key === "F9" ||
+        key === "F10" ||
+        key === "F11"
+      ) {
         event.preventDefault();
       }
 
       // const toast = useToast();
 
-      if (!isNaN(key) || key === '.') {
+      if (!isNaN(key) || key === ".") {
         event.preventDefault();
         this.agregarNumero(key);
       } else if (key === "Backspace") {
@@ -852,27 +1126,27 @@ export default {
       } else if (event.altKey && key === "s") {
         event.preventDefault();
         this.logout();
-      } else if (event.altKey && key === "c") {
-        event.preventDefault();
-        this.openModal();
       } else if (key === "F2") {
         event.preventDefault();
         this.buscarProducto();
       } else if (key === "F3") {
         event.preventDefault();
         this.openModal();
+      } else if (key === "F4") {
+        event.preventDefault();
+        this.eliminarItem();
+      } else if (key === "F5") {
+        event.preventDefault();
+        this.limpiarPantalla();
+      } else if (key === "F6") {
+        event.preventDefault();
+        this.guardarVenta();
+      } else if (key === "F7") {
+        event.preventDefault();
+        this.recVenta();
       } else if (key === "F12") {
         event.preventDefault();
         this.openPagoModal();
-      } else if (key === "F5") {
-        event.preventDefault();
-        this.eliminarItem();
-      } else if (key === "F9") {
-        event.preventDefault();
-        this.recVenta();
-      } else if (key === "F8") {
-        event.preventDefault();
-        this.guardarVenta();
       }
     },
 
@@ -888,17 +1162,17 @@ export default {
 
     limpiar() {
       this.addQuery = "";
-      this.totalCantidad = '';
+      this.totalCantidad = "";
     },
 
     limpiarPagado() {
       this.addQuery = "";
-      this.totalCantidad = '';
+      this.totalCantidad = "";
       this.productosLista = [];
       this.venta = [];
       this.factura = [];
       this.clienteSeleccionado = null;
-      this.facturaActual = '';
+      this.facturaActual = "";
     },
 
     procesarEnter() {
@@ -920,7 +1194,9 @@ export default {
       }
       try {
         this.limpiar();
-        const newProduct = this.productos.find((p) => p.codigo_producto === codigoValidar);
+        const newProduct = this.productos.find(
+          (p) => p.codigo_producto === codigoValidar
+        );
         if (!newProduct) {
           const toast = useToast();
           toast.warning("No existe el producto");
@@ -928,34 +1204,39 @@ export default {
           return;
         }
 
-        const existingProduct = this.productosLista.find((p) => p.codigo_producto === codigoValidar);
+        const existingProduct = this.productosLista.find(
+          (p) => p.codigo_producto === codigoValidar
+        );
         if (existingProduct) {
           existingProduct.cantidad += nuevaCantidad;
-
         } else {
           newProduct.cantidad = nuevaCantidad;
           this.productosLista.push({ ...newProduct });
         }
 
         if (!this.recuperandoVenta) {
-          const result = await agregarProductoCodigo(nuevaCantidad, codigoValidar, this.id_usuario);
+          const result = await agregarProductoCodigo(
+            nuevaCantidad,
+            codigoValidar,
+            this.id_usuario
+          );
           console.log(result);
           if (result.error) {
-
-            const index = this.productosLista.findIndex(i => i.codigo_producto === codigoValidar);
-            this.productosLista[index].cantidad = this.productosLista[index].cantidad - nuevaCantidad;
+            const index = this.productosLista.findIndex(
+              (i) => i.codigo_producto === codigoValidar
+            );
+            this.productosLista[index].cantidad =
+              this.productosLista[index].cantidad - nuevaCantidad;
             if (this.productosLista[index].cantidad < 1) {
               this.productosLista.splice(index, 1);
             }
-            result.message = 'No hay stock disponible en el inventario.';
+            result.message = "No hay stock disponible en el inventario.";
             throw result;
           }
         }
-
-
       } catch (error) {
         console.log(error);
-        notificaciones('error', error.message);
+        notificaciones("error", error.message);
       }
     },
 
@@ -968,11 +1249,9 @@ export default {
 
       if (!this.clienteSeleccionado) {
         this.isGuardarVentaModalVisible = true;
-      }
-      else {
+      } else {
         this.guardarVentainBD(this.clienteSeleccionado.nombre_completo);
       }
-
     },
 
     async guardarVentainBD(nombre_completo) {
@@ -981,14 +1260,13 @@ export default {
         const response = await guardarVenta(nombre_completo, this.id_usuario);
         if (response) {
           this.limpiarPagado();
-          notificaciones('venta-guardada');
-        }
-        else {
-          throw 'Ocurrio un error al guardar venta. Intente mas tarde';
+          notificaciones("venta-guardada");
+        } else {
+          throw "Ocurrio un error al guardar venta. Intente mas tarde";
         }
       } catch (error) {
         console.log(error);
-        notificaciones('error', error.message);
+        notificaciones("error", error.message);
       } finally {
         this.isModalLoading = false;
       }
@@ -1012,13 +1290,14 @@ export default {
         }
 
         this.recuperandoVenta = false;
-
       } catch (error) {
-        notificaciones('error', "Error al recuperar venta. Intente de nuevo mas tarde.");
+        notificaciones(
+          "error",
+          "Error al recuperar venta. Intente de nuevo mas tarde."
+        );
       } finally {
         this.isModalLoading = false;
       }
-
     },
 
     async RecventaPendiente(productosRec) {
@@ -1034,25 +1313,24 @@ export default {
         }
 
         this.recuperandoVenta = false;
-
-
       } catch (error) {
-        notificaciones('error', "Error al recuperar venta. Intente de nuevo mas tarde.");
+        notificaciones(
+          "error",
+          "Error al recuperar venta. Intente de nuevo mas tarde."
+        );
       } finally {
         this.isModalLoading = false;
       }
-
     },
 
     async handleSaveVenta(data) {
       this.isModalLoading = true;
-      this.loadingMessage = 'Guardando venta...';
+      this.loadingMessage = "Guardando venta...";
 
       try {
         this.guardarVentainBD(data);
-
       } catch (error) {
-        notificaciones('error', error.message);
+        notificaciones("error", error.message);
       } finally {
         this.isModalLoading = false;
         this.isGuardarVentaModalVisible = false;
@@ -1067,7 +1345,7 @@ export default {
         console.log(ventasGuardadas);
         this.isRecuperarVentaModalVisible = true;
       } catch (error) {
-        notificaciones('error', error);
+        notificaciones("error", error);
       } finally {
         this.isModalLoading = false;
       }
@@ -1078,9 +1356,8 @@ export default {
       try {
         const ventasGuardadas = await getVentasGuardadas(this.id_usuario);
         console.log(ventasGuardadas);
-
       } catch (error) {
-        notificaciones('error', error);
+        notificaciones("error", error);
       } finally {
         this.isModalLoading = false;
       }
@@ -1114,11 +1391,13 @@ export default {
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
+      document.getElementsByTagName("head")[0].appendChild(link);
     },
 
     toggleEditingMode() {
@@ -1127,14 +1406,14 @@ export default {
 
     showInfo() {
       console.log("Información o estadísticas mostradas.");
-    }
+    },
   },
 
   async mounted() {
     this.isModalLoading = true;
     let ventaRecuperada;
     window.addEventListener("keydown", this.handleKeyPress);
-    setPageTitle('Crear Ventas');
+    setPageTitle("Crear Ventas");
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
@@ -1150,7 +1429,7 @@ export default {
         await this.RecventaPendiente(ventaRecuperada.productos);
       }
     } catch (error) {
-      notificaciones('error', error.message);
+      notificaciones("error", error.message);
       this.estadoCajaValidado = true;
     } finally {
       this.isModalLoading = false;
@@ -1160,8 +1439,6 @@ export default {
   beforeUnmount() {
     window.removeEventListener("keydown", this.handleKeyPress);
   },
-
-
 };
 </script>
 
@@ -1453,7 +1730,6 @@ td {
   margin-top: 35%;
 }
 
-
 .abrir-caja-button:hover {
   background-color: #6ce600;
 }
@@ -1548,7 +1824,7 @@ button {
 .footer-container button {
   width: clamp(50px, 10vw, 70px);
   height: clamp(50px, 10vw, 70px);
-  border-radius: 50%;
+  border-radius: 0%;
   font-size: clamp(10px, 1.5vw, 12px);
   display: flex;
   align-items: center;

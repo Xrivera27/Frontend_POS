@@ -5,25 +5,17 @@
     @click="handleOverlayClick"
     @keydown.stop
   >
-    <ModalLoading :isLoading="isModalLoading" mensaje="Eliminando item..." />
+    <ModalLoading :isLoading="isModalLoading" mensaje="Limpiando pantalla..." />
     <div class="modal-content" @click.stop>
-      <div class="modal-header">
-        <h2>Eliminar Item</h2>
-      </div>
-
-      <!-- Primera vista: Confirmación inicial -->
+      <!-- Primera vista: Confirmación -->
       <template v-if="!mostrarInputClave">
+        <div class="modal-header">
+          <h2>Limpiar Pantalla</h2>
+        </div>
         <div class="modal-body">
-          <p>¿Está seguro que desea eliminar el siguiente item?</p>
-          <div class="item-details">
-            <p><strong>Código:</strong> {{ item.codigo_producto }}</p>
-            <p><strong>Descripción:</strong> {{ item.nombre }}</p>
-            <p><strong>Cantidad:</strong> {{ item.cantidad }}</p>
-            <p><strong>Precio Unitario:</strong> {{ item.precioImpuesto }}</p>
-            <p>
-              <strong>Importe:</strong>
-              {{ item.precioImpuesto * item.cantidad }}
-            </p>
+          <p>¿Está seguro que desea limpiar la pantalla?</p>
+          <div class="warning-message">
+            <p>Esta acción eliminará todos los productos de la venta actual.</p>
           </div>
         </div>
         <div class="modal-footer">
@@ -36,6 +28,7 @@
         </div>
       </template>
 
+      <!-- Segunda vista: Input de clave -->
       <div class="modal" v-else>
         <div class="modal-confirm">
           <div class="modal-header">
@@ -73,34 +66,19 @@
   </div>
 </template>
 
-
-
 <script>
-import { ref, onMounted, onBeforeUnmount, nextTick, watch } from "vue";
+import { ref, onBeforeUnmount, nextTick, watch } from "vue";
 import ModalLoading from "@/components/ModalLoading.vue";
-//import solicitudes from "../../services/solicitudes";
 
 export default {
-  components: {
-    ModalLoading,
-  },
-  name: "EliminarItemsModal",
+  components: { ModalLoading },
   props: {
     isVisible: {
       type: Boolean,
       required: true,
     },
-    item: {
-      type: Object,
-      required: true,
-    },
-    tipo: {
-      type: String,
-      default: "eliminarItem",
-    },
   },
-
-  emits: ["close", "confirm-delete", "modal-focused"],
+  emits: ["close", "confirm-limpiar", "modal-focused"],
 
   setup(props, { emit }) {
     const isModalLoading = ref(false);
@@ -109,21 +87,17 @@ export default {
     const error = ref("");
     const claveInput = ref(null);
 
-    // Observar cambios en isVisible
     watch(
       () => props.isVisible,
       (newValue) => {
         if (newValue) {
-          // Cuando el modal se abre, emitimos el evento para desactivar eventos del teclado principal
           emit("modal-focused", true);
           nextTick(() => {
-            // Asegurarnos que el input reciba el foco cuando se muestre
             if (mostrarInputClave.value && claveInput.value) {
               claveInput.value.focus();
             }
           });
         } else {
-          // Cuando el modal se cierra, reactivamos los eventos del teclado principal
           emit("modal-focused", false);
           mostrarInputClave.value = false;
           claveIngresada.value = "";
@@ -151,21 +125,14 @@ export default {
     };
 
     const validarClave = async () => {
+      if (!claveIngresada.value) {
+        error.value = "Por favor ingrese una clave";
+        return;
+      }
+      isModalLoading.value = true;
       try {
-        if (!claveIngresada.value) {
-          error.value = "Por favor ingrese una clave";
-          return;
-        }
-        isModalLoading.value = true;
-        // Emitimos la clave junto con el item
-        emit("confirm-delete", {
-          item: props.item,
-          clave: claveIngresada.value,
-        });
+        emit("confirm-limpiar", { clave: claveIngresada.value });
         emit("close");
-      } catch (err) {
-        error.value = "Error al validar la clave";
-        claveIngresada.value = "";
       } finally {
         isModalLoading.value = false;
       }
@@ -177,24 +144,7 @@ export default {
       claveIngresada.value = "";
     };
 
-    const handleEscape = (e) => {
-      if (e.key === "Escape" && props.isVisible) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (mostrarInputClave.value) {
-          volverConfirmacion();
-        } else {
-          emit("close");
-        }
-      }
-    };
-
-    onMounted(() => {
-      window.addEventListener("keydown", handleEscape);
-    });
-
     onBeforeUnmount(() => {
-      window.removeEventListener("keydown", handleEscape);
       emit("modal-focused", false);
     });
 
