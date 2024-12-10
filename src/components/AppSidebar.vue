@@ -219,7 +219,7 @@ export default {
         logout() {
             this.isLoading = true;
             this.$emit('logout');
-            this.isLoading = true;
+            this.isLoading = false;
         },
         toggleDarkMode() {
             this.$emit('toggle-dark-mode');
