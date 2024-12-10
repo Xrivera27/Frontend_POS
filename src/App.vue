@@ -1,29 +1,32 @@
 <template>
   <div class="app-wrapper" :class="{ dark: isDarkMode }">
-    <AppSidebar 
-      v-if="isInitialized && shouldShowSidebar" 
+    <AppSidebar
+      v-if="isInitialized && shouldShowSidebar"
       :class="{ 'hidden-sidebar': !showSidebar }"
-      :isDarkMode="isDarkMode" 
-      :expanded="expanded" 
-      :dropdowns="dropdowns" 
+      :isDarkMode="isDarkMode"
+      :expanded="expanded"
+      :dropdowns="dropdowns"
       :has-permission="hasPermission"
       :is-active="isActive"
       :isLoginRoute="isLoginRoute"
-      @toggle-sidebar="toggleSidebar" 
+      @toggle-sidebar="toggleSidebar"
       @open-dropdown="openDropdown"
-      @close-dropdown="closeDropdown" 
-      @logout="logout" 
+      @close-dropdown="closeDropdown"
+      @logout="logout"
       @toggle-dark-mode="toggleDarkMode"
-      @expand-sidebar="expandSidebar" 
-      @collapse-sidebar="collapseSidebar" 
+      @expand-sidebar="expandSidebar"
+      @collapse-sidebar="collapseSidebar"
     />
 
-    <main class="main-content" :class="{
-      expanded,
-      dark: isDarkMode,
-      login: isLoginRoute,
-      'no-sidebar': !showSidebar || !shouldShowSidebar
-    }">
+    <main
+      class="main-content"
+      :class="{
+        expanded,
+        dark: isDarkMode,
+        login: isLoginRoute,
+        'no-sidebar': !showSidebar || !shouldShowSidebar,
+      }"
+    >
       <router-view v-if="isInitialized" />
       <div v-else class="loading-state">
         <div class="loader"></div>
@@ -33,14 +36,14 @@
 </template>
 
 <script>
-import AppSidebar from './components/AppSidebar.vue';
-import axios from 'axios';
-import solicitudes from '../services/solicitudes';
+import AppSidebar from "./components/AppSidebar.vue";
+import axios from "axios";
+import solicitudes from "../services/solicitudes";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    AppSidebar
+    AppSidebar,
   },
   data() {
     return {
@@ -53,74 +56,71 @@ export default {
       isDarkMode: false,
       userRole: null,
       userPermissions: null,
-      authChecked: false
+      authChecked: false,
     };
   },
 
   async created() {
     try {
-      console.log('Iniciando created...');
-      const savedRole = localStorage.getItem('role');
-      const token = localStorage.getItem('auth');
-      console.log('Token encontrado:', !!token);
-      console.log('Role encontrado:', savedRole);
-      
+      console.log("Iniciando created...");
+      const savedRole = localStorage.getItem("role");
+      const token = localStorage.getItem("auth");
+      console.log("Token encontrado:", !!token);
+      console.log("Role encontrado:", savedRole);
+
       if (token && savedRole) {
         this.userRole = savedRole;
         this.isInitialized = true;
-        console.log('Estado inicial establecido con rol:', savedRole);
-        
+        console.log("Estado inicial establecido con rol:", savedRole);
+
         if (!this.isLoginRoute) {
           await this.checkAuthAndInitialize();
         }
       } else {
         this.isInitialized = true;
         if (!this.isLoginRoute) {
-          await this.$router.push('/login');
+          await this.$router.push("/login");
         }
       }
-      
-      window.addEventListener('storage', this.handleStorageChange);
-      window.addEventListener('roleChange', this.handleRoleChange);
+
+      window.addEventListener("storage", this.handleStorageChange);
+      window.addEventListener("roleChange", this.handleRoleChange);
     } catch (error) {
-      console.error('Error en created:', error);
+      console.error("Error en created:", error);
       this.isInitialized = true;
     }
   },
 
   computed: {
     isLoginRoute() {
-      return this.$route.path === '/login';
+      return this.$route.path === "/login";
     },
-    
+
     isAuthenticated() {
-      const token = localStorage.getItem('auth');
-      const role = localStorage.getItem('role') || this.userRole;
-      console.log('Verificando autenticación:', { token, role });
+      const token = localStorage.getItem("auth");
+      const role = localStorage.getItem("role") || this.userRole;
+      console.log("Verificando autenticación:", { token, role });
       return !!(token && role);
     },
-    
+
     shouldShowSidebar() {
-      const role = this.userRole || localStorage.getItem('role');
-      const token = localStorage.getItem('auth');
+      const role = this.userRole || localStorage.getItem("role");
+      const token = localStorage.getItem("auth");
       const isAuth = !!(token && role);
-      
-      console.log('Evaluando sidebar:', {
+
+      console.log("Evaluando sidebar:", {
         isAuth,
         role,
-        isLoginRoute: this.isLoginRoute
+        isLoginRoute: this.isLoginRoute,
       });
-      
-      return isAuth && 
-             !this.isLoginRoute && 
-             role && 
-             role !== '3';
+
+      return isAuth && !this.isLoginRoute && role && role !== "3";
     },
-    
+
     showSidebar() {
-      const role = this.userRole || localStorage.getItem('role');
-      const token = localStorage.getItem('auth');
-      return token && role && role !== '3';
+      const role = this.userRole || localStorage.getItem("role");
+      const token = localStorage.getItem("auth");
+      return token && role && role !== "3";
     },
 
     hasSidebarPermission() {
@@ -131,75 +131,81 @@ export default {
         4: true,
       };
       return permissions[this.userRole] || false;
-    }
+    },
   },
 
   methods: {
     async checkAuthAndInitialize() {
-  try {
-    console.log('Iniciando checkAuthAndInitialize...');
-    const token = localStorage.getItem('auth');
-    const role = localStorage.getItem('role');
-    console.log('Verificando token y rol:', { tieneToken: !!token, role });
-    
-    if (!token || !role) {
-      console.log('No hay token o rol, redirigiendo a login...');
-      this.isInitialized = true;
-      if (!this.isLoginRoute) {
-        await this.$router.push('/login');
-      }
-      return;
-    }
+      try {
+        console.log("Iniciando checkAuthAndInitialize...");
+        const token = localStorage.getItem("auth");
+        const role = localStorage.getItem("role");
+        console.log("Verificando token y rol:", { tieneToken: !!token, role });
 
-    try {
-      console.log('Intentando verificar token en:', `${solicitudes.homeUrl}/token/verify-token`);
-      const response = await axios.get(`${solicitudes.homeUrl}/token/verify-token`, {
-        headers: {
-          Authorization: `Bearer ${token}`
+        if (!token || !role) {
+          console.log("No hay token o rol, redirigiendo a login...");
+          this.isInitialized = true;
+          if (!this.isLoginRoute) {
+            await this.$router.push("/login");
+          }
+          return;
         }
-      });
-      
-      if (response.data) {
-        console.log('Token válido, inicializando app con rol:', role);
-        this.userRole = role;
+
+        try {
+          console.log(
+            "Intentando verificar token en:",
+            `${solicitudes.homeUrl}/token/verify-token`
+          );
+          const response = await axios.get(
+            `${solicitudes.homeUrl}/token/verify-token`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (response.data) {
+            console.log("Token válido, inicializando app con rol:", role);
+            this.userRole = role;
+            this.isInitialized = true;
+            await this.initializeApp();
+
+            // Redirigir a ventas si es cajero (role 3)
+            if (role === "3" && this.$route.path === "/home") {
+              console.log("Usuario es cajero, redirigiendo a ventas...");
+              await this.$router.push("/ventas");
+            }
+          }
+        } catch (error) {
+          console.error("Error en verificación:", error);
+          await this.logout();
+        }
+      } catch (error) {
+        console.error("Error en checkAuthAndInitialize:", error);
         this.isInitialized = true;
-        await this.initializeApp();
-        
-        // Redirigir a ventas si es cajero (role 3)
-        if (role === '3' && this.$route.path === '/home') {
-          console.log('Usuario es cajero, redirigiendo a ventas...');
-          await this.$router.push('/ventas');
+        if (!this.isLoginRoute) {
+          await this.$router.push("/login");
         }
       }
-    } catch (error) {
-      console.error('Error en verificación:', error);
-      await this.logout();
-    }
-  } catch (error) {
-    console.error('Error en checkAuthAndInitialize:', error);
-    this.isInitialized = true;
-    if (!this.isLoginRoute) {
-      await this.$router.push('/login');
-    }
-  }
-},
+    },
 
     async initializeApp() {
       try {
-        console.log('Iniciando initializeApp...');
+        console.log("Iniciando initializeApp...");
         if (!this.isAuthenticated) {
-          console.log('No autenticado, limpiando userRole');
+          console.log("No autenticado, limpiando userRole");
           this.userRole = null;
           return;
         }
 
-        const role = localStorage.getItem('role');
-        console.log('Inicializando app con rol:', role);
+        const role = localStorage.getItem("role");
+        console.log("Inicializando app con rol:", role);
         if (role) {
           this.userRole = role;
-          
+
           this.$nextTick(() => {
-            console.log('Reseteando estados de UI');
+            console.log("Reseteando estados de UI");
             this.expanded = false;
             this.dropdowns = {
               ventas: false,
@@ -208,17 +214,20 @@ export default {
           });
         }
       } catch (error) {
-        console.error('Error en initializeApp:', error);
+        console.error("Error en initializeApp:", error);
         await this.logout();
       }
     },
 
     handleRoleChange() {
-      const newRole = localStorage.getItem('role');
-      console.log('Cambio de rol detectado:', { rolAnterior: this.userRole, nuevoRol: newRole });
+      const newRole = localStorage.getItem("role");
+      console.log("Cambio de rol detectado:", {
+        rolAnterior: this.userRole,
+        nuevoRol: newRole,
+      });
       if (newRole !== this.userRole) {
         this.userRole = newRole;
-        console.log('Rol actualizado a:', newRole);
+        console.log("Rol actualizado a:", newRole);
         this.$nextTick(() => {
           this.$forceUpdate();
         });
@@ -226,49 +235,78 @@ export default {
     },
 
     handleStorageChange(event) {
-      if (event.key === 'auth' || event.key === 'role') {
-        console.log('Cambio detectado en storage:', event.key);
+      if (event.key === "auth" || event.key === "role") {
+        console.log("Cambio detectado en storage:", event.key);
         this.checkAuthAndInitialize();
       }
     },
 
     hasPermission(section) {
-      const role = this.userRole || localStorage.getItem('role');
+      const role = this.userRole || localStorage.getItem("role");
       const permissions = {
-        1: ['Home', 'Usuario', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'config-avanced', 'reporte'],
-        2: ['Home', 'Productos', 'Proveedores', 'Compra', 'Venta', 'reporte'],
-        3: ['Home', 'Productos', 'Venta', 'reporte'],
-        4: ['Home', 'Usuario', 'sucursales', 'Categorias', 'Productos', 'Clientes', 'Proveedores', 'Compra', 'Venta', 'Registro', 'Sucursal', 'config-avanced', 'reporte'],
+        1: [
+          "Home",
+          "Usuario",
+          "Categorias",
+          "Productos",
+          "Clientes",
+          "Proveedores",
+          "Compra",
+          "Venta",
+          "Registro",
+          "config-avanced",
+          "reporte",
+        ],
+        2: ["Home", "Productos", "Proveedores", "Compra", "Venta", "reporte"],
+        3: ["Home", "Productos", "Venta", "reporte"],
+        4: [
+          "Home",
+          "Usuario",
+          "sucursales",
+          "Categorias",
+          "Productos",
+          "Clientes",
+          "Proveedores",
+          "Compra",
+          "Venta",
+          "Registro",
+          "Sucursal",
+          "config-avanced",
+          "reporte",
+        ],
       };
       return role && permissions[role]?.includes(section);
     },
 
     async logout() {
-      
       try {
-        console.log('Iniciando proceso de logout...');
-        const token = localStorage.getItem('auth');
+        console.log("Iniciando proceso de logout...");
+        const token = localStorage.getItem("auth");
         if (token) {
-          console.log('Intentando logout en el servidor...');
-          await axios.post(`${solicitudes.homeUrl}/token/logout`, {}, {
-            headers: {
-              Authorization: `Bearer ${token}`
+          console.log("Intentando logout en el servidor...");
+          await axios.post(
+            `${solicitudes.homeUrl}/token/logout`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             }
-          });
-          console.log('Logout en servidor exitoso');
+          );
+          console.log("Logout en servidor exitoso");
         }
       } catch (error) {
         console.error("Error al cerrar sesión:", error);
       } finally {
-        console.log('Limpiando estado local...');
+        console.log("Limpiando estado local...");
         localStorage.clear();
         this.userRole = null;
         this.expanded = false;
         this.isInitialized = false;
-        await this.$router.push('/login');
+        await this.$router.push("/login");
         this.$nextTick(() => {
           this.isInitialized = true;
-          console.log('Estado local limpio, redirección completada');
+          console.log("Estado local limpio, redirección completada");
         });
       }
     },
@@ -283,7 +321,7 @@ export default {
 
     toggleDarkMode() {
       this.isDarkMode = !this.isDarkMode;
-      localStorage.setItem('isDarkMode', this.isDarkMode);
+      localStorage.setItem("isDarkMode", this.isDarkMode);
     },
 
     openDropdown(dropdown) {
@@ -300,74 +338,74 @@ export default {
 
     collapseSidebar() {
       this.expanded = false;
-    }
+    },
   },
 
   beforeUnmount() {
-    window.removeEventListener('storage', this.handleStorageChange);
-    window.removeEventListener('roleChange', this.handleRoleChange);
+    window.removeEventListener("storage", this.handleStorageChange);
+    window.removeEventListener("roleChange", this.handleRoleChange);
   },
 
   watch: {
-    '$route': {
-  immediate: true,
-  async handler(to) {
-    console.log('Cambio de ruta detectado:', to.path);
-    if (to.path !== '/login') {
-      const token = localStorage.getItem('auth');
-      const role = localStorage.getItem('role');
-      
-      if (!token || !role) {
-        console.log('No hay token o rol, redirigiendo a login');
-        await this.$router.push('/login');
-      } else if (!this.isInitialized) {
-        console.log('App no inicializada, inicializando...');
-        await this.checkAuthAndInitialize();
-      } else {
-        // Asegurarnos de que userRole está sincronizado
-        if (role && this.userRole !== role) {
-          this.userRole = role;
+    $route: {
+      immediate: true,
+      async handler(to) {
+        console.log("Cambio de ruta detectado:", to.path);
+        if (to.path !== "/login") {
+          const token = localStorage.getItem("auth");
+          const role = localStorage.getItem("role");
+
+          if (!token || !role) {
+            console.log("No hay token o rol, redirigiendo a login");
+            await this.$router.push("/login");
+          } else if (!this.isInitialized) {
+            console.log("App no inicializada, inicializando...");
+            await this.checkAuthAndInitialize();
+          } else {
+            // Asegurarnos de que userRole está sincronizado
+            if (role && this.userRole !== role) {
+              this.userRole = role;
+            }
+
+            // Redirigir a ventas si es cajero y está intentando acceder a home
+            if (role === "3" && to.path === "/home") {
+              console.log("Usuario es cajero, redirigiendo a ventas...");
+              await this.$router.push("/ventas");
+            }
+          }
         }
-        
-        // Redirigir a ventas si es cajero y está intentando acceder a home
-        if (role === '3' && to.path === '/home') {
-          console.log('Usuario es cajero, redirigiendo a ventas...');
-          await this.$router.push('/ventas');
-        }
-      }
-    }
-  }
-},
-    
+      },
+    },
+
     isAuthenticated: {
       immediate: true,
       handler(newValue) {
-        console.log('Estado de autenticación cambiado:', newValue);
+        console.log("Estado de autenticación cambiado:", newValue);
         if (!newValue && !this.isLoginRoute) {
-          console.log('Usuario no autenticado, redirigiendo a login');
-          this.$router.push('/login');
+          console.log("Usuario no autenticado, redirigiendo a login");
+          this.$router.push("/login");
         }
-      }
+      },
     },
 
     userRole: {
       immediate: true,
       handler(newRole) {
         if (newRole) {
-          console.log('Rol de usuario actualizado:', newRole);
+          console.log("Rol de usuario actualizado:", newRole);
           this.$forceUpdate();
         }
-      }
-    }
-  }
+      },
+    },
+  },
 };
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -391,8 +429,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .app-wrapper {
@@ -504,8 +546,7 @@ export default {
 }
 
 /* Soporte para dispositivos de alta densidad */
-@media (-webkit-min-device-pixel-ratio: 2),
-(min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

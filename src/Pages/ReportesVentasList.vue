@@ -11,17 +11,32 @@
             <div class="filter-group">
               <label>Tipo de Reporte</label>
               <select v-model="reporteSeleccionado" class="select-input">
-                <option value="ventas_cliente">Ventas por Cliente</option>
-                <option v-if="esCeo" value="ventas_sucursal">Ventas por Sucursal</option>
-                <option value="ventas_empleado">Ventas por Empleado</option>
+                <option @click="mostrarReportes" value="ventas_cliente">
+                  Ventas por Cliente
+                </option>
+                <option
+                  @click="mostrarReportes"
+                  v-if="esCeo"
+                  value="ventas_sucursal"
+                >
+                  Ventas por Sucursal
+                </option>
+                <option @click="mostrarReportes" value="ventas_empleado">
+                  Ventas por Empleado
+                </option>
               </select>
             </div>
 
             <div class="filter-group">
               <label>{{ labelFiltro }}</label>
               <select v-model="valorFiltro" class="select-input">
-                <option value="">Todos</option>
-                <option v-for="opcion in opcionesFiltro" :key="opcion.id" :value="opcion.id">
+                <option value="" @click="mostrarReportes">Todos</option>
+                <option
+                  v-for="opcion in opcionesFiltro"
+                  @click="mostrarReporteDesglose(opcion)"
+                  :key="opcion.id"
+                  :value="opcion.id"
+                >
                   {{ opcion.nombre }}
                 </option>
               </select>
@@ -34,22 +49,51 @@
               <div class="date-inputs">
                 <div class="date-field">
                   <label>Fecha Inicio</label>
-                  <input type="date" v-model="filtros.fechaInicio" @change="validarFechas" />
+                  <input
+                    type="date"
+                    v-model="filtros.fechaInicio"
+                    @change="validarFechas"
+                  />
                 </div>
                 <div class="date-field">
                   <label>Fecha Fin</label>
-                  <input type="date" v-model="filtros.fechaFin" @change="validarFechas" :min="filtros.fechaInicio" />
+                  <input
+                    type="date"
+                    v-model="filtros.fechaFin"
+                    @change="validarFechas"
+                    :min="filtros.fechaInicio"
+                  />
                 </div>
               </div>
-              <button @click="openModalHeaderFooter" :datosInstituto="datosBussines" class="header-footer-btn">
+              <button
+                @click="openModalHeaderFooter"
+                :datosInstituto="datosBussines"
+                class="header-footer-btn"
+              >
                 Configurar Header/Footer
               </button>
+
               <div class="button-group">
-                <button @click="generarReporte('pdf')" class="btn pdf-btn" :disabled="!canExportReport">PDF</button>
-                <button @click="generarReporte('excel')" class="btn excel-btn"
-                  :disabled="!canExportReport">EXCEL</button>
-                <button @click="generarReporte('preview')" class="btn generate-btn" :disabled="!canGenerateReport">
-                  {{ cargando ? 'Generando...' : 'Generar' }}
+                <button
+                  @click="generarReporte('pdf')"
+                  class="btn pdf-btn"
+                  :disabled="!canExportReport"
+                >
+                  PDF
+                </button>
+                <button
+                  @click="generarReporte('excel')"
+                  class="btn excel-btn"
+                  :disabled="!canExportReport"
+                >
+                  EXCEL
+                </button>
+                <button
+                  @click="generarReporte('preview')"
+                  class="btn generate-btn"
+                  :disabled="!canGenerateReport"
+                >
+                  {{ cargando ? "Generando..." : "Generar" }}
                 </button>
               </div>
             </div>
@@ -59,17 +103,29 @@
         <!-- Sección de control de logo -->
         <div class="controls-section">
           <div class="image-upload-wrapper">
-            <div class="image-drop-area" :class="{ 'dragging': isDragging, 'has-image': logoUrl }"
-              @dragenter.prevent="isDragging = true" @dragleave.prevent="onDragLeave" @dragover.prevent
-              @drop.prevent="handleDrop">
+            <div
+              class="image-drop-area"
+              :class="{ dragging: isDragging, 'has-image': logoUrl }"
+              @dragenter.prevent="isDragging = true"
+              @dragleave.prevent="onDragLeave"
+              @dragover.prevent
+              @drop.prevent="handleDrop"
+            >
               <div v-if="isDragging" class="drag-overlay">
                 <span>Suelta aquí</span>
               </div>
 
               <div v-else-if="!logoUrl" class="upload-content">
                 <div class="upload-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="17 8 12 3 7 8"></polyline>
                     <line x1="12" y1="3" x2="12" y2="15"></line>
@@ -77,20 +133,38 @@
                 </div>
                 <h3>Arrastra y suelta una imagen</h3>
                 <p class="separator">o</p>
-                <button class="upload-button" @click="triggerFileInput">Sube una foto</button>
-                <p class="upload-info">El archivo debe ser un JPEG, JPG, PNG o WebP de hasta 40 MB</p>
+                <button class="upload-button" @click="triggerFileInput">
+                  Sube una foto
+                </button>
+                <p class="upload-info">
+                  El archivo debe ser un JPEG, JPG, PNG o WebP de hasta 40 MB
+                </p>
               </div>
 
               <div v-else class="preview-content">
-                <img v-if="logoUrl" :src="logoUrl" alt="Logo preview" class="preview-image" />
+                <img
+                  v-if="logoUrl"
+                  :src="logoUrl"
+                  alt="Logo preview"
+                  class="preview-image"
+                />
                 <div class="image-actions">
-                  <button class="remove-button" @click="removeImage">Eliminar imagen</button>
-                  <button class="change-button" @click="triggerFileInput">Cambiar imagen</button>
+                  <button class="remove-button" @click="removeImage">
+                    Eliminar imagen
+                  </button>
+                  <button class="change-button" @click="triggerFileInput">
+                    Cambiar imagen
+                  </button>
                 </div>
               </div>
             </div>
-            <input type="file" ref="fileInput" @change="handleFileChange"
-              accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden-input" />
+            <input
+              type="file"
+              ref="fileInput"
+              @change="handleFileChange"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              class="hidden-input"
+            />
           </div>
         </div>
       </div>
@@ -101,18 +175,25 @@
       </div>
 
       <!-- Modal de Header/Footer -->
-      <HeaderFooterDesigner v-model="showHeaderFooterModal" :config="headerFooterConfig"
-        @save="handleHeaderFooterSave" />
-
-      <div class="checkbox-container">
-        <label class="checkbox-label">
-          <input type="checkbox" v-model="especificacion" class="checkbox-input">
-          <span class="checkbox-text">Especificación</span>
-        </label>
-      </div>
+      <HeaderFooterDesigner
+        v-model="showHeaderFooterModal"
+        :config="headerFooterConfig"
+        @save="handleHeaderFooterSave"
+      />
 
       <!-- Tabla de resultados -->
       <div v-if="!cargando && datosReporte.length" class="report-table">
+        <div class="checkbox-container" style="margin-bottom: 1rem">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              v-model="especificacion"
+              class="checkbox-input"
+            />
+            <span class="checkbox-text">Especificación</span>
+          </label>
+        </div>
+
         <div class="table-header"></div>
 
         <table>
@@ -130,7 +211,9 @@
             <template v-for="(grupo, index) in datosAgrupados" :key="index">
               <!-- Fila del grupo/cliente -->
               <tr class="group-header">
-                <td><strong>{{ grupo.nombre }}</strong></td>
+                <td>
+                  <strong>{{ grupo.nombre }}</strong>
+                </td>
                 <td>{{ formatearMoneda(grupo.valor_exento) }}</td>
                 <td>{{ formatearMoneda(grupo.gravado_15) }}</td>
                 <td>{{ formatearMoneda(grupo.gravado_18) }}</td>
@@ -139,7 +222,11 @@
               </tr>
               <!-- Filas de desglose con números de factura -->
               <template v-if="especificacion">
-                <tr v-for="factura in grupo.desglose" :key="factura.id" class="detail-row">
+                <tr
+                  v-for="factura in grupo.desglose"
+                  :key="factura.id"
+                  class="detail-row"
+                >
                   <td>{{ factura.numero_factura_sar }}</td>
                   <td>{{ formatearMoneda(factura.valor_exento) }}</td>
                   <td>{{ formatearMoneda(factura.gravado_15) }}</td>
@@ -154,18 +241,39 @@
 
         <!-- Totales -->
         <div class="totals">
-          <div><strong>Total Exento:</strong> {{ formatearMoneda(totales.exento) }}</div>
-          <div><strong>Total Gravado 15%:</strong> {{ formatearMoneda(totales.gravado_15) }}</div>
-          <div><strong>Total Gravado 18%:</strong> {{ formatearMoneda(totales.gravado_18) }}</div>
-          <div><strong>Total ISV:</strong> {{ formatearMoneda(totales.total_isv) }}</div>
-          <div><strong>Total General:</strong> {{ formatearMoneda(totales.total) }}</div>
-          <div><strong>Total Canceladas:</strong> {{ formatearMoneda(totales.total_canceladas) }}</div>
+          <div>
+            <strong>Total Exento:</strong> {{ formatearMoneda(totales.exento) }}
+          </div>
+          <div>
+            <strong>Total Gravado 15%:</strong>
+            {{ formatearMoneda(totales.gravado_15) }}
+          </div>
+          <div>
+            <strong>Total Gravado 18%:</strong>
+            {{ formatearMoneda(totales.gravado_18) }}
+          </div>
+          <div>
+            <strong>Total ISV:</strong> {{ formatearMoneda(totales.total_isv) }}
+          </div>
+          <div>
+            <strong>Total General:</strong> {{ formatearMoneda(totales.total) }}
+          </div>
+          <div>
+            <strong>Total Canceladas:</strong>
+            {{ formatearMoneda(totales.total_canceladas) }}
+          </div>
         </div>
       </div>
 
       <!-- Mensaje cuando no hay datos -->
-      <div v-else-if="!cargando && fechasValidas" class="no-data-message">
-        No se encontraron datos para el período seleccionado
+      <div
+        v-if="!cargando && fechasValidas && !datosReporte.length"
+        class="no-data-message"
+      >
+        <div class="alert-message">
+          <span class="alert-icon">ⓘ</span>
+          No se encontraron datos para el período seleccionado
+        </div>
       </div>
     </div>
   </div>
@@ -173,28 +281,39 @@
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
-import { notis } from '../../services/notificaciones.js';
+import { notis } from "../../services/notificaciones.js";
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
-import ModalLoading from '@/components/ModalLoading.vue';
+import ModalLoading from "@/components/ModalLoading.vue";
 import solicitudes from "../../services/solicitudes.js";
-const { clientesReportes, sucursalReportes, reportesProductos, reportesEmpleados, getRegistrosEmpleados, getRegistrosClientes, getRegistrosSucursales, getRegistrosEmpleadosDesglose, getRegistrosClienteDesglose, getRegistrosSucursalDesglose, getDatosInstitucion } = require('../../services/reporteSolicitudes.js');
-const { esCeo } = require('../../services/usuariosSolicitudes');
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import { setPageTitle } from '@/components/pageMetadata';
+const {
+  clientesReportes,
+  sucursalReportes,
+  reportesProductos,
+  reportesEmpleados,
+  getRegistrosEmpleados,
+  getRegistrosClientes,
+  getRegistrosSucursales,
+  getRegistrosEmpleadosDesglose,
+  getRegistrosClienteDesglose,
+  getRegistrosSucursalDesglose,
+  getDatosInstitucion,
+} = require("../../services/reporteSolicitudes.js");
+const { esCeo } = require("../../services/usuariosSolicitudes");
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default {
-  name: 'ReporteVentas',
+  name: "ReporteVentas",
   components: {
     PageHeader,
     HeaderFooterDesigner,
-    ModalLoading
+    ModalLoading,
   },
   data() {
     return {
-      titulo: 'Reportería',
+      titulo: "Reportería",
       isLoading: false,
-      id_usuario: '',
+      id_usuario: "",
       mostrandoDesglose: false,
       cargando: false,
       esCeo: false,
@@ -202,32 +321,32 @@ export default {
       isDragging: false,
       especificacion: false,
       logoUrl: null,
-      reporteSeleccionado: 'ventas_cliente',
+      reporteSeleccionado: "ventas_cliente",
       showHeaderFooterModal: false,
       isDesgloseActive: false,
       datosBussines: [],
       filtros: {
-        fechaInicio: '',
-        fechaFin: '',
-        valorFiltro: ''
+        fechaInicio: "",
+        fechaFin: "",
+        valorFiltro: "",
       },
       headerFooterConfig: {
         header: {
           enabled: true,
-          text: 'Reporte de Ventas',
-          companyName: '',
-          address: '',
-          phone: '',
-          email: '',
-          showDivider: false  // añadido
+          text: "Reporte de Ventas",
+          companyName: "",
+          address: "",
+          phone: "",
+          email: "",
+          showDivider: false, // añadido
         },
         footer: {
           enabled: true,
-          template: 'basic',
-          customText: 'Generado el {FECHA}',
-          alignment: 'center',
-          showDivider: false  // añadido
-        }
+          template: "basic",
+          customText: "Generado el {FECHA}",
+          alignment: "center",
+          showDivider: false, // añadido
+        },
       },
       clientes: [],
       sucursales: [],
@@ -244,35 +363,50 @@ export default {
         total_isv: 0,
         total: 0,
         total_canceladas: 0,
-      }
-    }
+      },
+    };
   },
 
   computed: {
+    canExportReport() {
+      return this.datosReporte.length > 0 && !this.cargando;
+    },
+
+    canGenerateReport() {
+      return this.fechasValidas && !this.cargando;
+    },
+
     getColumnTitle() {
-      if (this.especificacion) return 'Código Factura';
+      if (this.especificacion) return "Código Factura";
       switch (this.reporteSeleccionado) {
-        case 'ventas_cliente': return 'Clientes';
-        case 'ventas_sucursal': return 'Sucursales';
-        case 'ventas_empleado': return 'Empleados';
-        default: return '';
+        case "ventas_cliente":
+          return "Clientes";
+        case "ventas_sucursal":
+          return "Sucursales";
+        case "ventas_empleado":
+          return "Empleados";
+        default:
+          return "";
       }
     },
 
     fechasValidas() {
-      return this.filtros.fechaInicio && this.filtros.fechaFin &&
-        new Date(this.filtros.fechaFin) >= new Date(this.filtros.fechaInicio);
+      return (
+        this.filtros.fechaInicio &&
+        this.filtros.fechaFin &&
+        new Date(this.filtros.fechaFin) >= new Date(this.filtros.fechaInicio)
+      );
     },
 
     opcionesFiltro() {
       switch (this.reporteSeleccionado) {
-        case 'ventas_cliente':
+        case "ventas_cliente":
           return this.clientes;
-        case 'ventas_sucursal':
+        case "ventas_sucursal":
           return this.sucursales;
-        case 'ventas_empleado':
+        case "ventas_empleado":
           return this.empleados;
-        case 'ventas_producto':
+        case "ventas_producto":
           return this.productos;
         default:
           return [];
@@ -281,26 +415,27 @@ export default {
 
     labelFiltro() {
       switch (this.reporteSeleccionado) {
-        case 'ventas_cliente':
-          return 'Cliente';
-        case 'ventas_sucursal':
-          return 'Sucursal';
-        case 'ventas_empleado':
-          return 'Empleado';
-        case 'ventas_producto':
-          return 'Producto';
+        case "ventas_cliente":
+          return "Cliente";
+        case "ventas_sucursal":
+          return "Sucursal";
+        case "ventas_empleado":
+          return "Empleado";
+        case "ventas_producto":
+          return "Producto";
         default:
-          return '';
+          return "";
       }
     },
 
-    canExportReport() {
-      return this.datosReporte.length > 0 && !this.cargando;
+    valorFiltro: {
+      get() {
+        return this.filtros.valorFiltro;
+      },
+      set(value) {
+        this.filtros.valorFiltro = value;
+      },
     },
-
-    canGenerateReport() {
-      return this.fechasValidas && !this.cargando;
-    }
   },
 
   methods: {
@@ -310,7 +445,7 @@ export default {
         const [clientes, empleados, productos] = await Promise.all([
           clientesReportes(this.id_usuario),
           reportesEmpleados(this.id_usuario, this.esCeo),
-          reportesProductos(this.id_usuario, this.esCeo)
+          reportesProductos(this.id_usuario, this.esCeo),
         ]);
 
         this.clientes = clientes;
@@ -321,10 +456,9 @@ export default {
         if (this.esCeo) {
           this.sucursales = await sucursalReportes(this.id_usuario);
         }
-
       } catch (error) {
-        console.error('Error al cargar datos:', error);
-        this.error = 'Error al cargar los datos de filtros';
+        console.error("Error al cargar datos:", error);
+        this.error = "Error al cargar los datos de filtros";
       } finally {
         this.cargando = false;
       }
@@ -338,165 +472,90 @@ export default {
         total_isv: 0,
         total: 0,
         total_canceladas: 0,
-      }
+      };
     },
 
-    // En generarReporte
-    async generarReporte(formato = 'preview') {
-      if (!this.fechasValidas) {
-        alert('Por favor seleccione un intervalo de fechas válido');
-        return;
-      }
-
-      this.cargando = true;
-      this.error = null;
-      this.isLoading = true;
-
-      try {
-        if (formato === 'preview') {
-          // Verificar el valor del filtro y el cliente seleccionado
-          console.log('Valor del filtro:', this.valorFiltro);
-          console.log('Opciones de filtro:', this.opcionesFiltro);
-
-          if (this.valorFiltro && this.valorFiltro !== '') {
-            // Buscar la opción seleccionada
-            const opcionSeleccionada = this.opcionesFiltro.find(opt => opt.id === this.valorFiltro);
-            console.log('Opción seleccionada:', opcionSeleccionada);
-
-            if (opcionSeleccionada) {
-              // Llamar a mostrarReporteDesglose con la información correcta
-              await this.mostrarReporteDesglose(opcionSeleccionada);
-            } else {
-              console.error('No se encontró la opción seleccionada');
-            }
-          } else {
-            await this.mostrarReportes();
-          }
-        } else if (formato === 'pdf') {
-          await this.exportarPDF();
-          notis('success', 'PDF generado con éxito');
-        } else if (formato === 'excel') {
-          await this.exportarExcel();
-        }
-      } catch (error) {
-        console.error('Error en generarReporte:', error);
-        notis('error', 'Error al generar el reporte');
-        this.error = 'Error al generar el reporte';
-      } finally {
-        this.cargando = false;
-        this.isLoading = false;
-      }
-    },
-
-    // En mostrarReporteDesglose
     async mostrarReporteDesglose(option) {
       if (!this.fechasValidas) return;
 
       try {
-        this.cargando = true;
         let response;
+        this.cargando = true;
 
-        // Obtener los datos según el tipo de reporte
         switch (this.reporteSeleccionado) {
-          case 'ventas_cliente':
-            response = await getRegistrosClienteDesglose(
-              option.id,
-              this.filtros.fechaInicio,
-              this.filtros.fechaFin
-            );
+          case "ventas_empleado":
+            response = option.id
+              ? await getRegistrosEmpleadosDesglose(
+                  option.id,
+                  this.filtros.fechaInicio,
+                  this.filtros.fechaFin
+                )
+              : await getRegistrosEmpleados(
+                  this.id_usuario,
+                  this.filtros.fechaInicio,
+                  this.filtros.fechaFin
+                );
             break;
-          case 'ventas_empleado':
-            response = await getRegistrosEmpleadosDesglose(
-              option.id,
-              this.filtros.fechaInicio,
-              this.filtros.fechaFin
-            );
+
+          case "ventas_cliente":
+            response = option.id
+              ? await getRegistrosClienteDesglose(
+                  option.id,
+                  this.filtros.fechaInicio,
+                  this.filtros.fechaFin
+                )
+              : await getRegistrosClientes(
+                  this.id_usuario,
+                  this.filtros.fechaInicio,
+                  this.filtros.fechaFin
+                );
             break;
-          case 'ventas_sucursal':
-            response = await getRegistrosSucursalDesglose(
-              option.id,
-              this.filtros.fechaInicio,
-              this.filtros.fechaFin
-            );
+
+          case "ventas_sucursal":
+            response = option.id
+              ? await getRegistrosSucursalDesglose(
+                  option.id,
+                  this.filtros.fechaInicio,
+                  this.filtros.fechaFin
+                )
+              : await getRegistrosSucursales(
+                  this.id_usuario,
+                  this.filtros.fechaInicio,
+                  this.filtros.fechaFin
+                );
             break;
         }
 
-        if (response && response.data) {
-          // Formatear los datos asegurándonos de que todos los campos necesarios existan
-          const formattedData = {
-            nombre: option.nombre,
-            valor_exento: response.data.valor_exento || 0,
-            gravado_15: response.data.gravado_15 || 0,
-            gravado_18: response.data.gravado_18 || 0,
-            total_isv: response.data.total_isv || 0,
-            total: response.data.total || 0,
-            desglose: Array.isArray(response.data.desglose) ? response.data.desglose : []
-          };
-
-          // Actualizar el estado
-          this.datosReporte = [formattedData];
-          this.datosAgrupados = [formattedData];
-
-          // Calcular totales
-          this.reiniciarTotales();
-          this.calcularTotales([formattedData]);
-        } else {
-          // Si no hay datos, limpiar los arrays y totales
-          this.datosReporte = [];
-          this.datosAgrupados = [];
-          this.reiniciarTotales();
-          notis('warning', 'No se encontraron datos para el período seleccionado');
-        }
-
+        this.datosReporte = response;
+        this.calcularTotales(response);
       } catch (error) {
-        console.error('Error en mostrarReporteDesglose:', error);
-        notis('error', 'Error al cargar datos del cliente');
-        this.datosReporte = [];
-        this.datosAgrupados = [];
-        this.reiniciarTotales();
+        console.error(error);
+        notis("error", "Error al cargar datos. Intente de nuevo");
       } finally {
         this.cargando = false;
       }
     },
 
-    // Método actualizado para calcular totales
     calcularTotales(datos) {
-      this.totales = datos.reduce((acc, curr) => ({
-        exento: acc.exento + (parseFloat(curr.valor_exento) || 0),
-        gravado_15: acc.gravado_15 + (parseFloat(curr.gravado_15) || 0),
-        gravado_18: acc.gravado_18 + (parseFloat(curr.gravado_18) || 0),
-        total_isv: acc.total_isv + (parseFloat(curr.total_isv) || 0),
-        total: acc.total + (parseFloat(curr.total) || 0),
-        total_canceladas: acc.total_canceladas + (parseFloat(curr.total_canceladas) || 0),
-      }), {
-        exento: 0,
-        gravado_15: 0,
-        gravado_18: 0,
-        total_isv: 0,
-        total: 0,
-        total_canceladas: 0,
-      });
+      this.totales = datos.reduce(
+        (acc, curr) => ({
+          exento: acc.exento + (curr.valor_extento || 0),
+          gravado_15: acc.gravado_15 + (curr.gravado_15 || 0),
+          gravado_18: acc.gravado_18 + (curr.gravado_18 || 0),
+          total_isv: acc.total_isv + (curr.total_isv || 0),
+          total: acc.total + (curr.total || 0),
+          total_canceladas: acc.total_canceladas + (curr.total_canceladas || 0),
+        }),
+        {
+          exento: 0,
+          gravado_15: 0,
+          gravado_18: 0,
+          total_isv: 0,
+          total: 0,
+          total_canceladas: 0,
+        }
+      );
     },
-
-    // calcularTotales(datos) {
-
-    //   this.totales = datos.reduce((acc, curr) => ({
-    //     exento: acc.exento + (curr.valor_extento || 0),
-    //     gravado_15: acc.gravado_15 + (curr.gravado_15 || 0),
-    //     gravado_18: acc.gravado_18 + (curr.gravado_18 || 0),
-    //     total_isv: acc.total_isv + (curr.total_isv || 0),
-    //     total: acc.total + (curr.total || 0),
-    //     total_canceladas: acc.total_canceladas + (curr.total_canceladas || 0),
-    //   }), {
-    //     exento: 0,
-    //     gravado_15: 0,
-    //     gravado_18: 0,
-    //     total_isv: 0,
-    //     total: 0,
-    //     total_canceladas: 0,
-    //   });
-
-    // },
 
     async openModalHeaderFooter() {
       this.showHeaderFooterModal = true;
@@ -511,14 +570,26 @@ export default {
         let response;
 
         switch (this.reporteSeleccionado) {
-          case 'ventas_empleado':
-            response = await getRegistrosEmpleados(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+          case "ventas_empleado":
+            response = await getRegistrosEmpleados(
+              this.id_usuario,
+              this.filtros.fechaInicio,
+              this.filtros.fechaFin
+            );
             break;
-          case 'ventas_cliente':
-            response = await getRegistrosClientes(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+          case "ventas_cliente":
+            response = await getRegistrosClientes(
+              this.id_usuario,
+              this.filtros.fechaInicio,
+              this.filtros.fechaFin
+            );
             break;
-          case 'ventas_sucursal':
-            response = await getRegistrosSucursales(this.id_usuario, this.filtros.fechaInicio, this.filtros.fechaFin);
+          case "ventas_sucursal":
+            response = await getRegistrosSucursales(
+              this.id_usuario,
+              this.filtros.fechaInicio,
+              this.filtros.fechaFin
+            );
             break;
         }
 
@@ -528,70 +599,230 @@ export default {
             let desglose;
             try {
               switch (this.reporteSeleccionado) {
-                case 'ventas_empleado':
-                  desglose = await getRegistrosEmpleadosDesglose(item.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+                case "ventas_empleado":
+                  desglose = await getRegistrosEmpleadosDesglose(
+                    item.id,
+                    this.filtros.fechaInicio,
+                    this.filtros.fechaFin
+                  );
                   break;
-                case 'ventas_cliente':
-                  desglose = await getRegistrosClienteDesglose(item.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+                case "ventas_cliente":
+                  desglose = await getRegistrosClienteDesglose(
+                    item.id,
+                    this.filtros.fechaInicio,
+                    this.filtros.fechaFin
+                  );
                   break;
-                case 'ventas_sucursal':
-                  desglose = await getRegistrosSucursalDesglose(item.id, this.filtros.fechaInicio, this.filtros.fechaFin);
+                case "ventas_sucursal":
+                  desglose = await getRegistrosSucursalDesglose(
+                    item.id,
+                    this.filtros.fechaInicio,
+                    this.filtros.fechaFin
+                  );
                   break;
               }
               return {
                 ...item,
-                desglose: desglose || []
+                desglose: desglose || [],
               };
             } catch (error) {
-              console.error(`Error getting desglose for ${item.nombre}:`, error);
+              console.error(
+                `Error getting desglose for ${item.nombre}:`,
+                error
+              );
               return {
                 ...item,
-                desglose: []
+                desglose: [],
               };
             }
           });
 
           this.datosAgrupados = await Promise.all(desglosesPromises);
         } else {
-          this.datosAgrupados = response.map(item => ({
+          this.datosAgrupados = response.map((item) => ({
             ...item,
-            desglose: []
+            desglose: [],
           }));
         }
 
         this.datosReporte = response;
         this.calcularTotales(response);
       } catch (error) {
-        console.error('Error al cargar reportes:', error);
-        this.error = 'Error al cargar los datos del reporte';
-        notis('error', 'Error al cargar datos');
+        console.error("Error al cargar reportes:", error);
+        this.error = "Error al cargar los datos del reporte";
+        notis("error", "Error al cargar datos");
+      } finally {
+        this.cargando = false;
+      }
+    },
+
+    async generarReporte(formato = "preview") {
+      if (!this.fechasValidas) {
+        alert("Por favor seleccione un intervalo de fechas válido");
+        return;
+      }
+
+      this.cargando = true;
+      this.error = null;
+      this.isLoading = true;
+
+      try {
+        if (formato === "preview") {
+          if (this.valorFiltro && this.valorFiltro !== "") {
+            // Si hay un cliente específico seleccionado
+            const opcionSeleccionada = this.opcionesFiltro.find(
+              (opt) => opt.id === this.valorFiltro
+            );
+            if (opcionSeleccionada) {
+              if (this.especificacion) {
+                // Si especificación está activa, mostrar desglose
+                await this.mostrarReporteDesglose(opcionSeleccionada);
+              } else {
+                // Si especificación está inactiva, mostrar solo el total
+                await this.mostrarReporteTotalCliente(opcionSeleccionada);
+              }
+            }
+          } else {
+            // Si no hay cliente específico, mostrar todos
+            await this.mostrarReportes();
+          }
+        } else if (formato === "pdf") {
+          await this.exportarPDF();
+          notis("success", "PDF generado con éxito");
+        } else if (formato === "excel") {
+          await this.exportarExcel();
+        }
+      } catch (error) {
+        console.error("Error en generarReporte:", error);
+        if (!this.datosAgrupados.length) {
+          notis("error", "Error al generar el reporte");
+          this.error = "Error al generar el reporte";
+        }
+      } finally {
+        this.cargando = false;
+        this.isLoading = false;
+      }
+    },
+
+    async mostrarReporteTotalCliente(option) {
+      try {
+        this.cargando = true;
+        let response;
+
+        // Obtenemos el desglose para el cliente específico
+        switch (this.reporteSeleccionado) {
+          case "ventas_empleado":
+            response = await getRegistrosEmpleadosDesglose(
+              option.id,
+              this.filtros.fechaInicio,
+              this.filtros.fechaFin
+            );
+            break;
+
+          case "ventas_cliente":
+            response = await getRegistrosClienteDesglose(
+              option.id,
+              this.filtros.fechaInicio,
+              this.filtros.fechaFin
+            );
+            break;
+
+          case "ventas_sucursal":
+            response = await getRegistrosSucursalDesglose(
+              option.id,
+              this.filtros.fechaInicio,
+              this.filtros.fechaFin
+            );
+            break;
+        }
+
+        // Calculamos los totales
+        const totales = response.reduce(
+          (acc, factura) => {
+            if (factura.estado === "Cancelada") {
+              acc.total_canceladas += factura.total || 0;
+            } else {
+              acc.valor_exento += factura.valor_exento || 0;
+              acc.gravado_15 += factura.gravado_15 || 0;
+              acc.gravado_18 += factura.gravado_18 || 0;
+              acc.total_isv += factura.total_isv || 0;
+              acc.total += factura.total || 0;
+            }
+            return acc;
+          },
+          {
+            valor_exento: 0,
+            gravado_15: 0,
+            gravado_18: 0,
+            total_isv: 0,
+            total: 0,
+            total_canceladas: 0,
+          }
+        );
+
+        // Guardamos los datos dependiendo si especificación está activa o no
+        this.datosReporte = response;
+
+        if (this.especificacion) {
+          // Si especificación está activa, mostramos el desglose
+          this.datosAgrupados = [
+            {
+              id: option.id,
+              nombre:
+                this.opcionesFiltro.find((opt) => opt.id === option.id)
+                  ?.nombre || "",
+              desglose: response,
+              ...totales,
+            },
+          ];
+        } else {
+          // Si especificación NO está activa, solo mostramos el total consolidado
+          this.datosAgrupados = [
+            {
+              id: option.id,
+              nombre:
+                this.opcionesFiltro.find((opt) => opt.id === option.id)
+                  ?.nombre || "",
+              desglose: [], // Array vacío porque no queremos mostrar desglose
+              ...totales,
+            },
+          ];
+        }
+
+        // Actualizamos los totales generales
+        this.totales = totales;
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+        notis("error", "Error al cargar datos. Intente de nuevo");
       } finally {
         this.cargando = false;
       }
     },
 
     setHoy() {
-      const hoy = new Date().toISOString().split('T')[0];
+      const hoy = new Date().toISOString().split("T")[0];
       this.filtros.fechaInicio = hoy;
       this.filtros.fechaFin = hoy;
     },
 
     validarFechas() {
       if (this.filtros.fechaInicio && this.filtros.fechaFin) {
-        if (new Date(this.filtros.fechaFin) < new Date(this.filtros.fechaInicio)) {
+        if (
+          new Date(this.filtros.fechaFin) < new Date(this.filtros.fechaInicio)
+        ) {
           this.filtros.fechaFin = this.filtros.fechaInicio;
         }
       }
     },
 
     formatearFecha(fecha) {
-      return new Date(fecha).toLocaleDateString('es-HN');
+      return new Date(fecha).toLocaleDateString("es-HN");
     },
 
     formatearMoneda(valor) {
-      return new Intl.NumberFormat('es-HN', {
-        style: 'currency',
-        currency: 'HNL'
+      return new Intl.NumberFormat("es-HN", {
+        style: "currency",
+        currency: "HNL",
       }).format(valor || 0);
     },
 
@@ -616,27 +847,27 @@ export default {
     },
 
     processFile(file) {
-      if (!file.type.match('image/jpeg|image/jpg|image/png|image/webp')) {
-        alert('Por favor selecciona un archivo JPEG, JPG, PNG o WebP');
+      if (!file.type.match("image/jpeg|image/jpg|image/png|image/webp")) {
+        alert("Por favor selecciona un archivo JPEG, JPG, PNG o WebP");
         return;
       }
 
       if (file.size > 40 * 1024 * 1024) {
-        alert('El archivo debe ser menor a 40 MB');
+        alert("El archivo debe ser menor a 40 MB");
         return;
       }
 
       const reader = new FileReader();
       reader.onload = (e) => {
         this.logoUrl = e.target.result;
-        localStorage.setItem('logoEmpresa', e.target.result);
+        localStorage.setItem("logoEmpresa", e.target.result);
       };
       reader.readAsDataURL(file);
     },
 
     removeImage() {
       this.logoUrl = null;
-      localStorage.removeItem('logoEmpresa');
+      localStorage.removeItem("logoEmpresa");
     },
 
     onDragLeave(e) {
@@ -658,7 +889,7 @@ export default {
         img.onload = () => {
           resolve({
             width: img.width,
-            height: img.height
+            height: img.height,
           });
         };
         img.src = imageUrl;
@@ -669,7 +900,7 @@ export default {
       if (!originalWidth || !originalHeight) {
         return {
           width: maxWidth || 30,
-          height: maxHeight || 30
+          height: maxHeight || 30,
         };
       }
 
@@ -697,14 +928,14 @@ export default {
 
       return {
         width: newWidth,
-        height: newHeight
+        height: newHeight,
       };
     },
 
     async exportarPDF() {
       if (!this.datosAgrupados.length) return;
 
-      const doc = new jsPDF('p', 'mm', 'a4');
+      const doc = new jsPDF("p", "mm", "a4");
       const pageWidth = doc.internal.pageSize.width;
       const pageHeight = doc.internal.pageSize.height;
       const margin = { top: 20, right: 20, bottom: 20, left: 20 };
@@ -713,23 +944,42 @@ export default {
       // Add logo and header
       if (this.logoUrl) {
         const dimensions = await this.getImageDimensions(this.logoUrl);
-        const { width: logoWidth, height: logoHeight } = this.calculateDimensions(
-          dimensions.width,
-          dimensions.height,
-          40,
-          40
+        const { width: logoWidth, height: logoHeight } =
+          this.calculateDimensions(dimensions.width, dimensions.height, 40, 40);
+        doc.addImage(
+          this.logoUrl,
+          "PNG",
+          margin.left,
+          currentY,
+          logoWidth,
+          logoHeight
         );
-        doc.addImage(this.logoUrl, 'PNG', margin.left, currentY, logoWidth, logoHeight);
 
         if (this.headerFooterConfig.header.enabled) {
           const headerX = margin.left + logoWidth + 10;
           doc.setFontSize(16);
-          doc.text(this.headerFooterConfig.header.companyName, headerX, currentY + 7);
+          doc.text(
+            this.headerFooterConfig.header.companyName,
+            headerX,
+            currentY + 7
+          );
 
           doc.setFontSize(11);
-          doc.text("Dirección: " + this.headerFooterConfig.header.address, headerX, currentY + 14);
-          doc.text("Teléfono: " + this.headerFooterConfig.header.phone, headerX, currentY + 21);
-          doc.text("Correo: " + this.headerFooterConfig.header.email, headerX, currentY + 28);
+          doc.text(
+            "Dirección: " + this.headerFooterConfig.header.address,
+            headerX,
+            currentY + 14
+          );
+          doc.text(
+            "Teléfono: " + this.headerFooterConfig.header.phone,
+            headerX,
+            currentY + 21
+          );
+          doc.text(
+            "Correo: " + this.headerFooterConfig.header.email,
+            headerX,
+            currentY + 28
+          );
 
           currentY += Math.max(logoHeight, 35);
         }
@@ -737,30 +987,36 @@ export default {
 
       // Add report title and period
       doc.setFontSize(14);
-      doc.text('Reporte de Ventas', margin.left, currentY + 10);
+      doc.text("Reporte de Ventas", margin.left, currentY + 10);
       // Añade el texto del período en cursiva
       doc.setFontSize(8);
-      doc.setFont('helvetica', 'italic'); // Cambia a cursiva
-
+      doc.setFont("helvetica", "italic"); // Cambia a cursiva
 
       if (this.headerFooterConfig.header.showDivider) {
         doc.setDrawColor(0);
         doc.setLineWidth(0.5);
-        doc.line(margin.left, currentY + 12, pageWidth - margin.right, currentY + 12);
+        doc.line(
+          margin.left,
+          currentY + 12,
+          pageWidth - margin.right,
+          currentY + 12
+        );
         currentY + 3; // Espacio más reducido después de la línea
       }
 
       doc.text(
-        `Período: ${this.formatearFecha(this.filtros.fechaInicio)} - ${this.formatearFecha(this.filtros.fechaFin)}`,
+        `Período: ${this.formatearFecha(
+          this.filtros.fechaInicio
+        )} - ${this.formatearFecha(this.filtros.fechaFin)}`,
         margin.left,
         currentY + 20
       );
-      doc.setFont('helvetica', 'normal'); // Regresa a normal para el resto del documento
+      doc.setFont("helvetica", "normal"); // Regresa a normal para el resto del documento
       currentY += 25;
 
       // Prepare table data
       const tableData = [];
-      this.datosAgrupados.forEach(grupo => {
+      this.datosAgrupados.forEach((grupo) => {
         // Add group header
         tableData.push([
           grupo.nombre,
@@ -768,19 +1024,19 @@ export default {
           this.formatearMoneda(grupo.gravado_15),
           this.formatearMoneda(grupo.gravado_18),
           this.formatearMoneda(grupo.total_isv),
-          this.formatearMoneda(grupo.total)
+          this.formatearMoneda(grupo.total),
         ]);
 
         // Add details if especificacion is enabled
         if (this.especificacion && grupo.desglose) {
-          grupo.desglose.forEach(factura => {
+          grupo.desglose.forEach((factura) => {
             tableData.push([
               factura.numero_factura_sar,
               this.formatearMoneda(factura.valor_exento),
               this.formatearMoneda(factura.gravado_15),
               this.formatearMoneda(factura.gravado_18),
               this.formatearMoneda(factura.total_isv),
-              this.formatearMoneda(factura.total)
+              this.formatearMoneda(factura.total),
             ]);
           });
         }
@@ -790,51 +1046,55 @@ export default {
       // En autoTable, elimina la sección didDrawPage
       doc.autoTable({
         startY: currentY,
-        head: [[
-          this.getColumnTitle,
-          'Valor Exento',
-          'Valor Gravado 15%',
-          'Valor Gravado 18%',
-          'ISV',
-          'Total'
-        ]],
+        head: [
+          [
+            this.getColumnTitle,
+            "Valor Exento",
+            "Valor Gravado 15%",
+            "Valor Gravado 18%",
+            "ISV",
+            "Total",
+          ],
+        ],
         body: tableData,
-        theme: 'grid',
+        theme: "grid",
         styles: {
           fontSize: 8,
-          cellPadding: 2
+          cellPadding: 2,
         },
         headStyles: {
           fillColor: [41, 128, 185],
           textColor: 255,
-          fontSize: 9
+          fontSize: 9,
         },
         columnStyles: {
-          0: { cellWidth: 'auto' },
-          1: { cellWidth: 'auto', halign: 'right' },
-          2: { cellWidth: 'auto', halign: 'right' },
-          3: { cellWidth: 'auto', halign: 'right' },
-          4: { cellWidth: 'auto', halign: 'right' },
-          5: { cellWidth: 'auto', halign: 'right' }
+          0: { cellWidth: "auto" },
+          1: { cellWidth: "auto", halign: "right" },
+          2: { cellWidth: "auto", halign: "right" },
+          3: { cellWidth: "auto", halign: "right" },
+          4: { cellWidth: "auto", halign: "right" },
+          5: { cellWidth: "auto", halign: "right" },
         },
-        margin: { ...margin, bottom: 20 }
+        margin: { ...margin, bottom: 20 },
       });
 
       // Add totals
       const finalY = doc.lastAutoTable.finalY + 10;
       doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
+      doc.setFont(undefined, "bold");
 
       const totalesTexts = [
         `Total Exento: ${this.formatearMoneda(this.totales.exento)}`,
         `Total Gravado 15%: ${this.formatearMoneda(this.totales.gravado_15)}`,
         `Total Gravado 18%: ${this.formatearMoneda(this.totales.gravado_18)}`,
         `Total ISV: ${this.formatearMoneda(this.totales.total_isv)}`,
-        `Total General: ${this.formatearMoneda(this.totales.total)}`
+        `Total General: ${this.formatearMoneda(this.totales.total)}`,
       ];
 
       totalesTexts.forEach((text, index) => {
-        doc.text(text, pageWidth - margin.right, finalY + (index * 5), { align: 'right' });
+        doc.text(text, pageWidth - margin.right, finalY + index * 5, {
+          align: "right",
+        });
       });
 
       // Add footer if enabled
@@ -843,24 +1103,36 @@ export default {
         if (this.headerFooterConfig.footer.showDivider) {
           doc.setDrawColor(0);
           doc.setLineWidth(0.5);
-          doc.line(margin.left, footerY - 10, pageWidth - margin.right, footerY - 10);
+          doc.line(
+            margin.left,
+            footerY - 10,
+            pageWidth - margin.right,
+            footerY - 10
+          );
         }
 
         doc.setFontSize(8);
-        doc.setFont(undefined, 'normal');
-        const footerText = this.getFooterText(doc.internal.getNumberOfPages(), doc.internal.getNumberOfPages());
+        doc.setFont(undefined, "normal");
+        const footerText = this.getFooterText(
+          doc.internal.getNumberOfPages(),
+          doc.internal.getNumberOfPages()
+        );
 
         doc.text(
           footerText,
-          this.headerFooterConfig.footer.alignment === 'left' ? margin.left :
-            this.headerFooterConfig.footer.alignment === 'right' ? pageWidth - margin.right :
-              pageWidth / 2,
+          this.headerFooterConfig.footer.alignment === "left"
+            ? margin.left
+            : this.headerFooterConfig.footer.alignment === "right"
+            ? pageWidth - margin.right
+            : pageWidth / 2,
           footerY - 5,
           { align: this.headerFooterConfig.footer.alignment }
         );
       }
 
-      doc.save(`reporte_${this.reporteSeleccionado}_${this.filtros.fechaInicio}.pdf`);
+      doc.save(
+        `reporte_${this.reporteSeleccionado}_${this.filtros.fechaInicio}.pdf`
+      );
     },
 
     getFooterText(currentPage, totalPages) {
@@ -869,16 +1141,16 @@ export default {
       const hora = now.toLocaleTimeString();
 
       switch (this.headerFooterConfig.footer.template) {
-        case 'basic':
+        case "basic":
           return `Generado el ${fecha}`;
-        case 'detailed':
+        case "detailed":
           return `Generado el ${fecha} a las ${hora}`;
-        case 'custom':
+        case "custom":
           return this.headerFooterConfig.footer.customText
-            .replace('{FECHA}', fecha)
-            .replace('{HORA}', hora)
-            .replace('{PAGINA}', currentPage)
-            .replace('{TOTAL_PAGINAS}', totalPages);
+            .replace("{FECHA}", fecha)
+            .replace("{HORA}", hora)
+            .replace("{PAGINA}", currentPage)
+            .replace("{TOTAL_PAGINAS}", totalPages);
         default:
           return `Generado el ${fecha}`;
       }
@@ -886,31 +1158,32 @@ export default {
 
     async exportarExcel() {
       if (!this.datosAgrupados.length) return;
-
       try {
         // Importar XLSX dinámicamente
-        const XLSX = await import('xlsx');
-
+        const XLSX = await import("xlsx");
         // Preparar los datos para el Excel
         const excelData = [];
-
         // Agregar encabezado del reporte
         excelData.push([`Reporte de Ventas - ${this.getColumnTitle}`]);
-        excelData.push([`Período: ${this.formatearFecha(this.filtros.fechaInicio)} - ${this.formatearFecha(this.filtros.fechaFin)}`]);
+        excelData.push([
+          `Período: ${this.formatearFecha(
+            this.filtros.fechaInicio
+          )} - ${this.formatearFecha(this.filtros.fechaFin)}`,
+        ]);
         excelData.push([]); // Línea en blanco
 
         // Agregar encabezados de la tabla
         excelData.push([
           this.getColumnTitle,
-          'Valor Exento',
-          'Valor Gravado 15%',
-          'Valor Gravado 18%',
-          'ISV',
-          'Total'
+          "Valor Exento",
+          "Valor Gravado 15%",
+          "Valor Gravado 18%",
+          "ISV",
+          "Total",
         ]);
 
         // Agregar datos
-        this.datosAgrupados.forEach(grupo => {
+        this.datosAgrupados.forEach((grupo) => {
           // Agregar fila del grupo
           excelData.push([
             grupo.nombre,
@@ -918,35 +1191,36 @@ export default {
             grupo.gravado_15 || 0,
             grupo.gravado_18 || 0,
             grupo.total_isv || 0,
-            grupo.total || 0
+            grupo.total || 0,
           ]);
 
           // Si especificación está activa, agregar detalles
           if (this.especificacion && grupo.desglose) {
-            grupo.desglose.forEach(factura => {
+            grupo.desglose.forEach((factura) => {
               excelData.push([
                 factura.numero_factura_sar,
                 factura.valor_exento || 0,
                 factura.gravado_15 || 0,
                 factura.gravado_18 || 0,
                 factura.total_isv || 0,
-                factura.total || 0
+                factura.total || 0,
               ]);
             });
           }
         });
 
-        // Agregar línea en blanco
+        // Agregar línea en blanco y totales
         excelData.push([]);
-
-        // Agregar totales
-        excelData.push(['Totales']);
-        excelData.push(['Total Exento', this.totales.exento || 0]);
-        excelData.push(['Total Gravado 15%', this.totales.gravado_15 || 0]);
-        excelData.push(['Total Gravado 18%', this.totales.gravado_18 || 0]);
-        excelData.push(['Total ISV', this.totales.total_isv || 0]);
-        excelData.push(['Total General', this.totales.total || 0]);
-        excelData.push(['Total Canceladas', this.totales.total_canceladas || 0]);
+        excelData.push(["Totales"]);
+        excelData.push(["Total Exento", this.totales.exento || 0]);
+        excelData.push(["Total Gravado 15%", this.totales.gravado_15 || 0]);
+        excelData.push(["Total Gravado 18%", this.totales.gravado_18 || 0]);
+        excelData.push(["Total ISV", this.totales.total_isv || 0]);
+        excelData.push(["Total General", this.totales.total || 0]);
+        excelData.push([
+          "Total Canceladas",
+          this.totales.total_canceladas || 0,
+        ]);
 
         // Crear libro de trabajo y hoja
         const wb = XLSX.utils.book_new();
@@ -959,12 +1233,12 @@ export default {
           { wch: 15 }, // Gravado 15%
           { wch: 15 }, // Gravado 18%
           { wch: 15 }, // ISV
-          { wch: 15 }  // Total
+          { wch: 15 }, // Total
         ];
-        ws['!cols'] = columnWidths;
+        ws["!cols"] = columnWidths;
 
         // Aplicar estilos básicos
-        const range = XLSX.utils.decode_range(ws['!ref']);
+        const range = XLSX.utils.decode_range(ws["!ref"]);
         for (let R = range.s.r; R <= range.e.r; R++) {
           for (let C = range.s.c; C <= range.e.c; C++) {
             const cell_address = { c: C, r: R };
@@ -972,33 +1246,34 @@ export default {
             if (!ws[cell_ref]) continue;
 
             // Añadir formato de número para columnas numéricas
-            if (C > 0 && R > 3) { // Después de los encabezados y para columnas numéricas
-              ws[cell_ref].z = '#,##0.00';
+            if (C > 0 && R > 3) {
+              // Después de los encabezados y para columnas numéricas
+              ws[cell_ref].z = "#,##0.00";
             }
           }
         }
 
         // Agregar la hoja al libro
-        XLSX.utils.book_append_sheet(wb, ws, 'Reporte de Ventas');
+        XLSX.utils.book_append_sheet(wb, ws, "Reporte de Ventas");
 
         // Generar el archivo
-        const fecha = new Date().toISOString().split('T')[0];
+        const fecha = new Date().toISOString().split("T")[0];
         const fileName = `reporte_${this.reporteSeleccionado}_${fecha}.xlsx`;
         XLSX.writeFile(wb, fileName);
 
-        notis('success', 'Excel generado con éxito');
+        notis("success", "Excel generado con éxito");
       } catch (error) {
-        console.error('Error al generar Excel:', error);
-        notis('error', 'Error al generar el archivo Excel');
+        console.error("Error al generar Excel:", error);
+        notis("error", "Error al generar el archivo Excel");
       }
-    }
+    },
   },
 
   async mounted() {
+    // Cargar logo guardado si existe
     this.isLoading = true;
-    setPageTitle('Reportes');
     try {
-      const savedLogo = localStorage.getItem('logoEmpresa');
+      const savedLogo = localStorage.getItem("logoEmpresa");
       if (savedLogo) {
         this.logoUrl = savedLogo;
       }
@@ -1009,20 +1284,26 @@ export default {
       await this.cargarDatos();
 
       try {
+        // Obtener los datos de la empresa o sucursal
         const response = await getDatosInstitucion(this.id_usuario, this.esCeo);
         this.datosBussines = response;
 
+        // Llenar los campos del header/footer config
         this.headerFooterConfig.header.companyName = this.datosBussines.nombre;
         this.headerFooterConfig.header.address = this.datosBussines.direccion;
         this.headerFooterConfig.header.phone = this.datosBussines.telefono;
         this.headerFooterConfig.header.email = this.datosBussines.correo;
       } catch (error) {
-        notis('error', 'Error al cargar datos de empresa');
+        notis("error", "Error al cargar datos de empresa");
       }
 
+      // Si hay fechas por defecto, generar el reporte
+      if (this.fechasValidas) {
+        await this.generarReporte("preview");
+      }
     } catch (error) {
       console.log(error);
-      notis('error', 'Error al cargar datos. Intente de nuevo');
+      notis("error", "Error al cargar datos. Intente de nuevo");
     } finally {
       this.isLoading = false;
     }
@@ -1030,95 +1311,114 @@ export default {
 
   watch: {
     reporteSeleccionado() {
-      this.valorFiltro = '';
-      this.especificacion = false;
+      if (this.valorFiltro !== "") {
+        this.especificacion = true;
+      } else {
+        this.especificacion = false;
+      }
+      if (this.fechasValidas) {
+        this.generarReporte("preview");
+      }
     },
 
     valorFiltro: {
       handler(newValue) {
-        // Solo actualizar especificación
-        this.especificacion = newValue !== '';
-      }
+        if (newValue !== "") {
+          this.mostrarReporteTotalCliente({ id: newValue });
+        } else {
+          this.mostrarReportes();
+        }
+      },
+      immediate: true,
     },
 
     especificacion: {
       immediate: true,
-      async handler() {
+      async handler(newValue) {
         try {
           if (this.fechasValidas && this.datosReporte.length > 0) {
             this.cargando = true;
-            // Si especificacion está activo, cargar los desgloses
-            if (this.especificacion) {
-              const desglosesPromises = this.datosReporte.map(async (item) => {
-                try {
-                  let desglose;
-                  switch (this.reporteSeleccionado) {
-                    case 'ventas_empleado':
-                      desglose = await getRegistrosEmpleadosDesglose(
-                        item.id,
-                        this.filtros.fechaInicio,
-                        this.filtros.fechaFin
-                      );
-                      break;
-                    case 'ventas_cliente':
-                      desglose = await getRegistrosClienteDesglose(
-                        item.id,
-                        this.filtros.fechaInicio,
-                        this.filtros.fechaFin
-                      );
-                      break;
-                    case 'ventas_sucursal':
-                      desglose = await getRegistrosSucursalDesglose(
-                        item.id,
-                        this.filtros.fechaInicio,
-                        this.filtros.fechaFin
-                      );
-                      break;
-                    default:
-                      desglose = [];
-                  }
-                  return {
-                    ...item,
-                    desglose: desglose || []
-                  };
-                } catch (error) {
-                  console.error(`Error al obtener desglose para ${item.nombre}:`, error);
-                  return {
-                    ...item,
-                    desglose: []
-                  };
-                }
-              });
 
-              this.datosAgrupados = await Promise.all(desglosesPromises);
+            if (this.valorFiltro && this.valorFiltro !== "") {
+              // Si hay un cliente específico seleccionado
+              const opcionSeleccionada = this.opcionesFiltro.find(
+                (opt) => opt.id === this.valorFiltro
+              );
+              if (opcionSeleccionada) {
+                await this.mostrarReporteTotalCliente(opcionSeleccionada);
+              }
             } else {
-              // Si especificacion está inactivo, usar los datos base sin desglose
-              this.datosAgrupados = this.datosReporte.map(item => ({
-                ...item,
-                desglose: []
-              }));
+              // Si no hay cliente específico seleccionado
+              if (newValue) {
+                // Si especificación está activa, cargar los desgloses
+                const desglosesPromises = this.datosReporte.map(
+                  async (item) => {
+                    try {
+                      let desglose;
+                      switch (this.reporteSeleccionado) {
+                        case "ventas_empleado":
+                          desglose = await getRegistrosEmpleadosDesglose(
+                            item.id,
+                            this.filtros.fechaInicio,
+                            this.filtros.fechaFin
+                          );
+                          break;
+                        case "ventas_cliente":
+                          desglose = await getRegistrosClienteDesglose(
+                            item.id,
+                            this.filtros.fechaInicio,
+                            this.filtros.fechaFin
+                          );
+                          break;
+                        case "ventas_sucursal":
+                          desglose = await getRegistrosSucursalDesglose(
+                            item.id,
+                            this.filtros.fechaInicio,
+                            this.filtros.fechaFin
+                          );
+                          break;
+                      }
+                      return {
+                        ...item,
+                        desglose: desglose || [],
+                      };
+                    } catch (error) {
+                      console.error(
+                        `Error al obtener desglose para ${item.nombre}:`,
+                        error
+                      );
+                      return {
+                        ...item,
+                        desglose: [],
+                      };
+                    }
+                  }
+                );
+                this.datosAgrupados = await Promise.all(desglosesPromises);
+              } else {
+                // Si especificación está inactiva, mostrar solo los totales
+                await this.mostrarReportes();
+              }
             }
           }
         } catch (error) {
-          console.error('Error al actualizar los datos:', error);
-          notis('error', 'Error al cargar los detalles');
+          console.error("Error al actualizar los datos:", error);
+          notis("error", "Error al cargar los detalles");
         } finally {
           this.cargando = false;
         }
-      }
-    }
-  }
-}
+      },
+    },
+  },
+};
 </script>
 
-
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 /* Fuentes */
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
 }
 
@@ -1320,7 +1620,6 @@ tbody td {
 
 /* Media Queries */
 @media screen and (max-width: 768px) {
-
   .report-container {
     padding: 1rem;
     margin: 0;
@@ -1385,7 +1684,6 @@ tbody td {
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
-
 
 /* =======================================================
    Modo Oscuro
@@ -1593,7 +1891,6 @@ tbody td {
   flex: 1;
 }
 
-
 .date-buttons {
   margin-bottom: 8px;
 }
@@ -1655,7 +1952,6 @@ label {
   margin-bottom: 0.5rem;
   font-weight: 500;
 }
-
 
 .select-input,
 input[type="date"] {
@@ -1954,5 +2250,40 @@ input[type="date"] {
 
 .checkbox-text {
   user-select: none;
+}
+
+.no-data-message {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.alert-message {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #6c757d;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.alert-icon {
+  font-size: 1.2rem;
+  color: #0d6efd;
+}
+
+/* Estilos para modo oscuro */
+.dark .alert-message {
+  background-color: #2d2d2d;
+  border-color: #404040;
+  color: #adb5bd;
+}
+
+.dark .alert-icon {
+  color: #4a90e2;
 }
 </style>
