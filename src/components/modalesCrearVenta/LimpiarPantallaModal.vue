@@ -245,6 +245,7 @@ input:focus {
 
 .modal-body {
   margin-bottom: 20px;
+  align-items: center;
 }
 
 .item-details {
@@ -319,5 +320,83 @@ input[type="password"].error {
 
 .cancel-button:hover {
   background-color: #5a6268;
+}
+
+/* Dark Mode */
+.dark .modal-content {
+  background-color: #1e1e1e;
+  color: #e5e5e5;
+}
+
+.dark .modal-header {
+  background-color: #141414;
+  border-color: #2b2b2b;
+}
+
+.dark .modal-header h2 {
+  color: #e5e5e5;
+}
+
+.dark .modal-body {
+  color: #e5e5e5;
+}
+
+.dark .warning-message {
+  color: #ffd700; /* Color amarillo para advertencias */
+}
+
+.dark .modal-footer {
+  background-color: #141414;
+  border-color: #2b2b2b;
+}
+
+.dark input[type="password"] {
+  background-color: #141414;
+  border-color: #2b2b2b;
+  color: #e5e5e5;
+}
+
+.dark input[type="password"]:focus {
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+}
+
+.dark input[type="password"].error {
+  border-color: #dc3545;
+}
+
+/* Para el modal de clave */
+.dark .modal-confirm {
+  background-color: #1e1e1e;
+  border-color: #2b2b2b;
+}
+
+.dark .modal-body-confirm {
+  background-color: #1e1e1e;
+}
+
+.dark .modal-body-confirm p {
+  color: #e5e5e5;
+}
+
+.dark .error-message {
+  color: #ff6b6b;
+}
+
+/* Botones en modo oscuro */
+.dark .confirm-button {
+  background-color: #dc3545;
+}
+
+.dark .confirm-button:hover {
+  background-color: #c82333;
+}
+
+.dark .cancel-button {
+  background-color: #2d3238;
+}
+
+.dark .cancel-button:hover {
+  background-color: #3d4248;
 }
 </style>

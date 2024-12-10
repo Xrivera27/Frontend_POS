@@ -8,18 +8,36 @@
       <!-- Formulario de Login -->
       <form v-if="!isRecoveringPassword" @submit.prevent="login">
         <div class="form-group">
-          <input type="text" v-model="username" placeholder="Usuario" required />
+          <input
+            type="text"
+            v-model="username"
+            placeholder="Usuario"
+            required
+          />
         </div>
         <div class="form-group password-group">
-          <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="Contraseña" required />
-          <i :class="showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'" class="toggle-password"
-            @click="togglePasswordVisibility"></i>
+          <input
+            :type="showPassword ? 'text' : 'password'"
+            v-model="password"
+            placeholder="Contraseña"
+            required
+          />
+          <i
+            :class="showPassword ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill'"
+            class="toggle-password"
+            @click="togglePasswordVisibility"
+          ></i>
         </div>
         <div class="form-options">
           <label class="checkbox-container">
             <input type="checkbox" v-model="rememberMe" />Recordar contraseña
           </label>
-          <a href="#" class="forgot-password" @click.prevent="togglePasswordRecovery">¿Olvidaste la contraseña?</a>
+          <a
+            href="#"
+            class="forgot-password"
+            @click.prevent="togglePasswordRecovery"
+            >¿Olvidaste la contraseña?</a
+          >
         </div>
         <div class="form-group button-container">
           <button type="submit" class="submit-btn">
@@ -30,51 +48,56 @@
 
       <form v-else @submit.prevent="recoverPassword">
         <div class="form-group">
-          <input type="email" v-model="recoveryEmail" placeholder="Ingresa tu correo electrónico" required />
+          <input
+            type="email"
+            v-model="recoveryEmail"
+            placeholder="Ingresa tu correo electrónico"
+            required
+          />
         </div>
         <div class="form-group button-container">
           <button type="submit" class="submit-btn">
             <i class="bi bi-envelope-fill"></i>
           </button>
         </div>
-        <p><a href="#" @click.prevent="togglePasswordRecovery">Volver al login</a></p>
+        <p>
+          <a href="#" @click.prevent="togglePasswordRecovery"
+            >Volver al login</a
+          >
+        </p>
       </form>
-
-
     </div>
   </div>
-
-
 </template>
 
 <script>
-import ModalLoading from '@/components/ModalLoading.vue';
+import ModalLoading from "@/components/ModalLoading.vue";
 import { useToast } from "vue-toastification"; // Importación para el popup
-const { getApi } = require('../../config/getApiUrl.js');
-import { setPageTitle } from '@/components/pageMetadata';
+const { getApi } = require("../../config/getApiUrl.js");
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
   components: {
-    ModalLoading
+    ModalLoading,
   },
   data() {
     return {
       isLoading: false,
-      username: '',
-      password: '',
+      username: "",
+      password: "",
       rememberMe: false,
       showPassword: false, // Controla la visibilidad de la contraseña
       isRecoveringPassword: false, // Controla la vista de recuperación de contraseña
-      recoveryEmail: '',
+      recoveryEmail: "",
     };
   },
   computed: {
     role() {
-      return localStorage.getItem('role'); // Define role como una propiedad computada
-    }
+      return localStorage.getItem("role"); // Define role como una propiedad computada
+    },
   },
   mounted() {
-    setPageTitle('Inicio de Sesión');
+    setPageTitle("Inicio de Sesión");
   },
   methods: {
     async login() {
@@ -83,9 +106,12 @@ export default {
         this.isLoading = true;
 
         const response = await fetch(`${getApi()}/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: this.username, password: this.password })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: this.username,
+            password: this.password,
+          }),
         });
 
         const data = await response.json();
@@ -93,39 +119,39 @@ export default {
         if (response.ok) {
           // El código existente para el login exitoso se mantiene igual
           localStorage.clear();
-          localStorage.setItem('auth', data.token);
-          localStorage.setItem('role', data.role);
-          window.dispatchEvent(new Event('roleChange'));
+          localStorage.setItem("auth", data.token);
+          localStorage.setItem("role", data.role);
+          window.dispatchEvent(new Event("roleChange"));
 
           this.$nextTick(() => {
-            this.$emit('auth-change');
+            this.$emit("auth-change");
           });
 
           this.isLoading = false;
 
-          if (data.role === '3') {
-            await this.$router.push('/ventas');
+          if (data.role === "3") {
+            await this.$router.push("/ventas");
           } else {
-            await this.$router.push('/home');
+            await this.$router.push("/home");
           }
         } else {
           this.isLoading = false;
           // Aquí manejamos específicamente el caso de usuario inhabilitado
           if (response.status === 403) {
-            toast.error('Usuario inhabilitado', {
-              timeout: 5000
+            toast.error("Usuario inhabilitado", {
+              timeout: 5000,
             });
           } else {
             toast.error(data.message, {
-              timeout: 5000
+              timeout: 5000,
             });
           }
         }
       } catch (error) {
         this.isLoading = false;
-        console.error('Error:', error);
-        toast.error('Error de red o servidor.', {
-          timeout: 5000
+        console.error("Error:", error);
+        toast.error("Error de red o servidor.", {
+          timeout: 5000,
         });
       }
     },
@@ -135,34 +161,34 @@ export default {
         this.isLoading = true;
 
         const response = await fetch(`${getApi()}/recuperar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: this.recoveryEmail })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: this.recoveryEmail }),
         });
 
         const data = await response.json();
 
         if (response.ok) {
-          toast.success('Correo enviado con la contraseña temporal.', {
-            timeout: 5000
+          toast.success("Correo enviado con la contraseña temporal.", {
+            timeout: 5000,
           });
           this.isRecoveringPassword = false; // Volver a la vista de login
-          this.recoveryEmail = ''; // Limpiar el campo
+          this.recoveryEmail = ""; // Limpiar el campo
         } else {
           if (response.status === 404) {
-            toast.error('Usuario no encontrado', {
-              timeout: 5000
+            toast.error("Usuario no encontrado", {
+              timeout: 5000,
             });
           } else {
             toast.error(data.message, {
-              timeout: 5000
+              timeout: 5000,
             });
           }
         }
       } catch (error) {
-        console.error('Error:', error);
-        toast.error('Error de red o servidor.', {
-          timeout: 5000
+        console.error("Error:", error);
+        toast.error("Error de red o servidor.", {
+          timeout: 5000,
         });
       } finally {
         this.isLoading = false;
@@ -178,24 +204,24 @@ export default {
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    }
-  }
-
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
+  },
 };
 </script>
 
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 /* Estilos Generales */
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -214,7 +240,7 @@ html {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url('../../src/assets/imgs/fondo-pixeles.jpg');
+  background-image: url("/public/img/fondo-pixeles.webp");
   background-size: cover;
   background-position: center;
   position: fixed;
@@ -228,7 +254,7 @@ html {
 
 /* Capa de oscurecimiento */
 .login-container::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -432,7 +458,6 @@ input:focus {
 .login-card {
   animation: fadeIn 0.5s ease-out;
 }
-
 
 /* Contenedor principal */
 .dark .login-container::before {

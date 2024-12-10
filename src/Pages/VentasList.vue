@@ -342,6 +342,11 @@
           @modal-focused="handleModalFocus"
         />
         <button @click="salir">Salir<br />[ALT] + [S]</button>
+        <LogoutConfirmModal
+          :isVisible="showConfirmModal"
+          @confirm="logout"
+          @cancel="cancelarSalir"
+        />
       </div>
     </div>
   </div>
@@ -363,6 +368,7 @@ import PaymentAnimationModal from "@/components/PaymentAnimationModal.vue";
 import AperturaCajaModal from "@/components/modalesCrearVenta/AperturaCajaModal.vue";
 import solicitudes from "../../services/solicitudes.js";
 import LimpiarPantallaModal from "@/components/modalesCrearVenta/LimpiarPantallaModal.vue";
+import LogoutConfirmModal from "@/components/LogoutConfirmModal.vue";
 
 import {
   getInfoBasic,
@@ -392,6 +398,7 @@ import { setPageTitle } from "@/components/pageMetadata";
 export default {
   components: {
     ClienteModal,
+    LogoutConfirmModal,
     AperturaCajaModal,
     PaymentAnimationModal,
     RegistrarPagoModal,
@@ -407,6 +414,7 @@ export default {
   data() {
     return {
       isAperturaCajaModalVisible: false,
+      showConfirmModal: false,
       isLimpiarPantallaModalVisible: false,
       itemTemp: null,
       isLoading: false,
@@ -453,6 +461,15 @@ export default {
   watch: {
     // Observador para el modal de factura
     isFacturaModalVisible(newVal) {
+      this.isAnyModalOpen = newVal;
+      if (newVal) {
+        this.pauseMainKeyboardEvents();
+      } else {
+        this.resumeMainKeyboardEvents();
+      }
+    },
+
+    showConfirmModal(newVal) {
       this.isAnyModalOpen = newVal;
       if (newVal) {
         this.pauseMainKeyboardEvents();
@@ -542,8 +559,13 @@ export default {
       });
     },
 
-    async salir() {
-      this.logout();
+    salir() {
+      this.showConfirmModal = true;
+    },
+
+    // Agregar método para cancelar
+    cancelarSalir() {
+      this.showConfirmModal = false;
     },
 
     abrirCaja() {
@@ -1118,7 +1140,7 @@ export default {
       // Si la caja no está abierta, solo permite la tecla para abrir caja
       if (!this.cajaAbierta && event.altKey && event.key === "s") {
         event.preventDefault();
-        this.logout();
+        this.salir();
         return;
       }
 
@@ -1160,7 +1182,7 @@ export default {
         this.procesarEnter();
       } else if (event.altKey && key === "s") {
         event.preventDefault();
-        this.logout();
+        this.salir();
       } else if (key === "F2") {
         event.preventDefault();
         this.buscarProducto();

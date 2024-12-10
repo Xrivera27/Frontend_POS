@@ -207,8 +207,10 @@ export default {
 
     closeModal() {
       console.log(this.clientes);
+      this.showForm = false;
       this.$emit("close");
     },
+
     selectClient(client) {
       this.$emit("client-selected", client);
     },
