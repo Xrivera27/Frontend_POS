@@ -123,7 +123,7 @@
                   <th class="col-cantidad">Cantidad</th>
                   <th class="col-precio">Precio</th>
                   <th class="col-precio">Precio F.</th>
-                  <!-- <th class="col-precio">Descuento/Unidad</th> -->
+                  <th class="col-descuento">Descuento</th>
                   <th class="col-importe">Total</th>
                 </tr>
               </thead>
@@ -143,7 +143,9 @@
                   <td class="col-precio">
                     {{ producto.precioImpuesto.toFixed(2) }}
                   </td>
-                  <!-- <td class="col-descuento">{{ parseFloat(producto.precioDescuento.toFixed(2)) }}</td> -->
+                  <td class="col-descuento">
+                    {{ calcularDescuento(producto) }}
+                  </td>
                   <td class="col-importe">{{ calcularImporte(producto) }}</td>
                 </tr>
                 <!-- Filas vacías para llenar el espacio -->
@@ -813,6 +815,46 @@ export default {
       return producto.precio_final.toFixed(2);
     },
 
+    calcularDescuento(producto) {
+      // Si tiene precio mayorista y la cantidad es suficiente para precio mayorista
+      if (
+        producto.precio_mayorista > 0 &&
+        producto.cantidad >= producto.cantidad_activar_mayorista
+      ) {
+        // Primero verificamos si tiene descuento de producto/categoría
+        if (producto.precioDescuento > 0) {
+          // Aplicar el descuento del producto/categoría
+          const precioNormal = producto.cantidad * producto.precio_unitario;
+          const precioConDescuento =
+            producto.cantidad *
+            (producto.precio_unitario - producto.precioDescuento);
+          const descuento = +(precioNormal - precioConDescuento).toFixed(2);
+          return descuento > 0 ? descuento.toFixed(2) : "-";
+        } else {
+          // Si no tiene descuento de producto/categoría, aplicar descuento mayorista
+          const precioNormal = producto.cantidad * producto.precio_unitario;
+          const precioConDescuento =
+            producto.cantidad * producto.precio_mayorista;
+          const descuento = +(precioNormal - precioConDescuento).toFixed(2);
+          return descuento > 0 ? descuento.toFixed(2) : "-";
+        }
+      }
+
+      // Si no cumple las condiciones para precio mayorista,
+      // verificar si tiene descuento de producto/categoría
+      if (producto.precioDescuento > 0) {
+        const precioNormal = producto.cantidad * producto.precio_unitario;
+        const precioConDescuento =
+          producto.cantidad *
+          (producto.precio_unitario - producto.precioDescuento);
+        const descuento = +(precioNormal - precioConDescuento).toFixed(2);
+        return descuento > 0 ? descuento.toFixed(2) : "-";
+      }
+
+
+      return "-";
+    },
+
     mostrarPrecioFinal(producto) {
       if (
         producto.precio_mayorista > 0 &&
@@ -930,7 +972,7 @@ export default {
       this.isModalLoading = true;
       try {
         await axios.post(
-          "/api/logout",
+          "/api/token/logout", // Ajustando la ruta
           {},
           {
             headers: {
@@ -938,15 +980,12 @@ export default {
             },
           }
         );
-
-        localStorage.clear();
-        this.$router.push("/login");
       } catch (error) {
         console.error("Error al cerrar sesión", error);
+      } finally {
         localStorage.clear();
         this.$router.push("/login");
-      } finally {
-        this.isModalLoading = true;
+        this.isModalLoading = false; // Corregido de true a false
       }
     },
 
@@ -1265,11 +1304,25 @@ export default {
         const existingProduct = this.productosLista.find(
           (p) => p.codigo_producto === codigoValidar
         );
+
         if (existingProduct) {
           existingProduct.cantidad += nuevaCantidad;
         } else {
-          newProduct.cantidad = nuevaCantidad;
-          this.productosLista.push({ ...newProduct });
+          console.log("Producto antes de procesar:", newProduct);
+
+          // Asegurar que todas las propiedades necesarias existen
+          const productoParaAgregar = {
+            ...newProduct,
+            cantidad: nuevaCantidad,
+            precio_mayorista: newProduct.precio_mayorista || 0,
+            cantidad_activar_mayorista:
+              newProduct.cantidad_activar_mayorista || 0,
+            precio_unitario: newProduct.precio_unitario || 0,
+          };
+
+          console.log("Producto después de procesar:", productoParaAgregar);
+
+          this.productosLista.push(productoParaAgregar);
         }
 
         if (!this.recuperandoVenta) {
@@ -1475,6 +1528,7 @@ export default {
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
+      console.log("Productos cargados:", this.productos); // Agregar este log
       this.usaSAR = await sucursalSar(this.id_usuario);
       this.info = await getInfoBasic(this.id_usuario);
       this.productos = await getProductos(this.id_usuario);
@@ -1720,6 +1774,10 @@ export default {
   .col-importe {
     width: 10%;
   }
+
+  .col-descuento {
+    width: 10%;
+  }
 }
 
 @media screen and (max-width: 767px) {
@@ -1744,6 +1802,10 @@ export default {
   }
 
   .col-importe {
+    width: 10%;
+  }
+
+  .col-descuento {
     width: 10%;
   }
 }

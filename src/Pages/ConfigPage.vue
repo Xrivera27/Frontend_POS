@@ -5,7 +5,11 @@
       <PageHeader :titulo="titulo" />
       <div class="usuario-config" v-if="showUser">
         <!-- Formulario básico de usuario -->
-        <form @submit.prevent="updateUserData" autocomplete="off" class="formulario form-basic-user">
+        <form
+          @submit.prevent="updateUserData"
+          autocomplete="off"
+          class="formulario form-basic-user"
+        >
           <fieldset :disabled="usuarioEditing">
             <div class="contenedor-titulo">
               <h2 class="titulo-form">Configuración</h2>
@@ -13,55 +17,114 @@
             <div class="contenedor-principal">
               <div class="contenedor-interno contenedor-izquierdo">
                 <label for="nombre-usuario">Nombre de usuario:</label>
-                <input v-model="userForm.nombre_usuario" type="text" id="nombre_usuario" name="nombre_usuario" />
+                <input
+                  v-model="userForm.nombre_usuario"
+                  type="text"
+                  id="nombre_usuario"
+                  name="nombre_usuario"
+                />
 
                 <div class="form-group">
                   <label>Teléfono:</label>
                   <div class="phone-input-container">
-                    <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+                    <select
+                      v-model="selectedCountry"
+                      @change="updatePhoneValidation"
+                      class="select-phone"
+                    >
                       <option value="">País</option>
-                      <option v-for="(country, code) in countryData" :key="code" :value="code">
+                      <option
+                        v-for="(country, code) in countryData"
+                        :key="code"
+                        :value="code"
+                      >
                         {{ country.emoji }} {{ country.code }}
                       </option>
                     </select>
-                    <input v-model="userForm.telefono" type="text" class="input-phone"
-                      :placeholder="'Número (' + phoneLength + ' dígitos)'" />
+                    <input
+                      v-model="userForm.telefono"
+                      type="text"
+                      class="input-phone"
+                      :placeholder="'Número (' + phoneLength + ' dígitos)'"
+                    />
                   </div>
                 </div>
 
                 <label for="direccion">Dirección:</label>
-                <input v-model="userForm.direccion" type="text" id="direccion" name="direccion" />
+                <input
+                  v-model="userForm.direccion"
+                  type="text"
+                  id="direccion"
+                  name="direccion"
+                />
               </div>
 
               <div class="contenedor-interno contenedor-derecho">
-                <button type="button" class="btn btn-password" :class="{ 'disabled': usuarioEditing }"
-                  :disabled="usuarioEditing" @click="togglePasswordEdit">
-                  {{ isPassEdit ? 'Cancelar cambio' : 'Cambiar contraseña' }}
+                <button
+                  type="button"
+                  class="btn btn-password"
+                  :class="{ disabled: usuarioEditing }"
+                  :disabled="usuarioEditing"
+                  @click="togglePasswordEdit"
+                >
+                  {{ isPassEdit ? "Cancelar cambio" : "Cambiar contraseña" }}
                 </button>
 
                 <template v-if="isPassEdit">
                   <label for="contrasena">Contraseña actual:</label>
-                  <input v-model="userForm.contraseña" type="password" id="contraseña" name="contraseña" required />
+                  <input
+                    v-model="userForm.contraseña"
+                    type="password"
+                    id="contraseña"
+                    name="contraseña"
+                    required
+                  />
 
                   <label for="contrasena-nueva">Contraseña nueva:</label>
-                  <input v-model="userForm.contraseña_nueva" type="password" id="contraseña_nueva"
-                    name="contraseña_nueva" />
+                  <input
+                    v-model="userForm.contraseña_nueva"
+                    type="password"
+                    id="contraseña_nueva"
+                    name="contraseña_nueva"
+                  />
 
-                  <label for="contrasena-confirmar">Confirmar contraseña:</label>
-                  <input v-model="userForm.contraseña_confirm" type="password" id="contraseña_confirm"
-                    name="contraseña_confirm" />
+                  <label for="contrasena-confirmar"
+                    >Confirmar contraseña:</label
+                  >
+                  <input
+                    v-model="userForm.contraseña_confirm"
+                    type="password"
+                    id="contraseña_confirm"
+                    name="contraseña_confirm"
+                  />
                 </template>
               </div>
             </div>
           </fieldset>
           <div class="botones-container">
-            <button class="btn editar" @click="isEditing(1)" :disabled="!usuarioEditing">Editar</button>
-            <button type="submit" class="btn guardar" :disabled="usuarioEditing">Guardar</button>
+            <button
+              class="btn editar"
+              @click="isEditing(1)"
+              :disabled="!usuarioEditing"
+            >
+              Editar
+            </button>
+            <button
+              type="submit"
+              class="btn guardar"
+              :disabled="usuarioEditing"
+            >
+              Guardar
+            </button>
           </div>
         </form>
 
         <!-- Formulario avanzado de usuario -->
-        <form @submit.prevent="updateUserData" autocomplete="off" class="formulario form-avanced-user">
+        <form
+          @submit.prevent="updateUserData"
+          autocomplete="off"
+          class="formulario form-avanced-user"
+        >
           <fieldset :disabled="usuarioAvancedEditing">
             <div class="contenedor-titulo">
               <h2 class="titulo-form">Configuración avanzada</h2>
@@ -69,69 +132,103 @@
             <div class="contenedor-principal">
               <div class="contenedor-interno contenedor-izquierdo">
                 <label for="Nombre">Nombre:</label>
-                <input v-model="userFormAdvanced.nombre" type="text" id="nombre" name="nombre" />
+                <input
+                  v-model="userFormAdvanced.nombre"
+                  type="text"
+                  id="nombre"
+                  name="nombre"
+                />
 
                 <label for="apellido">Apellido:</label>
-                <input v-model="userFormAdvanced.apellido" type="text" id="apellido" name="apellido" />
+                <input
+                  v-model="userFormAdvanced.apellido"
+                  type="text"
+                  id="apellido"
+                  name="apellido"
+                />
 
                 <label for="correo">Correo:</label>
-                <input v-model="userFormAdvanced.correo" type="text" id="correo" name="correo" />
+                <input
+                  v-model="userFormAdvanced.correo"
+                  type="text"
+                  id="correo"
+                  name="correo"
+                />
               </div>
             </div>
           </fieldset>
           <div class="botones-container">
-            <button class="btn editar" @click="isEditing(2)" :disabled="!usuarioAvancedEditing">Editar</button>
-            <button type="submit" class="btn guardar" :disabled="usuarioAvancedEditing">Guardar</button>
+            <button
+              class="btn editar"
+              @click="isEditing(2)"
+              :disabled="!usuarioAvancedEditing"
+            >
+              Editar
+            </button>
+            <button
+              type="submit"
+              class="btn guardar"
+              :disabled="usuarioAvancedEditing"
+            >
+              Guardar
+            </button>
           </div>
         </form>
       </div>
 
       <!-- Botones de navegación -->
-      <button :class="{ 'activo': userActive, 'inactivo': !userActive }" :disabled="userBoton" class="btn boton-switch"
-        @click="switchBools">
+      <button
+        :class="{ activo: userActive, inactivo: !userActive }"
+        :disabled="userBoton"
+        class="btn boton-switch"
+        @click="switchBools"
+      >
         Config. Usuario
       </button>
 
-      <router-link to="/config-company" v-if="esCeo"  >
-        <button :class="{ 'inactivo': userActive, 'activo': !userActive }" :disabled="companyBoton"
-          class="btn boton-switch">
+      <router-link to="/config-company" v-if="esCeo">
+        <button
+          :class="{ inactivo: userActive, activo: !userActive }"
+          :disabled="companyBoton"
+          class="btn boton-switch"
+        >
           Config. Empresa
         </button>
       </router-link>
-      <router-link to="/config-sar" v-if="!esCeo" >
-              <button type="button" class="btn SAR" >Config SAR</button>
-            </router-link>
+      <router-link to="/config-sar" v-if="!esCeo">
+        <button type="button" class="btn SAR">Config SAR</button>
+      </router-link>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 import PageHeader from "@/components/PageHeader.vue";
-import ModalLoading from '@/components/ModalLoading.vue';
-import { notis } from '../../services/notificaciones.js';
+import ModalLoading from "@/components/ModalLoading.vue";
+import { notis } from "../../services/notificaciones.js";
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
-import { validacionesConfigPage } from "../../services/validarCampos.js"
+import { validacionesConfigPage } from "../../services/validarCampos.js";
 import solicitudes from "../../services/solicitudes.js";
-const { esCeo  } = require('../../services/usuariosSolicitudes');
-const { getApi } = require('../../config/getApiUrl.js');
-import { setPageTitle } from '@/components/pageMetadata';
+const { esCeo } = require("../../services/usuariosSolicitudes");
+const { getApi } = require("../../config/getApiUrl.js");
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
   components: {
     PageHeader,
-    ModalLoading
+    ModalLoading,
   },
   data() {
     return {
-      titulo: 'Configuración',
-      selectedCountry: 'HN',
+      titulo: "Configuración",
+      selectedCountry: "HN",
       countryData: COUNTRY_CODES,
       phoneLength: 8,
       isPassEdit: false,
       userBoton: true,
       companyBoton: false,
-      id_usuario: '',
+      id_usuario: "",
       showUser: true,
       esCeo: false,
       userActive: true,
@@ -139,17 +236,17 @@ export default {
       usuarioAvancedEditing: true,
       isLoading: false,
       userForm: {
-        nombreUsuario: '',
-        telefono: '',
-        direccion: '',
-        contraseña: '',
-        contraseña_nueva: '',
-        contraseña_confirm: '',
+        nombreUsuario: "",
+        telefono: "",
+        direccion: "",
+        contraseña: "",
+        contraseña_nueva: "",
+        contraseña_confirm: "",
       },
       userFormAdvanced: {
-        nombre: '',
-        apellido: '',
-        correo: '',
+        nombre: "",
+        apellido: "",
+        correo: "",
       },
     };
   },
@@ -163,24 +260,24 @@ export default {
     async getUserData() {
       this.isLoading = true;
       try {
-        const token = localStorage.getItem('auth');
+        const token = localStorage.getItem("auth");
 
         const response = await axios.get(`${getApi()}/usuarios`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         const userData = response.data;
-        this.userForm.nombre_usuario = userData.nombre_usuario || '';
-        this.userForm.telefono = userData.telefono || '';
-        this.userForm.direccion = userData.direccion || '';
-        this.userFormAdvanced.nombre = userData.nombre || '';
-        this.userFormAdvanced.apellido = userData.apellido || '';
-        this.userFormAdvanced.correo = userData.correo || '';
+        this.userForm.nombre_usuario = userData.nombre_usuario || "";
+        this.userForm.telefono = userData.telefono || "";
+        this.userForm.direccion = userData.direccion || "";
+        this.userFormAdvanced.nombre = userData.nombre || "";
+        this.userFormAdvanced.apellido = userData.apellido || "";
+        this.userFormAdvanced.correo = userData.correo || "";
       } catch (error) {
-        console.error('Error al obtener los datos del usuario:', error);
-        notis("error", 'No se pudo obtener la información del usuario.');
+        console.error("Error al obtener los datos del usuario:", error);
+        notis("error", "No se pudo obtener la información del usuario.");
       } finally {
         this.isLoading = false;
       }
@@ -189,12 +286,22 @@ export default {
     async updateUserData() {
       if (!this.usuarioEditing) {
         // Validar formulario básico
-        if (!await validacionesConfigPage.validarCamposConfiguracion(this.userForm, this.isPassEdit, this.selectedCountry)) {
+        if (
+          !(await validacionesConfigPage.validarCamposConfiguracion(
+            this.userForm,
+            this.isPassEdit,
+            this.selectedCountry
+          ))
+        ) {
           return;
         }
       } else if (!this.usuarioAvancedEditing) {
         // Validar formulario avanzado
-        if (!await validacionesConfigPage.validarCamposConfiguracionAvanzada(this.userFormAdvanced)) {
+        if (
+          !(await validacionesConfigPage.validarCamposConfiguracionAvanzada(
+            this.userFormAdvanced
+          ))
+        ) {
           return;
         }
       }
@@ -202,27 +309,41 @@ export default {
       // Si se está cambiando la contraseña, verificar primero la contraseña actual
       if (this.isPassEdit) {
         try {
-          const token = localStorage.getItem('auth');
-          const verifyResponse = await axios.post(`${getApi()}/verificar-password`,
+          const token = localStorage.getItem("auth");
+          const id_usuario = await solicitudes.solicitarUsuarioToken();
+
+          const verifyResponse = await axios.post(
+            `${getApi()}/verificar-password`,
             {
               contraseña: this.userForm.contraseña,
-              id_usuario: await solicitudes.solicitarUsuarioToken()
+              id_usuario: id_usuario,
             },
             {
               headers: {
                 Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
+                "Content-Type": "application/json",
+              },
             }
           );
 
-          if (!verifyResponse.data.isValid) {
-            notis("error", "La contraseña actual es incorrecta");
+          if (
+            !verifyResponse.data ||
+            verifyResponse.data.error ||
+            !verifyResponse.data.isValid
+          ) {
+            notis(
+              "error",
+              verifyResponse.data?.message ||
+                "La contraseña actual es incorrecta"
+            );
             return;
           }
         } catch (error) {
-          console.error('Error al verificar la contraseña:', error);
-          notis("error", "Error al verificar la contraseña");
+          console.error("Error al verificar la contraseña:", error);
+          notis(
+            "error",
+            error.response?.data?.message || "Error al verificar la contraseña"
+          );
           return;
         }
       }
@@ -230,8 +351,8 @@ export default {
       // Proceder con la actualización
       this.isLoading = true;
       try {
-        const token = localStorage.getItem('auth');
-        
+        const token = localStorage.getItem("auth");
+
         // Preparar datos para la actualización
         const updatedData = {
           nombre_usuario: this.userForm.nombre_usuario,
@@ -239,46 +360,50 @@ export default {
           direccion: this.userForm.direccion,
           nombre: this.userFormAdvanced.nombre,
           apellido: this.userFormAdvanced.apellido,
-          correo: this.userFormAdvanced.correo
+          correo: this.userFormAdvanced.correo,
         };
 
         // Agregar datos de contraseña si es necesario
-        if (this.isPassEdit) {
-          updatedData.contraseña = this.userForm.contraseña;
+        if (this.isPassEdit && this.userForm.contraseña_nueva) {
+          updatedData.contraseña_actual = this.userForm.contraseña;
           updatedData.contraseña_nueva = this.userForm.contraseña_nueva;
           updatedData.contraseña_confirm = this.userForm.contraseña_confirm;
         }
 
-        const response = await axios.put(`${getApi()}/configuser`, 
+        const response = await axios.put(
+          `${getApi()}/configuser`,
           updatedData,
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
           }
         );
 
         if (response.status === 200) {
-          localStorage.setItem('showUpdateSuccess', 'true');
+          localStorage.setItem("showUpdateSuccess", "true");
           window.location.reload();
         }
       } catch (error) {
-        console.error('Error al actualizar los datos del usuario:', error);
-        if (error.response && error.response.data) {
+        console.error("Error al actualizar los datos del usuario:", error);
+        if (error.response?.data) {
           if (error.response.data.duplicados) {
             const duplicados = error.response.data.duplicados;
-            if (duplicados.includes('nombre_usuario')) {
+            if (duplicados.includes("nombre_usuario")) {
               notis("error", "El nombre de usuario ya está en uso");
             }
-            if (duplicados.includes('correo')) {
+            if (duplicados.includes("correo")) {
               notis("error", "El correo electrónico ya está en uso");
             }
           } else {
-            notis("error", error.response.data.message || 'Error al actualizar los datos');
+            notis(
+              "error",
+              error.response.data.message || "Error al actualizar los datos"
+            );
           }
         } else {
-          notis("error", 'Hubo un problema al guardar los datos.');
+          notis("error", "Hubo un problema al guardar los datos.");
         }
       } finally {
         this.isLoading = false;
@@ -288,9 +413,9 @@ export default {
     togglePasswordEdit() {
       this.isPassEdit = !this.isPassEdit;
       // Limpiar campos de contraseña
-      this.userForm.contraseña = '';
-      this.userForm.contraseña_nueva = '';
-      this.userForm.contraseña_confirm = '';
+      this.userForm.contraseña = "";
+      this.userForm.contraseña_nueva = "";
+      this.userForm.contraseña_confirm = "";
     },
 
     isEditing(orden) {
@@ -304,7 +429,7 @@ export default {
           this.usuarioAvancedEditing = false;
           break;
         default:
-          notis("error", 'Ha ocurrido un error');
+          notis("error", "Ha ocurrido un error");
       }
     },
 
@@ -316,40 +441,40 @@ export default {
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    }
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
   },
   async mounted() {
     this.getUserData();
-    setPageTitle('Configuración de Usuario');
+    setPageTitle("Configuración de Usuario");
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.esCeo = await esCeo(this.id_usuario);
     } catch (error) {
-      notis('error', error.message);
+      notis("error", error.message);
     }
 
-    if (localStorage.getItem('showUpdateSuccess')) {
-      notis("success", 'Usuario actualizado exitosamente');
-      localStorage.removeItem('showUpdateSuccess');
- 
+    if (localStorage.getItem("showUpdateSuccess")) {
+      notis("success", "Usuario actualizado exitosamente");
+      localStorage.removeItem("showUpdateSuccess");
     }
   },
 };
 </script>
 
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap");
 
 * {
   box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 /* Configuración del usuario */
@@ -422,7 +547,6 @@ input {
   background-color: #fff;
   /* Fondo blanco por defecto */
 }
-
 
 .contenedor-principal input {
   margin-bottom: 4%;
@@ -540,7 +664,6 @@ input {
 }
 
 @media screen and (max-width: 480px) {
-
   .configuracion-usuario {
     padding: 8px;
   }
@@ -575,7 +698,6 @@ input {
   /* Mismo ancho que los otros inputs */
 }
 
-
 .phone-input-container select {
   width: 110px;
   margin: 0;
@@ -593,7 +715,6 @@ input {
   border: 1px solid #ddd;
   border-radius: 4px;
 }
-
 
 /* Scroll personalizado */
 .config-wrapper::-webkit-scrollbar {
@@ -614,7 +735,6 @@ input {
 .config-wrapper::-webkit-scrollbar-thumb:hover {
   background: #a38655;
 }
-
 
 /* Contenedor principal */
 .dark .configuracion-usuario {
@@ -765,6 +885,4 @@ input {
 .configuracion-usuario {
   padding: 16px;
 }
-
-
 </style>
