@@ -141,7 +141,7 @@ const validacionesComunes = {
     if (!pattern.test(password)) {
       notis(
         "warning",
-        "La contraseña no cumple con los requisitos de seguridad"
+        "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un símbolo."
       );
       return false;
     }

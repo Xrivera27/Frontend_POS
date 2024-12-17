@@ -1,86 +1,155 @@
 <template>
   <div class="wrapper">
     <PageHeader :titulo="titulo" />
+    <ModalLoading :isLoading="isLoading" />
 
     <div class="main-container">
-      <form @submit.prevent="agregarProducto" autocomplete="off">
-
-
-        <div class="input-container input-superior">
-          <div class="div-modal-resumen">
-            <label for="referencia" class="label-input">Referencia de Compra:</label>
-            <input type="text" id="referencia" class="campo" v-model="referenciaPago"
-              placeholder="Ingrese referencia de compra" />
-          </div>
-          <div class="input-container" id="div_codigo">
-            <label for="codigo-busqueda" class="label-input">Código del producto:</label>
-            <input list="codigosList" name="codigo-busqueda" ref="codigo" type="text" class="campo" id="campo_codigo"
-              tabindex="1" required v-model="addQuery" placeholder="Ingresar código" :disabled="isEditing"
-              @input="handleCodigoInput" />
+      <form
+        @submit.prevent="agregarProducto"
+        autocomplete="off"
+        class="purchase-form"
+      >
+        <!-- Primera fila: Código y Búsqueda -->
+        <div class="form-section search-section">
+          <div class="form-group">
+            <label for="codigo-busqueda" class="form-label"
+              >Código del producto:</label
+            >
+            <input
+              list="codigosList"
+              name="codigo-busqueda"
+              ref="codigo"
+              type="text"
+              class="form-input"
+              tabindex="1"
+              required
+              v-model="addQuery"
+              placeholder="Ingresar código"
+              :disabled="isEditing"
+              @input="handleCodigoInput"
+            />
             <datalist id="codigosList">
-              <option v-for="producto in productos" :key="producto.id_producto" :value="producto.codigo_producto">
+              <option
+                v-for="producto in productos"
+                :key="producto.id_producto"
+                :value="producto.codigo_producto"
+              >
                 {{ producto.codigo_producto }} - {{ producto.nombre }}
               </option>
             </datalist>
           </div>
 
-          <div class="input-container" id="div_nombre">
-            <label class="label-input">Buscar por nombre:</label>
-            <input list="productosList" class="campo" id="campo_nombre" :disabled="isEditing" v-model="searchQuery"
-              placeholder="Ingresar nombre" @input="handleSearchInput">
+          <div class="form-group">
+            <label for="referencia" class="form-label"
+              >Referencia de Compra:</label
+            >
+            <input
+              type="text"
+              id="referencia"
+              class="form-input"
+              v-model="referenciaPago"
+              placeholder="Ingrese referencia de compra"
+            />
+          </div>
+
+          <div class="form-group search-name">
+            <label class="form-label">Buscar por nombre:</label>
+            <input
+              list="productosList"
+              class="form-input"
+              :disabled="isEditing"
+              v-model="searchQuery"
+              placeholder="Ingresar nombre"
+              @input="handleSearchInput"
+            />
             <datalist id="productosList">
-              <option v-for="producto in productos" :key="producto.id_producto" :value="producto.nombre">
+              <option
+                v-for="producto in productos"
+                :key="producto.id_producto"
+                :value="producto.nombre"
+              >
                 {{ producto.codigo_producto }} - {{ producto.nombre }}
               </option>
             </datalist>
           </div>
         </div>
 
-        <div class="input-container-exterior">
-          <div class="input-container">
-            <label for="cantidad" class="label-input">Cant. Unitaria:</label>
-            <input name="cantidad" class="campo" type="number" tabindex="3" placeholder="Cantidad unitaria"
-              v-model="addQuantity" min="1" />
+        <!-- Segunda fila: Cantidades y Precio -->
+        <div class="form-section quantities-section">
+          <div class="form-group">
+            <label for="cantidad" class="form-label">Cantidad Unitaria:</label>
+            <input
+              name="cantidad"
+              class="form-input"
+              type="number"
+              tabindex="3"
+              placeholder="Cantidad unitaria"
+              v-model="addQuantity"
+              min="1"
+            />
           </div>
 
-          <div class="input-container">
-            <label for="cantidad" class="label-input">Cant. paquetes:</label>
-            <input name="cantidad_paquetes" class="campo" type="number" tabindex="4"
-              placeholder="Cantidad total de paquetes" v-model="addQuantityPackage" min="1" />
+          <div class="form-group">
+            <label for="cantidad_paquetes" class="form-label"
+              >Cantidad de paquetes:</label
+            >
+            <input
+              name="cantidad_paquetes"
+              class="form-input"
+              type="number"
+              tabindex="4"
+              placeholder="Cantidad total de paquetes"
+              v-model="addQuantityPackage"
+              min="1"
+            />
           </div>
 
-          <div class="input-container">
-            <label for="total-compra" class="label-input">Prec./paquete:</label>
-            <input name="total-compra" class="campo" type="number" step="0.01" tabindex="5"
-              placeholder="Total compra por paquete" required v-model="addtotalPrice" min="0.01" />
+          <div class="form-group">
+            <label for="total-compra" class="form-label"
+              >Precio por paquete:</label
+            >
+            <input
+              name="total-compra"
+              class="form-input"
+              type="number"
+              step="0.01"
+              tabindex="5"
+              placeholder="Total compra por paquete"
+              required
+              v-model="addtotalPrice"
+              min="0.01"
+            />
           </div>
 
-
-
-          <div class="boton-container">
-            <button class="btn btn-success agregar-producto" type="submit">
-              <i class="bi bi-plus-circle-fill"> Añadir</i>
+          <div class="form-group button-group">
+            <button class="btn btn-primary" type="submit">
+              <i class="bi bi-plus-circle-fill"></i> Añadir
             </button>
           </div>
         </div>
       </form>
 
+      <!-- Tabla de Productos -->
       <div class="table-container">
         <table class="table">
           <thead>
             <tr>
-              <th class="th_small">N.º</th>
-              <th class="th_medium">Código</th>
-              <th class="th_large">Nombre</th>
-              <th class="th_small">Paquetes</th>
-              <th class="th_small">Unidad/Paquetes</th>
-              <th class="medium">Proveedor</th>
-              <th class="th_small">Total Compra</th>
-              <th style="width: 100px">Opciones</th>
+              <th>N.º</th>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Paquetes</th>
+              <th>Unidad/Paquetes</th>
+              <th>Proveedor</th>
+              <th>Total Compra</th>
+              <th>Opciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(producto, index) in productosLista" :key="index" @click="isEditingTrue(index)">
+            <tr
+              v-for="(producto, index) in productosLista"
+              :key="index"
+              @click="isEditingTrue(index)"
+            >
               <td>{{ index + 1 }}</td>
               <td>{{ producto.codigo }}</td>
               <td>{{ producto.nombre }}</td>
@@ -88,21 +157,56 @@
               <td>{{ producto.cantidad }}</td>
               <td>{{ producto.proveedor?.nombre || producto.proveedor }}</td>
               <td>{{ producto.total_compra }}</td>
-              <td class="botones-accion">
-                <button class="btn btn-botones-accion" @click.stop="deleteProducto(index)">
-                  <i class="bi bi-x-circle-fill"></i>
+              <td class="actions-cell">
+                <button class="btn-icon" @click.stop="deleteProducto(index)">
+                  <i class="bi bi-x-circle-fill text-danger"></i>
                 </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <!-- Sección de Totales y Acciones -->
+      <div class="footer-section">
+        <div class="footer-content">
+          <!-- Lado izquierdo - Cancelar -->
+          <div class="action-group">
+            <div class="shortcut-badge">Esc</div>
+            <button class="btn btn-cancel" @click="cancelarCompra">
+              <i class="bi bi-x-circle"></i>
+              Cancelar compra
+            </button>
+          </div>
+
+          <!-- Lado derecho - Procesar y Total -->
+          <div class="action-group">
+            <div class="process-group">
+              <div class="shortcut-badge">F12</div>
+              <button class="btn btn-process" @click="payModalOpen">
+                <i class="bi bi-check-circle"></i>
+                Procesar Compra
+              </button>
+            </div>
+            <div class="total-container">
+              <span class="total-label">Total</span>
+              <div class="total-amount">
+                {{ calcularTotal }}<span class="currency">Lempiras</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="end-container">
       <div class="end-container-cancelar">
         <p class="texto-tecla-boton texto-esc">Esc</p>
-        <button class="btn btn-end" id="cancelar-compra" @click="cancelarCompra">
+        <button
+          class="btn btn-end"
+          id="cancelar-compra"
+          @click="cancelarCompra"
+        >
           Cancelar compra
         </button>
       </div>
@@ -183,7 +287,10 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(proveedor_actual, index) in proveedores_nombre" :key="index">
+            <tr
+              v-for="(proveedor_actual, index) in proveedores_nombre"
+              :key="index"
+            >
               <td>{{ index + 1 }}</td>
               <td>{{ proveedor_actual?.nombre || proveedor_actual }}</td>
             </tr>
@@ -200,18 +307,21 @@
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import solicompras from "../../services/solicompras";
-import { setPageTitle } from '@/components/pageMetadata';
+import { setPageTitle } from "@/components/pageMetadata";
+import ModalLoading from "@/components/ModalLoading.vue";
+import { notis } from "../../services/notificaciones.js";
 
 export default {
-  name: 'ComprasView',
+  name: "ComprasView",
 
   components: {
     PageHeader,
+    ModalLoading,
   },
 
   data() {
     return {
-      titulo: 'Registro de Compras',
+      titulo: "Registro de Compras",
       addQuery: "",
       searchQuery: "",
       addQuantity: "",
@@ -230,20 +340,26 @@ export default {
       productosLista: [],
       proveedores_nombre: [],
       loading: false,
-      error: null
+      error: null,
+      isLoading: false,
     };
   },
 
   computed: {
     calcularTotal() {
-      return this.productosLista.reduce((total, p) => total + p.total_compra, 0);
+      return this.productosLista.reduce(
+        (total, p) => total + p.total_compra,
+        0
+      );
     },
   },
 
   methods: {
     async handleCodigoInput() {
       if (this.addQuery) {
-        const productoEncontrado = this.productos.find(p => p.codigo_producto === this.addQuery);
+        const productoEncontrado = this.productos.find(
+          (p) => p.codigo_producto === this.addQuery
+        );
         if (productoEncontrado) {
           this.searchQuery = productoEncontrado.nombre;
         } else {
@@ -256,7 +372,9 @@ export default {
 
     async handleSearchInput() {
       if (this.searchQuery) {
-        const productoEncontrado = this.productos.find(p => p.nombre === this.searchQuery);
+        const productoEncontrado = this.productos.find(
+          (p) => p.nombre === this.searchQuery
+        );
         if (productoEncontrado) {
           this.addQuery = productoEncontrado.codigo_producto;
         } else {
@@ -268,49 +386,64 @@ export default {
     },
 
     async cargarProductos() {
+      this.isLoading = true;
       try {
-        const token = localStorage.getItem('auth');
+        const token = localStorage.getItem("auth");
         if (!token) {
-          console.log('No hay token, redirigiendo a login');
-          this.$router.push('/login');
+          console.log("No hay token, redirigiendo a login");
+          this.$router.push("/login");
           return;
         }
 
-        const productos = await solicompras.fetchRegistros('/compras/productos');
+        const productos = await solicompras.fetchRegistros(
+          "/compras/productos"
+        );
         this.productos = productos || [];
-        console.log('Productos cargados:', this.productos);
+        console.log("Productos cargados:", this.productos);
       } catch (error) {
-        console.error('Error completo al cargar productos:', error);
+        console.error("Error completo al cargar productos:", error);
 
-        if (error.message.includes('No hay token')) {
-          console.log('Token no encontrado, redirigiendo a login');
-          this.$router.push('/login');
+        if (error.message.includes("No hay token")) {
+          console.log("Token no encontrado, redirigiendo a login");
+          this.$router.push("/login");
           return;
         }
 
-        alert('Error al cargar la lista de productos');
+        notis("error", "Error al cargar la lista de productos");
+      } finally {
+        this.isLoading = false;
       }
     },
 
     validarDatos() {
       if (!this.addQuery || !this.addtotalPrice) {
-        throw new Error('Por favor complete los campos requeridos');
+        throw new Error("Por favor complete los campos requeridos");
       }
 
-      if (this.addQuantity && (isNaN(this.addQuantity) || this.addQuantity <= 0)) {
-        throw new Error('La cantidad debe ser un número mayor a 0');
+      if (
+        this.addQuantity &&
+        (isNaN(this.addQuantity) || this.addQuantity <= 0)
+      ) {
+        throw new Error("La cantidad debe ser un número mayor a 0");
       }
 
-      if (this.addtotalPrice && (isNaN(this.addtotalPrice) || this.addtotalPrice <= 0)) {
-        throw new Error('El precio debe ser un número mayor a 0');
+      if (
+        this.addtotalPrice &&
+        (isNaN(this.addtotalPrice) || this.addtotalPrice <= 0)
+      ) {
+        throw new Error("El precio debe ser un número mayor a 0");
       }
 
-      if (this.addQuantityPackage && (isNaN(this.addQuantityPackage) || this.addQuantityPackage <= 0)) {
-        throw new Error('La cantidad de paquetes debe ser un número mayor a 0');
+      if (
+        this.addQuantityPackage &&
+        (isNaN(this.addQuantityPackage) || this.addQuantityPackage <= 0)
+      ) {
+        throw new Error("La cantidad de paquetes debe ser un número mayor a 0");
       }
     },
 
     async agregarProducto() {
+      this.isLoading = true;
       try {
         this.validarDatos();
 
@@ -319,20 +452,28 @@ export default {
 
         const cantidad = this.addQuantity || "1";
         const cantidadPaquetes = this.addQuantityPackage || "1";
+        const precioUnitario = this.addtotalPrice || "0";
 
-        const productoExistente = this.productos.find(p => p.codigo_producto === this.addQuery);
+        const productoExistente = this.productos.find(
+          (p) => p.codigo_producto === this.addQuery
+        );
 
         if (!productoExistente) {
-          throw new Error('Producto no encontrado');
+          throw new Error("Producto no encontrado");
         }
 
-        const productoEnLista = this.productosLista.find(p => p.codigo === this.addQuery);
+        // Calcular el total multiplicando el precio por la cantidad de paquetes
+        const totalCompra = Number(precioUnitario) * Number(cantidadPaquetes);
+
+        const productoEnLista = this.productosLista.find(
+          (p) => p.codigo === this.addQuery
+        );
 
         if (!this.isEditing) {
           if (productoEnLista) {
             productoEnLista.cantidad = Number(cantidad);
             productoEnLista.paquetes = Number(cantidadPaquetes);
-            productoEnLista.total_compra = Number(this.addtotalPrice);
+            productoEnLista.total_compra = totalCompra; // Usar el nuevo total calculado
           } else {
             this.productosLista.push({
               codigo: productoExistente.codigo_producto,
@@ -340,13 +481,13 @@ export default {
               cantidad: Number(cantidad),
               paquetes: Number(cantidadPaquetes),
               proveedor: productoExistente.proveedor,
-              total_compra: Number(this.addtotalPrice)
+              total_compra: totalCompra, // Usar el nuevo total calculado
             });
           }
         } else {
           productoEnLista.cantidad = Number(cantidad);
           productoEnLista.paquetes = Number(cantidadPaquetes);
-          productoEnLista.total_compra = Number(this.addtotalPrice);
+          productoEnLista.total_compra = totalCompra; // Usar el nuevo total calculado
           this.isEditing = false;
         }
 
@@ -358,7 +499,9 @@ export default {
 
         this.$refs.codigo.focus();
       } catch (error) {
-        alert(error.message);
+        notis("error", error.message);
+      } finally {
+        this.isLoading = false;
       }
     },
 
@@ -377,7 +520,9 @@ export default {
     disminuirCantidad(index) {
       if (this.productosLista[index].paquetes > 1) {
         this.productosLista[index].paquetes -= 1;
-        const precioUnitarioPorPaquete = this.productosLista[index].total_compra / (this.productosLista[index].paquetes + 1);
+        const precioUnitarioPorPaquete =
+          this.productosLista[index].total_compra /
+          (this.productosLista[index].paquetes + 1);
         this.productosLista[index].total_compra -= precioUnitarioPorPaquete;
       } else {
         this.deleteProducto(index);
@@ -386,7 +531,9 @@ export default {
 
     aumentarCantidad(index) {
       this.productosLista[index].paquetes += 1;
-      const precioUnitarioPorPaquete = this.productosLista[index].total_compra / (this.productosLista[index].paquetes - 1);
+      const precioUnitarioPorPaquete =
+        this.productosLista[index].total_compra /
+        (this.productosLista[index].paquetes - 1);
       this.productosLista[index].total_compra += precioUnitarioPorPaquete;
     },
 
@@ -414,30 +561,31 @@ export default {
 
     async confirmPayment() {
       if (!this.referenciaPago) {
-        alert('Por favor ingrese una referencia de compra');
+        notis("info", "Por favor ingrese una referencia de compra");
         return;
       }
 
+      this.isLoading = true;
       try {
-        this.loading = true;
         const datosCompra = {
           productosLista: this.productosLista,
           total: this.calcularTotal,
-          referenciaPago: this.referenciaPago.trim() // Aseguramos que se envíe
+          referenciaPago: this.referenciaPago.trim(), // Aseguramos que se envíe
         };
 
-        console.log('Enviando compra:', datosCompra);
+        this.payModal = false; 
+
+        console.log("Enviando compra:", datosCompra);
         await solicompras.registrarCompra(datosCompra);
 
-        this.confirmModal = true;
-        this.payModal = false;
         this.productosLista = [];
         this.limpiarTodo();
+        notis("success", "Compra realizada correctamente");
       } catch (error) {
-        console.error('Error al confirmar la compra:', error);
-        alert(error.message);
+        console.error("Error al confirmar la compra:", error);
+        notis("error", error.message);
       } finally {
-        this.loading = false;
+        this.isLoading = false;
       }
     },
 
@@ -447,7 +595,7 @@ export default {
         this.total = this.calcularTotal;
         this.payModal = true;
       } else {
-        alert('No hay productos en la lista');
+        notis("info", "No hay productos en la lista");
       }
     },
 
@@ -456,13 +604,26 @@ export default {
     },
 
     confirmPaymentClose() {
+      // Cerramos el modal de confirmación
       this.confirmModal = false;
+
+      // Nos aseguramos que también el modal de pago esté cerrado
+      this.payModal = false;
+
+      // Limpiamos y reiniciamos
       this.reiniciarInputs();
-      this.$refs.codigo.focus();
+      this.limpiarTodo();
+
+      // Enfocamos el campo de código
+      this.$nextTick(() => {
+        this.$refs.codigo.focus();
+      });
     },
 
     listaProveedores() {
-      this.proveedores_nombre = [...new Set(this.productosLista.map(p => p.proveedor))];
+      this.proveedores_nombre = [
+        ...new Set(this.productosLista.map((p) => p.proveedor)),
+      ];
       this.showProveedores = true;
       this.payModal = false;
     },
@@ -506,7 +667,11 @@ export default {
         target.tagName === "TEXTAREA" ||
         target.isContentEditable;
 
-      if (!isInputField && event.key === "Backspace" && this.productosLista.length > 0) {
+      if (
+        !isInputField &&
+        event.key === "Backspace" &&
+        this.productosLista.length > 0
+      ) {
         this.productosLista.pop();
       }
     },
@@ -519,43 +684,51 @@ export default {
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
+      document.getElementsByTagName("head")[0].appendChild(link);
     },
 
     async guardarCompraTemporal() {
       if (this.productosLista.length === 0) {
-        alert('No hay productos para guardar');
+        notis("info", "No hay productos para guardar");
         return;
       }
 
+      this.isLoading = true;
       try {
         await solicompras.guardarCompraTemp({
           productosLista: this.productosLista,
-          total: this.calcularTotal
+          total: this.calcularTotal,
         });
-        alert('Compra guardada temporalmente');
+        notis("success", "Compra guardada temporalmente");
       } catch (error) {
-        console.error('Error al guardar compra temporal:', error);
-        alert(error.message);
+        console.error("Error al guardar compra temporal:", error);
+        notis("error", error.message);
+      } finally {
+        this.isLoading = false;
       }
     },
 
     async recuperarCompraTemporal() {
+      this.isLoading = true;
       try {
         const compraTemp = await solicompras.recuperarCompraTemp();
         if (compraTemp && compraTemp.productosLista) {
           this.productosLista = compraTemp.productosLista;
-          alert('Compra recuperada exitosamente');
+          notis("success", "Compra recuperada exitosamente");
         }
       } catch (error) {
-        console.error('Error al recuperar compra temporal:', error);
-        alert(error.message);
+        console.error("Error al recuperar compra temporal:", error);
+        notis("error", error.message);
+      } finally {
+        this.isLoading = false;
       }
-    }
+    },
   },
 
   async created() {
@@ -567,14 +740,14 @@ export default {
     window.addEventListener("keydown", this.pushEsc);
     window.addEventListener("keydown", this.pushF12);
     this.$refs.codigo.focus();
-    setPageTitle('Crear Compras');
+    setPageTitle("Crear Compras");
   },
 
   beforeUnmount() {
     window.removeEventListener("keydown", this.pushDelete);
     window.removeEventListener("keydown", this.pushEsc);
     window.removeEventListener("keydown", this.pushF12);
-  }
+  },
 };
 </script>
 
@@ -588,14 +761,241 @@ export default {
 
 /* Layout Principal */
 .wrapper {
-  padding: 8px;
-  /* Reducido el padding */
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 60px);
+}
+
+.main-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
   display: flex;
-  height: 90%;
-  /* Aumentado ligeramente */
   flex-direction: column;
-  justify-content: flex-start;
-  /* Alineación hacia arriba */
+  gap: 1.5rem;
+}
+
+.purchase-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-section {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 1.25rem;
+  border: 1px solid #e9ecef;
+}
+
+/* Nueva distribución para la sección de búsqueda */
+.search-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.quantities-section {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #344767;
+  font-size: 0.875rem;
+}
+
+.form-input {
+  padding: 0.625rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.form-input:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.button-group {
+  display: flex;
+  align-items: flex-end;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.625rem 1.25rem;
+  border-radius: 4px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .search-section {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .quantities-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .search-section,
+  .quantities-section {
+    grid-template-columns: 1fr;
+  }
+
+  .form-section {
+    padding: 1rem;
+  }
+}
+
+.footer-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.action-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.shortcut-badge {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #6c757d;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn i {
+  font-size: 1.1rem;
+}
+
+.btn-cancel {
+  background-color: #fff;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+}
+
+.btn-cancel:hover {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.btn-process {
+  background-color: #0d6efd;
+  color: #fff;
+  min-width: 160px;
+}
+
+.btn-process:hover {
+  background-color: #0b5ed7;
+}
+
+.process-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Contenedor del total */
+.total-container {
+  background-color: #f8f9fa;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  min-width: 200px;
+}
+
+.total-label {
+  display: block;
+  color: #6c757d;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.total-amount {
+  color: #344767;
+  font-size: 1.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.currency {
+  color: #6c757d;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .action-group {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .total-container {
+    width: 100%;
+    text-align: center;
+  }
+
+  .total-amount {
+    justify-content: center;
+  }
 }
 
 /* Contenedores de Input */
@@ -657,8 +1057,8 @@ export default {
 /* Tabla */
 .table-container {
   width: 100%;
-  border-radius: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #1a1a1a;
+  border-radius: 4px; /* Reducido de 8px a 4px */
   margin-top: 16px;
   height: auto;
   max-height: 480px;
@@ -707,14 +1107,6 @@ export default {
 
 .table tbody tr:last-child td:last-child {
   border-bottom-right-radius: 10px;
-}
-
-/* Botones */
-.btn {
-  padding: 8px 16px;
-  border: none;
-  cursor: pointer;
-  border-radius: 10px;
 }
 
 .btn-botones-accion {
@@ -996,131 +1388,189 @@ export default {
 /* =======================================================
    Modo Oscuro
 ======================================================= */
-/* Contenedor principal */
-.dark .categorias-wrapper {
-  background-color: #1e1e1e;
-  color: #fff;
+.dark .wrapper {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
 }
 
-/* Inputs y búsqueda en modo oscuro */
-.dark .busqueda {
-  background-color: #2d2d2d;
+.dark .main-container {
+  background-color: #242424;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Formularios en Modo Oscuro */
+.dark .form-section {
+  background-color: #2a2a2a;
+  border-color: #333333;
+}
+
+.dark .form-label {
+  color: #e0e0e0;
+}
+
+.dark .form-input {
+  background-color: #333333;
   border-color: #404040;
-  color: #fff;
+  color: #ffffff;
 }
 
-.dark .custom-select {
-  background-color: #2d2d2d;
-  border-color: #404040;
-  color: #fff;
+.dark .form-input::placeholder {
+  color: #666666;
 }
 
-.dark .custom-select option {
-  background-color: #2d2d2d;
-  color: #fff;
+.dark .form-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-/* Tabla en modo oscuro */
+/* Tabla en Modo Oscuro */
 .dark .table-container {
-  border-color: #404040;
-  background-color: #2d2d2d;
+  border-color: #333333;
 }
 
 .dark .table thead {
-  background-color: #2d2d2d;
+  background-color: #2a2a2a;
 }
 
 .dark .table th {
-  background-color: #383838;
-  color: #fff;
-  border-color: #404040;
+  background-color: #333333;
+  color: #e0e0e0;
+  border-bottom-color: #404040;
 }
 
 .dark .table td {
-  color: #fff;
-  border-color: #404040;
+  color: #e0e0e0;
+  border-bottom-color: #404040;
 }
 
-.dark .table tr:hover {
-  background-color: #383838;
-}
-
-/* Modal en modo oscuro */
-.dark .modal-content {
+.dark .table tbody tr:hover {
   background-color: #2d2d2d;
-  color: #fff;
 }
 
-.dark .modal-content input,
-.dark .modal-content textarea {
-  background-color: #383838;
+/* DataList en Modo Oscuro */
+.dark datalist {
+  background-color: #333333;
+  color: #ffffff;
+}
+
+/* Footer en Modo Oscuro */
+.dark .footer-section {
+  border-top-color: #333333;
+}
+
+.dark .shortcut-badge {
+  background-color: #333333;
   border-color: #404040;
-  color: #fff;
+  color: #b0b0b0;
 }
 
-.dark .form-group label {
-  color: #fff;
+.dark .btn-cancel {
+  background-color: #2a2a2a;
+  color: #ff4d4d;
+  border-color: #ff4d4d;
 }
 
-/* Scroll personalizado en modo oscuro */
-.dark .table-container::-webkit-scrollbar-track {
-  background: #2d2d2d;
+.dark .btn-cancel:hover {
+  background-color: #ff4d4d;
+  color: #ffffff;
 }
 
-.dark .table-container::-webkit-scrollbar-thumb {
-  background: #c09d62;
+.dark .btn-process {
+  background-color: #1a56db;
 }
 
-.dark .table-container::-webkit-scrollbar-thumb:hover {
-  background: #a38655;
+.dark .btn-process:hover {
+  background-color: #1e429f;
 }
 
-/* Botones en modo oscuro (manteniendo los colores originales) */
-.dark .button-promocion {
-  background-color: #4cafaf;
-  color: white;
+.dark .total-container {
+  background-color: #2a2a2a;
+  border-color: #333333;
 }
 
-.dark .button-unidad-medida {
-  background-color: #4caf4c;
-  color: #000;
+.dark .total-label {
+  color: #b0b0b0;
 }
 
-.dark #btnAdd {
-  background-color: #c09d62;
-  color: black;
+.dark .total-amount {
+  color: #ffffff;
 }
 
-.dark #btnAdd:hover {
-  background-color: #a38655;
+.dark .currency {
+  color: #b0b0b0;
 }
 
-.dark #btnEditar {
-  background-color: #ffc107;
-  color: black;
+/* Modales en Modo Oscuro */
+.dark .modal-content {
+  background-color: #242424;
+  color: #e0e0e0;
 }
 
-.dark #btnEditar:hover {
-  background-color: #e8af06;
+.dark .modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
 }
 
-.dark #btnEliminar {
-  background-color: #dc3545;
-  color: black;
+/* Input con autocompletado en Modo Oscuro */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff;
+  -webkit-box-shadow: 0 0 0px 1000px #333333 inset;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
-.dark #btnEliminar:hover {
-  background-color: #b72433;
+/* Scrollbar en Modo Oscuro */
+.dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-.dark .modalShowConfirm-Si {
-  background-color: #dc3545;
-  color: white;
+.dark ::-webkit-scrollbar-track {
+  background: #2a2a2a;
+  border-radius: 4px;
 }
 
-.dark .modalShowConfirm-no {
-  background-color: #6c757d;
-  color: white;
+.dark ::-webkit-scrollbar-thumb {
+  background: #4a4a4a;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* Botones de Acción en Modo Oscuro */
+.dark .btn-icon {
+  color: #ff4d4d;
+}
+
+.dark .btn-icon:hover {
+  color: #ff6666;
+}
+
+/* Estados de Input Deshabilitados en Modo Oscuro */
+.dark .form-input:disabled {
+  background-color: #2a2a2a;
+  color: #666666;
+  border-color: #333333;
+}
+
+/* notisas y Mensajes en Modo Oscuro */
+.dark .notis {
+  background-color: #2a2a2a;
+  border-color: #333333;
+}
+
+.dark .notis-danger {
+  color: #ff4d4d;
+  background-color: rgba(255, 77, 77, 0.1);
+  border-color: rgba(255, 77, 77, 0.2);
+}
+
+.dark .notis-success {
+  color: #4caf50;
+  background-color: rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.2);
 }
 
 /* Estilo para los div-modal-resumen */
@@ -1155,5 +1605,84 @@ export default {
   background-color: #383838;
   border-color: #404040;
   color: #fff;
+}
+
+.dark .table-container {
+  border-color: #1a1a1a;
+  background-color: #242424;
+}
+
+.dark .table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.dark .table thead {
+  background-color: #1a1a1a;
+}
+
+.dark .table th {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  border-bottom: 1px solid #151515;
+  padding: 12px 16px;
+  font-weight: 600;
+}
+
+.dark .table td {
+  background-color: #242424;
+  color: #e0e0e0;
+  border-bottom: 1px solid #151515;
+  padding: 12px 16px;
+}
+
+.dark .table tr:hover td {
+  background-color: #2a2a2a;
+}
+
+/* Ajuste de bordes redondeados */
+.dark .table thead th:first-child {
+  border-top-left-radius: 4px;
+}
+
+.dark .table thead th:last-child {
+  border-top-right-radius: 4px;
+}
+
+.dark .table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 4px;
+}
+
+.dark .table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 4px;
+}
+
+/* Estilos para las celdas de opciones */
+.dark .table td.actions-cell {
+  background-color: #242424;
+}
+
+.dark .table tr:hover td.actions-cell {
+  background-color: #2a2a2a;
+}
+
+/* Scrollbar personalizada para modo oscuro */
+.dark .table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark .table-container::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.dark .table-container::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 4px;
+}
+
+.dark .table-container::-webkit-scrollbar-thumb:hover {
+  background: #404040;
 }
 </style>

@@ -167,4 +167,28 @@ export const infoConfig = {
       "Consultar gráficas y datos actualizados del desempeño del negocio",
     ],
   },
+
+  "Registro de Compras": {
+    descripcion:
+      "Página diseñada para registrar de manera simple y rápida las compras de productos a proveedores. Aquí podrás llevar el control de tus compras diarias.",
+    funciones: [
+      "Buscar y seleccionar productos de tu inventario",
+      "Registrar cantidad y precio de los productos comprados",
+      "Agregar una referencia para identificar cada compra",
+      "Ver y editar la lista de productos antes de finalizar",
+      "Confirmar y procesar la compra cuando esté lista",
+    ],
+  },
+
+  "Reportería": {
+    descripcion:
+      "Página diseñada para generar y visualizar reportes detallados de ventas. Permite analizar la información de ventas por diferentes criterios y exportarla en distintos formatos.",
+    funciones: [
+      "Generar reportes por cliente, sucursal o empleado",
+      "Filtrar información por fechas específicas",
+      "Ver detalles de ventas con valores exentos y gravados",
+      "Personalizar el diseño con logo de la empresa",
+      "Exportar reportes en PDF y Excel",
+    ],
+  },
 };

@@ -672,23 +672,32 @@ export default {
 .info-icon {
   cursor: pointer;
   margin-right: 5px;
-  vertical-align: middle;
-  position: relative;
+  font-size: 16px;
+  color: #666;
 }
 
 .tooltip {
-  display: inline-block;
   position: absolute;
   left: 0;
-  top: 100%;
-  background-color: #f9f9f9;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 5px;
+  top: 28px; /* Ajustado para que aparezca debajo del label */
+  background-color: #333;
+  color: white;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  width: 300px;
   z-index: 1000;
-  width: 250px;
-  margin-top: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tooltip::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 10px;
+  border-width: 0 5px 5px 5px;
+  border-style: solid;
+  border-color: transparent transparent #333 transparent;
 }
 
 .modal {
@@ -767,6 +776,7 @@ export default {
 /* Form Groups */
 .form-group {
   margin-bottom: 20px;
+  position: relative; /* Añadido para posicionamiento del tooltip */
 }
 
 .form-group label {
@@ -1352,5 +1362,18 @@ textarea:focus {
 
 .dark .toggle-password:disabled {
   color: #666;
+}
+
+.dark .tooltip {
+  background-color: #1e1e1e;
+  border: 1px solid #404040;
+}
+
+.dark .tooltip::before {
+  border-color: transparent transparent #1e1e1e transparent;
+}
+
+.dark .info-icon {
+  color: #aaa;
 }
 </style>

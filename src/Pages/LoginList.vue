@@ -1,6 +1,6 @@
 <template>
+  <ModalLoading :isLoading="isLoading" />
   <div class="login-container">
-    <ModalLoading :isLoading="isLoading" />
     <div class="login-card">
       <h2 v-if="!isRecoveringPassword">Login</h2>
       <h2 v-else>Recuperar Contraseña</h2>
@@ -250,6 +250,7 @@ html {
   height: 100%;
   overflow: hidden;
   padding: 20px;
+  z-index: 1;
 }
 
 /* Capa de oscurecimiento */
@@ -261,7 +262,7 @@ html {
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1;
+  z-index: 2;
 }
 
 /* Tarjeta de Login */
@@ -274,7 +275,7 @@ html {
   width: 100%;
   max-width: 400px;
   position: relative;
-  z-index: 2;
+  z-index: 3;
   backdrop-filter: blur(10px);
 }
 
@@ -539,5 +540,11 @@ input:focus {
   -webkit-box-shadow: 0 0 0px 1000px #383838 inset;
   transition: background-color 5000s ease-in-out 0s;
   caret-color: #fff;
+}
+
+:deep(.modal-loading) {
+  position: fixed;
+  z-index: 9999; /* Mayor que cualquier otro elemento */
+  background-color: rgba(0, 0, 0, 0.7);
 }
 </style>
