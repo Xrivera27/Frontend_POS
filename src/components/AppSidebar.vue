@@ -54,7 +54,7 @@
         <li v-if="hasPermission('Usuario')" class="nav-item">
           <router-link
             @click="handleRouteChange"
-            to="/empleados"
+            to="/registro"
             class="nav-link"
             :class="{ active: isActive('/empleados') }"
           >
