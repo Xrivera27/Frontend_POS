@@ -4,7 +4,11 @@
       <PageHeader :titulo="titulo" />
 
       <div class="company-config">
-        <form @submit.prevent="guardarConfiguracionSAR" autocomplete="off" class="formulario form-company-SAR">
+        <form
+          @submit.prevent="guardarConfiguracionSAR"
+          autocomplete="off"
+          class="formulario form-company-SAR"
+        >
           <fieldset :disabled="busisnessSarEditing">
             <div class="contenedor-titulo">
               <h2 class="titulo-form">Configuración SAR</h2>
@@ -13,28 +17,65 @@
             <div class="contenedor-principal">
               <div class="contenedor-interno contenedor-izquierdo">
                 <label for="numero_CAI">Numero CAI:</label>
-                <input v-model="configuracionSAR.numero_CAI" type="text" id="numero_CAI" required />
+                <input
+                  v-model="configuracionSAR.numero_CAI"
+                  type="text"
+                  id="numero_CAI"
+                  required
+                />
 
                 <label for="rango_inicial">Rango Inicial:</label>
-                <input v-model="configuracionSAR.rango_inicial" type="text" id="rango_inicial" required />
+                <input
+                  v-model="configuracionSAR.rango_inicial"
+                  type="text"
+                  id="rango_inicial"
+                  required
+                />
 
                 <label for="rango_final">Rango Final:</label>
-                <input v-model="configuracionSAR.rango_final" type="text" id="rango_final" required />
+                <input
+                  v-model="configuracionSAR.rango_final"
+                  type="text"
+                  id="rango_final"
+                  required
+                />
               </div>
               <div class="contenedor-interno contenedor-derecho">
                 <label for="fecha_autorizacion">Fecha de autorización:</label>
-                <input v-model="configuracionSAR.fecha_autorizacion" type="date" id="fecha_autorizacion" required />
+                <input
+                  v-model="configuracionSAR.fecha_autorizacion"
+                  type="date"
+                  id="fecha_autorizacion"
+                  required
+                />
 
                 <label for="fecha_vencimiento">Fecha de vencimiento:</label>
-                <input v-model="configuracionSAR.fecha_vencimiento" type="date" id="fecha_vencimiento" required />
+                <input
+                  v-model="configuracionSAR.fecha_vencimiento"
+                  type="date"
+                  id="fecha_vencimiento"
+                  required
+                />
               </div>
             </div>
           </fieldset>
 
           <div class="botones-container">
-            <button class="btn editar" @click="isEditing(4)" :disabled="!busisnessSarEditing">Editar</button>
-            <button class="btn guardar" type="submit" :disabled="busisnessSarEditing"
-              @click.prevent="updatesar">Guardar</button>
+            <button
+              class="btn editar"
+              @click="isEditing(4)"
+              :disabled="!busisnessSarEditing"
+            >
+              Editar
+            </button>
+            <button
+              class="btn guardar"
+              type="submit"
+              :disabled="busisnessSarEditing"
+              @click.prevent="updatesar"
+            >
+              Guardar
+            </button>
           </div>
         </form>
       </div>
@@ -47,26 +88,26 @@
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
-import axios from 'axios';
+import axios from "axios";
 import { useToast } from "vue-toastification";
-const { getApi } = require('../../config/getApiUrl.js');
-import { setPageTitle } from '@/components/pageMetadata';
+const { getApi } = require("../../config/getApiUrl.js");
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
   components: {
-    PageHeader
+    PageHeader,
   },
   data() {
     return {
-      titulo: 'Configuración SAR',
+      titulo: "Configuración SAR",
       busisnessSarEditing: true,
       esCeo: false,
       configuracionSAR: {
-        numero_CAI: '',
-        rango_inicial: '',
-        rango_final: '',
-        fecha_autorizacion: '',
-        fecha_vencimiento: '',
+        numero_CAI: "",
+        rango_inicial: "",
+        rango_final: "",
+        fecha_autorizacion: "",
+        fecha_vencimiento: "",
       },
     };
   },
@@ -79,7 +120,7 @@ export default {
     async getConfiguracionSAR() {
       const toast = useToast();
       try {
-        const token = localStorage.getItem('auth');
+        const token = localStorage.getItem("auth");
         const response = await axios.get(`${getApi()}/sar`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -88,15 +129,17 @@ export default {
 
         const sarData = response.data.datosSAR;
 
-        this.configuracionSAR.numero_CAI = sarData.numero_CAI || '';
-        this.configuracionSAR.rango_inicial = sarData.rango_inicial || '';
-        this.configuracionSAR.rango_final = sarData.rango_final || '';
-        this.configuracionSAR.fecha_autorizacion = sarData.fecha_autorizacion || '';
-        this.configuracionSAR.fecha_vencimiento = sarData.fecha_vencimiento || '';
+        this.configuracionSAR.numero_CAI = sarData.numero_CAI || "";
+        this.configuracionSAR.rango_inicial = sarData.rango_inicial || "";
+        this.configuracionSAR.rango_final = sarData.rango_final || "";
+        this.configuracionSAR.fecha_autorizacion =
+          sarData.fecha_autorizacion || "";
+        this.configuracionSAR.fecha_vencimiento =
+          sarData.fecha_vencimiento || "";
       } catch (error) {
-        console.error('Error al obtener la configuración SAR:', error);
-        toast.error('No se pudo obtener la configuración SAR.', {
-          timeout: 5000
+        console.error("Error al obtener la configuración SAR:", error);
+        toast.error("No se pudo obtener la configuración SAR.", {
+          timeout: 5000,
         });
       }
     },
@@ -106,64 +149,81 @@ export default {
       try {
         // Validar el rango inicial
         if (!this.validateSARNumber(this.configuracionSAR.rango_inicial)) {
-          toast.error('El Rango Inicial debe tener exactamente 16 dígitos numéricos', {
-            timeout: 5000
-          });
+          toast.error(
+            "El Rango Inicial debe tener exactamente 16 dígitos numéricos",
+            {
+              timeout: 5000,
+            }
+          );
           return;
         }
 
         // Validar el rango final
         if (!this.validateSARNumber(this.configuracionSAR.rango_final)) {
-          toast.error('El Rango Final debe tener exactamente 16 dígitos numéricos', {
-            timeout: 5000
-          });
+          toast.error(
+            "El Rango Final debe tener exactamente 16 dígitos numéricos",
+            {
+              timeout: 5000,
+            }
+          );
           return;
         }
 
         // Validar que el rango final sea mayor que el inicial
-        if (parseInt(this.configuracionSAR.rango_final) <= parseInt(this.configuracionSAR.rango_inicial)) {
-          toast.error('El Rango Final debe ser mayor que el Rango Inicial', {
-            timeout: 5000
+        if (
+          parseInt(this.configuracionSAR.rango_final) <=
+          parseInt(this.configuracionSAR.rango_inicial)
+        ) {
+          toast.error("El Rango Final debe ser mayor que el Rango Inicial", {
+            timeout: 5000,
           });
           return;
         }
 
-        const token = localStorage.getItem('auth');
+        const token = localStorage.getItem("auth");
         const updatedData = {
           numero_CAI: this.configuracionSAR.numero_CAI,
           rango_inicial: this.configuracionSAR.rango_inicial,
           rango_final: this.configuracionSAR.rango_final,
           fecha_autorizacion: this.configuracionSAR.fecha_autorizacion,
           fecha_vencimiento: this.configuracionSAR.fecha_vencimiento,
-          numero_actual_SAR: this.configuracionSAR.rango_inicial
+          numero_actual_SAR: this.configuracionSAR.rango_inicial,
         };
 
-        const response = await axios.post(`${getApi()}/sar/create`, updatedData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await axios.post(
+          `${getApi()}/sar/create`,
+          updatedData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (response.status === 200) {
-          toast.success('Datos SAR actualizados exitosamente', {
-            timeout: 5000
+          toast.success("Datos SAR actualizados exitosamente", {
+            timeout: 5000,
           });
           window.location.reload();
         }
       } catch (error) {
-        console.error('Error al actualizar los datos SAR:', error);
+        console.error("Error al actualizar los datos SAR:", error);
         if (error.response) {
-          toast.error(error.response.data.message || 'Hubo un problema al guardar los datos.', {
-            timeout: 5000
-          });
+          toast.error(
+            error.response.data.message ||
+              "Hubo un problema al guardar los datos.",
+            {
+              timeout: 5000,
+            }
+          );
         } else if (error.request) {
-          toast.error('Error de conexión con el servidor.', {
-            timeout: 5000
+          toast.error("Error de conexión con el servidor.", {
+            timeout: 5000,
           });
         } else {
-          toast.error('Hubo un problema al guardar los datos.', {
-            timeout: 5000
+          toast.error("Hubo un problema al guardar los datos.", {
+            timeout: 5000,
           });
         }
       }
@@ -207,24 +267,26 @@ export default {
           break;
         default:
           toast.error("Ha ocurrido un error", {
-            timeout: 5000
+            timeout: 5000,
           });
       }
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    }
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
   },
 
   mounted() {
     this.getConfiguracionSAR();
     window.addEventListener("keydown", this.pushEsc);
-    setPageTitle('Configuración');
+    setPageTitle("Configuración");
   },
 
   beforeUnmount() {
@@ -234,11 +296,11 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap");
 
 * {
   box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 /* Configuración del usuario */
@@ -453,7 +515,6 @@ input {
 }
 
 @media screen and (max-width: 480px) {
-
   .configuracion-usuario {
     padding: 8px;
   }
@@ -480,7 +541,6 @@ input {
     top: -8%;
   }
 }
-
 
 /* Contenedor principal */
 .dark .configuracion-usuario {
@@ -601,5 +661,14 @@ input {
   -webkit-text-fill-color: #fff;
   -webkit-box-shadow: 0 0 0px 1000px #383838 inset;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 </style>

@@ -212,6 +212,9 @@ select {
 input:focus,
 select:focus {
   border-color: #39b378;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 
 .form-options {

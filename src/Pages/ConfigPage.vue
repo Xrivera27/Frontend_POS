@@ -500,14 +500,6 @@ export default {
   overflow-x: hidden;
 }
 
-.contenedor-titulo {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
 .contenedor-principal {
   display: flex;
   justify-content: space-around;
@@ -522,10 +514,17 @@ export default {
   padding: 0 2%;
 }
 
+.usuario-config {
+  max-width: 1000px; /* Ancho máximo */
+  width: 90%; /* Ancho responsivo */
+  margin: 0 auto; /* Centrar el contenedor */
+  padding: 20px;
+}
+
 /* Formularios */
 form {
   border: 1px solid rgb(110, 109, 109);
-  padding: 3% 0 2% 0;
+  padding: 24px 0; /* Ajustado el padding */
   border-radius: 10px;
   min-width: 300px;
   width: 100%;
@@ -564,12 +563,25 @@ input {
 }
 
 /* Títulos */
+.contenedor-titulo {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Cambiado de center a flex-start */
+  padding: 0 24px; /* Añadir padding horizontal */
+  margin-bottom: 45px; /* Espacio después del título */
+}
+
+/* Estilos para el título */
 .titulo-form {
-  position: absolute;
-  top: -11.5%;
-  background-color: #f5f5f5;
-  padding: 0 10px;
-  color: #858585;
+  position: relative; /* Cambiado de absolute a relative */
+  color: #333333;
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin: 0;
+  padding: 0;
+  border-bottom: 2px solid #c09d62; /* Línea decorativa debajo del título */
 }
 
 /* Botones */
@@ -592,44 +604,12 @@ input {
   cursor: pointer;
 }
 
-.botones-container .btn:disabled {
-  background-color: #888787;
-}
-
-.guardar {
-  background-color: #009b15;
-  font-weight: bolder;
-  color: rgb(255, 255, 255);
-}
-
-.editar {
-  background-color: #5a5a5a;
-  font-weight: bolder;
-  color: rgb(255, 255, 255);
-}
-
-/* Botones de cambio */
-.boton-switch {
-  padding: 10px 18px;
-  transition: all 0.3s ease;
-}
-
-.boton-switch.activo:hover {
-  transition: all 0.3s ease;
-}
-
-.activo {
-  background-color: rgb(62, 238, 62);
-  color: white;
-}
-
-.inactivo {
-  background-color: rgb(238, 62, 62);
-  color: white;
-}
-
 /* Media Queries */
 @media screen and (max-width: 1024px) {
+  .usuario-config {
+    width: 95%;
+  }
+
   .contenedor-principal {
     flex-direction: column;
     align-items: center;
@@ -646,6 +626,11 @@ input {
 }
 
 @media screen and (max-width: 768px) {
+  .usuario-config {
+    width: 100%;
+    padding: 10px;
+  }
+
   .config-wrapper {
     padding: 8px;
   }
@@ -776,62 +761,11 @@ input {
   color: #fff;
 }
 
-.dark input:focus {
-  border-color: #c09d62;
-}
-
 /* Campos deshabilitados */
 .dark fieldset:disabled label,
 .dark fieldset:disabled input {
   color: #666;
   background-color: #2d2d2d;
-}
-
-/* Botones */
-.dark .guardar {
-  background-color: #00b81a;
-  color: #fff;
-}
-
-.dark .guardar:disabled {
-  background-color: #666;
-  color: #999;
-}
-
-.dark .editar {
-  background-color: #5a5a5a;
-  color: #fff;
-}
-
-.dark .editar:disabled {
-  background-color: #666;
-  color: #999;
-}
-
-.dark .SAR {
-  background-color: #0031c7;
-  color: #fff;
-}
-
-.SAR {
-  background-color: #0031c7;
-  color: #fff;
-}
-
-.dark :disabled {
-  background-color: #666;
-  color: #999;
-}
-
-/* Botones de cambio */
-.dark .boton-switch.activo {
-  background-color: #00b81a;
-  color: #fff;
-}
-
-.dark .boton-switch.inactivo {
-  background-color: #dc3545;
-  color: #fff;
 }
 
 /* Scroll personalizado en modo oscuro */
@@ -864,26 +798,6 @@ input {
   color: #666;
 }
 
-.btn-password {
-  background-color: #009b15;
-  color: white;
-  width: 94%;
-  margin-bottom: 15px;
-}
-
-.btn-password.disabled {
-  background-color: #888787;
-  cursor: not-allowed;
-}
-
-.dark .btn-password {
-  background-color: #00b81a;
-}
-
-.dark .btn-password.disabled {
-  background-color: #666;
-}
-
 /* Input autofill en modo oscuro */
 .dark input:-webkit-autofill,
 .dark input:-webkit-autofill:hover,
@@ -897,11 +811,162 @@ input {
   padding: 16px;
 }
 
+/* Botones principales (Editar y Guardar) */
+.editar {
+  background-color: #c09d62;
+  font-weight: bolder;
+  color: white;
+}
+
+.editar:hover {
+  background-color: #a38655;
+  transform: scale(1.02);
+  transition: all 0.3s ease;
+}
+
+.editar:disabled {
+  background-color: #c09d62 !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.guardar {
+  background-color: #009b15;
+  font-weight: bolder;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.guardar:hover:not(:disabled) {
+  background-color: #008512;
+  transform: scale(1.02);
+}
+
+.guardar:disabled {
+  background-color: #e0e0e0;
+  color: #909090;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Botón Cambiar Contraseña */
+.btn-password {
+  background-color: #009b15;
+  color: white;
+  width: 94%;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+}
+
+.btn-password:hover:not(.disabled) {
+  background-color: #008512;
+  transform: scale(1.02);
+}
+
+.btn-password.disabled {
+  background-color: #e0e0e0;
+  color: #909090;
+  cursor: not-allowed;
+}
+
+/* Botones de navegación (Config Usuario y Config Empresa) */
+.boton-switch {
+  padding: 10px 18px;
+  transition: all 0.3s ease;
+}
+
+.activo {
+  background-color: #c09d62;
+  color: #ffffff;
+  border: 1px solid #a38655;
+}
+
+.activo:hover {
+  background-color: #a38655;
+  transform: scale(1.02);
+}
+
+.inactivo {
+  background-color: #f5f5f5;
+  color: #666666;
+  border: 1px solid #e0e0e0;
+}
+
+.inactivo:hover {
+  background-color: #e8e8e8;
+  transform: scale(1.02);
+}
+
+/* Modo Oscuro */
+.dark .editar {
+  background-color: #c09d62;
+  color: white;
+}
+
+.dark .editar:hover {
+  background-color: #a38655;
+}
+
+.dark .editar:disabled {
+  background-color: #c09d62 !important;
+  opacity: 0.7;
+}
+
+.dark .guardar {
+  background-color: #009b15;
+  color: white;
+}
+
+.dark .guardar:hover:not(:disabled) {
+  background-color: #008512;
+}
+
+.dark .guardar:disabled {
+  background-color: #2d2d2d;
+  color: #666;
+  border: 1px solid #404040;
+}
+
+.dark .btn-password {
+  background-color: #009b15;
+}
+
+.dark .btn-password:hover:not(.disabled) {
+  background-color: #008512;
+}
+
+.dark .btn-password.disabled {
+  background-color: #2d2d2d;
+  color: #666;
+  border: 1px solid #404040;
+}
+
+.dark .activo {
+  background-color: #c09d62;
+  color: #ffffff;
+  border: 1px solid #a38655;
+}
+
+.dark .activo:hover {
+  background-color: #a38655;
+}
+
+.dark .inactivo {
+  background-color: #2d2d2d;
+  color: #909090;
+  border: 1px solid #404040;
+}
+
+.dark .inactivo:hover {
+  background-color: #363636;
+}
+
 input:focus,
-textarea:focus,
-select:focus {
+select:focus,
+textarea:focus {
   outline: none;
   border-color: #c09d62;
   box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 </style>

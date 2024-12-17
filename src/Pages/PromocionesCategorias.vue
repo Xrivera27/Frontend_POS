@@ -1182,6 +1182,7 @@ form {
   outline: none;
   border-color: #c09d62;
   box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 
 .modal-body input,
