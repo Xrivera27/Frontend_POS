@@ -3,7 +3,12 @@
     <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
     <!-- Formulario principal -->
-    <form @submit.prevent="agregarPromocion" autocomplete="off" v-show="activeForm" class="promocion-form">
+    <form
+      @submit.prevent="agregarPromocion"
+      autocomplete="off"
+      v-show="activeForm"
+      class="promocion-form"
+    >
       <div class="contenedor-titulo">
         <h2 class="titulo-form">Registro de promociones</h2>
       </div>
@@ -12,10 +17,22 @@
         <div class="contenedor-interno contenedor-izquierdo">
           <div class="form-group">
             <label for="categoria">Categoría:</label>
-            <input type="text" id="input-codigo-categoria" name="categoria" v-model="promForm.categoria"
-              list="categorias-list" @change="handleCategoriaSelect(promForm)" required />
+            <input
+              ref="categInputCreate"
+              type="text"
+              id="input-codigo-categoria"
+              name="categoria"
+              v-model="promForm.categoria"
+              list="categorias-list"
+              @change="handleCategoriaSelect(promForm)"
+              required
+            />
             <datalist id="categorias-list">
-              <option v-for="categoria in categorias" :key="categoria.id_categoria" :value="categoria.nombre_categoria">
+              <option
+                v-for="categoria in categorias"
+                :key="categoria.id_categoria"
+                :value="categoria.nombre_categoria"
+              >
                 {{ categoria.nombre_categoria }}
               </option>
             </datalist>
@@ -23,28 +40,53 @@
 
           <div class="form-group">
             <label for="nombre_promocion">Nombre de la promoción:</label>
-            <input type="text" id="nombre_promocion" v-model="promForm.nombre_promocion" name="nombre_promocion"
-              required />
+            <input
+              type="text"
+              id="nombre_promocion"
+              v-model="promForm.nombre_promocion"
+              name="nombre_promocion"
+              required
+            />
           </div>
 
           <div class="form-group">
             <label for="porcentaje_descuento">Porcentaje de descuento:</label>
-            <input type="number" id="porcentaje_descuento" name="porcentaje_descuento"
-              v-model="promForm.porcentaje_descuento" min="0" max="100" step="0.01" required />
+            <input
+              type="number"
+              id="porcentaje_descuento"
+              name="porcentaje_descuento"
+              v-model="promForm.porcentaje_descuento"
+              min="0"
+              max="100"
+              step="0.01"
+              required
+            />
           </div>
         </div>
 
         <div class="contenedor-interno contenedor-derecho">
           <div class="form-group">
             <label for="fecha_inicio">Fecha de inicio:</label>
-            <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promForm.fecha_inicio"
-              :min="getFechaMinima()" required />
+            <input
+              type="date"
+              id="fecha_inicio"
+              name="fecha_inicio"
+              v-model="promForm.fecha_inicio"
+              :min="getFechaMinima()"
+              required
+            />
           </div>
 
           <div class="form-group">
             <label for="fecha_final">Fecha final:</label>
-            <input type="date" id="fecha_final" name="fecha_final" v-model="promForm.fecha_final"
-              :min="promForm.fecha_inicio || getFechaMinima()" required />
+            <input
+              type="date"
+              id="fecha_final"
+              name="fecha_final"
+              v-model="promForm.fecha_final"
+              :min="promForm.fecha_inicio || getFechaMinima()"
+              required
+            />
           </div>
         </div>
       </div>
@@ -53,7 +95,10 @@
         <div class="action-buttons">
           <btnGuardarModal :texto="'Registrar promoción'" type="submit">
           </btnGuardarModal>
-          <btnCerrarModal :texto="'Cancelar'" @click="limpiarForm"></btnCerrarModal>
+          <btnCerrarModal
+            :texto="'Cancelar'"
+            @click="limpiarForm"
+          ></btnCerrarModal>
         </div>
       </div>
     </form>
@@ -61,7 +106,12 @@
     <!-- Vista de tabla con paginación -->
     <div class="tabla-busqueda" v-if="!activeForm">
       <div>
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar promoción..." />
+        <input
+          class="busqueda"
+          type="text"
+          v-model="searchQuery"
+          placeholder="Buscar promoción..."
+        />
         <button v-if="esCeo" class="btn activar-form" @click="limpiarForm">
           Nueva promoción
         </button>
@@ -92,26 +142,44 @@
           </thead>
           <tbody>
             <tr v-for="(p, index) in paginatedPromociones" :key="index">
-              <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
+              <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
               <td>{{ p.categoria?.nombre_categoria || p.categoria }}</td>
               <td>{{ p.nombre_promocion }}</td>
               <td>{{ p.porcentaje_descuento }}</td>
               <td>{{ formatDate(p.fecha_inicio) }}</td>
               <td>{{ formatDate(p.fecha_final) }}</td>
-              <td>{{ p.manejo_automatico ? 'Se aplicará' : 'No se aplicará' }}</td>
+              <td>
+                {{ p.manejo_automatico ? "Se aplicará" : "No se aplicará" }}
+              </td>
               <td v-if="esCeo" class="td-botones">
-                <button id="btnEditar" class="btn btn-warning" @click="editarPromocion(index)">
+                <button
+                  id="btnEditar"
+                  class="btn btn-warning"
+                  @click="editarPromocion(index)"
+                >
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <button v-if="p.manejo_automatico" id="btnDesactivar" class="btn btn-success"
-                  @click="desactivarProm(index)">
+                <button
+                  v-if="p.manejo_automatico"
+                  id="btnDesactivar"
+                  class="btn btn-success"
+                  @click="desactivarProm(index)"
+                >
                   <b><i class="bi bi-check"></i></b>
                 </button>
-                <button v-if="!p.manejo_automatico" id="btnActivar" class="btn btn-secondary"
-                  @click="activarProm(p.id)">
+                <button
+                  v-if="!p.manejo_automatico"
+                  id="btnActivar"
+                  class="btn btn-secondary"
+                  @click="activarProm(p.id)"
+                >
                   <b><i class="bi bi-x"></i></b>
                 </button>
-                <button id="btnEliminar" class="btn btn-danger" @click="confirmDelete(index)">
+                <button
+                  id="btnEliminar"
+                  class="btn btn-danger"
+                  @click="confirmDelete(index)"
+                >
                   <b><i class="bi bi-trash-fill"></i></b>
                 </button>
               </td>
@@ -122,14 +190,23 @@
         <!-- Paginación -->
         <div class="pagination-wrapper">
           <div class="pagination-info">
-            Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize,
-              filterPromociones.length) }} de {{ filterPromociones.length }} registros
+            Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
+            {{ Math.min(currentPage * pageSize, filterPromociones.length) }} de
+            {{ filterPromociones.length }} registros
           </div>
           <div class="pagination-container">
-            <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+            <button
+              class="pagination-button"
+              :disabled="currentPage === 1"
+              @click="previousPage"
+            >
               Anterior
             </button>
-            <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
+            <button
+              class="pagination-button"
+              :disabled="currentPage === totalPages"
+              @click="nextPage"
+            >
               Siguiente
             </button>
           </div>
@@ -148,11 +225,22 @@
           <div class="contenedor-interno">
             <div class="form-group">
               <label for="categoria">Categoría:</label>
-              <input type="text" id="input-codigo-categoria-modal" name="categoria" v-model="promFormModal.categoria"
-                list="categorias-list-modal" @change="handleCategoriaSelect(promFormModal)" required />
+              <input
+                ref="categInputEdit"
+                type="text"
+                id="input-codigo-categoria-modal"
+                name="categoria"
+                v-model="promFormModal.categoria"
+                list="categorias-list-modal"
+                @change="handleCategoriaSelect(promFormModal)"
+                required
+              />
               <datalist id="categorias-list-modal">
-                <option v-for="categoria in categorias" :key="categoria.id_categoria"
-                  :value="categoria.nombre_categoria">
+                <option
+                  v-for="categoria in categorias"
+                  :key="categoria.id_categoria"
+                  :value="categoria.nombre_categoria"
+                >
                   {{ categoria.nombre_categoria }}
                 </option>
               </datalist>
@@ -160,46 +248,76 @@
 
             <div class="form-group">
               <label for="nombre_promocion">Nombre de la promoción:</label>
-              <input type="text" id="nombre_promocion" v-model="promFormModal.nombre_promocion" name="nombre_promocion"
-                required />
+              <input
+                type="text"
+                id="nombre_promocion"
+                v-model="promFormModal.nombre_promocion"
+                name="nombre_promocion"
+                required
+              />
             </div>
 
             <div class="form-group">
               <label for="porcentaje_descuento">Porcentaje de descuento:</label>
-              <input type="number" id="porcentaje_descuento" name="porcentaje_descuento"
-                v-model="promFormModal.porcentaje_descuento" min="0" max="100" step="0.01" required />
+              <input
+                type="number"
+                id="porcentaje_descuento"
+                name="porcentaje_descuento"
+                v-model="promFormModal.porcentaje_descuento"
+                min="0"
+                max="100"
+                step="0.01"
+                required
+              />
             </div>
           </div>
           <div class="contenedor-interno">
             <div class="form-group">
               <label for="fecha_inicio">Fecha de inicio:</label>
-              <input type="date" id="fecha_inicio" name="fecha_inicio" v-model="promFormModal.fecha_inicio"
-                :min="getFechaMinima()" required />
+              <input
+                type="date"
+                id="fecha_inicio"
+                name="fecha_inicio"
+                v-model="promFormModal.fecha_inicio"
+                :min="getFechaMinima()"
+                required
+              />
             </div>
 
             <div class="form-group">
               <label for="fecha_final">Fecha final:</label>
-              <input type="date" id="fecha_final" name="fecha_final" v-model="promFormModal.fecha_final"
-                :min="promFormModal.fecha_inicio || getFechaMinima()" required />
+              <input
+                type="date"
+                id="fecha_final"
+                name="fecha_final"
+                v-model="promFormModal.fecha_final"
+                :min="promFormModal.fecha_inicio || getFechaMinima()"
+                required
+              />
             </div>
           </div>
         </div>
 
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal :texto="'Guardar cambios'" @click="agregarPromocion" type="submit">
+            <btnGuardarModal
+              :texto="'Guardar cambios'"
+              @click="agregarPromocion"
+              type="submit"
+            >
             </btnGuardarModal>
-            <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+            <btnCerrarModal
+              :texto="'Cerrar'"
+              @click="closeModal"
+            ></btnCerrarModal>
           </div>
         </div>
-
       </div>
     </div>
 
     <!-- Modal de confirmación de eliminación -->
     <div class="modal" v-if="showConfirmModal">
       <div class="modal-confirm">
-
         <div class="modal-header">
           <h2>Confirmación</h2>
         </div>
@@ -208,7 +326,11 @@
         </div>
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="eliminarProm" />
+            <btnGuardarModal
+              texto="Sí, eliminar"
+              style="background-color: red"
+              @click="eliminarProm"
+            />
             <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
           </div>
         </div>
@@ -220,24 +342,48 @@
       <div class="modal-content">
         <h2>Conflicto de Fechas</h2>
         <div class="conflict-explanation">
-          <p>Existe una promoción activa para la categoría <strong>"{{ tempPromocionData?.categoria?.nombre_categoria ||
-            tempPromocionData?.categoria }}"</strong>
-            que coincide con las fechas seleccionadas:</p>
+          <p>
+            Existe una promoción activa para la categoría
+            <strong
+              >"{{
+                tempPromocionData?.categoria?.nombre_categoria ||
+                tempPromocionData?.categoria
+              }}"</strong
+            >
+            que coincide con las fechas seleccionadas:
+          </p>
 
           <div class="promocion-details existing">
             <h3>Promoción Existente:</h3>
-            <p><strong>Nombre:</strong> {{ conflictingPromocion?.nombre_promocion }}</p>
-            <p><strong>Descuento:</strong> {{ conflictingPromocion?.porcentaje_descuento }}%</p>
-            <p><strong>Período:</strong> {{ formatDate(conflictingPromocion?.fecha_inicio) }} al {{
-              formatDate(conflictingPromocion?.fecha_final) }}</p>
+            <p>
+              <strong>Nombre:</strong>
+              {{ conflictingPromocion?.nombre_promocion }}
+            </p>
+            <p>
+              <strong>Descuento:</strong>
+              {{ conflictingPromocion?.porcentaje_descuento }}%
+            </p>
+            <p>
+              <strong>Período:</strong>
+              {{ formatDate(conflictingPromocion?.fecha_inicio) }} al
+              {{ formatDate(conflictingPromocion?.fecha_final) }}
+            </p>
           </div>
 
           <div class="promocion-details new">
             <h3>Nueva Promoción:</h3>
-            <p><strong>Nombre:</strong> {{ tempPromocionData?.nombre_promocion }}</p>
-            <p><strong>Descuento:</strong> {{ tempPromocionData?.porcentaje_descuento }}%</p>
-            <p><strong>Período:</strong> {{ formatDate(tempPromocionData?.fecha_inicio) }} al {{
-              formatDate(tempPromocionData?.fecha_final) }}</p>
+            <p>
+              <strong>Nombre:</strong> {{ tempPromocionData?.nombre_promocion }}
+            </p>
+            <p>
+              <strong>Descuento:</strong>
+              {{ tempPromocionData?.porcentaje_descuento }}%
+            </p>
+            <p>
+              <strong>Período:</strong>
+              {{ formatDate(tempPromocionData?.fecha_inicio) }} al
+              {{ formatDate(tempPromocionData?.fecha_final) }}
+            </p>
           </div>
 
           <p class="warning-text">¿Qué deseas hacer?</p>
@@ -248,7 +394,8 @@
             <i class="bi bi-pencil"></i> Modificar fechas
           </button>
           <button class="btn btn-warning" @click="createAnywayPromocion">
-            <i class="bi bi-check2-circle"></i> Activar nueva y desactivar anterior
+            <i class="bi bi-check2-circle"></i> Activar nueva y desactivar
+            anterior
           </button>
         </div>
       </div>
@@ -259,25 +406,25 @@
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import solicitudes from "../../services/soli";
-const { esCeo } = require('../../services/usuariosSolicitudes');
-import ModalLoading from '@/components/ModalLoading.vue';
-import { notis } from '../../services/notificaciones.js';
-import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
-import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
-import { setPageTitle } from '@/components/pageMetadata';
+const { esCeo } = require("../../services/usuariosSolicitudes");
+import ModalLoading from "@/components/ModalLoading.vue";
+import { notis } from "../../services/notificaciones.js";
+import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
+import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
-  name: 'PromocionesCategoria',
+  name: "PromocionesCategoria",
   components: {
     PageHeader,
     ModalLoading,
     btnGuardarModal,
-    btnCerrarModal
+    btnCerrarModal,
   },
   data() {
     return {
       id_usuario: "",
-      titulo: 'Promociones: Categorías',
+      titulo: "Promociones: Categorías",
       searchQuery: "",
       activeForm: false,
       isEditing: false,
@@ -301,7 +448,6 @@ export default {
         fecha_inicio: "",
         fecha_final: "",
         estado: true,
-
       },
       promFormModal: {
         id: "",
@@ -321,8 +467,12 @@ export default {
     filterPromociones() {
       return this.promociones.filter(
         (promocion) =>
-          promocion.nombre_promocion?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          (promocion.categoria?.nombre_categoria || promocion.categoria)?.toLowerCase().includes(this.searchQuery.toLowerCase())
+          promocion.nombre_promocion
+            ?.toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
+          (promocion.categoria?.nombre_categoria || promocion.categoria)
+            ?.toLowerCase()
+            .includes(this.searchQuery.toLowerCase())
       );
     },
 
@@ -334,13 +484,13 @@ export default {
 
     totalPages() {
       return Math.ceil(this.filterPromociones.length / this.pageSize);
-    }
+    },
   },
 
   watch: {
     searchQuery() {
       this.currentPage = 1;
-    }
+    },
   },
 
   created() {
@@ -350,16 +500,15 @@ export default {
   async mounted() {
     this.isLoading = true;
     try {
-      setPageTitle('Promociones por Categorías');
+      setPageTitle("Promociones por Categorías");
       const result = await Promise.all([
         this.cargarPromociones(),
         this.cargarCategorias(),
-        solicitudes.solicitarUsuarioToken()
+        solicitudes.solicitarUsuarioToken(),
       ]);
       this.id_usuario = result[2];
 
       this.esCeo = await esCeo(this.id_usuario);
-
     } catch (error) {
       alert(error);
     } finally {
@@ -369,23 +518,23 @@ export default {
 
   methods: {
     formatDate(dateString) {
-      if (!dateString) return '';
+      if (!dateString) return "";
       try {
-        const date = new Date(dateString + 'T00:00:00');
-        if (isNaN(date.getTime())) return '';
+        const date = new Date(dateString + "T00:00:00");
+        if (isNaN(date.getTime())) return "";
         const day = date.getDate();
-        const month = date.toLocaleString('es-ES', { month: 'long' });
+        const month = date.toLocaleString("es-ES", { month: "long" });
         const year = date.getFullYear();
         return `${day} de ${month} de ${year}`;
       } catch (error) {
-        console.error('Error al formatear fecha:', error);
+        console.error("Error al formatear fecha:", error);
         return dateString;
       }
     },
 
     getFechaMinima() {
       const hoy = new Date();
-      return hoy.toISOString().split('T')[0];
+      return hoy.toISOString().split("T")[0];
     },
 
     previousPage() {
@@ -403,14 +552,16 @@ export default {
     async cargarCategorias() {
       this.isLoading = true;
       try {
-        const categoriasResponse = await solicitudes.fetchRegistros('/promocionesC/categorias/empresa');
+        const categoriasResponse = await solicitudes.fetchRegistros(
+          "/promocionesC/categorias/empresa"
+        );
         this.categorias = categoriasResponse;
-        console.log('Categorías cargadas:', this.categorias);
+        console.log("Categorías cargadas:", this.categorias);
       } catch (error) {
-        console.error('Error al cargar categorías:', error);
-        notis("error", 'Error al cargar las categorías');
-        if (error.message.includes('No hay token')) {
-          this.$router.push('/login');
+        console.error("Error al cargar categorías:", error);
+        notis("error", "Error al cargar las categorías");
+        if (error.message.includes("No hay token")) {
+          this.$router.push("/login");
         }
       } finally {
         this.isLoading = false;
@@ -419,7 +570,7 @@ export default {
 
     handleCategoriaSelect(form) {
       const categoriaSeleccionada = this.categorias.find(
-        c => c.nombre_categoria === form.categoria
+        (c) => c.nombre_categoria === form.categoria
       );
       if (categoriaSeleccionada) {
         form.categoria_id = categoriaSeleccionada.id_categoria;
@@ -432,18 +583,25 @@ export default {
       this.isLoading = true;
       this.error = null;
       try {
-        const promocionesResponse = await solicitudes.fetchRegistros('/promocionesC/empresa');
-        this.promociones = promocionesResponse.map(promocion => ({
+        const promocionesResponse = await solicitudes.fetchRegistros(
+          "/promocionesC/empresa"
+        );
+        this.promociones = promocionesResponse.map((promocion) => ({
           ...promocion,
-          fecha_inicio: new Date(promocion.fecha_inicio + 'T00:00:00').toISOString().split('T')[0],
-          fecha_final: new Date(promocion.fecha_final + 'T00:00:00').toISOString().split('T')[0]
+          fecha_inicio: new Date(promocion.fecha_inicio + "T00:00:00")
+            .toISOString()
+            .split("T")[0],
+          fecha_final: new Date(promocion.fecha_final + "T00:00:00")
+            .toISOString()
+            .split("T")[0],
         }));
-        console.log('Promociones cargadas:', this.promociones);
+        console.log("Promociones cargadas:", this.promociones);
       } catch (error) {
-        console.error('Error al cargar promociones:', error);
-        this.error = 'Error al cargar las promociones. Por favor, intente más tarde.';
-        if (error.message.includes('No hay token')) {
-          this.$router.push('/login');
+        console.error("Error al cargar promociones:", error);
+        this.error =
+          "Error al cargar las promociones. Por favor, intente más tarde.";
+        if (error.message.includes("No hay token")) {
+          this.$router.push("/login");
         }
       } finally {
         this.isLoading = false;
@@ -454,6 +612,9 @@ export default {
       this.activeForm = !this.activeForm;
       if (this.activeForm) {
         this.clearForm();
+        this.$nextTick(() => {
+          this.$refs.categInputCreate?.focus();
+        });
       }
     },
 
@@ -485,39 +646,50 @@ export default {
       const form = this.isEditing ? this.promFormModal : this.promForm;
 
       // Validar categoría
-      const categoriaValida = this.categorias.some(c => c.nombre_categoria === form.categoria);
+      const categoriaValida = this.categorias.some(
+        (c) => c.nombre_categoria === form.categoria
+      );
       if (!categoriaValida) {
-        notis("warning", 'Escoge una categoría válida');
+        notis("warning", "Escoge una categoría válida");
         return false;
       }
 
       // Validar campos obligatorios
-      if (!form.nombre_promocion || !form.porcentaje_descuento ||
-        !form.fecha_inicio || !form.fecha_final) {
-        notis("warning", 'Todos los campos son obligatorios');
+      if (
+        !form.nombre_promocion ||
+        !form.porcentaje_descuento ||
+        !form.fecha_inicio ||
+        !form.fecha_final
+      ) {
+        notis("warning", "Todos los campos son obligatorios");
         return false;
       }
 
       // Validar porcentaje
       if (form.porcentaje_descuento < 0 || form.porcentaje_descuento > 100) {
-        notis("warning", 'El porcentaje de descuento debe estar entre 0 y 100');
+        notis("warning", "El porcentaje de descuento debe estar entre 0 y 100");
         return false;
       }
 
       // Validar fechas
-      const fechaInicio = new Date(form.fecha_inicio + 'T00:00:00');
-      const fechaFinal = new Date(form.fecha_final + 'T00:00:00');
+      const fechaInicio = new Date(form.fecha_inicio + "T00:00:00");
+      const fechaFinal = new Date(form.fecha_final + "T00:00:00");
       const hoy = new Date();
 
-      [hoy, fechaInicio, fechaFinal].forEach(date => date.setHours(0, 0, 0, 0));
+      [hoy, fechaInicio, fechaFinal].forEach((date) =>
+        date.setHours(0, 0, 0, 0)
+      );
 
       if (fechaInicio < hoy) {
-        notis("warning", 'La fecha de inicio no puede ser anterior a hoy');
+        notis("warning", "La fecha de inicio no puede ser anterior a hoy");
         return false;
       }
 
       if (fechaInicio > fechaFinal) {
-        notis("warning", 'La fecha final debe ser posterior a la fecha inicial');
+        notis(
+          "warning",
+          "La fecha final debe ser posterior a la fecha inicial"
+        );
         return false;
       }
 
@@ -525,80 +697,93 @@ export default {
     },
 
     async agregarPromocion() {
-  this.isLoading = true;
-  try {
-    if (!this.validarFormulario()) return;
-
-    const formData = this.isEditing ? this.promFormModal : this.promForm;
-
-    if (!this.isEditing) {
+      this.isLoading = true;
       try {
-        const datos = {
-          categoria_id: formData.categoria_id,
-          nombre_promocion: formData.nombre_promocion,
-          porcentaje_descuento: formData.porcentaje_descuento,
-          fecha_inicio: new Date(formData.fecha_inicio + 'T00:00:00').toISOString().split('T')[0],
-          fecha_final: new Date(formData.fecha_final + 'T00:00:00').toISOString().split('T')[0],
-          force_create: false  // Importante: siempre false en la creación inicial
-        };
+        if (!this.validarFormulario()) return;
 
-        const response = await solicitudes.postRegistro(
-          '/promocionesC/crear-promocion',
-          datos
-        );
+        const formData = this.isEditing ? this.promFormModal : this.promForm;
 
-        if (response.length > 0) {
-          await this.cargarPromociones();
-          notis("success", 'Promocion creada exitosamente');
-          this.clearForm();
-          this.isShowModal = false;
-          this.activeForm = false;
+        if (!this.isEditing) {
+          try {
+            const datos = {
+              categoria_id: formData.categoria_id,
+              nombre_promocion: formData.nombre_promocion,
+              porcentaje_descuento: formData.porcentaje_descuento,
+              fecha_inicio: new Date(formData.fecha_inicio + "T00:00:00")
+                .toISOString()
+                .split("T")[0],
+              fecha_final: new Date(formData.fecha_final + "T00:00:00")
+                .toISOString()
+                .split("T")[0],
+              force_create: false, // Importante: siempre false en la creación inicial
+            };
+
+            const response = await solicitudes.postRegistro(
+              "/promocionesC/crear-promocion",
+              datos
+            );
+
+            if (response.length > 0) {
+              await this.cargarPromociones();
+              notis("success", "Promocion creada exitosamente");
+              this.clearForm();
+              this.isShowModal = false;
+              this.activeForm = false;
+            }
+          } catch (error) {
+            if (error.response?.status === 409) {
+              this.tempPromocionData = { ...formData };
+              this.conflictingPromocion =
+                error.response.data.promocion_existente;
+              this.showConflictModal = true;
+              notis(
+                "warning",
+                "Hay una promoción activa que coincide con las fechas indicadas"
+              );
+              return;
+            }
+            throw error;
+          }
+        } else {
+          const datos = {
+            nombre_promocion: this.promFormModal.nombre_promocion,
+            porcentaje_descuento: this.promFormModal.porcentaje_descuento,
+            fecha_inicio: new Date(
+              this.promFormModal.fecha_inicio + "T00:00:00"
+            )
+              .toISOString()
+              .split("T")[0],
+            fecha_final: new Date(this.promFormModal.fecha_final + "T00:00:00")
+              .toISOString()
+              .split("T")[0],
+          };
+
+          const response = await solicitudes.patchRegistro(
+            `/promocionesC/actualizar-promocion/${this.promFormModal.id}`,
+            datos
+          );
+
+          if (response) {
+            await this.cargarPromociones();
+            notis("success", "Promoción actualizada exitosamente");
+            this.clearForm();
+            this.isShowModal = false;
+          }
         }
       } catch (error) {
-        if (error.response?.status === 409) {
-          this.tempPromocionData = { ...formData };
-          this.conflictingPromocion = error.response.data.promocion_existente;
-          this.showConflictModal = true;
-          notis("warning", 'Hay una promoción activa que coincide con las fechas indicadas');
-          return;
-        }
-        throw error;
+        console.error("Error en agregarPromocion:", error);
+        notis("error", "Error al procesar la promoción");
+      } finally {
+        this.isLoading = false;
       }
-    } else {
-      const datos = {
-        nombre_promocion: this.promFormModal.nombre_promocion,
-        porcentaje_descuento: this.promFormModal.porcentaje_descuento,
-        fecha_inicio: new Date(this.promFormModal.fecha_inicio + 'T00:00:00').toISOString().split('T')[0],
-        fecha_final: new Date(this.promFormModal.fecha_final + 'T00:00:00').toISOString().split('T')[0]
-      };
-
-      const response = await solicitudes.patchRegistro(
-        `/promocionesC/actualizar-promocion/${this.promFormModal.id}`,
-        datos
-      );
-
-      if (response) {
-        await this.cargarPromociones();
-        notis("success", 'Promoción actualizada exitosamente');
-        this.clearForm();
-        this.isShowModal = false;
-      }
-    }
-  } catch (error) {
-    console.error('Error en agregarPromocion:', error);
-    notis("error", 'Error al procesar la promoción');
-  } finally {
-    this.isLoading = false;
-  }
-},
-
+    },
 
     async desactivarProm(index) {
       this.isLoading = true;
       try {
         const promocion = this.paginatedPromociones[index];
         if (!promocion || !promocion.id) {
-          throw new Error('Promoción no válida');
+          throw new Error("Promoción no válida");
         }
 
         const response = await solicitudes.patchRegistro(
@@ -608,126 +793,147 @@ export default {
 
         if (response) {
           await this.cargarPromociones();
-          notis("success", 'Promoción desactivada exitosamente');
+          notis("success", "Promoción desactivada exitosamente");
         }
       } catch (error) {
-        console.error('Error al desactivar promoción:', error);
-        notis("error", 'Error al desactivar promoción');
+        console.error("Error al desactivar promoción:", error);
+        notis("error", "Error al desactivar promoción");
       } finally {
         this.isLoading = false;
       }
     },
 
     async activarProm(promocionId) {
-  this.isLoading = true;
-  try {
-    // Encontrar la promoción a activar
-    const promocionAActivar = this.promociones.find(p => p.id === promocionId);
-    if (!promocionAActivar) {
-      throw new Error('Promoción no encontrada');
-    }
-
-    // Buscar promociones activas del mismo producto
-    const promocionActivaMismaCategoria = this.promociones.find(p => 
-      p.categoria_producto_Id === promocionAActivar.categoria_producto_Id && 
-      p.manejo_automatico === true &&
-      p.id !== promocionId &&
-      this.hayConflictoFechas(p, promocionAActivar)
-    );
-
-    if (promocionActivaMismaCategoria) {
-      // Si hay conflicto, mostrar modal
-      this.tempPromocionData = promocionAActivar;
-      this.conflictingPromocion = promocionActivaMismaCategoria;
-      this.showConflictModal = true;
-      notis("warning", "Ya existe una promoción activa para esta categoría en las fechas seleccionadas");
-      return;
-    }
-
-    // Si no hay conflicto, activar directamente
-    const response = await solicitudes.patchRegistro(
-      `/promocionesC/cambiar-estado-promocion/${promocionId}`,
-      { manejo_automatico: true }
-    );
-
-    if (response) {
-      await this.cargarPromociones();
-      notis("success", "Promoción activada exitosamente");
-    }
-  } catch (error) {
-    console.error('Error al activar promoción:', error);
-    notis("error", "Error al activar la promoción");
-  } finally {
-    this.isLoading = false;
-  }
-},
-
-hayConflictoFechas(promo1, promo2) {
-  const inicio1 = new Date(promo1.fecha_inicio);
-  const final1 = new Date(promo1.fecha_final);
-  const inicio2 = new Date(promo2.fecha_inicio);
-  const final2 = new Date(promo2.fecha_final);
-
-  return (
-    (inicio2 <= final1 && inicio2 >= inicio1) ||
-    (final2 >= inicio1 && final2 <= final1) ||
-    (inicio2 <= inicio1 && final2 >= final1)
-  );
-},
-
-async createAnywayPromocion() {
-  this.isLoading = true;
-  try {
-    if (this.tempPromocionData) {
-      if (!this.tempPromocionData.id) {
-        // Es una nueva promoción
-        const datos = {
-          categoria_id: this.tempPromocionData.categoria_id,
-          nombre_promocion: this.tempPromocionData.nombre_promocion,
-          porcentaje_descuento: this.tempPromocionData.porcentaje_descuento,
-          fecha_inicio: new Date(this.tempPromocionData.fecha_inicio + 'T00:00:00').toISOString().split('T')[0],
-          fecha_final: new Date(this.tempPromocionData.fecha_final + 'T00:00:00').toISOString().split('T')[0],
-          force_create: true
-        };
-
-        const response = await solicitudes.postRegistro(
-          '/promocionesC/crear-promocion',
-          datos
+      this.isLoading = true;
+      try {
+        // Encontrar la promoción a activar
+        const promocionAActivar = this.promociones.find(
+          (p) => p.id === promocionId
         );
-
-        if (response.length > 0) {
-          await this.cargarPromociones();
-          notis("success", "Nueva promoción creada y promoción anterior desactivada exitosamente");
-          this.clearForm();
-          this.closeConflictModal();
-          this.activeForm = false;
+        if (!promocionAActivar) {
+          throw new Error("Promoción no encontrada");
         }
-      } else {
-        // Es una promoción existente
-        await solicitudes.patchRegistro(
-          `/promocionesC/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
-          { manejo_automatico: false }
+
+        // Buscar promociones activas del mismo producto
+        const promocionActivaMismaCategoria = this.promociones.find(
+          (p) =>
+            p.categoria_producto_Id ===
+              promocionAActivar.categoria_producto_Id &&
+            p.manejo_automatico === true &&
+            p.id !== promocionId &&
+            this.hayConflictoFechas(p, promocionAActivar)
         );
 
+        if (promocionActivaMismaCategoria) {
+          // Si hay conflicto, mostrar modal
+          this.tempPromocionData = promocionAActivar;
+          this.conflictingPromocion = promocionActivaMismaCategoria;
+          this.showConflictModal = true;
+          notis(
+            "warning",
+            "Ya existe una promoción activa para esta categoría en las fechas seleccionadas"
+          );
+          return;
+        }
+
+        // Si no hay conflicto, activar directamente
         const response = await solicitudes.patchRegistro(
-          `/promocionesC/cambiar-estado-promocion/${this.tempPromocionData.id}`,
+          `/promocionesC/cambiar-estado-promocion/${promocionId}`,
           { manejo_automatico: true }
         );
 
         if (response) {
           await this.cargarPromociones();
-          notis("success", "Nueva promoción activada y promoción anterior desactivada exitosamente");
-          this.closeConflictModal();
+          notis("success", "Promoción activada exitosamente");
         }
+      } catch (error) {
+        console.error("Error al activar promoción:", error);
+        notis("error", "Error al activar la promoción");
+      } finally {
+        this.isLoading = false;
       }
-    }
-  } catch (error) {
-    console.error('Error al procesar la promoción:', error);
-    notis("error", "Error al procesar las promociones");
-  } finally {
-    this.isLoading = false;
-  }
-},
+    },
+
+    hayConflictoFechas(promo1, promo2) {
+      const inicio1 = new Date(promo1.fecha_inicio);
+      const final1 = new Date(promo1.fecha_final);
+      const inicio2 = new Date(promo2.fecha_inicio);
+      const final2 = new Date(promo2.fecha_final);
+
+      return (
+        (inicio2 <= final1 && inicio2 >= inicio1) ||
+        (final2 >= inicio1 && final2 <= final1) ||
+        (inicio2 <= inicio1 && final2 >= final1)
+      );
+    },
+
+    async createAnywayPromocion() {
+      this.isLoading = true;
+      try {
+        if (this.tempPromocionData) {
+          if (!this.tempPromocionData.id) {
+            // Es una nueva promoción
+            const datos = {
+              categoria_id: this.tempPromocionData.categoria_id,
+              nombre_promocion: this.tempPromocionData.nombre_promocion,
+              porcentaje_descuento: this.tempPromocionData.porcentaje_descuento,
+              fecha_inicio: new Date(
+                this.tempPromocionData.fecha_inicio + "T00:00:00"
+              )
+                .toISOString()
+                .split("T")[0],
+              fecha_final: new Date(
+                this.tempPromocionData.fecha_final + "T00:00:00"
+              )
+                .toISOString()
+                .split("T")[0],
+              force_create: true,
+            };
+
+            const response = await solicitudes.postRegistro(
+              "/promocionesC/crear-promocion",
+              datos
+            );
+
+            if (response.length > 0) {
+              await this.cargarPromociones();
+              notis(
+                "success",
+                "Nueva promoción creada y promoción anterior desactivada exitosamente"
+              );
+              this.clearForm();
+              this.closeConflictModal();
+              this.activeForm = false;
+            }
+          } else {
+            // Es una promoción existente
+            await solicitudes.patchRegistro(
+              `/promocionesC/cambiar-estado-promocion/${this.conflictingPromocion.id}`,
+              { manejo_automatico: false }
+            );
+
+            const response = await solicitudes.patchRegistro(
+              `/promocionesC/cambiar-estado-promocion/${this.tempPromocionData.id}`,
+              { manejo_automatico: true }
+            );
+
+            if (response) {
+              await this.cargarPromociones();
+              notis(
+                "success",
+                "Nueva promoción activada y promoción anterior desactivada exitosamente"
+              );
+              this.closeConflictModal();
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error al procesar la promoción:", error);
+        notis("error", "Error al procesar las promociones");
+      } finally {
+        this.isLoading = false;
+      }
+    },
     editarPromocion(index) {
       const promocion = this.paginatedPromociones[index];
 
@@ -739,12 +945,15 @@ async createAnywayPromocion() {
         porcentaje_descuento: promocion.porcentaje_descuento,
         fecha_inicio: promocion.fecha_inicio,
         fecha_final: promocion.fecha_final,
-        estado: promocion.estado
+        estado: promocion.estado,
       };
 
-      this.editIndex = this.promociones.findIndex(p => p.id === promocion.id);
+      this.editIndex = this.promociones.findIndex((p) => p.id === promocion.id);
       this.isEditing = true;
       this.showModal();
+      this.$nextTick(() => {
+        this.$refs.categInputEdit?.focus();
+      });
     },
 
     async eliminarProm() {
@@ -752,7 +961,7 @@ async createAnywayPromocion() {
       try {
         const promocion = this.promociones[this.editIndex];
         if (!promocion || !promocion.id) {
-          throw new Error('Promoción no válida');
+          throw new Error("Promoción no válida");
         }
 
         const response = await solicitudes.deleteRegistro(
@@ -761,12 +970,12 @@ async createAnywayPromocion() {
 
         if (response === true) {
           await this.cargarPromociones();
-          notis("success", 'Promoción eliminada exitosamente');
+          notis("success", "Promoción eliminada exitosamente");
           this.showConfirmModal = false;
         }
       } catch (error) {
-        console.error('Error al eliminar promoción:', error);
-        notis("error", 'Error al eliminar promoción');
+        console.error("Error al eliminar promoción:", error);
+        notis("error", "Error al eliminar promoción");
       } finally {
         this.isLoading = false;
         this.editIndex = null;
@@ -802,13 +1011,15 @@ async createAnywayPromocion() {
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    }
-  }
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
+  },
 };
 </script>
 
@@ -869,7 +1080,6 @@ async createAnywayPromocion() {
   cursor: not-allowed;
   opacity: 0.6;
 }
-
 
 .promocion-details {
   background-color: #f8f9fa;
@@ -1160,7 +1370,7 @@ label {
 
 .dark .activar-form {
   background-color: rgb(101, 217, 221);
-  color: black
+  color: black;
 }
 
 .categorias-wrapper {
@@ -1402,7 +1612,6 @@ label {
 .dark .table tbody tr:hover {
   background-color: #1f2937;
 }
-
 
 .dark .modal-content {
   background-color: #2d2d2d;

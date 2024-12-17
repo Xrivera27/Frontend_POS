@@ -18,6 +18,7 @@
               <div class="contenedor-interno contenedor-izquierdo">
                 <label for="nombre-usuario">Nombre de usuario:</label>
                 <input
+                  ref="nombreInput"
                   v-model="userForm.nombre_usuario"
                   type="text"
                   id="nombre_usuario"
@@ -73,6 +74,7 @@
                 <template v-if="isPassEdit">
                   <label for="contrasena">Contraseña actual:</label>
                   <input
+                    ref="contraInput"
                     v-model="userForm.contraseña"
                     type="password"
                     id="contraseña"
@@ -416,6 +418,12 @@ export default {
       this.userForm.contraseña = "";
       this.userForm.contraseña_nueva = "";
       this.userForm.contraseña_confirm = "";
+
+      if (this.isPassEdit) {
+        this.$nextTick(() => {
+          this.$refs.contraInput?.focus();
+        });
+      }
     },
 
     isEditing(orden) {
@@ -423,6 +431,9 @@ export default {
         case 1:
           this.usuarioEditing = false;
           this.usuarioAvancedEditing = true;
+          this.$nextTick(() => {
+            this.$refs.nombreInput?.focus();
+          });
           break;
         case 2:
           this.usuarioEditing = true;
@@ -884,5 +895,13 @@ input {
 
 .configuracion-usuario {
   padding: 16px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
 }
 </style>

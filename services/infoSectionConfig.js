@@ -120,6 +120,18 @@ export const infoConfig = {
     ],
   },
 
+  "Administrar Ventas": {
+    descripcion:
+      "Gestiona y monitorea todas las transacciones de venta realizadas. En esta sección podrás:",
+    funciones: [
+      "Visualizar el historial completo de ventas con detalles financieros",
+      "Filtrar ventas por fechas y estados (Pagadas/Canceladas)",
+      "Acceder a las facturas detalladas de cada venta",
+      "Gestionar la cancelación de ventas cuando sea necesario",
+      "Exportar reportes completos de ventas en formato PDF",
+    ],
+  },
+
   "Alertas de Inventario": {
     descripcion:
       "Monitorea el estado del inventario mediante un sistema de alertas visuales. En esta sección podrás:",
@@ -144,7 +156,7 @@ export const infoConfig = {
     ],
   },
 
-  'Bienvenido al Panel': {
+  "Bienvenido al Panel": {
     descripcion:
       "Panel principal personalizado según el rol del usuario. En esta sección podrás:",
     funciones: [
