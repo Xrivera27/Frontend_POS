@@ -198,10 +198,18 @@ export default {
           }
         );
 
-        if (response.status === 200) {
-          notis("success", "Datos SAR actualizados exitosamente", {
-            timeout: 5000,
+        if (
+          response?.data?.success ||
+          response?.data?.id ||
+          response?.status < 300
+        ) {
+          // Esperar a que se muestre la notificación antes de recargar
+          await new Promise((resolve) => {
+            notis("success", "Datos SAR actualizados exitosamente");
+            // Dar tiempo para que la notificación sea visible
+            setTimeout(resolve, 1500);
           });
+
           window.location.reload();
         }
       } catch (error) {
