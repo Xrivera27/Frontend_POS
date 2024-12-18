@@ -198,7 +198,12 @@
         </button>
       </router-link>
       <router-link to="/config-sar" v-if="!esCeo">
-        <button type="button" class="btn SAR">Config SAR</button>
+        <button
+          :class="{ inactivo: userActive, activo: !userActive }"
+          class="btn boton-switch"
+        >
+          Config SAR
+        </button>
       </router-link>
     </div>
   </div>

@@ -180,7 +180,7 @@ export const infoConfig = {
     ],
   },
 
-  "Reportería": {
+  Reportería: {
     descripcion:
       "Página diseñada para generar y visualizar reportes detallados de ventas. Permite analizar la información de ventas por diferentes criterios y exportarla en distintos formatos.",
     funciones: [
@@ -189,6 +189,30 @@ export const infoConfig = {
       "Ver detalles de ventas con valores exentos y gravados",
       "Personalizar el diseño con logo de la empresa",
       "Exportar reportes en PDF y Excel",
+    ],
+  },
+
+  "Configuración SAR": {
+    descripcion:
+      "Página diseñada para gestionar la configuración fiscal de tu empresa ante el SAR (Servicio de Administración de Rentas). Te permite ingresar y mantener actualizada la información necesaria para la facturación.",
+    funciones: [
+      "Ingresar y actualizar el número CAI",
+      "Establecer el rango inicial y final de facturación",
+      "Configurar las fechas de autorización y vencimiento del CAI",
+      "Modificar la información cuando sea necesario",
+      "Ver la configuración actual del SAR",
+    ],
+  },
+
+  "Configuración de Empresa": {
+    descripcion:
+      "Página diseñada para gestionar la información básica y datos fiscales de tu empresa. Permite mantener actualizada la información de contacto y datos importantes para la facturación.",
+    funciones: [
+      "Actualizar el nombre de la empresa",
+      "Gestionar el RTN de la empresa",
+      "Modificar la dirección del negocio",
+      "Actualizar teléfono de contacto",
+      "Cambiar correo electrónico principal",
     ],
   },
 };

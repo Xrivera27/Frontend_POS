@@ -100,7 +100,7 @@ export default {
   },
   data() {
     return {
-      titulo: "Configuración",
+      titulo: "Configuración de Empresa",
       businessEditing: true,
       isLoading: false,
       errorMessage: "",
@@ -360,12 +360,6 @@ label {
   margin: 4px;
   border: none;
   cursor: pointer;
-}
-
-.SAR {
-  background-color: #00249b;
-  font-weight: bolder;
-  color: rgb(255, 255, 255);
 }
 
 .boton-switch {
