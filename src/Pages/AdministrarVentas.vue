@@ -1,21 +1,22 @@
 <template>
   <div class="ventas-wrapper">
+    <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
       <!-- Filtros de fecha -->
       <div class="date-filter">
         <label for="start-date">Desde: </label>
-        <input type="date" id="start-date" v-model="startDate">
+        <input type="date" id="start-date" v-model="startDate" />
         <label for="end-date">Hasta: </label>
-        <input type="date" id="end-date" v-model="endDate">
+        <input type="date" id="end-date" v-model="endDate" />
       </div>
 
       <!-- Filtro de estado -->
       <div class="status-filter">
         <label for="status-select">Estado: </label>
-        <select 
-          id="status-select" 
+        <select
+          id="status-select"
           v-model="selectedStatus"
           class="status-select"
         >
@@ -26,24 +27,38 @@
       </div>
 
       <!-- Botón de exportación PDF -->
-      <ExportButton :columns="columns" :rows="allFilteredRows" fileName="Ventas.pdf" class="export-button" />
+      <ExportButton
+        :columns="columns"
+        :rows="allFilteredRows"
+        fileName="Ventas.pdf"
+        class="export-button"
+      />
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar venta..." />
+        <input
+          class="busqueda"
+          type="text"
+          v-model="searchQuery"
+          placeholder="Buscar venta..."
+        />
       </div>
     </div>
-    <select class="custom-select" v-model="searchSucursal" v-show="esCeo" >
-            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal" @click="obtenerVentas(sucursal.id_sucursal)" >
-              {{ sucursal.nombre_administrativo }}</option>
-          </select>
+    <select class="custom-select" v-model="searchSucursal" v-show="esCeo">
+      <option
+        v-for="(sucursal, index) in this.sucursales"
+        :key="index"
+        :value="sucursal.id_sucursal"
+        @click="obtenerVentas(sucursal.id_sucursal)"
+      >
+        {{ sucursal.nombre_administrativo }}
+      </option>
+    </select>
 
     <!-- Tabla exportable -->
     <div class="table-container" ref="table">
       <!-- Indicador de carga -->
-      <div v-if="loading" class="loading-indicator">
-        Cargando ventas...
-      </div>
+      <div v-if="loading" class="loading-indicator">Cargando ventas...</div>
 
       <!-- Mensaje si no hay datos -->
       <div v-else-if="paginatedVentas.length === 0" class="no-data">
@@ -68,7 +83,14 @@
         </thead>
         <tbody>
           <tr v-for="(venta, index) in paginatedVentas" :key="index">
-            <td>{{ String(((currentPage - 1) * pageSize) + index + 1).padStart(3, ' ') }}</td>
+            <td>
+              {{
+                String((currentPage - 1) * pageSize + index + 1).padStart(
+                  3,
+                  " "
+                )
+              }}
+            </td>
             <td>{{ venta.codigo }}</td>
             <td>{{ venta.nombre }}</td>
             <td>{{ venta.cliente }}</td>
@@ -77,27 +99,40 @@
             <td>{{ formatCurrency(venta.total_impuesto) }}</td>
             <td>{{ formatCurrency(venta.total) }}</td>
             <td>
-              <span 
+              <span
                 :class="{
                   'estado-badge': true,
                   'estado-pagada': venta.estado === 'Pagada',
-                  'estado-cancelada': venta.estado === 'Cancelada'
+                  'estado-cancelada': venta.estado === 'Cancelada',
                 }"
               >
-                {{ venta.estado || 'Pagada' }}
+                {{ venta.estado || "Pagada" }}
               </span>
             </td>
             <td>{{ formatDateTime(venta.fechaHora) }}</td>
             <td class="actions-column">
-              <button id="btnFactura" class="btn btn-primary" @click="showFactura(venta)" title="Ver Factura">
+              <button
+                id="btnFactura"
+                class="btn btn-primary"
+                @click="showFactura(venta)"
+                title="Ver Factura"
+              >
                 <i class="bi bi-file-text-fill"></i>
               </button>
-              <button 
-                class="btn btn-danger ms-2" 
+              <button
+                class="btn btn-danger ms-2"
                 @click="showCancelModal(venta)"
-                :title="venta.estado === 'Cancelada' ? 'Venta ya cancelada' : 'Cancelar Venta'"
+                :title="
+                  venta.estado === 'Cancelada'
+                    ? 'Venta ya cancelada'
+                    : 'Cancelar Venta'
+                "
                 :disabled="venta.estado === 'Cancelada'"
-                :style="venta.estado === 'Cancelada' ? { opacity: '0.5', cursor: 'not-allowed' } : {}"
+                :style="
+                  venta.estado === 'Cancelada'
+                    ? { opacity: '0.5', cursor: 'not-allowed' }
+                    : {}
+                "
               >
                 <i class="bi bi-x-circle-fill"></i>
               </button>
@@ -109,19 +144,21 @@
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredVentas.length) }} de {{ filteredVentas.length }} registros
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
+          {{ Math.min(currentPage * pageSize, filteredVentas.length) }} de
+          {{ filteredVentas.length }} registros
         </div>
         <div class="pagination-container">
-          <button 
-            class="pagination-button" 
+          <button
+            class="pagination-button"
             :disabled="currentPage === 1"
             @click="previousPage"
           >
             Anterior
           </button>
-          
-          <button 
-            class="pagination-button" 
+
+          <button
+            class="pagination-button"
             :disabled="currentPage === totalPages"
             @click="nextPage"
           >
@@ -132,7 +169,7 @@
     </div>
 
     <!-- Modal de Factura -->
-    <AdminFacturaModal 
+    <AdminFacturaModal
       v-if="isFacturaModalOpen"
       :isVisible="isFacturaModalOpen"
       :venta="selectedVenta"
@@ -140,7 +177,7 @@
     />
 
     <!-- Modal de Cancelación -->
-    <CancelSaleModal 
+    <CancelSaleModal
       v-if="isCancelModalOpen"
       :isVisible="isCancelModalOpen"
       :venta="selectedVentaForCancel"
@@ -153,22 +190,24 @@
 <script>
 import { useToast } from "vue-toastification";
 import PageHeader from "@/components/PageHeader.vue";
-import ExportButton from '../components/ExportButton.vue';
-import AdminFacturaModal from '../components/AdminFacturasModal.vue';
-import CancelSaleModal from '../components/CancelarVentaModal.vue';
+import ExportButton from "../components/ExportButton.vue";
+import AdminFacturaModal from "../components/AdminFacturasModal.vue";
+import CancelSaleModal from "../components/CancelarVentaModal.vue";
 import solicitudes from "../../services/solicitudes.js";
-import AdminVentas from '../../services/Soliadminventa';
-import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
-const { esCeo } = require('../../services/usuariosSolicitudes');
-import { setPageTitle } from '@/components/pageMetadata';
+import AdminVentas from "../../services/Soliadminventa";
+import { getSucursalesbyEmmpresaSumm } from "../../services/sucursalesSolicitudes.js";
+const { esCeo } = require("../../services/usuariosSolicitudes");
+import { setPageTitle } from "@/components/pageMetadata";
+import ModalLoading from "@/components/ModalLoading.vue";
 
 export default {
-  name: 'AdministrarVentas',
+  name: "AdministrarVentas",
   components: {
     PageHeader,
     ExportButton,
     AdminFacturaModal,
-    CancelSaleModal
+    CancelSaleModal,
+    ModalLoading,
   },
   setup() {
     const toast = useToast();
@@ -176,54 +215,58 @@ export default {
   },
   data() {
     return {
-      titulo: 'Administrar Ventas',
-      searchQuery: '',
-      startDate: '',
-      endDate: '',
-      id_usuario: '',
-      esCeo: '',
-      searchSucursal: '',
-      sucursales: '',
-      selectedStatus: '',
+      titulo: "Administrar Ventas",
+      searchQuery: "",
+      startDate: "",
+      endDate: "",
+      id_usuario: "",
+      esCeo: "",
+      searchSucursal: "",
+      sucursales: "",
+      selectedStatus: "",
       selectedVenta: null,
       selectedVentaForCancel: null,
       isFacturaModalOpen: false,
       isCancelModalOpen: false,
+      isLoading: false,
       ventas: [],
       currentPage: 1,
       pageSize: 10,
       columns: [
-        { header: '#', dataKey: 'index' },
-        { header: 'Número Factura', dataKey: 'codigo' },
-        { header: 'Empleado', dataKey: 'nombre' },
-        { header: 'Cliente', dataKey: 'cliente' },
-        { header: 'Subtotal', dataKey: 'subtotal' },
-        { header: 'Descuento', dataKey: 'descuento' },
-        { header: 'Total Impuesto', dataKey: 'total_impuesto' },
-        { header: 'Total', dataKey: 'total' },
-        { header: 'Estado', dataKey: 'estado' },
-        { header: 'Fecha y Hora', dataKey: 'fechaHora' }
+        { header: "#", dataKey: "index" },
+        { header: "Número Factura", dataKey: "codigo" },
+        { header: "Empleado", dataKey: "nombre" },
+        { header: "Cliente", dataKey: "cliente" },
+        { header: "Subtotal", dataKey: "subtotal" },
+        { header: "Descuento", dataKey: "descuento" },
+        { header: "Total Impuesto", dataKey: "total_impuesto" },
+        { header: "Total", dataKey: "total" },
+        { header: "Estado", dataKey: "estado" },
+        { header: "Fecha y Hora", dataKey: "fechaHora" },
       ],
       rows: [],
       loading: false,
-      error: null
+      error: null,
     };
   },
   computed: {
     filteredVentas() {
-      return this.ventas.filter(venta => {
+      return this.ventas.filter((venta) => {
         const ventaFecha = new Date(venta.fechaHora);
-        
-        const matchesSearchQuery = 
-          String(venta.codigo).toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+
+        const matchesSearchQuery =
+          String(venta.codigo)
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
           venta.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           venta.cliente.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-        const matchesDateRange = 
-          (!this.startDate || ventaFecha >= new Date(this.startDate + 'T00:00:00')) &&
-          (!this.endDate || ventaFecha <= new Date(this.endDate + 'T23:59:59'));
+        const matchesDateRange =
+          (!this.startDate ||
+            ventaFecha >= new Date(this.startDate + "T00:00:00")) &&
+          (!this.endDate || ventaFecha <= new Date(this.endDate + "T23:59:59"));
 
-        const matchesStatus = 
+        const matchesStatus =
           !this.selectedStatus || venta.estado === this.selectedStatus;
 
         return matchesSearchQuery && matchesDateRange && matchesStatus;
@@ -247,13 +290,13 @@ export default {
         descuento: this.formatCurrency(venta.descuento),
         total: this.formatCurrency(venta.total),
         total_impuesto: this.formatCurrency(venta.total_impuesto),
-        estado: venta.estado || 'Pagada',
-        fechaHora: this.formatDateTime(venta.fechaHora)
+        estado: venta.estado || "Pagada",
+        fechaHora: this.formatDateTime(venta.fechaHora),
       }));
     },
     filteredRows() {
       return this.paginatedVentas.map((venta, index) => ({
-        index: ((this.currentPage - 1) * this.pageSize) + index + 1,
+        index: (this.currentPage - 1) * this.pageSize + index + 1,
         codigo: venta.codigo,
         nombre: venta.nombre,
         cliente: venta.cliente,
@@ -261,10 +304,10 @@ export default {
         descuento: this.formatCurrency(venta.descuento),
         total: this.formatCurrency(venta.total),
         total_impuesto: this.formatCurrency(venta.total_impuesto),
-        estado: venta.estado || 'Pagada',
-        fechaHora: this.formatDateTime(venta.fechaHora)
+        estado: venta.estado || "Pagada",
+        fechaHora: this.formatDateTime(venta.fechaHora),
       }));
-    }
+    },
   },
   methods: {
     formatCurrency(value) {
@@ -273,40 +316,42 @@ export default {
 
     formatDateTime(dateString) {
       const date = new Date(dateString);
-      return date.toLocaleString('es-HN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      }).replace(',', '');
+      return date
+        .toLocaleString("es-HN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+        .replace(",", "");
     },
 
     async obtenerVentas(id_sucursal) {
       this.loading = true;
       this.error = null;
       try {
-        console.log('Iniciando carga de ventas...');
+        console.log("Iniciando carga de ventas...");
         const response = await AdminVentas.obtenerVentasCeo(id_sucursal);
-        console.log('Respuesta del servidor:', response);
-        
+        console.log("Respuesta del servidor:", response);
+
         const ventasData = response.data || response;
         if (ventasData) {
-          this.ventas = ventasData.map(venta => ({
+          this.ventas = ventasData.map((venta) => ({
             ...venta,
             id_venta: venta.id_venta || venta.idVenta,
             id_usuario: venta.id_usuario || venta.idUsuario,
-            estado: venta.estado || 'Pagada'
+            estado: venta.estado || "Pagada",
           }));
-          console.log('Ventas procesadas:', this.ventas);
+          console.log("Ventas procesadas:", this.ventas);
           this.generateRows();
         } else {
-          throw new Error('No se pudieron obtener las ventas');
+          throw new Error("No se pudieron obtener las ventas");
         }
       } catch (error) {
-        console.error('No se encontraron ventas para mostrar.', error);
-        this.error = 'No se encontraron ventas para mostrar.';
+        console.error("No se encontraron ventas para mostrar.", error);
+        this.error = "No se encontraron ventas para mostrar.";
         this.toast.error(this.error);
       } finally {
         this.loading = false;
@@ -317,26 +362,26 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        console.log('Iniciando carga de ventas...');
+        console.log("Iniciando carga de ventas...");
         const response = await AdminVentas.obtenerVentas();
-        console.log('Respuesta del servidor:', response);
-        
+        console.log("Respuesta del servidor:", response);
+
         const ventasData = response.data || response;
         if (ventasData) {
-          this.ventas = ventasData.map(venta => ({
+          this.ventas = ventasData.map((venta) => ({
             ...venta,
             id_venta: venta.id_venta || venta.idVenta,
             id_usuario: venta.id_usuario || venta.idUsuario,
-            estado: venta.estado || 'Pagada'
+            estado: venta.estado || "Pagada",
           }));
-          console.log('Ventas procesadas:', this.ventas);
+          console.log("Ventas procesadas:", this.ventas);
           this.generateRows();
         } else {
-          throw new Error('No se pudieron obtener las ventas');
+          throw new Error("No se pudieron obtener las ventas");
         }
       } catch (error) {
-        console.error('No se encontraron ventas para mostrar.', error);
-        this.error = 'No se encontraron ventas para mostrar.';
+        console.error("No se encontraron ventas para mostrar.", error);
+        this.error = "No se encontraron ventas para mostrar.";
         this.toast.error(this.error);
       } finally {
         this.loading = false;
@@ -344,7 +389,7 @@ export default {
     },
 
     showFactura(venta) {
-      console.log('Mostrando factura para:', venta);
+      console.log("Mostrando factura para:", venta);
       this.selectedVenta = venta;
       this.isFacturaModalOpen = true;
     },
@@ -367,15 +412,15 @@ export default {
     async handleCancelSale(ventaId, description) {
       try {
         const response = await AdminVentas.cancelarVenta(ventaId, description);
-        
+
         if (response.success) {
-          this.toast.success('Venta cancelada exitosamente');
-          
+          this.toast.success("Venta cancelada exitosamente");
+
           try {
             const blob = await AdminVentas.obtenerReporteCancelacion(ventaId);
-            
+
             const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            const a = document.createElement("a");
             a.href = url;
             a.download = `cancelacion_venta_${ventaId}.pdf`;
             document.body.appendChild(a);
@@ -383,17 +428,17 @@ export default {
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
           } catch (reportError) {
-            console.error('Error al descargar reporte:', reportError);
-            this.toast.error('Error al generar el reporte de cancelación');
+            console.error("Error al descargar reporte:", reportError);
+            this.toast.error("Error al generar el reporte de cancelación");
           }
 
           await this.loadVentas();
         } else {
-          throw new Error(response.message || 'Error al cancelar la venta');
+          throw new Error(response.message || "Error al cancelar la venta");
         }
       } catch (error) {
-        console.error('Error:', error);
-        this.toast.error('Error al cancelar la venta: ' + error.message);
+        console.error("Error:", error);
+        this.toast.error("Error al cancelar la venta: " + error.message);
         throw error;
       }
     },
@@ -415,19 +460,21 @@ export default {
     },
 
     resetFilters() {
-      this.searchQuery = '';
-      this.startDate = '';
-      this.endDate = '';
-      this.selectedStatus = '';
+      this.searchQuery = "";
+      this.startDate = "";
+      this.endDate = "";
+      this.selectedStatus = "";
       this.currentPage = 1;
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
+      document.getElementsByTagName("head")[0].appendChild(link);
     },
   },
   watch: {
@@ -435,7 +482,7 @@ export default {
       handler() {
         this.generateRows();
       },
-      deep: true
+      deep: true,
     },
     searchQuery() {
       this.currentPage = 1;
@@ -448,11 +495,11 @@ export default {
     },
     selectedStatus() {
       this.currentPage = 1;
-    }
+    },
   },
   async mounted() {
-    setPageTitle('Administrar Ventas');
-
+    setPageTitle("Administrar Ventas");
+    this.isLoading = true;
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.esCeo = await esCeo(this.id_usuario);
@@ -460,20 +507,20 @@ export default {
       this.searchSucursal = this.sucursales[0].id_sucursal;
 
       this.obtenerVentas(this.searchSucursal);
-
     } catch (error) {
       alert(error);
+    } finally {
+      this.isLoading = false;
     }
-
-  }
+  },
 };
 </script>
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 /* Estilos globales */
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
 }
 
@@ -485,6 +532,15 @@ export default {
   border-width: 0.5px;
   width: 100%;
   max-width: 300px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 
 /* Filtro de estado */
@@ -501,6 +557,7 @@ export default {
   padding: 10px;
   background-color: #fff;
   cursor: pointer;
+  margin-bottom: 10px;
 }
 
 .status-select {
@@ -510,12 +567,6 @@ export default {
   font-size: 14px;
   min-width: 120px;
   cursor: pointer;
-}
-
-.status-select:focus {
-  outline: none;
-  border-color: #86b7fe;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
 /* Botón de exportación */

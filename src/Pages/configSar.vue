@@ -4,7 +4,11 @@
       <PageHeader :titulo="titulo" />
 
       <div class="company-config">
-        <form @submit.prevent="guardarConfiguracionSAR" autocomplete="off" class="formulario form-company-SAR">
+        <form
+          @submit.prevent="guardarConfiguracionSAR"
+          autocomplete="off"
+          class="formulario form-company-SAR"
+        >
           <fieldset :disabled="busisnessSarEditing">
             <div class="contenedor-titulo">
               <h2 class="titulo-form">Configuración SAR</h2>
@@ -13,60 +17,100 @@
             <div class="contenedor-principal">
               <div class="contenedor-interno contenedor-izquierdo">
                 <label for="numero_CAI">Numero CAI:</label>
-                <input v-model="configuracionSAR.numero_CAI" type="text" id="numero_CAI" required />
+                <input
+                  v-model="configuracionSAR.numero_CAI"
+                  type="text"
+                  id="numero_CAI"
+                  required
+                />
 
                 <label for="rango_inicial">Rango Inicial:</label>
-                <input v-model="configuracionSAR.rango_inicial" type="text" id="rango_inicial" required />
+                <input
+                  v-model="configuracionSAR.rango_inicial"
+                  type="text"
+                  id="rango_inicial"
+                  required
+                />
 
                 <label for="rango_final">Rango Final:</label>
-                <input v-model="configuracionSAR.rango_final" type="text" id="rango_final" required />
+                <input
+                  v-model="configuracionSAR.rango_final"
+                  type="text"
+                  id="rango_final"
+                  required
+                />
               </div>
               <div class="contenedor-interno contenedor-derecho">
                 <label for="fecha_autorizacion">Fecha de autorización:</label>
-                <input v-model="configuracionSAR.fecha_autorizacion" type="date" id="fecha_autorizacion" required />
+                <input
+                  v-model="configuracionSAR.fecha_autorizacion"
+                  type="date"
+                  id="fecha_autorizacion"
+                  required
+                />
 
                 <label for="fecha_vencimiento">Fecha de vencimiento:</label>
-                <input v-model="configuracionSAR.fecha_vencimiento" type="date" id="fecha_vencimiento" required />
+                <input
+                  v-model="configuracionSAR.fecha_vencimiento"
+                  type="date"
+                  id="fecha_vencimiento"
+                  required
+                />
               </div>
             </div>
           </fieldset>
 
           <div class="botones-container">
-            <button class="btn editar" @click="isEditing(4)" :disabled="!busisnessSarEditing">Editar</button>
-            <button class="btn guardar" type="submit" :disabled="busisnessSarEditing"
-              @click.prevent="updatesar">Guardar</button>
+            <button
+              class="btn editar"
+              @click="isEditing(4)"
+              :disabled="!busisnessSarEditing"
+            >
+              Editar
+            </button>
+            <button
+              class="btn guardar"
+              type="submit"
+              :disabled="busisnessSarEditing"
+              @click.prevent="updatesar"
+            >
+              Guardar
+            </button>
           </div>
         </form>
       </div>
     </div>
+
     <router-link to="/config-page">
-      <button type="button" class="btn company">Config Usuario</button>
+      <button class="btn boton-switch inactivo">Config. Usuario</button>
     </router-link>
+
+    <button class="btn boton-switch activo">Config SAR</button>
   </div>
 </template>
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
-import axios from 'axios';
+import axios from "axios";
 import { useToast } from "vue-toastification";
-const { getApi } = require('../../config/getApiUrl.js');
-import { setPageTitle } from '@/components/pageMetadata';
+const { getApi } = require("../../config/getApiUrl.js");
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
   components: {
-    PageHeader
+    PageHeader,
   },
   data() {
     return {
-      titulo: 'Configuración SAR',
+      titulo: "Configuración SAR",
       busisnessSarEditing: true,
       esCeo: false,
       configuracionSAR: {
-        numero_CAI: '',
-        rango_inicial: '',
-        rango_final: '',
-        fecha_autorizacion: '',
-        fecha_vencimiento: '',
+        numero_CAI: "",
+        rango_inicial: "",
+        rango_final: "",
+        fecha_autorizacion: "",
+        fecha_vencimiento: "",
       },
     };
   },
@@ -79,7 +123,7 @@ export default {
     async getConfiguracionSAR() {
       const toast = useToast();
       try {
-        const token = localStorage.getItem('auth');
+        const token = localStorage.getItem("auth");
         const response = await axios.get(`${getApi()}/sar`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -88,15 +132,17 @@ export default {
 
         const sarData = response.data.datosSAR;
 
-        this.configuracionSAR.numero_CAI = sarData.numero_CAI || '';
-        this.configuracionSAR.rango_inicial = sarData.rango_inicial || '';
-        this.configuracionSAR.rango_final = sarData.rango_final || '';
-        this.configuracionSAR.fecha_autorizacion = sarData.fecha_autorizacion || '';
-        this.configuracionSAR.fecha_vencimiento = sarData.fecha_vencimiento || '';
+        this.configuracionSAR.numero_CAI = sarData.numero_CAI || "";
+        this.configuracionSAR.rango_inicial = sarData.rango_inicial || "";
+        this.configuracionSAR.rango_final = sarData.rango_final || "";
+        this.configuracionSAR.fecha_autorizacion =
+          sarData.fecha_autorizacion || "";
+        this.configuracionSAR.fecha_vencimiento =
+          sarData.fecha_vencimiento || "";
       } catch (error) {
-        console.error('Error al obtener la configuración SAR:', error);
-        toast.error('No se pudo obtener la configuración SAR.', {
-          timeout: 5000
+        console.error("Error al obtener la configuración SAR:", error);
+        toast.error("No se pudo obtener la configuración SAR.", {
+          timeout: 5000,
         });
       }
     },
@@ -106,64 +152,81 @@ export default {
       try {
         // Validar el rango inicial
         if (!this.validateSARNumber(this.configuracionSAR.rango_inicial)) {
-          toast.error('El Rango Inicial debe tener exactamente 16 dígitos numéricos', {
-            timeout: 5000
-          });
+          toast.error(
+            "El Rango Inicial debe tener exactamente 16 dígitos numéricos",
+            {
+              timeout: 5000,
+            }
+          );
           return;
         }
 
         // Validar el rango final
         if (!this.validateSARNumber(this.configuracionSAR.rango_final)) {
-          toast.error('El Rango Final debe tener exactamente 16 dígitos numéricos', {
-            timeout: 5000
-          });
+          toast.error(
+            "El Rango Final debe tener exactamente 16 dígitos numéricos",
+            {
+              timeout: 5000,
+            }
+          );
           return;
         }
 
         // Validar que el rango final sea mayor que el inicial
-        if (parseInt(this.configuracionSAR.rango_final) <= parseInt(this.configuracionSAR.rango_inicial)) {
-          toast.error('El Rango Final debe ser mayor que el Rango Inicial', {
-            timeout: 5000
+        if (
+          parseInt(this.configuracionSAR.rango_final) <=
+          parseInt(this.configuracionSAR.rango_inicial)
+        ) {
+          toast.error("El Rango Final debe ser mayor que el Rango Inicial", {
+            timeout: 5000,
           });
           return;
         }
 
-        const token = localStorage.getItem('auth');
+        const token = localStorage.getItem("auth");
         const updatedData = {
           numero_CAI: this.configuracionSAR.numero_CAI,
           rango_inicial: this.configuracionSAR.rango_inicial,
           rango_final: this.configuracionSAR.rango_final,
           fecha_autorizacion: this.configuracionSAR.fecha_autorizacion,
           fecha_vencimiento: this.configuracionSAR.fecha_vencimiento,
-          numero_actual_SAR: this.configuracionSAR.rango_inicial
+          numero_actual_SAR: this.configuracionSAR.rango_inicial,
         };
 
-        const response = await axios.post(`${getApi()}/sar/create`, updatedData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await axios.post(
+          `${getApi()}/sar/create`,
+          updatedData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (response.status === 200) {
-          toast.success('Datos SAR actualizados exitosamente', {
-            timeout: 5000
+          toast.success("Datos SAR actualizados exitosamente", {
+            timeout: 5000,
           });
           window.location.reload();
         }
       } catch (error) {
-        console.error('Error al actualizar los datos SAR:', error);
+        console.error("Error al actualizar los datos SAR:", error);
         if (error.response) {
-          toast.error(error.response.data.message || 'Hubo un problema al guardar los datos.', {
-            timeout: 5000
-          });
+          toast.error(
+            error.response.data.message ||
+              "Hubo un problema al guardar los datos.",
+            {
+              timeout: 5000,
+            }
+          );
         } else if (error.request) {
-          toast.error('Error de conexión con el servidor.', {
-            timeout: 5000
+          toast.error("Error de conexión con el servidor.", {
+            timeout: 5000,
           });
         } else {
-          toast.error('Hubo un problema al guardar los datos.', {
-            timeout: 5000
+          toast.error("Hubo un problema al guardar los datos.", {
+            timeout: 5000,
           });
         }
       }
@@ -207,24 +270,26 @@ export default {
           break;
         default:
           toast.error("Ha ocurrido un error", {
-            timeout: 5000
+            timeout: 5000,
           });
       }
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    }
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
   },
 
   mounted() {
     this.getConfiguracionSAR();
     window.addEventListener("keydown", this.pushEsc);
-    setPageTitle('Configuración');
+    setPageTitle("Configuración");
   },
 
   beforeUnmount() {
@@ -234,11 +299,11 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap");
 
 * {
   box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 /* Configuración del usuario */
@@ -253,14 +318,6 @@ export default {
   overflow-x: hidden;
 }
 
-.contenedor-titulo {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
 .contenedor-principal {
   display: flex;
   justify-content: space-around;
@@ -273,17 +330,6 @@ export default {
   flex-direction: column;
   width: 50%;
   padding: 0 2%;
-}
-
-/* Formularios */
-form {
-  border: 1px solid rgb(110, 109, 109);
-  padding: 3% 0 2% 0;
-  border-radius: 10px;
-  min-width: 300px;
-  width: 100%;
-  min-height: 200px;
-  position: relative;
 }
 
 .formulario {
@@ -301,27 +347,8 @@ fieldset:disabled input {
   color: #858585;
 }
 
-/* Estilos de entrada */
-input {
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 95%;
-  height: 25%;
-  justify-content: center;
-}
-
 .contenedor-principal input {
   margin-bottom: 4%;
-}
-
-/* Títulos */
-.titulo-form {
-  position: absolute;
-  top: -11.5%;
-  background-color: #f5f5f5;
-  padding: 0 10px;
-  color: #858585;
 }
 
 /* Botones */
@@ -337,6 +364,11 @@ input {
   border-radius: 5px;
 }
 
+.botones-container .btn:disabled {
+  background-color: #888787;
+}
+
+/* Estilos base para los botones de navegación */
 .btn {
   padding: 8px 16px;
   margin: 4px;
@@ -344,46 +376,53 @@ input {
   cursor: pointer;
 }
 
-.botones-container .btn:disabled {
-  background-color: #888787;
-}
-
-.guardar {
-  background-color: #009b15;
-  font-weight: bolder;
-  color: rgb(255, 255, 255);
-}
-
-.company {
-  background-color: #00249b;
-  font-weight: bolder;
-  color: rgb(255, 255, 255);
-}
-
-.editar {
-  background-color: #5a5a5a;
-  font-weight: bolder;
-  color: rgb(255, 255, 255);
-}
-
-/* Botones de cambio */
 .boton-switch {
   padding: 10px 18px;
   transition: all 0.3s ease;
 }
 
-.boton-switch.activo:hover {
+/* Estilos para el botón activo */
+.activo {
+  background-color: #c09d62;
+  color: #ffffff;
+  border: 1px solid #a38655; /* Un borde más oscuro para profundidad */
   transition: all 0.3s ease;
 }
 
-.activo {
-  background-color: rgb(62, 238, 62);
-  color: white;
+.activo:hover {
+  background-color: #a38655; /* Un tono más oscuro al hover */
 }
 
 .inactivo {
-  background-color: rgb(238, 62, 62);
-  color: white;
+  background-color: #f5f5f5;
+  color: #666666;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.inactivo:hover {
+  background-color: #e8e8e8;
+}
+
+/* Modo oscuro */
+.dark .activo {
+  background-color: #c09d62;
+  color: #ffffff;
+  border: 1px solid #a38655;
+}
+
+.dark .activo:hover {
+  background-color: #a38655;
+}
+
+.dark .inactivo {
+  background-color: #2d2d2d;
+  color: #909090;
+  border: 1px solid #404040;
+}
+
+.dark .inactivo:hover {
+  background-color: #363636;
 }
 
 /* Scroll personalizado */
@@ -453,6 +492,10 @@ input {
 }
 
 @media screen and (max-width: 480px) {
+  .boton-switch {
+    width: 100%;
+    text-align: center;
+  }
 
   .configuracion-usuario {
     padding: 8px;
@@ -481,7 +524,6 @@ input {
   }
 }
 
-
 /* Contenedor principal */
 .dark .configuracion-usuario {
   background-color: #1e1e1e;
@@ -499,18 +541,6 @@ input {
   background-color: #2d2d2d;
 }
 
-.dark .titulo-form {
-  background-color: #1e1e1e;
-  color: #fff;
-}
-
-/* Inputs y campos de formulario */
-.dark input {
-  background-color: #383838;
-  border-color: #404040;
-  color: #fff;
-}
-
 .dark input:focus {
   border-color: #c09d62;
 }
@@ -520,48 +550,6 @@ input {
 .dark fieldset:disabled input {
   color: #666;
   background-color: #2d2d2d;
-}
-
-/* Botones */
-.dark .guardar {
-  background-color: #00b81a;
-  color: #fff;
-}
-
-.dark .guardar:disabled {
-  background-color: #666;
-  color: #999;
-}
-
-.dark .editar {
-  background-color: #5a5a5a;
-  color: #fff;
-}
-
-.dark .editar:disabled {
-  background-color: #666;
-  color: #999;
-}
-
-.dark .SAR {
-  background-color: #0031c7;
-  color: #fff;
-}
-
-.dark .SAR:disabled {
-  background-color: #666;
-  color: #999;
-}
-
-/* Botones de cambio */
-.dark .boton-switch.activo {
-  background-color: #00b81a;
-  color: #fff;
-}
-
-.dark .boton-switch.inactivo {
-  background-color: #dc3545;
-  color: #fff;
 }
 
 /* Scroll personalizado en modo oscuro */
@@ -601,5 +589,148 @@ input {
   -webkit-text-fill-color: #fff;
   -webkit-box-shadow: 0 0 0px 1000px #383838 inset;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Form Groups y Contenedores */
+.contenedor-titulo {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0 24px;
+  margin-bottom: 45px;
+}
+
+.company-config {
+  max-width: 1000px;
+  width: 90%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+form {
+  border: 1px solid rgb(110, 109, 109);
+  padding: 24px 0;
+  border-radius: 10px;
+  min-width: 300px;
+  width: 100%;
+  min-height: 200px;
+  position: relative;
+}
+
+/* Título del form */
+.titulo-form {
+  position: relative;
+  color: #333333;
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin: 0;
+  padding: 0;
+  border-bottom: 2px solid #c09d62;
+}
+
+/* Inputs y Labels */
+input {
+  padding: 10px 12px;
+  height: 35px;
+  margin-bottom: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 95%;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+label {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+/* Estilos para los botones */
+.editar {
+  background-color: #c09d62;
+  font-weight: bolder;
+  color: white;
+}
+
+.editar:hover {
+  background-color: #a38655;
+  transform: scale(1.02);
+  transition: all 0.3s ease;
+}
+
+.editar:disabled {
+  background-color: #c09d62 !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.guardar {
+  background-color: #009b15;
+  font-weight: bolder;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.guardar:hover:not(:disabled) {
+  background-color: #008512;
+  transform: scale(1.02);
+}
+
+.guardar:disabled {
+  background-color: #e0e0e0;
+  color: #909090;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Modo Oscuro */
+.dark .editar {
+  background-color: #c09d62;
+  color: white;
+}
+
+.dark .editar:hover {
+  background-color: #a38655;
+}
+
+.dark .editar:disabled {
+  background-color: #c09d62 !important;
+  opacity: 0.7;
+}
+
+.dark .guardar {
+  background-color: #009b15;
+  color: white;
+}
+
+.dark .guardar:hover:not(:disabled) {
+  background-color: #008512;
+}
+
+.dark .guardar:disabled {
+  background-color: #2d2d2d;
+  color: #666;
+  border: 1px solid #404040;
+}
+
+.dark input {
+  background-color: #383838;
+  border-color: #404040;
+  color: #fff;
+}
+
+.dark .titulo-form {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+/* Focus states */
+input:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 </style>

@@ -7,33 +7,44 @@
       <!-- Filtros de fecha -->
       <div class="date-filter">
         <label for="start-date">Desde: </label>
-        <input type="date" id="start-date" v-model="startDate">
+        <input type="date" id="start-date" v-model="startDate" />
         <label for="end-date">Hasta: </label>
-        <input type="date" id="end-date" v-model="endDate">
+        <input type="date" id="end-date" v-model="endDate" />
       </div>
 
       <!-- Botones de exportación -->
-      <ExportButton :columns="columns" :rows="allFilteredRows" fileName="Compras.pdf" class="export-button" />
+      <ExportButton
+        :columns="columns"
+        :rows="allFilteredRows"
+        fileName="Compras.pdf"
+        class="export-button"
+      />
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar compra..." />
+        <input
+          class="busqueda"
+          type="text"
+          v-model="searchQuery"
+          placeholder="Buscar compra..."
+        />
       </div>
       <select class="custom-select" v-model="searchSucursal" v-show="esCeo">
-        <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal"
-          @click="obtenesCompras(sucursal.id_sucursal)">
-          {{ sucursal.nombre_administrativo }}</option>
+        <option
+          v-for="(sucursal, index) in this.sucursales"
+          :key="index"
+          :value="sucursal.id_sucursal"
+          @click="obtenesCompras(sucursal.id_sucursal)"
+        >
+          {{ sucursal.nombre_administrativo }}
+        </option>
       </select>
     </div>
-
-
 
     <!-- Tabla exportable -->
     <div class="table-container" ref="table">
       <!-- Indicador de carga -->
-      <div v-if="loading" class="loading-indicator">
-        Cargando compras...
-      </div>
+      <div v-if="loading" class="loading-indicator">Cargando compras...</div>
 
       <!-- Mensaje si no hay datos -->
       <div v-else-if="paginatedCompras.length === 0" class="no-data">
@@ -57,26 +68,40 @@
         </thead>
         <tbody>
           <tr v-for="(compra, index) in paginatedCompras" :key="index">
-            <td>{{ String(((currentPage - 1) * pageSize) + index + 1).padStart(3, ' ') }}</td>
+            <td>
+              {{
+                String((currentPage - 1) * pageSize + index + 1).padStart(
+                  3,
+                  " "
+                )
+              }}
+            </td>
             <td>{{ compra.codigo }}</td>
             <td>{{ compra.nombre }}</td>
             <td>{{ compra.proveedor }}</td>
             <td>{{ compra.cantidad }}</td>
             <td>{{ formatCurrency(compra.total) }}</td>
             <td>
-              <span :class="{
-                'estado-badge': true,
-                'estado-completado': compra.estado === 'Completado',
-                'estado-pendiente': compra.estado === 'Pendiente',
-                'estado-cancelado': compra.estado === 'Cancelado'
-              }">
+              <span
+                :class="{
+                  'estado-badge': true,
+                  'estado-completado': compra.estado === 'Completado',
+                  'estado-pendiente': compra.estado === 'Pendiente',
+                  'estado-cancelado': compra.estado === 'Cancelado',
+                }"
+              >
                 {{ compra.estado }}
               </span>
             </td>
             <td>{{ compra.metodo_pago }}</td>
             <td>{{ formatDateTime(compra.fechaHora) }}</td>
             <td class="actions-column">
-              <button id="btnDetalles" class="btn btn-info" @click="showDetalles(compra)" title="Ver Detalles">
+              <button
+                id="btnDetalles"
+                class="btn btn-info"
+                @click="showDetalles(compra)"
+                title="Ver Detalles"
+              >
                 <i class="bi bi-eye-fill"></i>
               </button>
             </td>
@@ -87,15 +112,24 @@
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize, filteredCompras.length)
-          }} de {{ filteredCompras.length }} registros
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
+          {{ Math.min(currentPage * pageSize, filteredCompras.length) }} de
+          {{ filteredCompras.length }} registros
         </div>
         <div class="pagination-container">
-          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
             Anterior
           </button>
 
-          <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
             Siguiente
           </button>
         </div>
@@ -149,7 +183,10 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(producto, index) in selectedCompra?.productos" :key="index">
+              <tr
+                v-for="(producto, index) in selectedCompra?.productos"
+                :key="index"
+              >
                 <td>{{ index + 1 }}</td>
                 <td>{{ producto.codigo }}</td>
                 <td>{{ producto.nombre }}</td>
@@ -179,20 +216,20 @@
 <script>
 import { useToast } from "vue-toastification";
 import PageHeader from "@/components/PageHeader.vue";
-import ExportButton from '../components/ExportButton.vue';
+import ExportButton from "../components/ExportButton.vue";
 import solicitudes from "../../services/solicitudes.js";
-const { esCeo } = require('../../services/usuariosSolicitudes');
-import AdminCompras from '../../services/Soliadminventa';
-import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
-import ModalLoading from '@/components/ModalLoading.vue';
-import { setPageTitle } from '@/components/pageMetadata';
+const { esCeo } = require("../../services/usuariosSolicitudes");
+import AdminCompras from "../../services/Soliadminventa";
+import { getSucursalesbyEmmpresaSumm } from "../../services/sucursalesSolicitudes.js";
+import ModalLoading from "@/components/ModalLoading.vue";
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
-  name: 'AdministrarCompras',
+  name: "AdministrarCompras",
   components: {
     PageHeader,
     ExportButton,
-    ModalLoading
+    ModalLoading,
   },
   setup() {
     const toast = useToast();
@@ -200,14 +237,14 @@ export default {
   },
   data() {
     return {
-      titulo: 'Administrar Compras',
-      searchQuery: '',
-      startDate: '',
-      endDate: '',
-      id_usuario: '',
-      esCeo: '',
-      searchSucursal: '',
-      sucursales: '',
+      titulo: "Administrar Compras",
+      searchQuery: "",
+      startDate: "",
+      endDate: "",
+      id_usuario: "",
+      esCeo: "",
+      searchSucursal: "",
+      sucursales: "",
       selectedCompra: null,
       isDetallesModalOpen: false,
       isLoading: false,
@@ -215,34 +252,42 @@ export default {
       currentPage: 1,
       pageSize: 10,
       columns: [
-        { header: '#', dataKey: 'index' },
-        { header: 'Código', dataKey: 'codigo' },
-        { header: 'Empleado', dataKey: 'nombre' },
-        { header: 'Proveedor', dataKey: 'proveedor' },
-        { header: 'Cantidad', dataKey: 'cantidad' },
-        { header: 'Total', dataKey: 'total' },
-        { header: 'Estado', dataKey: 'estado' },
-        { header: 'Método de Pago', dataKey: 'metodo_pago' },
-        { header: 'Fecha y Hora', dataKey: 'fechaHora' }
+        { header: "#", dataKey: "index" },
+        { header: "Código", dataKey: "codigo" },
+        { header: "Empleado", dataKey: "nombre" },
+        { header: "Proveedor", dataKey: "proveedor" },
+        { header: "Cantidad", dataKey: "cantidad" },
+        { header: "Total", dataKey: "total" },
+        { header: "Estado", dataKey: "estado" },
+        { header: "Método de Pago", dataKey: "metodo_pago" },
+        { header: "Fecha y Hora", dataKey: "fechaHora" },
       ],
       rows: [],
       loading: false,
-      error: null
+      error: null,
     };
   },
   computed: {
     filteredCompras() {
-      return this.compras.filter(compra => {
+      return this.compras.filter((compra) => {
         const compraFecha = new Date(compra.fechaHora);
 
         const matchesSearchQuery =
-          String(compra.codigo).toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          compra.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          compra.proveedor.toLowerCase().includes(this.searchQuery.toLowerCase());
+          String(compra.codigo)
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
+          compra.nombre
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
+          compra.proveedor
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase());
 
         const matchesDateRange =
-          (!this.startDate || compraFecha >= new Date(this.startDate + 'T00:00:00')) &&
-          (!this.endDate || compraFecha <= new Date(this.endDate + 'T23:59:59'));
+          (!this.startDate ||
+            compraFecha >= new Date(this.startDate + "T00:00:00")) &&
+          (!this.endDate ||
+            compraFecha <= new Date(this.endDate + "T23:59:59"));
 
         return matchesSearchQuery && matchesDateRange;
       });
@@ -265,12 +310,12 @@ export default {
         total: this.formatCurrency(compra.total),
         estado: compra.estado,
         metodo_pago: compra.metodo_pago,
-        fechaHora: this.formatDateTime(compra.fechaHora)
+        fechaHora: this.formatDateTime(compra.fechaHora),
       }));
     },
     filteredRows() {
       return this.paginatedCompras.map((compra, index) => ({
-        index: ((this.currentPage - 1) * this.pageSize) + index + 1, // Aquí estaba el error
+        index: (this.currentPage - 1) * this.pageSize + index + 1, // Aquí estaba el error
         codigo: compra.codigo,
         nombre: compra.nombre,
         proveedor: compra.proveedor,
@@ -278,9 +323,9 @@ export default {
         total: this.formatCurrency(compra.total),
         estado: compra.estado,
         metodo_pago: compra.metodo_pago,
-        fechaHora: this.formatDateTime(compra.fechaHora)
+        fechaHora: this.formatDateTime(compra.fechaHora),
       }));
-    }
+    },
   },
   methods: {
     formatCurrency(value) {
@@ -288,16 +333,18 @@ export default {
     },
 
     formatDateTime(dateString) {
-      if (!dateString) return '';
+      if (!dateString) return "";
       const date = new Date(dateString);
-      return date.toLocaleString('es-HN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      }).replace(',', '');
+      return date
+        .toLocaleString("es-HN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+        .replace(",", "");
     },
 
     async loadCompras() {
@@ -306,21 +353,21 @@ export default {
 
       this.isLoading = true;
       try {
-        console.log('Iniciando carga de compras...');
+        console.log("Iniciando carga de compras...");
         const response = await AdminCompras.obtenerCompras();
-        console.log('Respuesta del servidor:', response);
+        console.log("Respuesta del servidor:", response);
 
         const comprasData = response.data || response;
         if (comprasData) {
           this.compras = comprasData;
-          console.log('Compras procesadas:', this.compras);
+          console.log("Compras procesadas:", this.compras);
           this.generateRows();
         } else {
-          throw new Error('No se pudieron obtener las compras');
+          throw new Error("No se pudieron obtener las compras");
         }
       } catch (error) {
-        console.error('No se encontraron compras para mostrar.', error);
-        this.error = 'No se encontraron compras para mostrar.';
+        console.error("No se encontraron compras para mostrar.", error);
+        this.error = "No se encontraron compras para mostrar.";
         this.toast.error(this.error);
       } finally {
         this.loading = false;
@@ -331,13 +378,15 @@ export default {
     async showDetalles(compra) {
       this.isLoading = true;
       try {
-        console.log('Mostrando detalles para:', compra);
-        const detalles = await AdminCompras.obtenerDetalleCompra(compra.id_compra);
+        console.log("Mostrando detalles para:", compra);
+        const detalles = await AdminCompras.obtenerDetalleCompra(
+          compra.id_compra
+        );
         this.selectedCompra = detalles;
         this.isDetallesModalOpen = true;
       } catch (error) {
-        console.error('Error al obtener detalles:', error);
-        this.toast.error('Error al obtener los detalles de la compra');
+        console.error("Error al obtener detalles:", error);
+        this.toast.error("Error al obtener los detalles de la compra");
       } finally {
         this.isLoading = false;
       }
@@ -346,21 +395,21 @@ export default {
     async obtenesCompras(id_sucursal) {
       this.isLoading = true;
       try {
-        console.log('Iniciando carga de compras...');
+        console.log("Iniciando carga de compras...");
         const response = await AdminCompras.obtenerComprasCeo(id_sucursal);
-        console.log('Respuesta del servidor:', response);
+        console.log("Respuesta del servidor:", response);
 
         const comprasData = response.data || response;
         if (comprasData) {
           this.compras = comprasData;
-          console.log('Compras procesadas:', this.compras);
+          console.log("Compras procesadas:", this.compras);
           this.generateRows();
         } else {
-          throw new Error('No se pudieron obtener las compras');
+          throw new Error("No se pudieron obtener las compras");
         }
       } catch (error) {
-        console.error('No se encontraron compras para mostrar.', error);
-        this.error = 'No se encontraron compras para mostrar.';
+        console.error("No se encontraron compras para mostrar.", error);
+        this.error = "No se encontraron compras para mostrar.";
         this.toast.error(this.error);
       } finally {
         this.loading = false;
@@ -390,18 +439,18 @@ export default {
     },
 
     resetFilters() {
-      this.searchQuery = '';
-      this.startDate = '';
-      this.endDate = '';
+      this.searchQuery = "";
+      this.startDate = "";
+      this.endDate = "";
       this.currentPage = 1;
-    }
+    },
   },
   watch: {
     paginatedCompras: {
       handler() {
         this.generateRows();
       },
-      deep: true
+      deep: true,
     },
     searchQuery() {
       this.currentPage = 1;
@@ -411,10 +460,10 @@ export default {
     },
     endDate() {
       this.currentPage = 1;
-    }
+    },
   },
   async mounted() {
-    setPageTitle('Administrar Compras');
+    setPageTitle("Administrar Compras");
     this.isLoading = true;
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
@@ -422,22 +471,20 @@ export default {
       this.sucursales = await getSucursalesbyEmmpresaSumm(this.id_usuario);
       this.searchSucursal = this.sucursales[0].id_sucursal;
       this.obtenesCompras(this.searchSucursal);
-
     } catch (error) {
       alert(error);
     } finally {
       this.isLoading = false;
     }
-
-  }
+  },
 };
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
 }
 
@@ -454,6 +501,15 @@ export default {
   border-width: 0.5px;
   width: 100%;
   max-width: 300px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 
 .export-button {
@@ -509,7 +565,7 @@ export default {
 }
 
 .btn-view {
-  background-color: #20B2AA;
+  background-color: #20b2aa;
   color: white;
   width: 40px;
   height: 40px;
@@ -517,7 +573,7 @@ export default {
 }
 
 .btn-view:hover {
-  background-color: #1A958F;
+  background-color: #1a958f;
 }
 
 .btn-info {
@@ -803,7 +859,6 @@ export default {
 }
 
 @media screen and (max-width: 480px) {
-
   .table th,
   .table td {
     padding: 6px;

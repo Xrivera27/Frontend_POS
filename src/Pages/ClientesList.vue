@@ -4,21 +4,35 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap;">Agregar
-        Clientes</button>
+      <button
+        id="btnAdd"
+        class="btn btn-primary"
+        @click="openModal"
+        style="width: 200px; white-space: nowrap"
+      >
+        Agregar Clientes
+      </button>
 
-      <ExportButton :columns="columns" :rows="rows" fileName="Clientes.pdf" class="export-button" />
+      <ExportButton
+        :columns="columns"
+        :rows="rows"
+        fileName="Clientes.pdf"
+        class="export-button"
+      />
 
       <div class="search-bar">
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar cliente..." />
+        <input
+          class="busqueda"
+          type="text"
+          v-model="searchQuery"
+          placeholder="Buscar cliente..."
+        />
       </div>
     </div>
 
     <div class="table-container">
       <!-- Indicador de carga -->
-      <div v-if="isLoading" class="loading-indicator">
-        Cargando clientes...
-      </div>
+      <div v-if="isLoading" class="loading-indicator">Cargando clientes...</div>
 
       <!-- Mensaje si no hay datos -->
       <div v-else-if="paginatedClientes.length === 0" class="no-data">
@@ -39,17 +53,25 @@
         </thead>
         <tbody>
           <tr v-for="(cliente, index) in paginatedClientes" :key="index">
-            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
+            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
             <td>{{ cliente.nombre_completo }}</td>
             <td>{{ cliente.correo }}</td>
             <td>{{ cliente.direccion }}</td>
             <td>{{ cliente.telefono }}</td>
             <td>{{ cliente.rtn }}</td>
             <td v-if="esCeo">
-              <button id="btnEditar" class="btn btn-warning" @click="editCliente(cliente)">
+              <button
+                id="btnEditar"
+                class="btn btn-warning"
+                @click="editCliente(cliente)"
+              >
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteCliente(cliente)">
+              <button
+                id="btnEliminar"
+                class="btn btn-danger"
+                @click="deleteCliente(cliente)"
+              >
                 <i class="bi bi-x-lg"></i>
               </button>
             </td>
@@ -65,10 +87,18 @@
           de {{ filteredClientes.length }} registros
         </div>
         <div class="pagination-container">
-          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
             Anterior
           </button>
-          <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
             Siguiente
           </button>
         </div>
@@ -85,61 +115,95 @@
         </div>
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteCliente()" />
+            <btnGuardarModal
+              texto="Sí, eliminar"
+              style="background-color: red"
+              @click="deleteCliente()"
+            />
             <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
           </div>
         </div>
       </div>
     </div>
 
-
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h2 class="h2-modal-content">{{ isEditing ? 'Editar Cliente' : 'Agregar Cliente' }}</h2>
+          <h2 class="h2-modal-content">
+            {{ isEditing ? "Editar Cliente" : "Agregar Cliente" }}
+          </h2>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
             <label>Nombre:</label>
-            <input v-model="clienteForm.nombre_completo" type="text" required>
+            <input
+              ref="nombreInput"
+              v-model="clienteForm.nombre_completo"
+              type="text"
+              required
+            />
           </div>
 
           <div class="form-group">
             <label>Correo:</label>
-            <input v-model="clienteForm.correo" type="email" required>
+            <input v-model="clienteForm.correo" type="email" required />
           </div>
 
           <div class="form-group">
             <label>Dirección:</label>
-            <input v-model="clienteForm.direccion" type="text" required>
+            <input v-model="clienteForm.direccion" type="text" required />
           </div>
 
           <div class="form-group">
             <label>Teléfono:</label>
             <div class="phone-input-container">
-              <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+              <select
+                v-model="selectedCountry"
+                @change="updatePhoneValidation"
+                class="select-phone"
+              >
                 <option value="">País</option>
-                <option v-for="(country, code) in countryData" :key="code" :value="code">
+                <option
+                  v-for="(country, code) in countryData"
+                  :key="code"
+                  :value="code"
+                >
                   {{ country.emoji }} {{ country.code }}
                 </option>
               </select>
-              <input v-model="clienteForm.telefono" type="text" class="input-phone"
-                :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+              <input
+                v-model="clienteForm.telefono"
+                type="text"
+                class="input-phone"
+                :placeholder="'Número (' + phoneLength + ' dígitos)'"
+                required
+              />
             </div>
           </div>
 
           <div class="form-group">
             <label>RTN:</label>
-            <input v-model="clienteForm.rtn" type="text" maxlength="14" required>
+            <input
+              v-model="clienteForm.rtn"
+              type="text"
+              maxlength="14"
+              required
+            />
           </div>
         </div>
 
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Cliente'" @click="guardarCliente">
+            <btnGuardarModal
+              :texto="isEditing ? 'Guardar Cambios' : 'Agregar Cliente'"
+              @click="guardarCliente"
+            >
             </btnGuardarModal>
-            <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+            <btnCerrarModal
+              :texto="'Cerrar'"
+              @click="closeModal"
+            ></btnCerrarModal>
           </div>
         </div>
       </div>
@@ -149,17 +213,22 @@
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
-import ExportButton from '../components/ExportButton.vue';
-import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
-import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
+import ExportButton from "../components/ExportButton.vue";
+import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
+import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
 import solicitudes from "../../services/solicitudes";
-import { validacionesClientes } from '../../services/validarCampos.js';
-import { notis } from '../../services/notificaciones.js';
-const { getClientesbyEmpresa, postCliente, patchCliente, desactivarCliente } = require('../../services/clienteSolicitudes.js');
-const { esCeo } = require('../../services/usuariosSolicitudes');
+import { validacionesClientes } from "../../services/validarCampos.js";
+import { notis } from "../../services/notificaciones.js";
+const {
+  getClientesbyEmpresa,
+  postCliente,
+  patchCliente,
+  desactivarCliente,
+} = require("../../services/clienteSolicitudes.js");
+const { esCeo } = require("../../services/usuariosSolicitudes");
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
-import ModalLoading from '@/components/ModalLoading.vue';
-import { setPageTitle } from '@/components/pageMetadata';
+import ModalLoading from "@/components/ModalLoading.vue";
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
   components: {
@@ -167,39 +236,39 @@ export default {
     btnGuardarModal,
     btnCerrarModal,
     PageHeader,
-    ModalLoading
+    ModalLoading,
   },
   data() {
     return {
-      titulo: 'Clientes',
+      titulo: "Clientes",
       isLoading: false,
       showConfirmModal: false,
       clienteToDelete: null,
-      searchQuery: '',
+      searchQuery: "",
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
       id_usuario: 0,
       esCeo: false,
-      selectedCountry: 'HN',
+      selectedCountry: "HN",
       countryData: COUNTRY_CODES,
       phoneLength: 8,
       currentPage: 1,
       pageSize: 10,
       clienteForm: {
         id: null,
-        nombre_completo: '',
-        correo: '',
-        direccion: '',
-        telefono: '',
-        rtn: ''
+        nombre_completo: "",
+        correo: "",
+        direccion: "",
+        telefono: "",
+        rtn: "",
       },
-      clientes: []
+      clientes: [],
     };
   },
   async mounted() {
     this.isLoading = true;
-    setPageTitle('Clientes');
+    setPageTitle("Clientes");
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.clientes = await getClientesbyEmpresa(this.id_usuario);
@@ -212,9 +281,12 @@ export default {
   },
   computed: {
     filteredClientes() {
-      return this.clientes.filter(cliente =>
-        cliente.nombre_completo.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        cliente.telefono.includes(this.searchQuery)
+      return this.clientes.filter(
+        (cliente) =>
+          cliente.nombre_completo
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
+          cliente.telefono.includes(this.searchQuery)
       );
     },
     paginatedClientes() {
@@ -224,7 +296,7 @@ export default {
     },
     totalPages() {
       return Math.ceil(this.filteredClientes.length / this.pageSize);
-    }
+    },
   },
   methods: {
     updatePhoneValidation() {
@@ -247,6 +319,9 @@ export default {
 
     openModal() {
       this.isModalOpen = true;
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
     },
 
     closeModal() {
@@ -257,18 +332,23 @@ export default {
     clearForm() {
       this.clienteForm = {
         id: null,
-        nombre_completo: '',
-        correo: '',
-        direccion: '',
-        telefono: '',
-        rtn: ''
+        nombre_completo: "",
+        correo: "",
+        direccion: "",
+        telefono: "",
+        rtn: "",
       };
       this.isEditing = false;
       this.editIndex = null;
     },
 
     async guardarCliente() {
-      if (!validacionesClientes.validarCampos(this.clienteForm, this.selectedCountry)) {
+      if (
+        !validacionesClientes.validarCampos(
+          this.clienteForm,
+          this.selectedCountry
+        )
+      ) {
         return;
       }
       this.isLoading = true;
@@ -277,10 +357,13 @@ export default {
       let response;
 
       if (this.isEditing) {
-        const nuevoRegistro = await patchCliente(this.clienteForm, this.clientes[this.editIndex].id_cliente);
+        const nuevoRegistro = await patchCliente(
+          this.clienteForm,
+          this.clientes[this.editIndex].id_cliente
+        );
         if (nuevoRegistro == true) {
           this.isLoading = false;
-          notis('success', 'Actualizado datos del cliente...');
+          notis("success", "Actualizado datos del cliente...");
           Object.assign(this.clientes[this.editIndex], this.clienteForm);
         }
       } else {
@@ -288,10 +371,10 @@ export default {
           response = await postCliente(this.clienteForm, this.id_usuario);
           if (response.length > 0) {
             this.isLoading = false;
-            notis('success', 'Cliente guardado correctamente');
+            notis("success", "Cliente guardado correctamente");
             this.clientes.push(response[0]);
           } else {
-            throw new Error('Error al crear el cliente.');
+            throw new Error("Error al crear el cliente.");
           }
         } catch (error) {
           console.log(error);
@@ -303,8 +386,13 @@ export default {
     editCliente(cliente) {
       this.clienteForm = { ...cliente };
       this.isEditing = true;
-      this.editIndex = this.clientes.findIndex(item => item.id_cliente === cliente.id_cliente);
+      this.editIndex = this.clientes.findIndex(
+        (item) => item.id_cliente === cliente.id_cliente
+      );
       this.openModal();
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
     },
 
     async deleteCliente(cliente) {
@@ -316,16 +404,20 @@ export default {
 
       this.isLoading = true;
       try {
-        const response = await desactivarCliente(this.clienteToDelete.id_cliente);
+        const response = await desactivarCliente(
+          this.clienteToDelete.id_cliente
+        );
         if (response === true) {
-          this.clientes = this.clientes.filter(item => item.id_cliente !== this.clienteToDelete.id_cliente);
+          this.clientes = this.clientes.filter(
+            (item) => item.id_cliente !== this.clienteToDelete.id_cliente
+          );
           this.isLoading = false;
-          notis('success', 'Cliente eliminado correctamente');
+          notis("success", "Cliente eliminado correctamente");
         } else {
           throw response;
         }
       } catch (error) {
-        notis('error', error.message);
+        notis("error", error.message);
       } finally {
         this.showConfirmModal = false;
         this.clienteToDelete = null;
@@ -339,29 +431,29 @@ export default {
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    }
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
   },
   watch: {
     searchQuery() {
       this.currentPage = 1;
-    }
-  }
+    },
+  },
 };
 </script>
 
-
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 /* Fuente global */
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
 }
 
@@ -381,6 +473,15 @@ export default {
   border-width: 0.5px;
   width: 100%;
   max-width: 300px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 
 .registros {
@@ -503,7 +604,7 @@ export default {
 .modal-body-confirm {
   padding: 24px;
   overflow-y: auto;
-  background-color: white
+  background-color: white;
 }
 
 .dark .modal-body-confirm {
@@ -561,7 +662,6 @@ export default {
   border-color: #c09d62;
   box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
 }
-
 
 .form-group textarea {
   min-height: 100px;
@@ -805,7 +905,6 @@ export default {
   border-radius: 4px;
 }
 
-
 /* Estilos para modo oscuro */
 .dark .country-code-select,
 .dark .phone-input {
@@ -848,7 +947,6 @@ export default {
 }
 
 @media screen and (max-width: 480px) {
-
   .modal-content {
     width: 95%;
     padding: 15px;
@@ -952,7 +1050,6 @@ export default {
 .dark .table tbody tr:hover {
   background-color: #1f2937;
 }
-
 
 /* Modal en modo oscuro */
 .dark .modal-content {

@@ -4,13 +4,23 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal"
-        style="width: 200px; white-space: nowrap;">
+      <button
+        v-if="esCeo"
+        id="btnAdd"
+        class="btn btn-primary"
+        @click="openModal"
+        style="width: 200px; white-space: nowrap"
+      >
         Agregar Proveedor
       </button>
 
       <div class="search-bar">
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar proveedor..." />
+        <input
+          class="busqueda"
+          type="text"
+          v-model="searchQuery"
+          placeholder="Buscar proveedor..."
+        />
       </div>
     </div>
 
@@ -38,16 +48,24 @@
         </thead>
         <tbody>
           <tr v-for="(proveedor, index) in paginatedProveedores" :key="index">
-            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
+            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
             <td>{{ proveedor.nombre }}</td>
             <td>{{ proveedor.telefono }}</td>
             <td>{{ proveedor.correo }}</td>
             <td>{{ proveedor.direccion }}</td>
             <td v-if="esCeo">
-              <button id="btnEditar" class="btn btn-warning" @click="editProveedor(proveedor)">
+              <button
+                id="btnEditar"
+                class="btn btn-warning"
+                @click="editProveedor(proveedor)"
+              >
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteProveedor(proveedor)">
+              <button
+                id="btnEliminar"
+                class="btn btn-danger"
+                @click="deleteProveedor(proveedor)"
+              >
                 <i class="bi bi-x-lg"></i>
               </button>
             </td>
@@ -58,16 +76,29 @@
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ paginatedProveedores.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }} a
+          Mostrando
+          {{
+            paginatedProveedores.length === 0
+              ? 0
+              : (currentPage - 1) * pageSize + 1
+          }}
+          a
           {{ Math.min(currentPage * pageSize, filteredProveedores.length) }}
           de {{ filteredProveedores.length }} registros
         </div>
         <div class="pagination-container">
-          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
             Anterior
           </button>
-          <button class="pagination-button" :disabled="currentPage === totalPages || totalPages === 0"
-            @click="nextPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === totalPages || totalPages === 0"
+            @click="nextPage"
+          >
             Siguiente
           </button>
         </div>
@@ -86,11 +117,14 @@
 
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteProveedor()" />
+            <btnGuardarModal
+              texto="Sí, eliminar"
+              style="background-color: red"
+              @click="deleteProveedor()"
+            />
             <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
           </div>
         </div>
-
       </div>
     </div>
 
@@ -98,83 +132,107 @@
     <div v-if="isModalOpen" class="modal">
       <div class="modal-proveedores">
         <div class="modal-header">
-          <h2 class="h2-modal-proveedores">{{ isEditing ? 'Editar Proveedor' : 'Agregar Proveedor' }}</h2>
+          <h2 class="h2-modal-proveedores">
+            {{ isEditing ? "Editar Proveedor" : "Agregar Proveedor" }}
+          </h2>
         </div>
 
         <div class="modal-body">
           <div class="contenedor">
             <div class="form-group">
               <label>Nombre:</label>
-              <input v-model="proveedorForm.nombre" type="text" required>
+              <input
+                ref="nombreInput"
+                v-model="proveedorForm.nombre"
+                type="text"
+                required
+              />
             </div>
 
             <div class="form-group">
               <label>Teléfono:</label>
               <div class="phone-input-container">
-                <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+                <select
+                  v-model="selectedCountry"
+                  @change="updatePhoneValidation"
+                  class="select-phone"
+                >
                   <option value="">País</option>
-                  <option v-for="(country, code) in countryData" :key="code" :value="code">
+                  <option
+                    v-for="(country, code) in countryData"
+                    :key="code"
+                    :value="code"
+                  >
                     {{ country.emoji }} {{ country.code }}
                   </option>
                 </select>
-                <input v-model="proveedorForm.telefono" type="text" class="input-phone"
-                  :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+                <input
+                  v-model="proveedorForm.telefono"
+                  type="text"
+                  class="input-phone"
+                  :placeholder="'Número (' + phoneLength + ' dígitos)'"
+                  required
+                />
               </div>
             </div>
 
             <div class="form-group">
               <label>Email:</label>
-              <input v-model="proveedorForm.correo" type="text" required>
+              <input v-model="proveedorForm.correo" type="text" required />
             </div>
 
             <div class="form-group">
               <label>Dirección:</label>
-              <input v-model="proveedorForm.direccion" type="text" required>
+              <input v-model="proveedorForm.direccion" type="text" required />
             </div>
           </div>
         </div>
 
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Proveedor'" @click="guardarProveedor">
+            <btnGuardarModal
+              :texto="isEditing ? 'Guardar Cambios' : 'Agregar Proveedor'"
+              @click="guardarProveedor"
+            >
             </btnGuardarModal>
-            <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+            <btnCerrarModal
+              :texto="'Cerrar'"
+              @click="closeModal"
+            ></btnCerrarModal>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </template>
 
 <script>
-
 import PageHeader from "@/components/PageHeader.vue";
-import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
-import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
-import { notis } from '../../services/notificaciones.js';
-const { esCeo } = require('../../services/usuariosSolicitudes');
+import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
+import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
+import { notis } from "../../services/notificaciones.js";
+const { esCeo } = require("../../services/usuariosSolicitudes");
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
-import { validacionesProveedores } from '../../services/validarCampos.js';
+import { validacionesProveedores } from "../../services/validarCampos.js";
 import solicitudes from "../../services/solicitudes.js";
-import ModalLoading from '@/components/ModalLoading.vue';
-import { setPageTitle } from '@/components/pageMetadata';
+import ModalLoading from "@/components/ModalLoading.vue";
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
-  name: 'AdministrarProveedores',
+  name: "AdministrarProveedores",
   components: {
     PageHeader,
     btnGuardarModal,
     btnCerrarModal,
-    ModalLoading
+    ModalLoading,
   },
   data() {
     return {
-      titulo: 'Proveedores',
+      titulo: "Proveedores",
       isLoading: false,
       showConfirmModal: false,
       proveedorToDelete: null,
-      searchQuery: '',
+      searchQuery: "",
       isModalOpen: false,
       isEditing: false,
       editIndex: null,
@@ -182,24 +240,27 @@ export default {
       currentPage: 1,
       pageSize: 10,
       esCeo: false,
-      selectedCountry: 'HN',
+      selectedCountry: "HN",
       countryData: COUNTRY_CODES,
       phoneLength: 8,
       proveedorForm: {
-        nombre: '',
-        telefono: '',
-        correo: '',
-        direccion: '',
+        nombre: "",
+        telefono: "",
+        correo: "",
+        direccion: "",
       },
-      proveedores: []
+      proveedores: [],
     };
   },
 
   computed: {
     filteredProveedores() {
-      return this.proveedores.filter(proveedor =>
-        proveedor.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        proveedor.telefono.includes(this.searchQuery)
+      return this.proveedores.filter(
+        (proveedor) =>
+          proveedor.nombre
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
+          proveedor.telefono.includes(this.searchQuery)
       );
     },
 
@@ -211,7 +272,7 @@ export default {
 
     totalPages() {
       return Math.ceil(this.filteredProveedores.length / this.pageSize);
-    }
+    },
   },
 
   methods: {
@@ -240,7 +301,7 @@ export default {
           `/proveedores/${this.id_usuario}`
         );
       } catch (error) {
-        notis('error', error.message);
+        notis("error", error.message);
       } finally {
         this.isLoading = false;
       }
@@ -248,6 +309,9 @@ export default {
 
     openModal() {
       this.isModalOpen = true;
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
     },
 
     closeModal() {
@@ -257,17 +321,22 @@ export default {
 
     clearForm() {
       this.proveedorForm = {
-        nombre: '',
-        telefono: '',
-        correo: '',
-        direccion: '',
+        nombre: "",
+        telefono: "",
+        correo: "",
+        direccion: "",
       };
       this.isEditing = false;
       this.editIndex = null;
     },
 
     async guardarProveedor() {
-      if (!validacionesProveedores.validarCampos(this.proveedorForm, this.selectedCountry)) {
+      if (
+        !validacionesProveedores.validarCampos(
+          this.proveedorForm,
+          this.selectedCountry
+        )
+      ) {
         return;
       }
 
@@ -279,35 +348,43 @@ export default {
 
       if (this.isEditing) {
         try {
-          parametros = `/proveedores/actualizar-proveedor/${this.proveedores[this.editIndex].id}`;
-          response = await solicitudes.patchRegistro(parametros, this.proveedorForm);
+          parametros = `/proveedores/actualizar-proveedor/${
+            this.proveedores[this.editIndex].id
+          }`;
+          response = await solicitudes.patchRegistro(
+            parametros,
+            this.proveedorForm
+          );
 
           if (response === true) {
             this.isLoading = false;
-            notis('success', "Actualizando datos del proveedor...");
+            notis("success", "Actualizando datos del proveedor...");
             Object.assign(this.proveedores[this.editIndex], this.proveedorForm);
           } else {
-            notis('error', response.message);
+            notis("error", response.message);
           }
         } catch (error) {
-          notis('error', error.message);
+          notis("error", error.message);
         } finally {
           this.isLoading = false;
         }
       } else {
         try {
           parametros = `/proveedores/crear-proveedor/${this.id_usuario}`;
-          response = await solicitudes.postRegistro(parametros, this.proveedorForm);
+          response = await solicitudes.postRegistro(
+            parametros,
+            this.proveedorForm
+          );
 
           if (response.length > 0) {
             this.isLoading = false;
-            notis('success', "Proveedor guardado correctamente...");
+            notis("success", "Proveedor guardado correctamente...");
             this.proveedores.push(response[0]);
           } else {
             throw response;
           }
         } catch (error) {
-          notis('error', error.message);
+          notis("error", error.message);
         } finally {
           this.isLoading = false;
         }
@@ -318,8 +395,13 @@ export default {
     editProveedor(proveedor) {
       this.proveedorForm = { ...proveedor };
       this.isEditing = true;
-      this.editIndex = this.proveedores.findIndex(item => item.id === proveedor.id);
+      this.editIndex = this.proveedores.findIndex(
+        (item) => item.id === proveedor.id
+      );
       this.openModal();
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
     },
 
     async deleteProveedor(proveedor) {
@@ -333,18 +415,26 @@ export default {
       try {
         const datosActualizados = {
           estado: false,
-          id_usuario: this.id_usuario
+          id_usuario: this.id_usuario,
         };
 
         const parametros = `/proveedores/desactivar-proveedor/${this.proveedorToDelete.id}`;
-        const response = await solicitudes.desactivarRegistro(parametros, datosActualizados);
+        const response = await solicitudes.desactivarRegistro(
+          parametros,
+          datosActualizados
+        );
 
         if (response === true) {
-          this.proveedores = this.proveedores.filter(item => item.id !== this.proveedorToDelete.id);
-          notis('success', 'Proveedor eliminado correctamente');
+          this.proveedores = this.proveedores.filter(
+            (item) => item.id !== this.proveedorToDelete.id
+          );
+          notis("success", "Proveedor eliminado correctamente");
         }
       } catch (error) {
-        notis('error', 'Error al eliminar el proveedor, hay productos asignados con el proveedor');
+        notis(
+          "error",
+          "Error al eliminar el proveedor, hay productos asignados con el proveedor"
+        );
       } finally {
         this.showConfirmModal = false;
         this.proveedorToDelete = null;
@@ -358,43 +448,45 @@ export default {
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    }
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
   },
 
   watch: {
     searchQuery() {
       this.currentPage = 1;
-    }
+    },
   },
 
   async mounted() {
     this.isLoading = true;
-    setPageTitle('Proveedores');
+    setPageTitle("Proveedores");
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       await this.loadProveedores();
       this.esCeo = await esCeo(this.id_usuario);
     } catch (error) {
-      notis('error', error.message);
+      notis("error", error.message);
     } finally {
       this.isLoading = false;
     }
-  }
+  },
 };
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 /* Fuentes */
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
 }
 
@@ -428,9 +520,8 @@ export default {
 .modal-body-confirm {
   padding: 24px;
   overflow-y: auto;
-  background-color: white
+  background-color: white;
 }
-
 
 .modal-proveedores {
   background: white;
@@ -485,7 +576,7 @@ export default {
 .modal-body-confirm {
   padding: 24px;
   overflow-y: auto;
-  background-color: white
+  background-color: white;
 }
 
 .dark .modal-body-confirm {
@@ -650,6 +741,15 @@ export default {
   max-width: 300px;
 }
 
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
+}
+
 /* Selección */
 select {
   border: 1px solid #ccc;
@@ -770,7 +870,6 @@ select {
   gap: 12px;
 }
 
-
 .phone-input-container {
   display: flex;
   gap: 8px;
@@ -793,7 +892,6 @@ select {
   border: 1px solid #ddd;
   border-radius: 4px;
 }
-
 
 /* Estilos para modo oscuro */
 .dark .country-code-select,
@@ -822,7 +920,6 @@ select {
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #a38655;
 }
-
 
 /* Media Queries */
 @media screen and (max-width: 768px) {
@@ -866,7 +963,6 @@ select {
 }
 
 @media screen and (max-width: 480px) {
-
   .modal-proveedores {
     width: 95%;
     padding: 15px;

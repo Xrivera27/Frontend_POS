@@ -4,9 +4,15 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal"
-        style="width: 200px; white-space: nowrap;">Agregar
-        Categoría</button>
+      <button
+        v-if="esCeo"
+        id="btnAdd"
+        class="btn btn-primary"
+        @click="openModal"
+        style="width: 200px; white-space: nowrap"
+      >
+        Agregar Categoría
+      </button>
 
       <RouterLink to="promociones-categorias">
         <button class="button-promocion">Promociones</button>
@@ -18,12 +24,16 @@
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar categoría..." />
+        <input
+          class="busqueda"
+          type="text"
+          v-model="searchQuery"
+          placeholder="Buscar categoría..."
+        />
       </div>
     </div>
 
     <div class="table-container">
-
       <!-- Indicador de carga -->
       <div v-if="isLoading" class="loading-indicator">
         Cargando categorias...
@@ -33,7 +43,6 @@
       <div v-else-if="paginatedCategorias.length === 0" class="no-data">
         No se encontraron categorias para mostrar.
       </div>
-
 
       <table class="table">
         <thead>
@@ -47,15 +56,25 @@
         </thead>
         <tbody>
           <tr v-for="(categoria, index) in paginatedCategorias" :key="index">
-            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
+            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
             <td>{{ categoria.nombre_categoria }}</td>
             <td>{{ categoria.descripcion }}</td>
             <td>{{ categoria.totalProd }}</td>
             <td v-if="esCeo">
-              <button id="btnEditar" class="btn btn-warning" @click="editCategoria(categoria)"><i
-                  class="bi bi-pencil-fill"></i></button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteCategoria(categoria)"><b><i
-                    class="bi bi-x-lg"></i></b></button>
+              <button
+                id="btnEditar"
+                class="btn btn-warning"
+                @click="editCategoria(categoria)"
+              >
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button
+                id="btnEliminar"
+                class="btn btn-danger"
+                @click="deleteCategoria(categoria)"
+              >
+                <b><i class="bi bi-x-lg"></i></b>
+              </button>
             </td>
           </tr>
         </tbody>
@@ -65,15 +84,24 @@
 
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize,
-            filteredCategorias.length) }} de {{ filteredCategorias.length }} registros
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
+          {{ Math.min(currentPage * pageSize, filteredCategorias.length) }} de
+          {{ filteredCategorias.length }} registros
         </div>
         <div class="pagination-container">
-          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
             Anterior
           </button>
 
-          <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
             Siguiente
           </button>
         </div>
@@ -91,44 +119,64 @@
         </div>
 
         <div class="modal-footer">
-          <btnGuardarModal :texto="'Si, eliminar'" style="background-color: red;" @click="deleteCategoria()">
+          <btnGuardarModal
+            :texto="'Si, eliminar'"
+            style="background-color: red"
+            @click="deleteCategoria()"
+          >
           </btnGuardarModal>
-          <btnCerrarModal :texto="'No, regresar'" @click="cancelDelete"></btnCerrarModal>
+          <btnCerrarModal
+            :texto="'No, regresar'"
+            @click="cancelDelete"
+          ></btnCerrarModal>
         </div>
       </div>
     </div>
-
 
     <!-- Modal para agregar o editar categorías -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-categoria">
         <div class="modal-header">
-          <h2>{{ isEditing ? 'Editar Categoría' : 'Agregar Categoría' }}</h2>
+          <h2>{{ isEditing ? "Editar Categoría" : "Agregar Categoría" }}</h2>
         </div>
 
         <div class="modal-body">
           <div class="form-row full-width">
             <div class="form-group">
               <label>Nombre:</label>
-              <input v-model="categoriaForm.nombre_categoria" type="text"
-                placeholder="Ingrese el nombre de la categoría" required>
+              <input
+                ref="nombreInput"
+                v-model="categoriaForm.nombre_categoria"
+                type="text"
+                placeholder="Ingrese el nombre de la categoría"
+                required
+              />
             </div>
           </div>
 
           <div class="form-row full-width">
             <div class="form-group">
               <label>Descripción:</label>
-              <textarea v-model="categoriaForm.descripcion" placeholder="Ingrese la descripción de la categoría"
-                required></textarea>
+              <textarea
+                v-model="categoriaForm.descripcion"
+                placeholder="Ingrese la descripción de la categoría"
+                required
+              ></textarea>
             </div>
           </div>
         </div>
 
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Categoría'" @click="guardarCategoria">
+            <btnGuardarModal
+              :texto="isEditing ? 'Guardar Cambios' : 'Agregar Categoría'"
+              @click="guardarCategoria"
+            >
             </btnGuardarModal>
-            <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+            <btnCerrarModal
+              :texto="'Cerrar'"
+              @click="closeModal"
+            ></btnCerrarModal>
           </div>
         </div>
       </div>
@@ -140,47 +188,49 @@
 import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
-import { validacionesCategorias } from '../../services/validarCampos.js';
-import { notis } from '../../services/notificaciones.js';
+import { validacionesCategorias } from "../../services/validarCampos.js";
+import { notis } from "../../services/notificaciones.js";
 import { useToast } from "vue-toastification";
 import solicitudes from "../../services/solicitudes.js";
-const { deleteCategoria } = require('../../services/categoriaSolicitudes');
-const { esCeo } = require('../../services/usuariosSolicitudes');
-import ModalLoading from '@/components/ModalLoading.vue';
-import { setPageTitle } from '@/components/pageMetadata';
+const { deleteCategoria } = require("../../services/categoriaSolicitudes");
+const { esCeo } = require("../../services/usuariosSolicitudes");
+import ModalLoading from "@/components/ModalLoading.vue";
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
   components: {
     btnGuardarModal,
     btnCerrarModal,
     PageHeader,
-    ModalLoading
+    ModalLoading,
   },
   data() {
     return {
-      titulo: 'Categorías',
+      titulo: "Categorías",
       showConfirmModal: false,
       isLoading: false,
       categoriaToDelete: null,
-      searchQuery: '',
+      searchQuery: "",
       currentPage: 1,
       pageSize: 10,
-      id_usuario: '',
+      id_usuario: "",
       categorias: [],
       isModalOpen: false,
       isEditing: false,
       editIndex: -1,
       esCeo: false,
       categoriaForm: {
-        nombre_categoria: '',
-        descripcion: ''
+        nombre_categoria: "",
+        descripcion: "",
       },
     };
   },
   computed: {
     filteredCategorias() {
-      return this.categorias.filter(categoria =>
-        categoria.nombre_categoria.toLowerCase().includes(this.searchQuery.toLowerCase())
+      return this.categorias.filter((categoria) =>
+        categoria.nombre_categoria
+          .toLowerCase()
+          .includes(this.searchQuery.toLowerCase())
       );
     },
     paginatedCategorias() {
@@ -197,14 +247,16 @@ export default {
         pages.push(i);
       }
       return pages;
-    }
+    },
   },
   methods: {
-
     openModal() {
       this.isModalOpen = true;
       this.isEditing = false;
-      this.categoriaForm = { nombre_categoria: '', descripcion: '' };
+      this.categoriaForm = { nombre_categoria: "", descripcion: "" };
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
     },
     closeModal() {
       this.isModalOpen = false;
@@ -213,7 +265,12 @@ export default {
       this.isModalOpen = true;
       this.isEditing = true;
       this.categoriaForm = { ...categoria };
-      this.editIndex = this.categorias.findIndex(item => item.id_categoria === categoria.id_categoria);
+      this.editIndex = this.categorias.findIndex(
+        (item) => item.id_categoria === categoria.id_categoria
+      );
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
     },
     async deleteCategoria(categoria) {
       if (!this.showConfirmModal) {
@@ -221,7 +278,7 @@ export default {
         if (categoria.totalProd > 0) {
           const toast = useToast();
           this.isLoading = false;
-          toast.error('Productos existentes dentro de esta categoría');
+          toast.error("Productos existentes dentro de esta categoría");
           return;
         }
         this.isLoading = false;
@@ -233,15 +290,17 @@ export default {
       this.isLoading = true;
 
       try {
-        const response = await deleteCategoria(this.categoriaToDelete.id_categoria);
+        const response = await deleteCategoria(
+          this.categoriaToDelete.id_categoria
+        );
         if (response == true) {
           this.categorias = this.categorias.filter(
-            item => item.id_categoria !== this.categoriaToDelete.id_categoria
+            (item) => item.id_categoria !== this.categoriaToDelete.id_categoria
           );
-          notis('success', 'Categoría eliminada correctamente');
+          notis("success", "Categoría eliminada correctamente");
         }
       } catch (error) {
-        notis('error', new Error(error).message);
+        notis("error", new Error(error).message);
       } finally {
         this.showConfirmModal = false;
         this.categoriaToDelete = null;
@@ -268,14 +327,18 @@ export default {
         console.log("Pasó validación");
 
         // Verificar si existe una categoría con el mismo nombre
-        const nombreNormalizado = this.categoriaForm.nombre_categoria.toLowerCase().trim();
-        const categoriaExistente = this.categorias.find(cat => 
-          cat.nombre_categoria.toLowerCase().trim() === nombreNormalizado &&
-          (!this.isEditing || cat.id_categoria !== this.categoriaForm.id_categoria)
+        const nombreNormalizado = this.categoriaForm.nombre_categoria
+          .toLowerCase()
+          .trim();
+        const categoriaExistente = this.categorias.find(
+          (cat) =>
+            cat.nombre_categoria.toLowerCase().trim() === nombreNormalizado &&
+            (!this.isEditing ||
+              cat.id_categoria !== this.categoriaForm.id_categoria)
         );
 
         if (categoriaExistente) {
-          notis('error', 'Ya existe una categoría con este nombre');
+          notis("error", "Ya existe una categoría con este nombre");
           this.isLoading = false;
           return false;
         }
@@ -285,33 +348,43 @@ export default {
         this.categoriaForm.id_usuario = this.id_usuario;
 
         if (this.isEditing) {
-          parametros = `/categoria-producto/actualizar-categoria/${this.categorias[this.editIndex].id_categoria}`;
+          parametros = `/categoria-producto/actualizar-categoria/${
+            this.categorias[this.editIndex].id_categoria
+          }`;
           console.log("Actualizando categoría:", parametros);
-          response = await solicitudes.patchRegistro(parametros, this.categoriaForm);
+          response = await solicitudes.patchRegistro(
+            parametros,
+            this.categoriaForm
+          );
 
           if (response === true) {
             Object.assign(this.categorias[this.editIndex], this.categoriaForm);
             notis("success", "Actualizando datos de la categoría...");
             this.closeModal();
           } else {
-            throw new Error(response.message || 'Error al actualizar la categoría');
+            throw new Error(
+              response.message || "Error al actualizar la categoría"
+            );
           }
         } else {
           parametros = `/categoria-producto/crear-categoria`;
           console.log("Creando nueva categoría");
-          response = await solicitudes.postRegistro(parametros, this.categoriaForm);
+          response = await solicitudes.postRegistro(
+            parametros,
+            this.categoriaForm
+          );
 
           if (response && response.length > 0) {
             this.categorias.push(response[0]);
             notis("success", "Categoría guardada correctamente");
             this.closeModal();
           } else {
-            throw new Error('Error al crear la categoría');
+            throw new Error("Error al crear la categoría");
           }
         }
       } catch (error) {
         console.error("Error en guardarCategoria:", error);
-        notis('error', error.message);
+        notis("error", error.message);
       } finally {
         this.isLoading = false;
       }
@@ -333,16 +406,18 @@ export default {
       }
     },
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    }
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
   },
   async mounted() {
     this.isLoading = true;
-    setPageTitle('Categorías');
+    setPageTitle("Categorías");
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
@@ -350,7 +425,6 @@ export default {
         `/categoria-producto/${this.id_usuario}`
       );
       this.esCeo = await esCeo(this.id_usuario);
-
     } catch (error) {
       console.log(error);
     } finally {
@@ -360,17 +434,16 @@ export default {
   watch: {
     searchQuery() {
       this.currentPage = 1;
-    }
-  }
+    },
+  },
 };
 </script>
 
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
 }
 
@@ -425,9 +498,13 @@ export default {
   transition: border-color 0.2s ease;
 }
 
-.busqueda:focus {
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
-  border-color: #a38655;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 
 /* Botones */
@@ -620,7 +697,6 @@ export default {
   box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
 }
 
-
 .form-group textarea {
   min-height: 100px;
   resize: vertical;
@@ -672,7 +748,6 @@ export default {
   border-color: #404040;
   color: #fff;
 }
-
 
 .h2-modal-content {
   margin-top: 0px;

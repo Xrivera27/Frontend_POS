@@ -3,16 +3,20 @@
     <PageHeader :titulo="titulo" />
 
     <div class="categories-container">
-      <div 
-        class="category-box" 
-        v-for="(product, index) in sortedProducts" 
+      <div
+        class="category-box"
+        v-for="(product, index) in sortedProducts"
         :key="index"
         :class="getEstadoClass(product.puntaje)"
         @click="openModal(product)"
       >
         <div class="product-name">{{ product.name }}</div>
-        <div class="product-descripcion">Descripción: {{ product.descripcion }}</div>
-        <div class="product-status">Estado: {{ getEstadoLabel(product.puntaje) }}</div>
+        <div class="product-descripcion">
+          Descripción: {{ product.descripcion }}
+        </div>
+        <div class="product-status">
+          Estado: {{ getEstadoLabel(product.puntaje) }}
+        </div>
       </div>
     </div>
 
@@ -34,9 +38,9 @@
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
-import { getAlerts } from '../../services/alertasSolicitudes.js';
+import { getAlerts } from "../../services/alertasSolicitudes.js";
 import solicitudes from "../../services/solicitudes.js";
-import { setPageTitle } from '@/components/pageMetadata';
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
   components: {
@@ -47,8 +51,8 @@ export default {
     return {
       titulo: "Alertas de Inventario",
       alertas: [],
-      id_usuario: '',
-      selectedProduct: null
+      id_usuario: "",
+      selectedProduct: null,
     };
   },
 
@@ -61,12 +65,12 @@ export default {
   methods: {
     getEstadoLabel(puntaje) {
       if (puntaje >= 80) return "URGENTE";
-      if (puntaje >= 45  || puntaje < 80) return "ATENCION";
+      if (puntaje >= 45 || puntaje < 80) return "ATENCION";
       if (puntaje < 45) return "NORMAL";
     },
     getEstadoClass(puntaje) {
       if (puntaje >= 80) return "urgente";
-      if (puntaje >= 45  && puntaje < 80) return "atencion";
+      if (puntaje >= 45 && puntaje < 80) return "atencion";
       if (puntaje < 45) return "normal";
     },
     openModal(product) {
@@ -74,11 +78,11 @@ export default {
     },
     closeModal() {
       this.selectedProduct = null;
-    }
+    },
   },
   async mounted() {
-    setPageTitle('Alertas de Inventario');
-    
+    setPageTitle("Alertas de Inventario");
+
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.alertas = await getAlerts(this.id_usuario);
@@ -86,19 +90,19 @@ export default {
     } catch (error) {
       alert(error);
     }
-  }
+  },
 };
 </script>
 
 <style scoped>
 /* Reset básico */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 body {
@@ -160,10 +164,10 @@ body {
   font-size: 0.9em;
   color: #555;
   display: -webkit-box;
-    -webkit-line-clamp: 2; /* Número de líneas de texto que quieres mostrar */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  -webkit-line-clamp: 2; /* Número de líneas de texto que quieres mostrar */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .product-status {
@@ -353,5 +357,4 @@ body {
 .dark .category-box:hover.normal {
   background-color: rgba(46, 204, 113, 0.3);
 }
-
 </style>

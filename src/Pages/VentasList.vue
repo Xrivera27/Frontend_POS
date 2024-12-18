@@ -851,7 +851,6 @@ export default {
         return descuento > 0 ? descuento.toFixed(2) : "-";
       }
 
-
       return "-";
     },
 
@@ -1744,72 +1743,6 @@ export default {
   table-layout: fixed;
 }
 
-/* Columnas responsivas */
-@media screen and (min-width: 768px) {
-  .col-item {
-    width: 10%;
-  }
-
-  .col-codigo {
-    width: 20%;
-  }
-
-  .col-descripcion {
-    width: 40%;
-  }
-
-  .col-cantidad {
-    width: 10%;
-  }
-
-  .col-precio {
-    width: 10%;
-  }
-
-  .col-descuento {
-    width: 10%;
-    color: rgba(255, 0, 0, 0.747);
-  }
-
-  .col-importe {
-    width: 10%;
-  }
-
-  .col-descuento {
-    width: 10%;
-  }
-}
-
-@media screen and (max-width: 767px) {
-  .col-item {
-    width: 15%;
-  }
-
-  .col-codigo {
-    width: 25%;
-  }
-
-  .col-descripcion {
-    width: 30%;
-  }
-
-  .col-cantidad {
-    width: 10%;
-  }
-
-  .col-precio {
-    width: 10%;
-  }
-
-  .col-importe {
-    width: 10%;
-  }
-
-  .col-descuento {
-    width: 10%;
-  }
-}
-
 /* Estilos de la tabla */
 th {
   background-color: #f0f0f0;
@@ -1861,14 +1794,6 @@ td {
 
 .dark .abrir-caja-button:hover {
   background-color: #4c9900;
-}
-
-@media screen and (max-width: 768px) {
-  .right-section {
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid #ccc;
-  }
 }
 
 /* Teclado Numérico */
@@ -1980,56 +1905,6 @@ button {
   background-color: #d1e8ff !important;
 }
 
-/* Media Queries */
-@media screen and (max-width: 768px) {
-  .header-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .tipo-cliente,
-  .informacion-1,
-  .informacion-2 {
-    width: 100%;
-    padding: 0;
-    margin-bottom: 10px;
-  }
-
-  .numeric-keypad {
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid #ccc;
-  }
-
-  .column-container {
-    flex-direction: column;
-  }
-
-  .total-container {
-    justify-content: center;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .inputs-container {
-    flex-direction: column;
-  }
-
-  .cliente-input,
-  .rtn-input {
-    width: 100%;
-  }
-
-  .footer-container button {
-    font-size: 10px;
-  }
-
-  .buttons-header {
-    width: 100%;
-  }
-}
-
 /* Scrollbar personalizado */
 .table-container::-webkit-scrollbar {
   width: 8px;
@@ -2049,8 +1924,6 @@ button {
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
-
-/* Agregar después de todos tus estilos actuales */
 
 /* =======================================================
    Modo Oscuro
@@ -2207,5 +2080,152 @@ button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+/* Media Queries Grandes (Desktops/Laptops grandes) */
+@media screen and (min-width: 1200px) {
+  .column-container {
+    gap: 20px;
+  }
+
+  .right-section {
+    width: 300px;
+  }
+}
+
+/* Media Queries Medianas (Tablets/Laptops pequeñas) */
+@media screen and (max-width: 1024px) {
+  .usuario-config {
+    width: 95%;
+  }
+
+  .contenedor-principal {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .contenedor-interno {
+    width: 90%;
+    padding: 0;
+  }
+
+  form {
+    min-width: 100%;
+  }
+}
+
+/* Media Queries para Tablets */
+@media screen and (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .tipo-cliente,
+  .informacion-1,
+  .informacion-2 {
+    width: 100%;
+    padding: 0;
+    margin-bottom: 10px;
+  }
+
+  .numeric-keypad {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #ccc;
+  }
+
+  .column-container {
+    flex-direction: column;
+  }
+
+  .right-section {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #ccc;
+  }
+
+  .total-container {
+    justify-content: center;
+  }
+
+  .busqueda {
+    width: 100%;
+  }
+
+  /* Ajustes para la tabla en tablets */
+  .table thead th,
+  .table tbody td {
+    padding: 8px;
+    font-size: 14px;
+  }
+}
+
+/* Media Queries para Móviles */
+@media screen and (max-width: 480px) {
+  .inputs-container {
+    flex-direction: column;
+  }
+
+  .cliente-input,
+  .rtn-input {
+    width: 100%;
+  }
+
+  .buttons-header {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .search-button {
+    width: 100%;
+  }
+
+  .footer-container {
+    gap: 8px;
+  }
+
+  .footer-container button {
+    width: calc(50% - 8px);
+    height: 60px;
+    font-size: 11px;
+    padding: 5px;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .subTotal {
+    font-size: 24px;
+  }
+
+  .keypad button {
+    height: 45px;
+    font-size: 16px;
+  }
+}
+
+/* Media Queries para Móviles Pequeños */
+@media screen and (max-width: 320px) {
+  .footer-container button {
+    width: 100%;
+    height: 50px;
+    font-size: 10px;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 4px;
+    font-size: 11px;
+  }
+
+  .keypad button {
+    height: 40px;
+    font-size: 14px;
+  }
 }
 </style>

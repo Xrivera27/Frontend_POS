@@ -4,12 +4,27 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <button id="btnAdd" class="btn btn-primary" @click="openModal" style="width: 200px; white-space: nowrap">
+      <button
+        id="btnAdd"
+        class="btn btn-primary"
+        @click="openModal"
+        style="width: 200px; white-space: nowrap"
+      >
         Agregar sucursales
       </button>
-      <ExportButton :columns="columns" :rows="rows" fileName="Sucursales.pdf" class="export-button" />
+      <ExportButton
+        :columns="columns"
+        :rows="rows"
+        fileName="Sucursales.pdf"
+        class="export-button"
+      />
       <div class="search-bar">
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar sucursal..." />
+        <input
+          class="busqueda"
+          type="text"
+          v-model="searchQuery"
+          placeholder="Buscar sucursal..."
+        />
       </div>
     </div>
 
@@ -37,16 +52,24 @@
         </thead>
         <tbody>
           <tr v-for="(sucursal, index) in paginatedSucursales" :key="index">
-            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
+            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
             <td>{{ sucursal.nombre_administrativo }}</td>
             <td>{{ sucursal.correo }}</td>
             <td>{{ sucursal.telefono }}</td>
             <td>{{ sucursal.direccion }}</td>
             <td>
-              <button id="btnEditar" class="btn btn-warning" @click="editSucursal(sucursal)">
+              <button
+                id="btnEditar"
+                class="btn btn-warning"
+                @click="editSucursal(sucursal)"
+              >
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteSucursal(sucursal)">
+              <button
+                id="btnEliminar"
+                class="btn btn-danger"
+                @click="deleteSucursal(sucursal)"
+              >
                 <b><i class="bi bi-x-lg"></i></b>
               </button>
             </td>
@@ -57,15 +80,24 @@
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize,
-            filteredSucursales.length) }} de {{ filteredSucursales.length }} registros
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
+          {{ Math.min(currentPage * pageSize, filteredSucursales.length) }} de
+          {{ filteredSucursales.length }} registros
         </div>
         <div class="pagination-container">
-          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
             Anterior
           </button>
 
-          <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
             Siguiente
           </button>
         </div>
@@ -84,7 +116,12 @@
         <div class="modal-body">
           <div class="form-group">
             <label>Nombre:</label>
-            <input v-model="sucursalForm.nombre_administrativo" type="text" required />
+            <input
+              ref="nombreInput"
+              v-model="sucursalForm.nombre_administrativo"
+              type="text"
+              required
+            />
           </div>
 
           <div class="form-group">
@@ -95,14 +132,27 @@
           <div class="form-group">
             <label>Teléfono:</label>
             <div class="phone-input-container">
-              <select v-model="selectedCountry" @change="updatePhoneValidation" class="select-phone">
+              <select
+                v-model="selectedCountry"
+                @change="updatePhoneValidation"
+                class="select-phone"
+              >
                 <option value="">País</option>
-                <option v-for="(country, code) in countryData" :key="code" :value="code">
+                <option
+                  v-for="(country, code) in countryData"
+                  :key="code"
+                  :value="code"
+                >
                   {{ country.emoji }} {{ country.code }}
                 </option>
               </select>
-              <input v-model="sucursalForm.telefono" type="text" class="input-phone"
-                :placeholder="'Número (' + phoneLength + ' dígitos)'" required />
+              <input
+                v-model="sucursalForm.telefono"
+                type="text"
+                class="input-phone"
+                :placeholder="'Número (' + phoneLength + ' dígitos)'"
+                required
+              />
             </div>
           </div>
 
@@ -113,9 +163,15 @@
         </div>
 
         <div class="modal-footer">
-          <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Sucursal'" @click="guardarSucursal">
+          <btnGuardarModal
+            :texto="isEditing ? 'Guardar Cambios' : 'Agregar Sucursal'"
+            @click="guardarSucursal"
+          >
           </btnGuardarModal>
-          <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+          <btnCerrarModal
+            :texto="'Cerrar'"
+            @click="closeModal"
+          ></btnCerrarModal>
         </div>
       </div>
     </div>
@@ -131,27 +187,30 @@
         </div>
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteSucursal" />
+            <btnGuardarModal
+              texto="Sí, eliminar"
+              style="background-color: red"
+              @click="deleteSucursal"
+            />
             <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script>
 import ExportButton from "../components/ExportButton.vue";
-import ModalLoading from '@/components/ModalLoading.vue';
+import ModalLoading from "@/components/ModalLoading.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
-import { notis } from '../../services/notificaciones.js';
+import { notis } from "../../services/notificaciones.js";
 import PageHeader from "@/components/PageHeader.vue";
 import { COUNTRY_CODES } from "../../services/countrySelector.js";
-import { validacionesSucursal } from '../../services/validarCampos.js';
+import { validacionesSucursal } from "../../services/validarCampos.js";
 import solicitudes from "../../services/solicitudes.js";
-import { setPageTitle } from '@/components/pageMetadata';
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
   components: {
@@ -159,7 +218,7 @@ export default {
     btnGuardarModal,
     btnCerrarModal,
     PageHeader,
-    ModalLoading
+    ModalLoading,
   },
   data() {
     return {
@@ -171,7 +230,7 @@ export default {
       isEditing: false,
       isLoading: false,
       editIndex: null,
-      selectedCountry: 'HN',
+      selectedCountry: "HN",
       countryData: COUNTRY_CODES,
       phoneLength: 8,
       currentPage: 1,
@@ -204,7 +263,9 @@ export default {
           sucursal.nombre_administrativo
             .toLowerCase()
             .includes(this.searchQuery.toLowerCase()) ||
-          sucursal.direccion.toLowerCase().includes(this.searchQuery.toLowerCase())
+          sucursal.direccion
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase())
       );
     },
     paginatedSucursales() {
@@ -214,7 +275,7 @@ export default {
     },
     totalPages() {
       return Math.ceil(this.filteredSucursales.length / this.pageSize);
-    }
+    },
   },
   methods: {
     updatePhoneValidation() {
@@ -226,7 +287,7 @@ export default {
     closeModal() {
       this.isModalOpen = false;
       this.isEditing = false;
-      this.selectedCountry = 'HN';
+      this.selectedCountry = "HN";
       this.sucursalForm = {
         id_sucursal: 0,
         nombre_administrativo: "",
@@ -238,12 +299,20 @@ export default {
 
     openModal() {
       this.isModalOpen = true;
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
     },
 
     async guardarSucursal() {
       this.isLoading = true;
       try {
-        if (!validacionesSucursal.validarCampos(this.sucursalForm, this.selectedCountry)) {
+        if (
+          !validacionesSucursal.validarCampos(
+            this.sucursalForm,
+            this.selectedCountry
+          )
+        ) {
           return;
         }
 
@@ -251,24 +320,34 @@ export default {
         let parametros;
 
         if (this.isEditing) {
-          parametros = `/sucursales/actualizar-sucursal/${this.sucursales[this.editIndex].id_sucursal}`;
-          response = await solicitudes.patchRegistro(parametros, this.sucursalForm);
+          parametros = `/sucursales/actualizar-sucursal/${
+            this.sucursales[this.editIndex].id_sucursal
+          }`;
+          response = await solicitudes.patchRegistro(
+            parametros,
+            this.sucursalForm
+          );
 
           if (response === true) {
             Object.assign(this.sucursales[this.editIndex], this.sucursalForm);
-            notis('success', "Actualizando datos de sucursal...");
+            notis("success", "Actualizando datos de sucursal...");
           } else {
-            throw new Error(response.message || 'Error al actualizar la sucursal');
+            throw new Error(
+              response.message || "Error al actualizar la sucursal"
+            );
           }
         } else {
           parametros = `/sucursales/crear-sucursal/${this.id_usuario}`;
-          response = await solicitudes.postRegistro(parametros, this.sucursalForm);
+          response = await solicitudes.postRegistro(
+            parametros,
+            this.sucursalForm
+          );
 
           if (response && response.length > 0) {
             this.sucursales.push(response[0]);
-            notis('success', "Sucursal creada correctamente");
+            notis("success", "Sucursal creada correctamente");
           } else {
-            throw new Error('Error al crear la sucursal');
+            throw new Error("Error al crear la sucursal");
           }
         }
 
@@ -276,7 +355,7 @@ export default {
         this.generateRows();
       } catch (error) {
         this.isLoading = false;
-        notis('error', "Error");
+        notis("error", "Error");
       } finally {
         this.isLoading = false;
       }
@@ -285,8 +364,13 @@ export default {
     editSucursal(sucursal) {
       this.isModalOpen = true;
       this.isEditing = true;
-      this.editIndex = this.sucursales.findIndex(item => item.id_sucursal === sucursal.id_sucursal);
+      this.editIndex = this.sucursales.findIndex(
+        (item) => item.id_sucursal === sucursal.id_sucursal
+      );
       this.sucursalForm = { ...sucursal };
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
     },
 
     cancelDelete() {
@@ -304,19 +388,23 @@ export default {
       this.isLoading = true;
       try {
         const parametros = `/sucursales/desactivar-sucursal/${this.sucursalToDelete.id_sucursal}`;
-        const response = await solicitudes.desactivarRegistro(parametros, { estado: false });
+        const response = await solicitudes.desactivarRegistro(parametros, {
+          estado: false,
+        });
 
         if (response === true) {
-          this.sucursales = this.sucursales.filter(item => item.id_sucursal !== this.sucursalToDelete.id_sucursal);
+          this.sucursales = this.sucursales.filter(
+            (item) => item.id_sucursal !== this.sucursalToDelete.id_sucursal
+          );
           this.generateRows();
-          notis('success', 'Sucursal eliminada correctamente');
+          notis("success", "Sucursal eliminada correctamente");
           this.showConfirmModal = false;
           this.sucursalToDelete = null;
         } else {
-          throw new Error('Error al eliminar la sucursal');
+          throw new Error("Error al eliminar la sucursal");
         }
       } catch (error) {
-        notis('error', "Error al eliminar la sucursal");
+        notis("error", "Error al eliminar la sucursal");
       } finally {
         this.isLoading = false;
       }
@@ -345,7 +433,9 @@ export default {
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement("link");
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
       link.type = "image/x-icon";
       link.rel = "icon";
       link.href = iconPath;
@@ -360,15 +450,17 @@ export default {
       handler() {
         this.generateRows();
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
   async mounted() {
     this.isLoading = true;
-    setPageTitle('Sucursales');
+    setPageTitle("Sucursales");
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
-      this.sucursales = await solicitudes.fetchRegistros(`/sucursales/empresa/${this.id_usuario}`);
+      this.sucursales = await solicitudes.fetchRegistros(
+        `/sucursales/empresa/${this.id_usuario}`
+      );
       this.generateRows();
     } catch (error) {
       console.error(error);
@@ -403,6 +495,15 @@ export default {
   border-width: 0.5px;
   width: 100%;
   max-width: 300px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 
 .registros {
@@ -725,7 +826,6 @@ export default {
   box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
 }
 
-
 .form-group textarea {
   min-height: 100px;
   resize: vertical;
@@ -772,7 +872,6 @@ export default {
   border-color: #404040;
   color: #fff;
 }
-
 
 /* Custom scrollbar */
 .table-container::-webkit-scrollbar {
@@ -833,7 +932,6 @@ export default {
 }
 
 @media screen and (max-width: 480px) {
-
   .modal-content {
     width: 95%;
     padding: 15px;
@@ -886,7 +984,6 @@ export default {
   border: 1px solid #ddd;
   border-radius: 4px;
 }
-
 
 /* Estilos para modo oscuro */
 .dark .country-code-select,

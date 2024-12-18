@@ -3,7 +3,12 @@
     <ModalLoading :isLoading="isLoading" />
     <PageHeader :titulo="titulo" />
     <div class="opciones">
-      <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal">
+      <button
+        v-if="esCeo"
+        id="btnAdd"
+        class="btn btn-primary"
+        @click="openModal"
+      >
         Agregar Unidad
       </button>
 
@@ -13,15 +18,18 @@
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar unidad..." />
+        <input
+          class="busqueda"
+          type="text"
+          v-model="searchQuery"
+          placeholder="Buscar unidad..."
+        />
       </div>
     </div>
 
     <div class="table-container">
       <!-- Indicador de carga -->
-      <div v-if="isLoading" class="loading-indicator">
-        Cargando unidades...
-      </div>
+      <div v-if="isLoading" class="loading-indicator">Cargando unidades...</div>
 
       <!-- Mensaje si no hay datos -->
       <div v-else-if="paginatedUnidades.length === 0" class="no-data">
@@ -39,19 +47,30 @@
         </thead>
         <tbody>
           <tr v-for="(unidad, index) in paginatedUnidades" :key="index">
-            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
+            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
             <td>{{ unidad.medida }}</td>
             <td class="totalProductos">
               {{ unidad.totalProductos }}
-              <button class="btn mostrar-producto" @click="mostrarModalProductos(unidad.id_medida)">
+              <button
+                class="btn mostrar-producto"
+                @click="mostrarModalProductos(unidad.id_medida)"
+              >
                 Mostrar Prod.
               </button>
             </td>
             <td v-if="esCeo">
-              <button id="btnEditar" class="btn btn-warning" @click="editUnidad(unidad)">
+              <button
+                id="btnEditar"
+                class="btn btn-warning"
+                @click="editUnidad(unidad)"
+              >
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button id="btnEliminar" class="btn btn-danger" @click="confirmDelete(unidad)">
+              <button
+                id="btnEliminar"
+                class="btn btn-danger"
+                @click="confirmDelete(unidad)"
+              >
                 <b><i class="bi bi-x-lg"></i></b>
               </button>
             </td>
@@ -62,7 +81,6 @@
       <!-- Modal de confirmación de eliminación -->
       <div class="modal" v-if="showConfirmModal">
         <div class="modal-confirm">
-
           <div class="modal-header">
             <h2>Confirmación</h2>
           </div>
@@ -71,7 +89,11 @@
           </div>
           <div class="modal-footer">
             <div class="action-buttons">
-              <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteUnidad" />
+              <btnGuardarModal
+                texto="Sí, eliminar"
+                style="background-color: red"
+                @click="deleteUnidad"
+              />
               <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
             </div>
           </div>
@@ -81,14 +103,23 @@
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a {{ Math.min(currentPage * pageSize,
-            filteredUnidades.length) }} de {{ filteredUnidades.length }} registros
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }} a
+          {{ Math.min(currentPage * pageSize, filteredUnidades.length) }} de
+          {{ filteredUnidades.length }} registros
         </div>
         <div class="pagination-container">
-          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
             Anterior
           </button>
-          <button class="pagination-button" :disabled="currentPage === totalPages" @click="nextPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
             Siguiente
           </button>
         </div>
@@ -99,22 +130,36 @@
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h2 class="h2-modal-content">{{ isEditing ? 'Editar Unidad' : 'Agregar Unidad' }}</h2>
+          <h2 class="h2-modal-content">
+            {{ isEditing ? "Editar Unidad" : "Agregar Unidad" }}
+          </h2>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
             <label>Nombre de unidad de inventario:</label>
-            <input v-model="unidadForm.medida" type="text" required>
+            <input
+              ref="nombreInput"
+              v-model="unidadForm.medida"
+              type="text"
+              required
+            />
           </div>
         </div>
 
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal id="AggUnid" :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'"
-              @click="guardarUnidad">
+            <btnGuardarModal
+              id="AggUnid"
+              :texto="isEditing ? 'Guardar Cambios' : 'Agregar Unidad'"
+              @click="guardarUnidad"
+            >
             </btnGuardarModal>
-            <btnCerrarModal id="btnCerrarM" :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+            <btnCerrarModal
+              id="btnCerrarM"
+              :texto="'Cerrar'"
+              @click="closeModal"
+            ></btnCerrarModal>
           </div>
         </div>
       </div>
@@ -135,7 +180,10 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="producto in mostrarProductosModal" :key="producto.codigo_producto">
+              <tr
+                v-for="producto in mostrarProductosModal"
+                :key="producto.codigo_producto"
+              >
                 <td>{{ producto.codigo_producto }}</td>
                 <td>{{ producto.nombre }}</td>
               </tr>
@@ -144,7 +192,10 @@
         </div>
 
         <div class="modal-footer">
-          <btnCerrarModal :texto="'Cerrar'" @click="closeModal"></btnCerrarModal>
+          <btnCerrarModal
+            :texto="'Cerrar'"
+            @click="closeModal"
+          ></btnCerrarModal>
         </div>
       </div>
     </div>
@@ -155,21 +206,21 @@
 import PageHeader from "@/components/PageHeader.vue";
 import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
 import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
-import { notis } from '../../services/notificaciones.js';
+import { notis } from "../../services/notificaciones.js";
 import { useToast } from "vue-toastification";
-const { esCeo } = require('../../services/usuariosSolicitudes');
-import { validacionesComunes } from '../../services/validarCampos.js';
+const { esCeo } = require("../../services/usuariosSolicitudes");
+import { validacionesComunes } from "../../services/validarCampos.js";
 import solicitudes from "../../services/solicitudes.js";
 import {
   getUnidadMedidaEmpresas,
   postUnidad,
   patchUnidad,
   getProductosUnidad,
-  eliminarUnidad
+  eliminarUnidad,
 } from "../../services/unidadMedidaSolicitud.js";
 
 export default {
-  name: 'UnidadesInventario',
+  name: "UnidadesInventario",
   components: {
     PageHeader,
     btnGuardarModal,
@@ -178,12 +229,12 @@ export default {
 
   data() {
     return {
-      titulo: 'Unidades de Inventario y Venta',
-      searchQuery: '',
+      titulo: "Unidades de Inventario y Venta",
+      searchQuery: "",
       isLoading: false,
       currentPage: 1,
       pageSize: 10,
-      id_usuario: '',
+      id_usuario: "",
       unidadesMedida: [],
       mostrarProductos: [],
       showConfirmModal: false,
@@ -192,15 +243,15 @@ export default {
       isModalProductosOpen: false,
       isEditing: false,
       unidadForm: {
-        medida: ''
+        medida: "",
       },
-      editIndex: null
+      editIndex: null,
     };
   },
 
   computed: {
     filteredUnidades() {
-      return this.unidadesMedida.filter(unidad =>
+      return this.unidadesMedida.filter((unidad) =>
         unidad.medida.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
@@ -217,26 +268,26 @@ export default {
 
     mostrarProductosModal() {
       return this.mostrarProductos;
-    }
+    },
   },
 
   watch: {
     searchQuery() {
       this.currentPage = 1;
-    }
+    },
   },
 
   async mounted() {
     this.isLoading = true;
     document.title = "Unidades de medida";
-    this.changeFavicon('/img/spiderman.ico');
+    this.changeFavicon("/img/spiderman.ico");
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
       this.esCeo = await esCeo(this.id_usuario);
       this.unidadesMedida = await getUnidadMedidaEmpresas(this.id_usuario);
     } catch (error) {
       console.error(error);
-      notis('error', 'Error al cargar los datos');
+      notis("error", "Error al cargar los datos");
     } finally {
       this.isLoading = false;
     }
@@ -244,7 +295,9 @@ export default {
 
   methods: {
     confirmDelete(unidad) {
-      this.editIndex = this.unidadesMedida.findIndex(u => u.id_medida === unidad.id_medida);
+      this.editIndex = this.unidadesMedida.findIndex(
+        (u) => u.id_medida === unidad.id_medida
+      );
       this.showConfirmModal = true;
     },
 
@@ -268,7 +321,10 @@ export default {
     openModal() {
       this.isModalOpen = true;
       this.isEditing = false;
-      this.unidadForm = { medida: '' };
+      this.unidadForm = { medida: "" };
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
     },
 
     closeModal() {
@@ -282,7 +338,12 @@ export default {
       this.isModalOpen = true;
       this.isEditing = true;
       this.unidadForm = { ...unidad };
-      this.editIndex = this.unidadesMedida.findIndex(item => item.id_medida === unidad.id_medida);
+      this.editIndex = this.unidadesMedida.findIndex(
+        (item) => item.id_medida === unidad.id_medida
+      );
+      this.$nextTick(() => {
+        this.$refs.nombreInput?.focus();
+      });
     },
 
     async mostrarModalProductos(id_medida) {
@@ -292,7 +353,7 @@ export default {
         this.isModalProductosOpen = true;
       } catch (error) {
         console.error(error);
-        notis('error', 'Error al cargar los productos');
+        notis("error", "Error al cargar los productos");
       } finally {
         this.isLoading = false;
       }
@@ -302,7 +363,7 @@ export default {
       const toast = useToast();
       const unidadEliminar = this.unidadesMedida[this.editIndex];
       if (unidadEliminar.totalProductos > 0) {
-        toast.error('Productos existentes dentro de esta unidad');
+        toast.error("Productos existentes dentro de esta unidad");
         return;
       }
 
@@ -310,23 +371,27 @@ export default {
       try {
         const response = await eliminarUnidad(unidadEliminar.id_medida);
         if (response === true) {
-          this.unidadesMedida = this.unidadesMedida.filter(item => item.id_medida !== unidadEliminar.id_medida);
-          notis('success', 'Unidad eliminada correctamente');
+          this.unidadesMedida = this.unidadesMedida.filter(
+            (item) => item.id_medida !== unidadEliminar.id_medida
+          );
+          notis("success", "Unidad eliminada correctamente");
           this.showConfirmModal = false;
           this.editIndex = null;
         } else {
-          throw new Error('Error al eliminar la unidad');
+          throw new Error("Error al eliminar la unidad");
         }
       } catch (error) {
-        notis('error', error.message);
+        notis("error", error.message);
       } finally {
         this.isLoading = false;
       }
     },
 
     async guardarUnidad() {
-      if (!validacionesComunes.validarEmpty(this.unidadForm) ||
-        !validacionesComunes.validarNombre(this.unidadForm.medida)) {
+      if (
+        !validacionesComunes.validarEmpty(this.unidadForm) ||
+        !validacionesComunes.validarNombre(this.unidadForm.medida)
+      ) {
         return;
       }
 
@@ -348,32 +413,34 @@ export default {
           const nuevoRegistro = await postUnidad(this.unidadForm);
           this.unidadesMedida.push(nuevoRegistro[0]);
           this.isLoading = false;
-          notis('success', 'Unidad agregada correctamente');
+          notis("success", "Unidad agregada correctamente");
         }
         this.closeModal();
       } catch (error) {
-        notis('error', error.message);
+        notis("error", error.message);
       } finally {
         this.isLoading = false;
       }
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    }
-  }
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
+  },
 };
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
 }
 
@@ -389,7 +456,6 @@ export default {
   justify-content: center;
   align-items: center;
 }
-
 
 .modal-confirm {
   background: white;
@@ -408,9 +474,8 @@ export default {
 .modal-body-confirm {
   padding: 24px;
   overflow-y: auto;
-  background-color: white
+  background-color: white;
 }
-
 
 .modal-content {
   background: white;
@@ -465,7 +530,7 @@ export default {
 .modal-body-confirm {
   padding: 24px;
   overflow-y: auto;
-  background-color: white
+  background-color: white;
 }
 
 .dark .modal-body-confirm {
@@ -702,7 +767,14 @@ export default {
   max-width: 300px;
 }
 
-
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
+}
 
 /* Scroll personalizado */
 ::-webkit-scrollbar {

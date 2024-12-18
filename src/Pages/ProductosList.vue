@@ -5,14 +5,24 @@
 
     <div class="opciones">
       <div class="action-bar">
-        <button v-if="esCeo" id="btnAdd" class="btn btn-primary" @click="openModal"
-          style="width: 200px; white-space: nowrap;">
+        <button
+          v-if="esCeo"
+          id="btnAdd"
+          class="btn btn-primary"
+          @click="openModal"
+          style="width: 200px; white-space: nowrap"
+        >
           Agregar Producto
         </button>
       </div>
 
       <!-- Botón de exportación PDF -->
-      <ExportButton :columns="columns" :rows="rows" fileName="Productos.pdf" class="export-button" />
+      <ExportButton
+        :columns="columns"
+        :rows="rows"
+        fileName="Productos.pdf"
+        class="export-button"
+      />
 
       <RouterLink to="promociones-producto">
         <button class="button-promocion">Promociones</button>
@@ -20,16 +30,30 @@
 
       <!-- Barra de búsqueda -->
       <div class="search-bar">
-        <input class="busqueda" type="text" v-model="searchQuery" placeholder="Buscar producto..." />
+        <input
+          class="busqueda"
+          type="text"
+          v-model="searchQuery"
+          placeholder="Buscar producto..."
+        />
       </div>
 
       <div class="registros">
         <span>
-          <select class="custom-select select-sucursal" v-model="searchSucursal" v-show="(sucursales.length > 1)"
-            @change="mostrarRegistros(searchSucursal)">
+          <select
+            class="custom-select select-sucursal"
+            v-model="searchSucursal"
+            v-show="sucursales.length > 1"
+            @change="mostrarRegistros(searchSucursal)"
+          >
             <option value="default">Todas</option>
-            <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">
-              {{ sucursal.nombre_administrativo }}</option>
+            <option
+              v-for="(sucursal, index) in this.sucursales"
+              :key="index"
+              :value="sucursal.id_sucursal"
+            >
+              {{ sucursal.nombre_administrativo }}
+            </option>
           </select>
         </span>
       </div>
@@ -37,7 +61,6 @@
 
     <!-- Tabla exportable -->
     <div class="table-container" v-pdf-export ref="table">
-
       <!-- Indicador de carga -->
       <div v-if="isLoading" class="loading-indicator">
         Cargando productos...
@@ -61,19 +84,30 @@
         </thead>
         <tbody>
           <tr v-for="(producto, index) in paginatedProductos" :key="index">
-            <td>{{ ((currentPage - 1) * pageSize) + index + 1 }}</td>
+            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
             <td>{{ producto.codigo_producto }}</td>
             <td>{{ producto.nombre }}</td>
-            <td>{{ producto.stock_actual }} <button class="edit-stock" @click="openModalStock(producto)">
-                <i class="bi bi-pencil-square"></i></button>
+            <td>
+              {{ producto.stock_actual }}
+              <button class="edit-stock" @click="openModalStock(producto)">
+                <i class="bi bi-pencil-square"></i>
+              </button>
             </td>
             <td>{{ producto.precio_unitario }}</td>
             <td>{{ producto.promocion }}</td>
             <td v-if="esCeo">
-              <button id="btnEditar" class="btn btn-warning" @click="editProducto(producto, index)">
+              <button
+                id="btnEditar"
+                class="btn btn-warning"
+                @click="editProducto(producto, index)"
+              >
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button id="btnEliminar" class="btn btn-danger" @click="deleteProducto(producto)">
+              <button
+                id="btnEliminar"
+                class="btn btn-danger"
+                @click="deleteProducto(producto)"
+              >
                 <b><i class="bi bi-x-lg"></i></b>
               </button>
             </td>
@@ -84,15 +118,28 @@
       <!-- Paginación -->
       <div class="pagination-wrapper">
         <div class="pagination-info">
-          Mostrando {{ paginatedProductos.length === 0 ? 0 : (currentPage - 1) * pageSize + 1 }} a
-          {{ Math.min(currentPage * pageSize, filteredProductos.length) }} de {{ filteredProductos.length }} registros
+          Mostrando
+          {{
+            paginatedProductos.length === 0
+              ? 0
+              : (currentPage - 1) * pageSize + 1
+          }}
+          a {{ Math.min(currentPage * pageSize, filteredProductos.length) }} de
+          {{ filteredProductos.length }} registros
         </div>
         <div class="pagination-container">
-          <button class="pagination-button" :disabled="currentPage === 1" @click="previousPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === 1"
+            @click="previousPage"
+          >
             Anterior
           </button>
-          <button class="pagination-button" :disabled="currentPage === totalPages || totalPages === 0"
-            @click="nextPage">
+          <button
+            class="pagination-button"
+            :disabled="currentPage === totalPages || totalPages === 0"
+            @click="nextPage"
+          >
             Siguiente
           </button>
         </div>
@@ -106,19 +153,24 @@
         </div>
 
         <div class="modal-body-confirm">
-          <p v-if="productoToDelete.stock_actual > 0">Este producto actualmente tiene {{ productoToDelete.stock_actual
-            }}
-            unidades en stock. ¿Estás seguro de que quieres eliminarlo?</p>
+          <p v-if="productoToDelete.stock_actual > 0">
+            Este producto actualmente tiene
+            {{ productoToDelete.stock_actual }} unidades en stock. ¿Estás seguro
+            de que quieres eliminarlo?
+          </p>
           <p v-else>¿Estás seguro de que quieres eliminar este producto?</p>
         </div>
 
         <div class="modal-footer">
           <div class="action-buttons">
-            <btnGuardarModal texto="Sí, eliminar" style="background-color: red;" @click="deleteProducto()" />
+            <btnGuardarModal
+              texto="Sí, eliminar"
+              style="background-color: red"
+              @click="deleteProducto()"
+            />
             <btnCerrarModal texto="No, regresar" @click="cancelDelete" />
           </div>
         </div>
-
       </div>
     </div>
 
@@ -133,15 +185,25 @@
           <div class="form-row">
             <div class="form-group full-width">
               <label>Código único del producto:</label>
-              <input v-model="productoForm.codigo_producto" type="text" placeholder="Ingrese el código del producto"
-                required />
+              <input
+                ref="codigoInput"
+                v-model="productoForm.codigo_producto"
+                type="text"
+                placeholder="Ingrese el código del producto"
+                required
+              />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group full-width">
               <label>Nombre Producto:</label>
-              <input v-model="productoForm.nombre" type="text" placeholder="Ingrese el nombre del producto" required />
+              <input
+                v-model="productoForm.nombre"
+                type="text"
+                placeholder="Ingrese el nombre del producto"
+                required
+              />
             </div>
           </div>
 
@@ -149,15 +211,22 @@
             <div class="form-column">
               <div class="form-group">
                 <label>Descripción:</label>
-                <textarea v-model="productoForm.descripcion" placeholder="Ingrese la descripción del producto"
-                  required />
+                <textarea
+                  v-model="productoForm.descripcion"
+                  placeholder="Ingrese la descripción del producto"
+                  required
+                />
               </div>
 
               <div class="form-group">
                 <label>Impuesto:</label>
                 <select class="form-select" v-model="productoForm.impuesto">
                   <option value="" disabled>Seleccione un impuesto</option>
-                  <option v-for="(impuesto, index) in cargarImpuestos()" :key="index" :value="impuesto.id">
+                  <option
+                    v-for="(impuesto, index) in cargarImpuestos()"
+                    :key="index"
+                    :value="impuesto.id"
+                  >
                     {{ impuesto.nombre }}
                   </option>
                 </select>
@@ -166,8 +235,14 @@
               <div class="form-group">
                 <label>Proveedor:</label>
                 <select class="form-select" v-model="productoForm.proveedor">
-                  <option value="default" disabled>Seleccione un proveedor</option>
-                  <option v-for="(proveedor, index) in proveedoresMostrar" :key="index" :value="proveedor.id">
+                  <option value="default" disabled>
+                    Seleccione un proveedor
+                  </option>
+                  <option
+                    v-for="(proveedor, index) in proveedoresMostrar"
+                    :key="index"
+                    :value="proveedor.id"
+                  >
                     {{ proveedor.nombre }}
                   </option>
                 </select>
@@ -179,8 +254,16 @@
                 <label>Precio por Unidad:</label>
                 <div class="input-icon">
                   <span class="currency-symbol">L.</span>
-                  <input v-model="productoForm.precio_unitario" type="text" step="0.01" min="0" placeholder="0.00"
-                    @blur="formatearPrecio($event, 'precio_unitario')" @keypress="soloNumeros($event)" required />
+                  <input
+                    v-model="productoForm.precio_unitario"
+                    type="text"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    @blur="formatearPrecio($event, 'precio_unitario')"
+                    @keypress="soloNumeros($event)"
+                    required
+                  />
                 </div>
               </div>
 
@@ -188,22 +271,45 @@
                 <label>Precio por mayoreo:</label>
                 <div class="input-icon">
                   <span class="currency-symbol">L.</span>
-                  <input v-model="productoForm.precio_mayorista" type="text" step="0.01" min="0" placeholder="0.00"
-                    @blur="formatearPrecio($event, 'precio_mayorista')" @keypress="soloNumeros($event)" required />
+                  <input
+                    v-model="productoForm.precio_mayorista"
+                    type="text"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    @blur="formatearPrecio($event, 'precio_mayorista')"
+                    @keypress="soloNumeros($event)"
+                    required
+                  />
                 </div>
               </div>
 
               <div class="form-group">
                 <label>Cantidad activar mayoreo:</label>
-                <input @keypress="soloNumeros($event)" v-model="productoForm.cantidad_activar_mayorista" type="text"
-                  min="0" placeholder="0" required />
+                <input
+                  @keypress="soloNumeros($event)"
+                  v-model="productoForm.cantidad_activar_mayorista"
+                  type="text"
+                  min="0"
+                  placeholder="0"
+                  required
+                />
               </div>
 
               <div class="form-group">
                 <label>Unidad de medida:</label>
-                <select class="form-select" v-model="productoForm.unidad_medida">
-                  <option value="default" disabled>Seleccione una unidad de medida</option>
-                  <option v-for="(unidad, index) in unidadesMostrar" :key="index" :value="unidad.id_medida">
+                <select
+                  class="form-select"
+                  v-model="productoForm.unidad_medida"
+                >
+                  <option value="default" disabled>
+                    Seleccione una unidad de medida
+                  </option>
+                  <option
+                    v-for="(unidad, index) in unidadesMostrar"
+                    :key="index"
+                    :value="unidad.id_medida"
+                  >
                     {{ unidad.medida }}
                   </option>
                 </select>
@@ -218,7 +324,10 @@
             Asignar categorías
           </button>
           <div id="btnCanc" class="action-buttons">
-            <btnGuardarModal :texto="isEditing ? 'Guardar Cambios' : 'Agregar Producto'" @click="guardarProducto" />
+            <btnGuardarModal
+              :texto="isEditing ? 'Guardar Cambios' : 'Agregar Producto'"
+              @click="guardarProducto"
+            />
             <btnCerrarModal texto="Cerrar" @click="closeModal" />
           </div>
         </div>
@@ -232,23 +341,44 @@
           <div class="categoria-header">
             <h3>Selecciona categorías del producto</h3>
             <div class="search-container">
-              <input type="text" v-model="searchCategoria" placeholder="Buscar categoría..." class="search-input" />
+              <input
+                type="text"
+                v-model="searchCategoria"
+                placeholder="Buscar categoría..."
+                class="search-input"
+              />
             </div>
           </div>
 
           <div class="categorias-container">
             <div class="categorias-grid">
-              <label v-for="(categoria, index) in filteredCategorias" :key="index" class="categoria-checkbox">
-                <input type="checkbox" v-model="categoriasSeleccionadas" :value="categoria.id_categoria">
-                <span class="checkbox-text">{{ categoria.nombre_categoria }}</span>
+              <label
+                v-for="(categoria, index) in filteredCategorias"
+                :key="index"
+                class="categoria-checkbox"
+              >
+                <input
+                  type="checkbox"
+                  v-model="categoriasSeleccionadas"
+                  :value="categoria.id_categoria"
+                />
+                <span class="checkbox-text">{{
+                  categoria.nombre_categoria
+                }}</span>
               </label>
             </div>
           </div>
 
           <div class="categoria-footer">
-            <btnGuardarModal :texto="'Agregar Categoría'" @click="guardarCategorias">
+            <btnGuardarModal
+              :texto="'Agregar Categoría'"
+              @click="guardarCategorias"
+            >
             </btnGuardarModal>
-            <btnCerrarModal :texto="'Cerrar'" @click="closeModalCategoria"></btnCerrarModal>
+            <btnCerrarModal
+              :texto="'Cerrar'"
+              @click="closeModalCategoria"
+            ></btnCerrarModal>
           </div>
         </div>
       </div>
@@ -263,10 +393,19 @@
 
         <div class="modal-body">
           <div class="form-group">
-            <select class="custom-select select-sucursal-stock" @change="mostrarStockbySucursal(searchSucursalStock)"
-              v-model="searchSucursalStock" v-show="(sucursales.length > 1)">
-              <option v-for="(sucursal, index) in this.sucursales" :key="index" :value="sucursal.id_sucursal">{{
-                sucursal.nombre_administrativo }}</option>
+            <select
+              class="custom-select select-sucursal-stock"
+              @change="mostrarStockbySucursal(searchSucursalStock)"
+              v-model="searchSucursalStock"
+              v-show="sucursales.length > 1"
+            >
+              <option
+                v-for="(sucursal, index) in this.sucursales"
+                :key="index"
+                :value="sucursal.id_sucursal"
+              >
+                {{ sucursal.nombre_administrativo }}
+              </option>
             </select>
           </div>
           <div class="form-group">
@@ -279,21 +418,37 @@
           </div>
           <div class="form-group">
             <label for="stock-min">Stock Min:</label>
-            <input type="text" class="input" @keypress="soloNumeros($event)"
-              placeholder="Ingrese stock minimo del producto " v-model="inputStockMin">
+            <input
+              type="text"
+              class="input"
+              @keypress="soloNumeros($event)"
+              placeholder="Ingrese stock minimo del producto "
+              v-model="inputStockMin"
+            />
           </div>
 
           <div class="form-group">
             <label for="stock-max">Stock Max:</label>
-            <input type="text" class="input" @keypress="soloNumeros($event)"
-              placeholder="Ingrese stock maximo del producto" v-model="inputStockMax">
+            <input
+              type="text"
+              class="input"
+              @keypress="soloNumeros($event)"
+              placeholder="Ingrese stock maximo del producto"
+              v-model="inputStockMax"
+            />
           </div>
         </div>
 
         <div class="modal-footer">
-          <btnGuardarModal :texto="'Guardar cambios'" @click="guardarStock(searchSucursalStock)">
+          <btnGuardarModal
+            :texto="'Guardar cambios'"
+            @click="guardarStock(searchSucursalStock)"
+          >
           </btnGuardarModal>
-          <btnCerrarModal :texto="'Cerrar'" @click="closeModalStock"></btnCerrarModal>
+          <btnCerrarModal
+            :texto="'Cerrar'"
+            @click="closeModalStock"
+          ></btnCerrarModal>
         </div>
       </div>
     </div>
@@ -303,27 +458,36 @@
 <script>
 //compontentes
 import PageHeader from "@/components/PageHeader.vue";
-import ExportButton from '../components/ExportButton.vue';
-import btnGuardarModal from '../components/botones/modales/btnGuardar.vue';
-import btnCerrarModal from '../components/botones/modales/btnCerrar.vue';
-import { validacionesProductos } from '../../services/validarCampos.js';
-import { notis } from '../../services/notificaciones.js';
-import ModalLoading from '@/components/ModalLoading.vue';
+import ExportButton from "../components/ExportButton.vue";
+import btnGuardarModal from "../components/botones/modales/btnGuardar.vue";
+import btnCerrarModal from "../components/botones/modales/btnCerrar.vue";
+import { validacionesProductos } from "../../services/validarCampos.js";
+import { notis } from "../../services/notificaciones.js";
+import ModalLoading from "@/components/ModalLoading.vue";
 
 // importando solicitudes
 import solicitudes from "../../services/solicitudes.js";
 
 //apis
-import { getUnidadMedidaEmpresas } from '../../services/unidadMedidaSolicitud.js';
-import { getProveedoresEmpresa } from '../../services/proveedoresSolicitud.js';
+import { getUnidadMedidaEmpresas } from "../../services/unidadMedidaSolicitud.js";
+import { getProveedoresEmpresa } from "../../services/proveedoresSolicitud.js";
 
 //solicitudes a api
-import { getInfoExtra, getProductoSucursal, postProducto, patchProducto, desactivarProducto, getProductosEmpresa, getStockMinMax, PostStockMinMax } from '../../services/productosSolicitudes.js';
-import { getSucursalesbyEmmpresaSumm } from '../../services/sucursalesSolicitudes.js';
-import { getCategoriaProductosEmpresa } from '../../services/categoriaSolicitudes.js';
-const { esCeo } = require('../../services/usuariosSolicitudes');
-const { impuestos } = require('../resources/impuestos.js');
-import { setPageTitle } from '@/components/pageMetadata';
+import {
+  getInfoExtra,
+  getProductoSucursal,
+  postProducto,
+  patchProducto,
+  desactivarProducto,
+  getProductosEmpresa,
+  getStockMinMax,
+  PostStockMinMax,
+} from "../../services/productosSolicitudes.js";
+import { getSucursalesbyEmmpresaSumm } from "../../services/sucursalesSolicitudes.js";
+import { getCategoriaProductosEmpresa } from "../../services/categoriaSolicitudes.js";
+const { esCeo } = require("../../services/usuariosSolicitudes");
+const { impuestos } = require("../resources/impuestos.js");
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
   components: {
@@ -331,18 +495,18 @@ export default {
     ExportButton,
     btnGuardarModal,
     btnCerrarModal,
-    ModalLoading
+    ModalLoading,
   },
   data() {
     return {
-      titulo: 'Productos',
+      titulo: "Productos",
       showConfirmModal: false,
       isLoading: false,
       productoToDelete: null,
-      searchQuery: '',
-      searchCategoria: '',
-      searchSucursal: 'default',
-      searchSucursalStock: '',
+      searchQuery: "",
+      searchCategoria: "",
+      searchSucursal: "default",
+      searchSucursalStock: "",
       isModalOpen: false,
       isModalCategoriaOpen: false,
       isModalStockOpen: false,
@@ -350,47 +514,46 @@ export default {
       editIndex: null,
       inputStockMax: 0,
       inputStockMin: 0,
-      idProductoStock: '',
+      idProductoStock: "",
       currentPage: 1,
       pageSize: 10,
-      id_usuario: '',
+      id_usuario: "",
       productoOriginal: null,
       unidadesMostrar: [],
       proveedoresMostrar: [],
       esCeo: false,
       productoForm: {
-        codigo_producto: '',
-        nombre: '',
-        descripcion: '',
-        unidad_medida: 'default',
+        codigo_producto: "",
+        nombre: "",
+        descripcion: "",
+        unidad_medida: "default",
         impuesto: impuestos[0]?.id || null,
-        proveedor: 'default',
+        proveedor: "default",
         precio_unitario: "",
         precio_mayorista: "",
         cantidad_activar_mayorista: "",
-        categorias: []
+        categorias: [],
       },
       productos: [],
       sucursales: [],
       categoriasSeleccionadas: [],
       categorias: [],
       columns: [
-        { header: '#', dataKey: 'index' },
-        { header: 'Código', dataKey: 'codigo_producto' },
-        { header: 'Descripción', dataKey: 'descripcion' },
-        { header: 'Categoría', dataKey: 'categoria' },
-        { header: 'Stock', dataKey: 'stock' },
-        { header: 'Precio Unitario', dataKey: 'preciounitario' },
-        { header: 'Precio Mayorista', dataKey: 'preciomayorista' },
-        { header: 'Precio Descuento', dataKey: 'preciodescuento' },
-        { header: 'Fecha', dataKey: 'fecha' }
+        { header: "#", dataKey: "index" },
+        { header: "Código", dataKey: "codigo_producto" },
+        { header: "Descripción", dataKey: "descripcion" },
+        { header: "Categoría", dataKey: "categoria" },
+        { header: "Stock", dataKey: "stock" },
+        { header: "Precio Unitario", dataKey: "preciounitario" },
+        { header: "Precio Mayorista", dataKey: "preciomayorista" },
+        { header: "Precio Descuento", dataKey: "preciodescuento" },
+        { header: "Fecha", dataKey: "fecha" },
       ],
-      rows: []
+      rows: [],
     };
   },
 
   computed: {
-
     hasChanges() {
       if (!this.productoOriginal) return false;
       const changedFields = this.getChangedFields();
@@ -398,9 +561,12 @@ export default {
     },
 
     filteredProductos() {
-      return this.productos.filter(producto =>
-        producto.codigo_producto.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        producto.nombre.toLowerCase().includes(this.searchQuery.toLowerCase())
+      return this.productos.filter(
+        (producto) =>
+          producto.codigo_producto
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase()) ||
+          producto.nombre.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
 
@@ -415,14 +581,16 @@ export default {
     },
 
     filteredCategorias() {
-      return this.categorias.filter(categoria =>
-        categoria.nombre_categoria.toLowerCase().includes(this.searchCategoria.toLowerCase())
+      return this.categorias.filter((categoria) =>
+        categoria.nombre_categoria
+          .toLowerCase()
+          .includes(this.searchCategoria.toLowerCase())
       );
-    }
+    },
   },
 
-  codigoProductoStock: '',
-  nombreProductoStock: '',
+  codigoProductoStock: "",
+  nombreProductoStock: "",
 
   methods: {
     async mostrarRegistros(valor) {
@@ -431,10 +599,9 @@ export default {
         this.searchSucursal = this.sucursales[0].id_sucursal;
       }
 
-      if (valor === 'default') {
+      if (valor === "default") {
         this.productos = await getProductosEmpresa(this.id_usuario);
-      }
-      else {
+      } else {
         try {
           this.productos = await getProductoSucursal(valor);
         } catch (error) {
@@ -447,8 +614,10 @@ export default {
       const codigoTecla = event.keyCode || event.which;
       const tecla = String.fromCharCode(codigoTecla);
       const regex = /^[0-9.]$/;
-      if (!regex.test(tecla) ||
-        (tecla === '.' && event.target.value.includes('.'))) {
+      if (
+        !regex.test(tecla) ||
+        (tecla === "." && event.target.value.includes("."))
+      ) {
         event.preventDefault();
         return false;
       }
@@ -456,7 +625,7 @@ export default {
 
     formatearPrecio(event, campo) {
       let valor = event.target.value;
-      if (valor === '') return;
+      if (valor === "") return;
       const numeroFormateado = parseFloat(valor).toFixed(2);
       this.productoForm[campo] = numeroFormateado;
     },
@@ -466,6 +635,9 @@ export default {
       await this.cargarUnidadMedidaProveedores();
       this.isModalOpen = true;
       this.isLoading = false;
+      this.$nextTick(() => {
+        this.$refs.codigoInput?.focus();
+      });
     },
 
     closeModal() {
@@ -494,15 +666,18 @@ export default {
     async mostrarStockbySucursal(id_sucursal) {
       this.isLoading = true;
       try {
-        const response = await getStockMinMax(this.idProductoStock, id_sucursal);
+        const response = await getStockMinMax(
+          this.idProductoStock,
+          id_sucursal
+        );
         if (response.error) {
-          console.error('Error al obtener stock:', response.error);
+          console.error("Error al obtener stock:", response.error);
           return;
         }
         this.inputStockMin = response.stock_min || 0;
         this.inputStockMax = response.stock_max || 0;
       } catch (error) {
-        console.error('Error al abrir el modal de stock:', error);
+        console.error("Error al abrir el modal de stock:", error);
       } finally {
         this.isLoading = false;
       }
@@ -513,7 +688,7 @@ export default {
       this.nombreProductoStock = producto.nombre;
       this.idProductoStock = producto.id_producto;
 
-      if (this.searchSucursal === 'default') {
+      if (this.searchSucursal === "default") {
         this.searchSucursalStock = this.sucursales[0].id_sucursal;
       } else {
         this.searchSucursalStock = this.searchSucursal;
@@ -528,22 +703,29 @@ export default {
 
       const datosStock = {
         stock_min: stock_min,
-        stock_max: stock_max
+        stock_max: stock_max,
       };
 
       if (stock_max <= stock_min) {
-        notis('error', 'Datos invalidos: Stock minimo no puede ser mayor o igual a stock maximo');
+        notis(
+          "error",
+          "Datos invalidos: Stock minimo no puede ser mayor o igual a stock maximo"
+        );
         return;
       }
 
       try {
-        const response = await PostStockMinMax(this.idProductoStock, sucursal, datosStock);
+        const response = await PostStockMinMax(
+          this.idProductoStock,
+          sucursal,
+          datosStock
+        );
         if (response instanceof Error) {
           throw response;
         }
-        notis('success', 'Datos de stock guardados correctamente');
+        notis("success", "Datos de stock guardados correctamente");
       } catch (error) {
-        notis('error', error);
+        notis("error", error);
       }
 
       this.closeModalStock();
@@ -555,16 +737,16 @@ export default {
 
     clearForm() {
       this.productoForm = {
-        codigo_producto: '',
-        nombre: '',
-        descripcion: '',
-        unidad_medida: 'default',
+        codigo_producto: "",
+        nombre: "",
+        descripcion: "",
+        unidad_medida: "default",
         impuesto: impuestos[0]?.id || null,
-        proveedor: 'default',
+        proveedor: "default",
         precio_unitario: "",
         precio_mayorista: "",
         cantidad_activar_mayorista: "",
-        categorias: []
+        categorias: [],
       };
       this.productoOriginal = null;
       this.isEditing = false;
@@ -601,11 +783,17 @@ export default {
           changedFields.id_usuario = this.id_usuario;
 
           // Si el código no cambió, no lo enviamos
-          if (changedFields.codigo_producto === this.productos[this.editIndex].codigo_producto) {
+          if (
+            changedFields.codigo_producto ===
+            this.productos[this.editIndex].codigo_producto
+          ) {
             delete changedFields.codigo_producto;
           }
 
-          const nuevoRegistro = await patchProducto(changedFields, this.productos[this.editIndex].id_producto);
+          const nuevoRegistro = await patchProducto(
+            changedFields,
+            this.productos[this.editIndex].id_producto
+          );
 
           if (nuevoRegistro === true) {
             notis("success", "Actualizando datos del producto...");
@@ -620,7 +808,7 @@ export default {
           notis("success", "Producto agregado correctamente");
         }
       } catch (error) {
-        notis('error', error.message);
+        notis("error", error.message);
       } finally {
         this.isLoading = false;
         this.closeModal();
@@ -630,16 +818,16 @@ export default {
     async editProducto(producto, index) {
       // Inicializar el form solo con datos básicos
       this.productoForm = {
-        codigo_producto: producto.codigo_producto || '',
-        nombre: producto.nombre || '',
-        descripcion: producto.descripcion || '',
-        precio_unitario: producto.precio_unitario || '',
-        precio_mayorista: '',
-        proveedor: 'default',
-        unidad_medida: 'default',
+        codigo_producto: producto.codigo_producto || "",
+        nombre: producto.nombre || "",
+        descripcion: producto.descripcion || "",
+        precio_unitario: producto.precio_unitario || "",
+        precio_mayorista: "",
+        proveedor: "default",
+        unidad_medida: "default",
         impuesto: impuestos[0]?.id || null,
-        cantidad_activar_mayorista: '',
-        categorias: []
+        cantidad_activar_mayorista: "",
+        categorias: [],
       };
 
       try {
@@ -660,7 +848,8 @@ export default {
           this.productoForm.precio_mayorista = infoExtra.precio_mayorista;
         }
         if (infoExtra.cantidad_activar_mayorista !== undefined) {
-          this.productoForm.cantidad_activar_mayorista = infoExtra.cantidad_activar_mayorista;
+          this.productoForm.cantidad_activar_mayorista =
+            infoExtra.cantidad_activar_mayorista;
         }
         if (infoExtra.categorias) {
           this.categoriasSeleccionadas = infoExtra.categorias;
@@ -670,16 +859,15 @@ export default {
         this.editIndex = index;
         this.productoOriginal = { ...this.productoForm }; // Guardar estado original
         this.openModal();
-
       } catch (error) {
-        notis('error', "Error al editar el producto");
+        notis("error", "Error al editar el producto");
         console.error(error);
       }
     },
 
     getChangedFields() {
       const changedFields = {};
-      Object.keys(this.productoForm).forEach(key => {
+      Object.keys(this.productoForm).forEach((key) => {
         // Comparar con los valores originales
         if (this.productoForm[key] !== this.productoOriginal[key]) {
           changedFields[key] = this.productoForm[key];
@@ -696,19 +884,23 @@ export default {
       }
       this.isLoading = true;
       try {
-        const registroEliminado = await desactivarProducto(this.productoToDelete.id_producto);
+        const registroEliminado = await desactivarProducto(
+          this.productoToDelete.id_producto
+        );
 
         if (registroEliminado == true) {
-          this.productos = this.productos.filter(item => item.id_producto !== this.productoToDelete.id_producto);
+          this.productos = this.productos.filter(
+            (item) => item.id_producto !== this.productoToDelete.id_producto
+          );
           this.isLoading = false;
-          notis('success', 'Producto eliminado correctamente');
+          notis("success", "Producto eliminado correctamente");
         } else {
           this.isLoading = false;
-          notis('error', 'Error al eliminar producto');
+          notis("error", "Error al eliminar producto");
         }
       } catch (error) {
         console.error(error);
-        notis('error', 'Error al eliminar el producto');
+        notis("error", "Error al eliminar el producto");
       } finally {
         this.showConfirmModal = false;
         this.productoToDelete = null;
@@ -743,17 +935,19 @@ export default {
         preciounitario: producto.preciounitario,
         preciomayorista: producto.preciomayorista,
         preciodescuento: producto.preciodescuento,
-        fecha: producto.fecha
+        fecha: producto.fecha,
       }));
     },
 
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
-    }
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
   },
 
   watch: {
@@ -765,13 +959,13 @@ export default {
     },
     paginatedProductos() {
       this.generateRows();
-    }
+    },
   },
 
   async mounted() {
     this.isLoading = true;
     this.generateRows();
-    setPageTitle('Productos');
+    setPageTitle("Productos");
 
     try {
       this.id_usuario = await solicitudes.solicitarUsuarioToken();
@@ -783,15 +977,15 @@ export default {
     } finally {
       this.isLoading = false;
     }
-  }
+  },
 };
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
 }
 
@@ -820,6 +1014,15 @@ export default {
   border-width: 0.5px;
   width: 100%;
   max-width: 300px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #c09d62;
+  box-shadow: 0 0 0 3px rgba(192, 157, 98, 0.2);
+  transition: all 0.3s ease;
 }
 
 #btnAdd {
@@ -1057,7 +1260,7 @@ export default {
 }
 
 .btn-export {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   font-size: 16px;
   border-radius: 5px;
@@ -1314,7 +1517,7 @@ export default {
 .modal-body-confirm {
   padding: 24px;
   overflow-y: auto;
-  background-color: white
+  background-color: white;
 }
 
 .dark .modal-body-confirm {
@@ -1412,8 +1615,6 @@ export default {
   font-size: 1.2em;
 }
 
-
-
 .input-icon {
   position: relative;
 }
@@ -1439,7 +1640,6 @@ export default {
   background-size: 20px;
   padding-right: 40px;
 }
-
 
 /* Footer */
 .modal-footer {
@@ -1598,7 +1798,6 @@ export default {
 }
 
 @media screen and (max-width: 480px) {
-
   .modal-stock {
     width: 95%;
     padding: 15px;
@@ -1693,7 +1892,6 @@ export default {
 .dark .table tbody tr:hover {
   background-color: #1f2937;
 }
-
 
 /* Modal en modo oscuro */
 .dark .modal-content {
