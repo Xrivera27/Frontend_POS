@@ -267,7 +267,12 @@
         </li>
       </ul>
     </aside>
-    <button v-if="isMobile" class="mobile-toggle" @click="toggleSidebar">
+    <button
+      v-show="isMobile"
+      class="mobile-toggle"
+      @click="toggleSidebar"
+      :class="{ active: expanded }"
+    >
       <i class="bi bi-list"></i>
     </button>
   </div>
@@ -283,7 +288,7 @@ export default {
   data() {
     return {
       showConfirmModal: false,
-      isMobile: window.innerWidth <= 480,
+      isMobile: false,
       openDropdowns: {
         ventas: false,
         compras: false,
@@ -330,9 +335,14 @@ export default {
   ],
 
   methods: {
+    checkMobileSize() {
+      this.isMobile = window.innerWidth <= 768;
+    },
+
     toggleSidebar() {
       this.$emit("toggle-sidebar");
     },
+
     toggleDropdown(menu) {
       if (menu === "ventas") {
         this.openDropdowns.compras = false;
@@ -342,6 +352,7 @@ export default {
 
       this.openDropdowns[menu] = !this.openDropdowns[menu];
     },
+
     closeDropdowns(event) {
       const ventasDropdown = this.$refs.ventasDropdown;
       const comprasDropdown = this.$refs.comprasDropdown;
@@ -405,17 +416,15 @@ export default {
 
   mounted() {
     document.addEventListener("click", this.closeDropdowns);
+    // Agregar el listener para resize
+    window.addEventListener("resize", this.checkMobileSize);
 
-    window.addEventListener("resize", () => {
-      this.isMobile = window.innerWidth <= 480;
-    });
+    this.checkMobileSize();
   },
 
   beforeUnmount() {
     document.removeEventListener("click", this.closeDropdowns);
-    window.removeEventListener("resize", () => {
-      this.isMobile = window.innerWidth <= 480;
-    });
+    window.removeEventListener("resize", this.checkMobileSize);
   },
 };
 </script>
@@ -555,8 +564,8 @@ ul.nav {
 .nav-link {
   display: flex;
   position: relative;
-  /overflow: hidden;
-  /align-items: center;
+  overflow: hidden;
+  align-items: center;
   justify-content: flex-start;
   color: #c09d62;
   text-decoration: none;
@@ -678,70 +687,6 @@ ul.nav {
   margin: 8px auto;
 }
 
-/* Mobile */
-@media (max-width: 480px) {
-  .sidebar {
-    transform: translateX(-100%);
-    width: 100%;
-  }
-
-  .sidebar.expanded {
-    transform: translateX(0);
-    width: 50%;
-  }
-
-  .mobile-toggle {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    width: 40px;
-    height: 40px;
-    background-color: transparent;
-    color: #c09d62;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 1001;
-    border: none;
-  }
-
-  .sidebar-overlay {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease;
-  }
-
-  .sidebar-overlay.show {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .nav-item {
-    margin: 8px 0;
-  }
-
-  .nav-link {
-    padding: 12px 20px;
-  }
-
-  .dropdown-menu {
-    position: static;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-}
-
 /* Animaciones */
 @keyframes slideIn {
   to {
@@ -780,5 +725,233 @@ ul.nav {
 
 .nav-item:nth-child(8) {
   animation-delay: 0.8s;
+}
+
+/* Estilos base del botón flotante */
+.mobile-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 45px;
+  height: 45px;
+  background-color: #c09d62;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-toggle:hover {
+  transform: scale(1.05);
+  opacity: 1;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-toggle i {
+  font-size: 24px;
+  transition: transform 0.3s ease;
+}
+
+.mobile-toggle.active i {
+  transform: rotate(90deg);
+}
+
+/* Tablets y laptops pequeñas */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 70px;
+  }
+
+  .sidebar.expanded {
+    width: 180px;
+  }
+
+  .tooltip-text {
+    font-size: 14px;
+  }
+
+  .nav-link i {
+    font-size: 2.2vh;
+  }
+}
+
+/* Tablets pequeñas y teléfonos grandes */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #c09d62 transparent;
+  }
+
+  .sidebar.expanded {
+    transform: translateX(0);
+    width: 65%;
+    max-width: 200px;
+  }
+
+  .mobile-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 999;
+  }
+
+  .sidebar-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .nav-item {
+    margin: 6px 0;
+  }
+
+  .dropdown-menu.show {
+    max-height: none;
+  }
+}
+
+/* Teléfonos móviles */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 100%;
+  }
+
+  .sidebar.expanded {
+    width: 85%;
+  }
+
+  .mobile-toggle {
+    top: 15px;
+    left: 15px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .mobile-toggle i {
+    font-size: 22px;
+  }
+
+  .nav-link {
+    padding: 10px 16px;
+  }
+
+  .nav-link i {
+    font-size: 2vh;
+  }
+
+  .tooltip-text {
+    font-size: 13px;
+  }
+
+  .dropdown-item {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  #aside-line {
+    width: 75%;
+  }
+}
+
+/* Teléfonos móviles pequeños */
+@media (max-width: 320px) {
+  .sidebar.expanded {
+    width: 100%;
+  }
+
+  .mobile-toggle {
+    top: 10px;
+    left: 10px;
+  }
+
+  .nav-link {
+    padding: 8px 12px;
+  }
+
+  .tooltip-text {
+    font-size: 12px;
+  }
+
+  .dropdown-item {
+    padding: 8px 16px;
+  }
+}
+
+/* Orientación landscape para móviles */
+@media (max-height: 480px) and (orientation: landscape) {
+  .sidebar {
+    padding-top: 10px;
+  }
+
+  .mobile-toggle {
+    top: 10px;
+    left: 10px;
+    width: 35px;
+    height: 35px;
+  }
+
+  .nav-item {
+    margin: 2px 0;
+  }
+
+  .nav-link {
+    padding: 6px 12px;
+  }
+
+  .nav-link i {
+    font-size: 1.8vh;
+  }
+
+  #aside-line {
+    margin: 4px auto;
+  }
+}
+
+/* Ajustes para modo oscuro */
+@media (prefers-color-scheme: dark) {
+  .mobile-toggle {
+    background-color: #79552f;
+    color: white;
+  }
+
+  .mobile-toggle:hover {
+    background-color: #c09d62;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0.9;
+    transform: scale(1);
+  }
 }
 </style>
