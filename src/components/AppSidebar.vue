@@ -14,16 +14,23 @@
       :class="{ expanded, dark: isDarkMode }"
     >
       <!-- Toggle button for expanding/collapsing -->
-      <!-- Toggle Sidebar Arrow -->
-      <li class="nav-item toggle-btn" @click="toggleSidebar">
-        <i
-          class="bi"
-          :class="expanded ? 'bi-chevron-left' : 'bi-chevron-right'"
-        ></i>
-      </li>
-
-      <!-- Toggle button for expanding/collapsing -->
       <ul class="nav flex-column">
+        <!-- Toggle Sidebar Arrow -->
+        <li class="nav-item">
+          <a
+            @click="toggleSidebar"
+            class="nav-link"
+            style="cursor: pointer"
+            data-tooltip="Expandir Menú"
+          >
+            <i
+              class="bi"
+              :class="expanded ? 'bi-chevron-left' : 'bi-chevron-right'"
+            ></i>
+            <span v-if="expanded" class="tooltip-text">Contraer Menú</span>
+          </a>
+        </li>
+
         <!-- Home -->
         <li v-if="hasPermission('Home')" class="nav-item">
           <router-link
@@ -31,6 +38,7 @@
             to="/home"
             class="nav-link"
             :class="{ active: isActive('/home') }"
+            data-tooltip="Home"
           >
             <i class="bi bi-house-door-fill"></i>
             <span v-if="expanded" class="tooltip-text">Home</span>
@@ -44,6 +52,7 @@
             to="/sucursales"
             class="nav-link"
             :class="{ active: isActive('/sucursales') }"
+            data-tooltip="Sucursales"
           >
             <i class="bi bi-shop-window"></i>
             <span v-if="expanded" class="tooltip-text">Sucursal</span>
@@ -57,6 +66,7 @@
             to="/empleados"
             class="nav-link"
             :class="{ active: isActive('/empleados') }"
+            data-tooltip="Usuarios"
           >
             <i class="bi bi-person-fill"></i>
             <span v-if="expanded" class="tooltip-text">Usuario</span>
@@ -70,6 +80,7 @@
             to="/categorias"
             class="nav-link"
             :class="{ active: isActive('/categorias') }"
+            data-tooltip="Categorías"
           >
             <i class="bi bi-tags-fill"></i>
             <span v-if="expanded" class="tooltip-text">Categorías</span>
@@ -83,6 +94,7 @@
             to="/productos"
             class="nav-link"
             :class="{ active: isActive('/productos') }"
+            data-tooltip="Productos"
           >
             <i class="bi bi-box-seam"></i>
             <span v-if="expanded" class="tooltip-text">Productos</span>
@@ -96,6 +108,7 @@
             to="/clientes"
             class="nav-link"
             :class="{ active: isActive('/clientes') }"
+            data-tooltip="Clientes"
           >
             <i class="bi bi-people-fill"></i>
             <span v-if="expanded" class="tooltip-text">Clientes</span>
@@ -109,6 +122,7 @@
             to="/proveedores"
             class="nav-link"
             :class="{ active: isActive('/proveedores') }"
+            data-tooltip="Proveedores"
           >
             <i class="bi bi-truck"></i>
             <span v-if="expanded" class="tooltip-text">Proveedores</span>
@@ -211,6 +225,7 @@
             to="/config-page"
             class="nav-link"
             :class="{ active: isActive('/config-page') }"
+            data-tooltip="Configuración"
           >
             <i class="bi bi-gear-fill"></i>
             <span v-if="expanded" class="tooltip-text">Configuración</span>
@@ -219,7 +234,12 @@
 
         <!-- Cerrar sesión -->
         <li class="nav-item">
-          <a @click="salir" class="nav-link" style="cursor: pointer">
+          <a
+            @click="salir"
+            class="nav-link"
+            style="cursor: pointer"
+            data-tooltip="Cerrar Sesión"
+          >
             <i class="bi bi-box-arrow-right"></i>
             <span v-if="expanded" class="tooltip-text">Cerrar sesión</span>
           </a>
@@ -231,11 +251,19 @@
         />
 
         <!-- Toggle Dark Mode -->
-        <li class="nav-item toggle-btn" @click="toggleDarkMode">
-          <i
-            class="bi"
-            :class="isDarkMode ? 'bi-brightness-high' : 'bi-moon-stars-fill'"
-          ></i>
+        <li class="nav-item">
+          <a
+            @click="toggleDarkMode"
+            class="nav-link"
+            style="cursor: pointer"
+            data-tooltip="Cambiar Tema"
+          >
+            <i
+              class="bi"
+              :class="isDarkMode ? 'bi-brightness-high' : 'bi-moon-stars-fill'"
+            ></i>
+            <span v-if="expanded" class="tooltip-text">Cambiar Tema</span>
+          </a>
         </li>
       </ul>
     </aside>
@@ -474,6 +502,42 @@ ul.nav {
   padding: 1vh 1.5vh;
 }
 
+/* Tooltip personalizado */
+.nav-item {
+  position: relative;
+}
+
+/* Tooltip personalizado */
+.sidebar:not(.expanded) .nav-link:not(.dropdown .nav-link):hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(192, 157, 98, 0.9);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Flecha del tooltip */
+.sidebar:not(.expanded) .nav-link:not(.dropdown .nav-link):hover::before {
+  content: "";
+  position: absolute;
+  left: calc(100% + 5px);
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent rgba(192, 157, 98, 0.9) transparent transparent;
+  z-index: 1000;
+  pointer-events: none;
+}
+
 /* Navegación */
 .nav-item {
   transform: translateX(-10px);
@@ -491,8 +555,8 @@ ul.nav {
 .nav-link {
   display: flex;
   position: relative;
-  overflow: hidden;
-  align-items: center;
+  /overflow: hidden;
+  /align-items: center;
   justify-content: flex-start;
   color: #c09d62;
   text-decoration: none;
@@ -580,11 +644,6 @@ ul.nav {
   color: #79552f;
 }
 
-.sidebar.dark .toggle-btn,
-.sidebar.dark .toggle-btn i {
-  color: #c09d62;
-}
-
 .sidebar.dark .dropdown-menu {
   background-color: #2d2d2d;
 }
@@ -602,35 +661,6 @@ ul.nav {
 .sidebar.dark:not(.expanded) .dropdown-menu {
   background-color: #2d2d2d;
   box-shadow: 4px 0 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Botón Toggle */
-.toggle-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 35px;
-  height: 35px;
-  min-width: 35px;
-  min-height: 35px;
-  border-radius: 50%;
-  padding: 0;
-  cursor: pointer;
-  margin-bottom: 2px;
-  margin-left: auto;
-  margin-right: auto;
-  position: relative;
-  flex-shrink: 0;
-  background-color: transparent;
-  transition: background-color 0.3s ease;
-}
-
-.toggle-btn i {
-  font-size: 20px;
-}
-
-.toggle-btn:hover {
-  background-color: rgba(192, 157, 98, 0.1);
 }
 
 /* Tooltip */
@@ -702,10 +732,6 @@ ul.nav {
 
   .nav-link {
     padding: 12px 20px;
-  }
-
-  .toggle-btn {
-    display: none;
   }
 
   .dropdown-menu {
