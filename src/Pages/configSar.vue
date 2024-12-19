@@ -2,6 +2,7 @@
   <div class="configuracion-usuario">
     <div class="config-wrapper">
       <PageHeader :titulo="titulo" />
+      <ModalLoading :isLoading="isLoading" />
 
       <div class="company-config">
         <form
@@ -21,6 +22,7 @@
                   v-model="configuracionSAR.numero_CAI"
                   type="text"
                   id="numero_CAI"
+                  maxlength="45"
                   required
                 />
 
@@ -47,6 +49,7 @@
                   type="date"
                   id="fecha_autorizacion"
                   required
+                  @keypress="soloNumeros($event)"
                 />
 
                 <label for="fecha_vencimiento">Fecha de vencimiento:</label>
@@ -55,6 +58,7 @@
                   type="date"
                   id="fecha_vencimiento"
                   required
+                  @keypress="soloNumeros($event)"
                 />
               </div>
             </div>
@@ -72,7 +76,7 @@
               class="btn guardar"
               type="submit"
               :disabled="busisnessSarEditing"
-              @click.prevent="updatesar"
+              @click.prevent="updateSAR"
             >
               Guardar
             </button>
@@ -92,17 +96,21 @@
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import axios from "axios";
-import { useToast } from "vue-toastification";
 const { getApi } = require("../../config/getApiUrl.js");
 import { setPageTitle } from "@/components/pageMetadata";
+import { validacionesConfigSAR } from "../../services/validarCampos.js";
+import { notis } from "../../services/notificaciones.js";
+import ModalLoading from "@/components/ModalLoading.vue";
 
 export default {
   components: {
     PageHeader,
+    ModalLoading,
   },
   data() {
     return {
       titulo: "Configuración SAR",
+      isLoading: false,
       busisnessSarEditing: true,
       esCeo: false,
       configuracionSAR: {
@@ -116,12 +124,24 @@ export default {
   },
 
   methods: {
+    soloNumeros(event) {
+      const codigoTecla = event.keyCode || event.which;
+      const tecla = String.fromCharCode(codigoTecla);
+      const regex = /^[0-9.]$/;
+      if (
+        !regex.test(tecla) ||
+        (tecla === "." && event.target.value.includes("."))
+      ) {
+        event.preventDefault();
+        return false;
+      }
+    },
+
     validateSARNumber(number) {
       return /^\d{16}$/.test(number);
     },
 
     async getConfiguracionSAR() {
-      const toast = useToast();
       try {
         const token = localStorage.getItem("auth");
         const response = await axios.get(`${getApi()}/sar`, {
@@ -141,56 +161,30 @@ export default {
           sarData.fecha_vencimiento || "";
       } catch (error) {
         console.error("Error al obtener la configuración SAR:", error);
-        toast.error("No se pudo obtener la configuración SAR.", {
-          timeout: 5000,
-        });
+        notis("error", "No se pudo obtener la configuración SAR.");
       }
     },
 
-    async updatesar() {
-      const toast = useToast();
+    async updateSAR() {
+      // Usar las validaciones definidas
+      if (
+        !validacionesConfigSAR.validarCamposConfiguracion(this.configuracionSAR)
+      ) {
+        return;
+      }
+
+      this.isLoading = true;
       try {
-        // Validar el rango inicial
-        if (!this.validateSARNumber(this.configuracionSAR.rango_inicial)) {
-          toast.error(
-            "El Rango Inicial debe tener exactamente 16 dígitos numéricos",
-            {
-              timeout: 5000,
-            }
-          );
-          return;
-        }
-
-        // Validar el rango final
-        if (!this.validateSARNumber(this.configuracionSAR.rango_final)) {
-          toast.error(
-            "El Rango Final debe tener exactamente 16 dígitos numéricos",
-            {
-              timeout: 5000,
-            }
-          );
-          return;
-        }
-
-        // Validar que el rango final sea mayor que el inicial
-        if (
-          parseInt(this.configuracionSAR.rango_final) <=
-          parseInt(this.configuracionSAR.rango_inicial)
-        ) {
-          toast.error("El Rango Final debe ser mayor que el Rango Inicial", {
-            timeout: 5000,
-          });
-          return;
-        }
-
         const token = localStorage.getItem("auth");
+
+        // Los rangos ya deberían estar formateados por las validaciones
         const updatedData = {
           numero_CAI: this.configuracionSAR.numero_CAI,
           rango_inicial: this.configuracionSAR.rango_inicial,
           rango_final: this.configuracionSAR.rango_final,
           fecha_autorizacion: this.configuracionSAR.fecha_autorizacion,
           fecha_vencimiento: this.configuracionSAR.fecha_vencimiento,
-          numero_actual_SAR: this.configuracionSAR.rango_inicial,
+          numero_actual_SAR: this.configuracionSAR.rango_inicial, // Se inicializa con el rango inicial
         };
 
         const response = await axios.post(
@@ -204,31 +198,31 @@ export default {
           }
         );
 
-        if (response.status === 200) {
-          toast.success("Datos SAR actualizados exitosamente", {
-            timeout: 5000,
+        if (
+          response?.data?.success ||
+          response?.data?.id ||
+          response?.status < 300
+        ) {
+          // Esperar a que se muestre la notificación antes de recargar
+          await new Promise((resolve) => {
+            notis("success", "Datos SAR actualizados exitosamente");
+            // Dar tiempo para que la notificación sea visible
+            setTimeout(resolve, 1500);
           });
+
           window.location.reload();
         }
       } catch (error) {
         console.error("Error al actualizar los datos SAR:", error);
         if (error.response) {
-          toast.error(
-            error.response.data.message ||
-              "Hubo un problema al guardar los datos.",
-            {
-              timeout: 5000,
-            }
-          );
+          notis("error", "Hubo un problema al guardar los datos.");
         } else if (error.request) {
-          toast.error("Error de conexión con el servidor.", {
-            timeout: 5000,
-          });
+          notis("error", "Error de conexión con el servidor.", {});
         } else {
-          toast.error("Hubo un problema al guardar los datos.", {
-            timeout: 5000,
-          });
+          notis("error", "Hubo un problema al guardar los datos.", {});
         }
+      } finally {
+        this.isLoading = false;
       }
     },
 
@@ -242,7 +236,6 @@ export default {
     },
 
     isEditing(orden) {
-      const toast = useToast();
       switch (orden) {
         case 1:
           this.usuarioEditing = false;
@@ -269,7 +262,7 @@ export default {
           this.usuarioAvancedEditing = true;
           break;
         default:
-          toast.error("Ha ocurrido un error", {
+          notis("error", "Ha ocurrido un error", {
             timeout: 5000,
           });
       }

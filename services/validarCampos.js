@@ -563,6 +563,208 @@ const validacionesConfigPage = {
   },
 };
 
+const validacionesConfigSAR = {
+  validarCAI(cai) {
+    // CAI validation remains the same
+    const caracteresPermitidos = /^[A-Z0-9-]+$/;
+    if (!caracteresPermitidos.test(cai)) {
+      notis(
+        "warning",
+        "El número CAI solo puede contener letras mayúsculas, números y guiones"
+      );
+      return false;
+    }
+
+    const caracteresAlfanumericos = cai.replace(/-/g, "");
+
+    if (caracteresAlfanumericos.length !== 37) {
+      notis(
+        "warning",
+        `El número CAI debe tener exactamente 37 caracteres (sin contar guiones). Actualmente tiene ${caracteresAlfanumericos.length}.`
+      );
+      return false;
+    }
+
+    const soloAlfanumericos = /^[A-Z0-9]+$/;
+    if (!soloAlfanumericos.test(caracteresAlfanumericos)) {
+      notis(
+        "warning",
+        "El número CAI solo puede contener letras mayúsculas y números"
+      );
+      return false;
+    }
+
+    return true;
+  },
+
+  formatearRangoParaVisualizacion(rango) {
+    // Primero eliminar cualquier guion existente
+    const rangoLimpio = rango.replace(/-/g, "");
+
+    if (rangoLimpio.length !== 14) {
+      return null;
+    }
+
+    // Formatear como: AAA-000-00000XXX para visualización
+    return `${rangoLimpio.slice(0, 3)}-${rangoLimpio.slice(
+      3,
+      6
+    )}-${rangoLimpio.slice(6)}`;
+  },
+
+  validarFormatoRango(rango) {
+    // Eliminar guiones para validación
+    const rangoSinGuiones = rango.replace(/-/g, "");
+
+    if (rangoSinGuiones.length !== 14) {
+      notis(
+        "warning",
+        `El rango debe tener exactamente 14 caracteres (sin contar guiones). Actualmente tiene ${rangoSinGuiones.length}.`
+      );
+      return false;
+    }
+
+    const establecimiento = rangoSinGuiones.slice(0, 3);
+    const puntoEmision = rangoSinGuiones.slice(3, 6);
+    const secuencial = rangoSinGuiones.slice(6);
+
+    if (!/^[A-Z0-9]{3}$/.test(establecimiento)) {
+      notis(
+        "warning",
+        "El código de establecimiento debe ser 3 caracteres alfanuméricos"
+      );
+      return false;
+    }
+
+    if (!/^\d{3}$/.test(puntoEmision)) {
+      notis("warning", "El punto de emisión debe ser 3 dígitos numéricos");
+      return false;
+    }
+
+    if (!/^\d{8}$/.test(secuencial)) {
+      notis("warning", "El número secuencial debe ser 8 dígitos numéricos");
+      return false;
+    }
+
+    return true;
+  },
+
+  validarCamposConfiguracion(form) {
+    const campos = {
+      "Número CAI": form.numero_CAI,
+      "Rango inicial": form.rango_inicial,
+      "Rango final": form.rango_final,
+      "Fecha de autorización": form.fecha_autorizacion,
+      "Fecha de vencimiento": form.fecha_vencimiento,
+    };
+
+    if (!validacionesComunes.validarEmpty(campos)) return false;
+    if (!this.validarCAI(campos["Número CAI"])) return false;
+
+    // Limpiar guiones antes de validar
+    const rangoInicialLimpio = campos["Rango inicial"].replace(/-/g, "");
+    const rangoFinalLimpio = campos["Rango final"].replace(/-/g, "");
+
+    if (!this.validarFormatoRango(rangoInicialLimpio)) return false;
+    if (!this.validarFormatoRango(rangoFinalLimpio)) return false;
+
+    // Guardar los rangos sin guiones en el formulario para la base de datos
+    form.rango_inicial = rangoInicialLimpio;
+    form.rango_final = rangoFinalLimpio;
+
+    // Validar secuenciales usando los rangos limpios
+    const secuencialInicial = parseInt(rangoInicialLimpio.slice(6));
+    const secuencialFinal = parseInt(rangoFinalLimpio.slice(6));
+
+    // Validar que los prefijos sean iguales
+    const prefijoInicial = rangoInicialLimpio.slice(0, 6);
+    const prefijoFinal = rangoFinalLimpio.slice(0, 6);
+
+    if (prefijoInicial !== prefijoFinal) {
+      notis(
+        "warning",
+        "Los rangos deben pertenecer al mismo establecimiento y punto de emisión"
+      );
+      return false;
+    }
+
+    if (secuencialInicial >= secuencialFinal) {
+      notis("warning", "El rango inicial debe ser menor que el rango final");
+      return false;
+    }
+
+    // Validaciones de fecha
+    const fechaAutorizacion = new Date(campos["Fecha de autorización"]);
+    const fechaVencimiento = new Date(campos["Fecha de vencimiento"]);
+    const fechaActual = new Date();
+
+    if (
+      isNaN(fechaAutorizacion.getTime()) ||
+      isNaN(fechaVencimiento.getTime())
+    ) {
+      notis("warning", "Las fechas ingresadas no son válidas");
+      return false;
+    }
+
+    if (fechaAutorizacion > fechaActual) {
+      notis("warning", "La fecha de autorización no puede ser futura");
+      return false;
+    }
+
+    if (fechaVencimiento <= fechaAutorizacion) {
+      notis(
+        "warning",
+        "La fecha de vencimiento debe ser posterior a la fecha de autorización"
+      );
+      return false;
+    }
+
+    const unMesFuturo = new Date();
+    unMesFuturo.setMonth(unMesFuturo.getMonth() + 1);
+    if (fechaVencimiento < unMesFuturo) {
+      notis(
+        "warning",
+        "La fecha de vencimiento debe tener al menos 1 mes de vigencia"
+      );
+      return false;
+    }
+
+    return true;
+  },
+
+  validarRangoDisponible(rangoInicial, rangoFinal, rangoActual) {
+    // Limpiar guiones de todos los rangos
+    const rangoInicialLimpio = rangoInicial.replace(/-/g, "");
+    const rangoFinalLimpio = rangoFinal.replace(/-/g, "");
+    const rangoActualLimpio = rangoActual.replace(/-/g, "");
+
+    const secuencialInicial = parseInt(rangoInicialLimpio.slice(6));
+    const secuencialFinal = parseInt(rangoFinalLimpio.slice(6));
+    const secuencialActual = parseInt(rangoActualLimpio.slice(6));
+
+    if (
+      secuencialActual < secuencialInicial ||
+      secuencialActual > secuencialFinal
+    ) {
+      notis("warning", "El número actual está fuera del rango autorizado");
+      return false;
+    }
+
+    const rangoTotal = secuencialFinal - secuencialInicial;
+    const rangoUsado = secuencialActual - secuencialInicial;
+    const porcentajeUsado = (rangoUsado / rangoTotal) * 100;
+
+    if (porcentajeUsado > 80) {
+      notis(
+        "warning",
+        "Queda menos del 20% del rango disponible. Considere solicitar un nuevo CAI"
+      );
+    }
+
+    return true;
+  },
+};
+
 export {
   validacionesComunes,
   validacionesUsuario,
@@ -572,4 +774,5 @@ export {
   validacionesClientes,
   validacionesProveedores,
   validacionesConfigPage,
+  validacionesConfigSAR,
 };
