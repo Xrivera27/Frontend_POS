@@ -399,85 +399,208 @@ label {
   cursor: not-allowed;
 }
 
-@media screen and (max-width: 1024px) {
-  .usuario-config {
+/* Large Desktop (1440px y más) */
+@media screen and (min-width: 1440px) {
+  .company-config {
+    max-width: 1200px;
+  }
+
+  .contenedor-interno {
+    padding: 0 4%;
+  }
+
+  .titulo-form {
+    font-size: 1.8rem;
+  }
+
+  input {
+    font-size: 1rem;
+    padding: 12px 16px;
+    height: 40px;
+  }
+}
+
+/* Desktop (1200px a 1439px) */
+@media screen and (max-width: 1200px) {
+  .company-config {
     width: 95%;
+  }
+
+  .contenedor-interno {
+    padding: 0 3%;
+  }
+
+  .titulo-form {
+    font-size: 1.5rem;
+  }
+}
+
+/* Tablet Landscape (992px a 1199px) */
+@media screen and (max-width: 992px) {
+  .company-config {
+    width: 100%;
+    padding: 15px;
   }
 
   .contenedor-principal {
     flex-direction: column;
-    align-items: center;
   }
 
   .contenedor-interno {
-    width: 90%;
-    padding: 0;
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  input {
+    width: 100%;
+    margin-bottom: 15px;
   }
 
   form {
-    min-width: 100%;
+    padding: 20px 15px;
+  }
+
+  .titulo-form {
+    font-size: 1.3rem;
+    margin-bottom: 30px;
   }
 }
 
+/* Tablet Portrait (768px a 991px) */
 @media screen and (max-width: 768px) {
-  .usuario-config {
-    width: 100%;
+  .configuracion-usuario,
+  .config-wrapper {
+    padding: 12px;
+  }
+
+  .company-config {
     padding: 10px;
   }
 
-  .config-wrapper {
-    padding: 8px;
+  .contenedor-interno {
+    padding: 0 15px;
+  }
+
+  .titulo-form {
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+  }
+
+  input {
+    font-size: 0.9rem;
+  }
+
+  label {
+    font-size: 0.9rem;
+    margin-bottom: 6px;
   }
 
   .botones-container {
     justify-content: center;
-    margin-right: 0;
+    padding: 0 15px;
+    margin-top: 20px;
+    gap: 15px;
+  }
+
+  .boton-switch {
+    width: calc(50% - 10px);
   }
 
   .btn {
-    width: 100%;
-    margin: 4px 0;
-  }
-
-  input {
-    width: 100%;
-  }
-
-  .contenedor-interno {
-    width: 100%;
-  }
-
-  .titulo-form {
-    font-size: 14px;
-    top: -10%;
+    padding: 10px 20px;
   }
 }
 
-@media screen and (max-width: 480px) {
-  .configuracion-usuario {
-    padding: 8px;
+/* Mobile (576px a 767px) */
+@media screen and (max-width: 576px) {
+  .configuracion-usuario,
+  .config-wrapper {
+    padding: 10px;
+  }
+
+  .company-config {
+    width: 100%;
+    padding: 5px;
+  }
+
+  .contenedor-interno {
+    padding: 0 10px;
   }
 
   form {
-    padding: 20px 10px;
+    padding: 15px 10px;
+    margin-bottom: 20px;
+  }
+
+  .titulo-form {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
   }
 
   .botones-container {
     flex-direction: column;
+    padding: 0 10px;
   }
 
+  .btn,
   .boton-switch {
     width: 100%;
-    text-align: center;
+    margin: 5px 0;
   }
 
   input {
-    font-size: 14px;
+    font-size: 0.875rem;
+    padding: 8px 12px;
+  }
+
+  label {
+    font-size: 0.875rem;
+  }
+}
+
+/* Small Mobile (400px y menos) */
+@media screen and (max-width: 400px) {
+  .configuracion-usuario,
+  .config-wrapper {
+    padding: 5px;
+  }
+
+  .company-config {
+    padding: 5px;
+  }
+
+  form {
+    padding: 10px 8px;
+    border-radius: 8px;
+  }
+
+  .contenedor-interno {
+    padding: 0 8px;
   }
 
   .titulo-form {
-    font-size: 12px;
-    top: -8%;
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+
+  input {
+    padding: 6px 10px;
+    height: 35px;
+    font-size: 0.875rem;
+  }
+
+  label {
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    font-size: 0.875rem;
+  }
+
+  .botones-container {
+    gap: 8px;
   }
 }
 

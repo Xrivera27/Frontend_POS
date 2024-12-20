@@ -4,21 +4,23 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <button
-        id="btnAdd"
-        class="btn btn-primary"
-        @click="openModal"
-        style="width: 200px; white-space: nowrap"
-      >
-        Agregar Clientes
-      </button>
+      <div class="primary-buttons">
+        <button
+          id="btnAdd"
+          class="btn btn-primary"
+          @click="openModal"
+          style="width: 200px; white-space: nowrap"
+        >
+          Agregar Clientes
+        </button>
 
-      <ExportButton
-        :columns="columns"
-        :rows="rows"
-        fileName="Clientes.pdf"
-        class="export-button"
-      />
+        <ExportButton
+          :columns="columns"
+          :rows="rows"
+          fileName="Clientes.pdf"
+          class="export-button"
+        />
+      </div>
 
       <div class="search-bar">
         <input
@@ -53,13 +55,15 @@
         </thead>
         <tbody>
           <tr v-for="(cliente, index) in paginatedClientes" :key="index">
-            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-            <td>{{ cliente.nombre_completo }}</td>
-            <td>{{ cliente.correo }}</td>
-            <td>{{ cliente.direccion }}</td>
-            <td>{{ cliente.telefono }}</td>
-            <td>{{ cliente.rtn }}</td>
-            <td v-if="esCeo">
+            <td data-label="#">
+              {{ (currentPage - 1) * pageSize + index + 1 }}
+            </td>
+            <td data-label="Nombre">{{ cliente.nombre_completo }}</td>
+            <td data-label="Correo">{{ cliente.correo }}</td>
+            <td data-label="Dirección">{{ cliente.direccion }}</td>
+            <td data-label="Teléfono">{{ cliente.telefono }}</td>
+            <td data-label="RTN">{{ cliente.rtn }}</td>
+            <td v-if="esCeo" data-label="Acciones">
               <button
                 id="btnEditar"
                 class="btn btn-warning"
@@ -460,19 +464,31 @@ export default {
 /* Opciones y búsqueda */
 .opciones {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+#btnAdd,
+.export-button {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 0 20px;
+  white-space: nowrap;
+  margin: 0;
 }
 
 .busqueda {
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 10px;
-  border-width: 0.5px;
   width: 100%;
-  max-width: 300px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
 }
 
 input:focus,
@@ -759,6 +775,7 @@ textarea:focus {
   border-radius: 10px;
   border: 1px solid #ddd;
   margin-top: 16px;
+  overflow-x: auto;
   height: auto;
   max-height: 480px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -766,6 +783,7 @@ textarea:focus {
 
 .table {
   width: 100%;
+  white-space: nowrap;
   min-width: 800px;
   border-collapse: separate;
   border-spacing: 0;
@@ -861,6 +879,17 @@ textarea:focus {
   cursor: pointer;
 }
 
+.primary-buttons {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0; /* Evita que los botones se encogan */
+}
+
+.search-bar {
+  flex-grow: 1; /* Ocupa el espacio restante */
+  max-width: 250px; /* Limita el ancho máximo */
+}
+
 .btn-danger {
   background-color: #dc3545;
   color: white;
@@ -914,64 +943,218 @@ textarea:focus {
 }
 
 /* Media Queries */
-@media screen and (max-width: 768px) {
-  .opciones {
-    flex-direction: column;
-    align-items: stretch;
+@media screen and (max-width: 1024px) {
+  .modal-content {
+    width: 80%;
+    max-width: 700px;
   }
 
-  .busqueda,
-  .registros,
-  #btnAdd,
-  .export-button {
-    width: 100%;
-    margin: 8px 0;
+  .modal-confirm {
+    width: 40%;
   }
 
-  .custom-select {
-    width: 100%;
-    max-width: none;
-  }
-
-  #btnEditar,
-  #btnEliminar {
-    width: 40px;
-    height: 35px;
-    font-size: 14px;
-    padding: 8px;
-  }
-
-  .table-container {
-    margin-top: 24px;
+  .phone-input-container {
+    flex-direction: row;
   }
 }
 
-@media screen and (max-width: 480px) {
-  .modal-content {
-    width: 95%;
-    padding: 15px;
+@media screen and (max-width: 768px) {
+  .opciones {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .table thead th,
-  .table tbody td {
-    padding: 6px;
-    font-size: 14px;
+  .primary-buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .search-bar {
+    grid-column: 1;
+  }
+
+  .table-container {
+    margin-top: 12px;
+    border-radius: 8px;
+  }
+
+  .table {
+    min-width: 650px;
+  }
+
+  .modal-content {
+    width: 90%;
+  }
+
+  .modal-confirm {
+    width: 80%;
   }
 
   .form-group {
     margin-bottom: 12px;
   }
 
-  .h2-modal-content {
-    font-size: 20px;
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
   }
 
-  #form-tel {
-    max-width: 100%;
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
 
-  .busqueda {
-    max-width: 100%;
+  .primary-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .search-bar {
+    max-width: none;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  /* Convertir tabla en tarjetas */
+  .table {
+    display: block;
+    min-width: unset;
+    border: none;
+  }
+
+  .primary-buttons {
+    flex-direction: column;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody {
+    display: block;
+  }
+
+  .table tr {
+    display: block;
+    margin-bottom: 12px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .table td {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    padding: 8px 4px;
+    text-align: left;
+    border: none;
+    font-size: 14px;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #666;
+  }
+
+  /* Modo oscuro para tarjetas */
+  .dark .table tr {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+
+  .dark .table td::before {
+    color: #aaa;
+  }
+
+  /* Columna de acciones */
+  .table td:last-child {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 12px;
+    margin-top: 8px;
+    border-top: 1px solid #eee;
+    grid-column: 1 / -1;
+  }
+
+  .dark .table td:last-child {
+    border-top-color: #404040;
+  }
+
+  /* Ajustes de botones */
+  #btnEditar,
+  #btnEliminar {
+    width: 36px;
+    height: 36px;
+    margin: 0;
+  }
+
+  /* Ajustes de input teléfono */
+  .phone-input-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .phone-input-container select,
+  .phone-input-container input {
+    width: 100%;
+  }
+
+  /* Ajustes modales */
+  .modal-content,
+  .modal-confirm {
+    width: 95%;
+    margin: 10px;
+  }
+}
+
+/* Ajustes para teléfonos pequeños */
+@media screen and (max-width: 360px) {
+  .table td {
+    grid-template-columns: 100%;
+  }
+
+  .table td::before {
+    margin-bottom: 4px;
+  }
+
+  .table td:last-child {
+    justify-content: center;
+  }
+
+  #btnEditar,
+  #btnEliminar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+}
+
+/* Landscape mode */
+@media screen and (max-height: 480px) and (orientation: landscape) {
+  .modal-content {
+    max-height: 100vh;
+    margin: 0;
+  }
+
+  .modal-body {
+    max-height: calc(100vh - 120px);
+  }
+
+  .form-group {
+    margin-bottom: 8px;
+  }
+
+  .phone-input-container {
+    flex-direction: row;
   }
 }
 

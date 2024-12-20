@@ -496,6 +496,7 @@ export default {
 /* Configuración del usuario */
 .configuracion-usuario {
   padding: 16px;
+  width: 100%;
 }
 
 /* Contenedores principales */
@@ -520,9 +521,9 @@ export default {
 }
 
 .usuario-config {
-  max-width: 1000px; /* Ancho máximo */
-  width: 90%; /* Ancho responsivo */
-  margin: 0 auto; /* Centrar el contenedor */
+  max-width: 1000px;
+  width: 90%;
+  margin: 0 auto;
   padding: 20px;
 }
 
@@ -609,86 +610,179 @@ input {
   cursor: pointer;
 }
 
-/* Media Queries */
-@media screen and (max-width: 1024px) {
+/* Large Desktop (1440px y más) */
+@media screen and (min-width: 1440px) {
+  .usuario-config {
+    max-width: 1200px;
+  }
+
+  .contenedor-interno {
+    padding: 0 4%;
+  }
+}
+
+/* Desktop (1200px a 1439px) */
+@media screen and (max-width: 1200px) {
   .usuario-config {
     width: 95%;
   }
 
-  .contenedor-principal {
-    flex-direction: column;
-    align-items: center;
-  }
-
   .contenedor-interno {
-    width: 90%;
-    padding: 0;
-  }
-
-  form {
-    min-width: 100%;
+    padding: 0 3%;
   }
 }
 
-@media screen and (max-width: 768px) {
+/* Tablet Landscape (992px a 1199px) */
+@media screen and (max-width: 992px) {
   .usuario-config {
     width: 100%;
-    padding: 10px;
+    padding: 15px;
   }
 
+  .contenedor-principal {
+    gap: 15px;
+  }
+
+  .contenedor-interno {
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  form {
+    padding: 20px 15px;
+  }
+
+  .titulo-form {
+    font-size: 1.3rem;
+  }
+}
+
+/* Tablet Portrait (768px a 991px) */
+@media screen and (max-width: 768px) {
+  .configuracion-usuario,
   .config-wrapper {
-    padding: 8px;
+    padding: 12px;
+  }
+
+  .contenedor-principal {
+    flex-direction: column;
+  }
+
+  .contenedor-interno {
+    width: 100%;
+    padding: 0 15px;
+  }
+
+  .phone-input-container {
+    width: 100%;
+  }
+
+  .phone-input-container select {
+    width: 100px;
+  }
+
+  .btn-password {
+    width: 100%;
+  }
+
+  input,
+  select {
+    width: 100%;
+    margin-bottom: 15px;
   }
 
   .botones-container {
     justify-content: center;
-    margin-right: 0;
+    padding: 0 15px;
+    margin-top: 20px;
   }
 
-  .btn {
-    width: 100%;
-    margin: 4px 0;
-  }
-
-  input {
-    width: 100%;
-  }
-
-  .contenedor-interno {
-    width: 100%;
-  }
-
-  .titulo-form {
-    font-size: 14px;
-    top: -10%;
+  .boton-switch {
+    width: calc(50% - 10px);
   }
 }
 
-@media screen and (max-width: 480px) {
-  .configuracion-usuario {
+/* Mobile (576px a 767px) */
+@media screen and (max-width: 576px) {
+  .configuracion-usuario,
+  .config-wrapper {
     padding: 8px;
   }
 
+  .usuario-config {
+    padding: 10px;
+  }
+
+  .contenedor-interno {
+    padding: 0 10px;
+  }
+
   form {
-    padding: 20px 10px;
+    padding: 15px 10px;
+    margin-bottom: 20px;
+  }
+
+  .titulo-form {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
   }
 
   .botones-container {
     flex-direction: column;
+    padding: 0 10px;
+  }
+
+  .btn {
+    width: 100%;
+    margin: 5px 0;
+    padding: 10px;
   }
 
   .boton-switch {
     width: 100%;
-    text-align: center;
+    margin: 5px 0;
+  }
+}
+
+/* Small Mobile (400px y menos) */
+@media screen and (max-width: 400px) {
+  .configuracion-usuario,
+  .config-wrapper {
+    padding: 5px;
   }
 
-  input {
-    font-size: 14px;
+  .usuario-config {
+    padding: 5px;
+  }
+
+  form {
+    padding: 10px 8px;
   }
 
   .titulo-form {
-    font-size: 12px;
-    top: -8%;
+    font-size: 1rem;
+  }
+
+  .phone-input-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .phone-input-container select,
+  .phone-input-container input {
+    width: 100%;
+  }
+
+  input,
+  select,
+  .btn {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  label {
+    font-size: 14px;
+    margin-bottom: 5px;
   }
 }
 

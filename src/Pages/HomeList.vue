@@ -6,22 +6,18 @@
     <div v-if="role === 1">
       <!-- Secciones visibles solo para Administrador -->
       <BarChart />
-
     </div>
 
     <div v-if="role === 2">
       <!-- Secciones visibles solo para Gerente -->
       <h3>Panel de Gerente</h3>
       <BarChart />
-
     </div>
 
     <div v-if="role === 4">
       <!-- Secciones visibles solo para Gerente -->
       <h3>Panel de Ceo</h3>
       <BarChart />
-
-
     </div>
 
     <div v-if="role === 3">
@@ -39,10 +35,10 @@
 </template>
 
 <script>
-import BarChart from '../components/DashboardList.vue';
+import BarChart from "../components/DashboardList.vue";
 import PageHeader from "@/components/PageHeader.vue";
-import ModalLoading from '@/components/ModalLoading.vue';
-import { setPageTitle } from '@/components/pageMetadata';
+import ModalLoading from "@/components/ModalLoading.vue";
+import { setPageTitle } from "@/components/pageMetadata";
 
 export default {
   components: {
@@ -52,31 +48,33 @@ export default {
   },
   data() {
     return {
-      titulo: 'Bienvenido al Panel',
-      role: Number(localStorage.getItem('role')) || 0,
+      titulo: "Bienvenido al Panel",
+      role: Number(localStorage.getItem("role")) || 0,
     };
   },
   mounted() {
-    setPageTitle('Inicio');
+    setPageTitle("Inicio");
   },
   methods: {
     changeFavicon(iconPath) {
-      const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-      link.type = 'image/x-icon';
-      link.rel = 'icon';
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
       link.href = iconPath;
-      document.getElementsByTagName('head')[0].appendChild(link);
+      document.getElementsByTagName("head")[0].appendChild(link);
     },
   },
 };
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 /* Estilos Generales */
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -214,53 +212,209 @@ h3 {
 }
 
 /* Media Queries */
-@media screen and (max-width: 768px) {
+/* Tablets grandes y laptops pequeñas */
+
+@media screen and (max-width: 1024px) {
   .dashboard {
-    padding: 15px;
+    padding: 16px;
+    max-width: 100%;
+  }
+
+  h3 {
+    font-size: clamp(16px, 2.5vw, 22px);
   }
 
   .box {
-    padding: 15px;
+    margin-bottom: 16px;
+  }
+}
+
+/* Tablets */
+@media screen and (max-width: 768px) {
+  .dashboard {
+    padding: 14px;
+  }
+
+  .box {
+    padding: 16px;
+    margin-bottom: 14px;
   }
 
   .container-top {
     justify-content: center;
-    margin-top: 10px;
-  }
-
-  .navigate-button {
-    margin: 5px;
-    width: 100%;
-    max-width: 300px;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .dashboard {
-    padding: 10px;
-  }
-
-  .box {
-    padding: 12px;
-    margin-bottom: 15px;
-  }
-
-  .rol {
-    font-size: 12px;
-  }
-
-  #campana {
-    font-size: 16px;
-  }
-
-  .container-top {
-    flex-direction: column;
+    margin: 12px 0;
     gap: 8px;
   }
 
   .navigate-button {
+    margin: 4px;
+    width: calc(50% - 8px); /* 2 botones por fila */
+    max-width: 250px;
     font-size: 14px;
-    padding: 8px 16px;
+  }
+
+  h3 {
+    font-size: clamp(15px, 2.2vw, 20px);
+  }
+
+  .box-header {
+    margin-bottom: 12px;
+  }
+}
+
+/* Tablets pequeñas y teléfonos grandes */
+@media screen and (max-width: 600px) {
+  .dashboard {
+    padding: 12px;
+  }
+
+  .box {
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .navigate-button {
+    width: 100%; /* 1 botón por fila */
+    max-width: 100%;
+    padding: 10px 16px;
+  }
+
+  h3 {
+    font-size: clamp(14px, 2vw, 18px);
+  }
+}
+
+/* Teléfonos */
+/* Ajustes para móviles */
+@media screen and (max-width: 480px) {
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(
+      2,
+      1fr
+    ); /* Crear 2 columnas de igual tamaño */
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .box {
+    /* Reset de propiedades anteriores */
+    width: 100%;
+    margin: 0;
+    padding: 12px;
+    min-height: 100px;
+
+    /* Nuevo layout */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Ajustar tamaños de texto */
+  .box h3 {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .box p {
+    font-size: 12px;
+    margin: 4px 0;
+  }
+
+  /* Los gráficos deben ocupar todo el ancho */
+  .chart-container,
+  .barChart-container,
+  div[class*="Chart"] {
+    grid-column: 1 / -1;
+    width: 100% !important;
+  }
+
+  /* Ajustar encabezados de sección */
+  .dashboard > h3 {
+    grid-column: 1 / -1;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  /* Ajustar los elementos de los boxes */
+  .box i {
+    font-size: 16px;
+  }
+
+  .box .number {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  /* Links y botones dentro de los boxes */
+  .box a,
+  .box .btn {
+    font-size: 12px;
+    padding: 4px 8px;
+    margin-top: 8px;
+  }
+}
+
+/* Ajustes específicos para teléfonos pequeños */
+@media screen and (max-width: 360px) {
+  .dashboard {
+    gap: 8px;
+  }
+
+  .box {
+    padding: 8px;
+    min-height: 90px;
+  }
+
+  .box h3 {
+    font-size: 13px;
+  }
+
+  .box p {
+    font-size: 11px;
+  }
+
+  .box .number {
+    font-size: 16px;
+  }
+}
+
+/* Para pantallas muy grandes */
+@media screen and (min-width: 1440px) {
+  .dashboard {
+    max-width: 1600px;
+    padding: 24px;
+  }
+
+  h3 {
+    font-size: clamp(20px, 3.5vw, 28px);
+  }
+
+  .box {
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+}
+
+/* Para dispositivos en landscape */
+@media screen and (max-height: 480px) and (orientation: landscape) {
+  .dashboard {
+    padding: 10px 15px;
+  }
+
+  .box {
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .container-top {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .navigate-button {
+    width: auto;
+    padding: 6px 12px;
   }
 }
 

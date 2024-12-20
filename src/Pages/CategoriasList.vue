@@ -56,11 +56,13 @@
         </thead>
         <tbody>
           <tr v-for="(categoria, index) in paginatedCategorias" :key="index">
-            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-            <td>{{ categoria.nombre_categoria }}</td>
-            <td>{{ categoria.descripcion }}</td>
-            <td>{{ categoria.totalProd }}</td>
-            <td v-if="esCeo">
+            <td data-label="#">
+              {{ (currentPage - 1) * pageSize + index + 1 }}
+            </td>
+            <td data-label="Nombre">{{ categoria.nombre_categoria }}</td>
+            <td data-label="Descripción">{{ categoria.descripcion }}</td>
+            <td data-label="Productos Usados">{{ categoria.totalProd }}</td>
+            <td v-if="esCeo" data-label="Acciones">
               <button
                 id="btnEditar"
                 class="btn btn-warning"
@@ -960,74 +962,217 @@ textarea:focus {
 }
 
 /* Media Queries */
+/* Media Queries Mejoradas */
+
+/* Tablets y pantallas medianas */
+@media screen and (max-width: 1024px) {
+  .categorias-wrapper {
+    padding: 12px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .modal-categoria {
+    width: 70%;
+  }
+
+  .modal-confirm {
+    width: 40%;
+  }
+
+  .button-promocion,
+  .button-unidad-medida {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+}
+
+/* Tablets */
 @media screen and (max-width: 768px) {
+  .categorias-wrapper {
+    padding: 10px;
+  }
+
   .opciones {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
   }
 
-  .busqueda,
-  #btnAdd {
+  .button-promocion,
+  .button-unidad-medida {
     width: 100%;
-    max-width: none;
-    min-width: 0;
   }
 
-  #btnEditar,
-  #btnEliminar {
-    width: 32px;
-    height: 32px;
+  .table-container {
+    overflow-x: auto;
+    white-space: nowrap;
+    margin: 10px 0;
+  }
+
+  .modal-categoria {
+    width: 85%;
+  }
+
+  .modal-confirm {
+    width: 60%;
   }
 
   .pagination-wrapper {
     flex-direction: column;
-    gap: 1rem;
+    gap: 10px;
+  }
+
+  .pagination-info {
     text-align: center;
   }
 
   .pagination-container {
     justify-content: center;
   }
-
-  .form-columns {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .modal-footer {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .action-buttons {
-    width: 100%;
-    justify-content: space-between;
-  }
 }
 
+/* Móviles */
 @media screen and (max-width: 480px) {
-  .modal-content {
-    width: 95%;
-    padding: 15px;
+  .categorias-wrapper {
+    padding: 8px;
   }
 
-  .table th,
+  /* Convertir la tabla en tarjetas */
+  .table {
+    display: block;
+    min-width: unset;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody {
+    display: block;
+  }
+
+  .table tr {
+    display: block;
+    margin-bottom: 1rem;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .dark .table tr {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+
   .table td {
-    padding: 8px;
+    display: grid;
+    grid-template-columns: 40% 60%;
+    padding: 8px 4px;
+    text-align: left;
+    border: none;
+    white-space: normal;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    text-align: left;
+  }
+
+  /* Ajustar botones en la vista de tarjetas */
+  .table td:last-child {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 12px;
+    grid-column: 1 / -1;
+  }
+
+  #btnEditar,
+  #btnEliminar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .modal-categoria,
+  .modal-confirm {
+    width: 95%;
+    margin: 10px;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .form-group input,
+  .form-group textarea {
     font-size: 14px;
+    padding: 8px;
   }
 
   .pagination-button {
     padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .pagination-info {
+    font-size: 13px;
+  }
+}
+
+/* Móviles pequeños */
+@media screen and (max-width: 360px) {
+  .table td {
+    grid-template-columns: 100%;
+  }
+
+  .table td::before {
+    margin-bottom: 4px;
+  }
+
+  .table td:last-child {
+    justify-content: center;
+  }
+
+  #btnEditar,
+  #btnEliminar {
+    width: 32px;
+    height: 32px;
     font-size: 14px;
   }
 
-  .form-group {
-    margin-bottom: 12px;
+  .modal-header h2 {
+    font-size: 1.2rem;
   }
 
-  .h2-modal-content {
-    font-size: 20px;
+  .form-group label {
+    font-size: 13px;
+  }
+}
+
+/* Media query para landscape */
+@media screen and (max-height: 480px) and (orientation: landscape) {
+  .modal-categoria {
+    max-height: 100vh;
+    margin: 0;
+  }
+
+  .modal-body {
+    max-height: calc(100vh - 120px);
+  }
+
+  .form-group textarea {
+    min-height: 60px;
   }
 }
 

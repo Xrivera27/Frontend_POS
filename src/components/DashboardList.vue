@@ -46,7 +46,9 @@
             <td>{{ sale.fecha }}</td>
             <td>{{ sale.total }}</td>
             <td>
-              <router-link to="/administrar-ventas" class="card-link">Ver más</router-link>
+              <router-link to="/administrar-ventas" class="card-link"
+                >Ver más</router-link
+              >
               <!-- <span>|</span>
               <button style="font-size: 1rem;">Descargar</button> -->
             </td>
@@ -58,17 +60,27 @@
 </template>
 
 <script>
-import { Line, Pie } from 'vue-chartjs';
-const { getTotalVentasDia } = require('../../services/dashboardSolicitudes')
-const { getClientesPorEmpresa } = require('../../services/dashboardSolicitudes')
-const { getAlertasPorPromocion } = require('../../services/dashboardSolicitudes')
-const { getAlertasPorPromocionProducto } = require('../../services/dashboardSolicitudes')
-import { notis } from '../../services/notificaciones.js';
-const { getVentasUltimosTresMeses } = require('../../services/dashboardSolicitudes')
-const { getCategoriasPopulares } = require('../../services/dashboardSolicitudes')
-const { getUltimasVentas } = require('../../services/dashboardSolicitudes')
+import { Line, Pie } from "vue-chartjs";
+const { getTotalVentasDia } = require("../../services/dashboardSolicitudes");
+const {
+  getClientesPorEmpresa,
+} = require("../../services/dashboardSolicitudes");
+const {
+  getAlertasPorPromocion,
+} = require("../../services/dashboardSolicitudes");
+const {
+  getAlertasPorPromocionProducto,
+} = require("../../services/dashboardSolicitudes");
+import { notis } from "../../services/notificaciones.js";
+const {
+  getVentasUltimosTresMeses,
+} = require("../../services/dashboardSolicitudes");
+const {
+  getCategoriasPopulares,
+} = require("../../services/dashboardSolicitudes");
+const { getUltimasVentas } = require("../../services/dashboardSolicitudes");
 import solicitudes from "../../services/solicitudes.js";
-import ModalLoading from '@/components/ModalLoading.vue';
+import ModalLoading from "@/components/ModalLoading.vue";
 import {
   Chart as ChartJS,
   Title,
@@ -79,7 +91,7 @@ import {
   ArcElement,
   CategoryScale,
   LinearScale,
-} from 'chart.js';
+} from "chart.js";
 
 ChartJS.register(
   Title,
@@ -93,12 +105,12 @@ ChartJS.register(
 );
 
 export default {
-  name: 'DashboardList',
+  name: "DashboardList",
 
   components: {
     LineChart: Line,
     PieChart: Pie,
-    ModalLoading
+    ModalLoading,
   },
 
   data() {
@@ -107,39 +119,39 @@ export default {
       clientesNumero: 0,
       alertasPorPromocion: 0,
       alertasPorPromocionProducto: 0,
-      id_usuario: '',
+      id_usuario: "",
       isLoading: false,
       lineChartData: {
         labels: [],
         datasets: [
           {
-            label: 'Ventas Pagadas',
-            borderColor: '#36A2EB',
+            label: "Ventas Pagadas",
+            borderColor: "#36A2EB",
             data: [],
             fill: false,
           },
           {
-            label: 'Ventas Canceladas',
-            borderColor: '#FF6384',
+            label: "Ventas Canceladas",
+            borderColor: "#FF6384",
             data: [],
             fill: false,
-          }
+          },
         ],
       },
       lineChartOptions: {
         responsive: true,
         plugins: {
           legend: {
-            position: 'top',
+            position: "top",
           },
           tooltip: {
             callbacks: {
               label: function (context) {
-                const label = context.dataset.label || '';
+                const label = context.dataset.label || "";
                 return `${label}: ${context.raw}`;
-              }
-            }
-          }
+              },
+            },
+          },
         },
         scales: {
           y: {
@@ -148,26 +160,28 @@ export default {
               stepSize: 1,
               callback: function (value) {
                 return Math.floor(value);
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       },
       pieChartData: {
         labels: [],
-        datasets: [{
-          data: [],
-          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-          hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-        }]
+        datasets: [
+          {
+            data: [],
+            backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+            hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+          },
+        ],
       },
       pieChartOptions: {
         responsive: true,
         plugins: {
           legend: {
-            position: 'top',
-          }
-        }
+            position: "top",
+          },
+        },
       },
       sales: [],
     };
@@ -183,37 +197,36 @@ export default {
           title: "Ventas",
           value: `L. ${this.retornarVentas}`,
           icon: "bi bi-cash",
-          link: "/administrar-ventas"
+          link: "/administrar-ventas",
         },
         {
           title: "Clientes",
           value: this.clientesNumero,
           icon: "bi bi-people",
-          link: "/clientes"
+          link: "/clientes",
         },
         {
           title: "Alertas Promoción",
           value: this.getAlertasPromocionFormatted(),
           icon: "bi bi-tags",
-          link: "/admin-invenario"
+          link: "/admin-invenario",
         },
         {
           title: "Promociones Productos",
           value: this.getAlertasPorPromocionProductoFormatted(),
           icon: "bi bi-megaphone",
-          link: "/promociones-producto"
+          link: "/promociones-producto",
         },
       ];
-    }
+    },
   },
 
   methods: {
-
     async devolverVenta() {
       try {
         this.ventas = await getTotalVentasDia(this.id_usuario);
       } catch (error) {
-        notis("error", "Error al buscar ventas")
+        notis("error", "Error al buscar ventas");
       }
     },
 
@@ -222,17 +235,19 @@ export default {
         const clientes = await getClientesPorEmpresa(this.id_usuario);
         this.clientesNumero = clientes.totalClientes;
       } catch (error) {
-        notis("error", "Error al buscar el total de clientes")
+        notis("error", "Error al buscar el total de clientes");
       } finally {
         this.isLoading = false;
       }
     },
     async getAlertasPromocion() {
       try {
-        this.alertasPorPromocion = await getAlertasPorPromocion(this.id_usuario);
+        this.alertasPorPromocion = await getAlertasPorPromocion(
+          this.id_usuario
+        );
       } catch (error) {
         console.error(error);
-        notis("error", "Error al mostras las promociones de productos")
+        notis("error", "Error al mostras las promociones de productos");
       }
     },
 
@@ -244,13 +259,15 @@ export default {
         }
       } catch (error) {
         console.error(error);
-        notis("error", "Error al mostras las promociones de productos")
+        notis("error", "Error al mostras las promociones de productos");
       }
     },
 
     async getAlertasPorPromocionProducto() {
       try {
-        this.alertasPorPromocionProducto = await getAlertasPorPromocionProducto(this.id_usuario);
+        this.alertasPorPromocionProducto = await getAlertasPorPromocionProducto(
+          this.id_usuario
+        );
       } catch (error) {
         console.error(error);
       }
@@ -270,11 +287,11 @@ export default {
           this.lineChartData = response.chartData.lineChartData;
           this.lineChartOptions = {
             ...this.lineChartOptions,
-            ...response.chartData.lineChartOptions
+            ...response.chartData.lineChartOptions,
           };
         }
       } catch (error) {
-        console.error('Error al obtener ventas de los últimos 3 meses:', error);
+        console.error("Error al obtener ventas de los últimos 3 meses:", error);
       }
     },
 
@@ -284,16 +301,20 @@ export default {
         if (response && response.topCategorias) {
           // Actualizar el pieChartData con los datos de topCategorias
           this.pieChartData = {
-            labels: response.topCategorias.map(categoria => categoria.nombre),
-            datasets: [{
-              data: response.topCategorias.map(categoria => categoria.cantidadTotal),
-              backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-              hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-            }]
+            labels: response.topCategorias.map((categoria) => categoria.nombre),
+            datasets: [
+              {
+                data: response.topCategorias.map(
+                  (categoria) => categoria.cantidadTotal
+                ),
+                backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+                hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+              },
+            ],
           };
         }
       } catch (error) {
-        console.error('Error al obtener categorías populares:', error);
+        console.error("Error al obtener categorías populares:", error);
         notis("error", "Error al obtener las categorías más vendidas");
       }
     },
@@ -303,21 +324,21 @@ export default {
         const response = await getUltimasVentas(this.id_usuario);
         if (response && response.sales) {
           // Formatear la fecha antes de asignarla
-          this.sales = response.sales.map(venta => ({
+          this.sales = response.sales.map((venta) => ({
             ...venta,
-            fecha: new Date(venta.fecha).toLocaleString('es-HN', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-              hour12: false
-            })
+            fecha: new Date(venta.fecha).toLocaleString("es-HN", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: false,
+            }),
           }));
         }
       } catch (error) {
-        console.error('Error al obtener últimas ventas:', error);
+        console.error("Error al obtener últimas ventas:", error);
         notis("error", "Error al obtener las últimas ventas");
       } finally {
         this.isLoading = false;
@@ -341,15 +362,15 @@ export default {
     } finally {
       this.isLoading = false;
     }
-  }
+  },
 };
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 * {
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 /* =======================================================
@@ -569,13 +590,20 @@ export default {
 /* =======================================================
    Estilos Responsivos
 ======================================================= */
+/* =======================================================
+   Estilos Responsivos
+======================================================= */
+
+/* Pantallas grandes y laptops */
 @media (max-width: 1200px) {
   .cards-container {
     grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
   }
 
   .charts-container {
     flex-direction: column;
+    gap: 1rem;
   }
 
   .line-chart,
@@ -583,20 +611,186 @@ export default {
     width: 100%;
     margin-bottom: 1rem;
   }
+
+  .card {
+    padding: 1.25rem;
+  }
+
+  .card h3 {
+    font-size: 1.1rem;
+  }
+
+  .card-icon {
+    font-size: 1.5rem;
+  }
 }
 
+/* Tablets y pantallas medianas */
 @media (max-width: 768px) {
-  .cards-container {
-    grid-template-columns: 1fr;
+  .dashboard-container {
+    padding: 15px;
   }
 
   .graphics-container {
     padding: 0;
   }
 
+  .card {
+    padding: 1rem;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+  }
+
+  .item-value {
+    font-size: 1.25rem;
+    padding: 8px;
+  }
+
+  .card-icon {
+    margin-top: 2rem;
+  }
+
+  /* Ajustes para la tabla */
   .sales-table {
-    overflow-x: auto;
     display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .sales-table th,
+  .sales-table td {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Móviles grandes */
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 10px;
+  }
+
+  .cards-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .card {
+    padding: 0.75rem;
+  }
+
+  .card h3 {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .card p {
+    font-size: 1rem;
+  }
+
+  .item-value {
+    font-size: 0.9rem;
+    padding: 4px;
+  }
+
+  .card-icon {
+    margin-top: 1rem;
+    font-size: 1.25rem;
+  }
+
+  .card-link {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Ajustes para los gráficos */
+  .charts-container {
+    gap: 0.75rem;
+  }
+
+  .line-chart,
+  .pie-chart {
+    padding: 0.75rem;
+  }
+
+  /* Ajustes para la tabla */
+  .sales-table th,
+  .sales-table td {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+
+  .sales-table a,
+  .sales-table button {
+    margin-right: 5px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 360px) {
+  .cards-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+
+  .card {
+    padding: 0.6rem;
+  }
+
+  .card h3 {
+    font-size: 0.8rem;
+  }
+
+  .item-value {
+    font-size: 0.8rem;
+    padding: 3px;
+  }
+
+  .card-icon {
+    font-size: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .card-link {
+    font-size: 0.75rem;
+  }
+
+  /* Ajustes adicionales para gráficos en pantallas muy pequeñas */
+  .line-chart,
+  .pie-chart {
+    padding: 0.5rem;
+  }
+}
+
+/* Para pantallas en modo landscape */
+@media (max-height: 480px) and (orientation: landscape) {
+  .dashboard-container {
+    padding: 8px;
+  }
+
+  .cards-container {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
+  }
+
+  .card {
+    padding: 0.6rem;
+  }
+
+  .card-icon {
+    margin-top: 0.5rem;
+  }
+
+  .charts-container {
+    flex-direction: row;
+  }
+
+  .line-chart,
+  .pie-chart {
+    width: 50%;
   }
 }
 </style>

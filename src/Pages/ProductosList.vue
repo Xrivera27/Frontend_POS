@@ -4,42 +4,42 @@
     <PageHeader :titulo="titulo" />
 
     <div class="opciones">
-      <div class="action-bar">
+      <!-- Botones principales agrupados -->
+      <div class="primary-buttons">
         <button
           v-if="esCeo"
           id="btnAdd"
           class="btn btn-primary"
           @click="openModal"
-          style="width: 200px; white-space: nowrap"
         >
           Agregar Producto
         </button>
-      </div>
 
-      <!-- Botón de exportación PDF -->
-      <ExportButton
-        :columns="columns"
-        :rows="rows"
-        fileName="Productos.pdf"
-        class="export-button"
-      />
-
-      <RouterLink to="promociones-producto">
-        <button class="button-promocion">Promociones</button>
-      </RouterLink>
-
-      <!-- Barra de búsqueda -->
-      <div class="search-bar">
-        <input
-          class="busqueda"
-          type="text"
-          v-model="searchQuery"
-          placeholder="Buscar producto..."
+        <!-- Botón de exportación PDF -->
+        <ExportButton
+          :columns="columns"
+          :rows="rows"
+          fileName="Productos.pdf"
+          class="export-button"
         />
+
+        <RouterLink to="promociones-producto" class="promocion-link">
+          <button class="button-promocion">Promociones</button>
+        </RouterLink>
       </div>
 
-      <div class="registros">
-        <span>
+      <!-- Búsqueda y filtros agrupados -->
+      <div class="search-filters">
+        <div class="search-bar">
+          <input
+            class="busqueda"
+            type="text"
+            v-model="searchQuery"
+            placeholder="Buscar producto..."
+          />
+        </div>
+
+        <div class="registros">
           <select
             class="custom-select select-sucursal"
             v-model="searchSucursal"
@@ -48,14 +48,14 @@
           >
             <option value="default">Todas</option>
             <option
-              v-for="(sucursal, index) in this.sucursales"
+              v-for="(sucursal, index) in sucursales"
               :key="index"
               :value="sucursal.id_sucursal"
             >
               {{ sucursal.nombre_administrativo }}
             </option>
           </select>
-        </span>
+        </div>
       </div>
     </div>
 
@@ -84,18 +84,20 @@
         </thead>
         <tbody>
           <tr v-for="(producto, index) in paginatedProductos" :key="index">
-            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-            <td>{{ producto.codigo_producto }}</td>
-            <td>{{ producto.nombre }}</td>
-            <td>
+            <td data-label="#">
+              {{ (currentPage - 1) * pageSize + index + 1 }}
+            </td>
+            <td data-label="Código">{{ producto.codigo_producto }}</td>
+            <td data-label="Nombre">{{ producto.nombre }}</td>
+            <td data-label="Stock">
               {{ producto.stock_actual }}
               <button class="edit-stock" @click="openModalStock(producto)">
                 <i class="bi bi-pencil-square"></i>
               </button>
             </td>
-            <td>{{ producto.precio_unitario }}</td>
-            <td>{{ producto.promocion }}</td>
-            <td v-if="esCeo">
+            <td data-label="Precio Unitario">{{ producto.precio_unitario }}</td>
+            <td data-label="Promoción Activa">{{ producto.promocion }}</td>
+            <td v-if="esCeo" data-label="Acciones">
               <button
                 id="btnEditar"
                 class="btn btn-warning"
@@ -1008,12 +1010,12 @@ export default {
 }
 
 .busqueda {
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 10px;
-  border-width: 0.5px;
   width: 100%;
-  max-width: 300px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
 }
 
 input:focus,
@@ -1044,6 +1046,7 @@ textarea:focus {
   border: none;
   cursor: pointer;
   border-radius: 10px;
+  margin-left: 15px;
 }
 
 .button-promocion:hover {
@@ -1375,6 +1378,11 @@ textarea:focus {
   margin-bottom: 8px;
 }
 
+.search-bar {
+  flex-grow: 1; /* Ocupa el espacio restante */
+  max-width: 500px; /* Limita el ancho máximo */
+}
+
 .search-input {
   width: 100%;
   padding: 12px 16px;
@@ -1463,6 +1471,10 @@ textarea:focus {
   gap: 12px;
   background-color: #f8f9fa;
   border-radius: 0 0 12px 12px;
+}
+
+.primary-buttons {
+  gap: 10px;
 }
 
 /* Modal de Producto */
@@ -1696,95 +1708,68 @@ textarea:focus {
   color: #aaa;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Media Queries Principales */
+
+/* Tablets y pantallas medianas */
+@media screen and (max-width: 1024px) {
+  .modal-producto {
+    width: 95%;
+  }
+
+  .modal-stock {
+    width: 50%;
+  }
+
   .form-columns {
-    grid-template-columns: 1fr;
     gap: 16px;
-  }
-
-  .modal-footer {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .action-buttons {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .btn-categoria {
-    width: 100%;
-    justify-content: center;
   }
 }
 
+/* Tablets */
 @media screen and (max-width: 768px) {
-  .modal-categorias {
-    width: 95%;
-    margin: 20px;
-    max-height: 90vh;
-  }
-
-  .categorias-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .categoria-header,
-  .categoria-footer {
-    padding: 16px;
-  }
-
-  .search-input {
-    padding: 10px 12px;
-  }
-
-  .contenedor-principal {
-    flex-direction: column;
-  }
-
-  .contenedor {
-    width: 100%;
-    margin-bottom: 20px;
+  .productos-wrapper {
+    padding: 10px;
   }
 
   .opciones {
     flex-direction: column;
-    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
   }
 
-  .busqueda,
-  .custom-select,
+  /* Ajustes de botones y controles */
   #btnAdd,
+  .button-promocion,
   .export-button,
-  .button-promocion {
+  .busqueda,
+  .custom-select {
     width: 100%;
-    margin: 8px 0;
-  }
-
-  .select-sucursal {
-    min-width: 100%;
-  }
-
-  #btnEditar,
-  #btnEliminar {
-    width: 40px;
-    height: 35px;
-    font-size: 14px;
-    padding: 8px;
+    max-width: none;
+    margin: 4px 0;
   }
 
   .table-container {
-    margin-top: 24px;
+    margin-top: 12px;
+    overflow-x: auto;
+    border-radius: 8px;
   }
 
-  .modal-content-categoria {
+  .table {
+    min-width: 650px;
+  }
+
+  .modal-stock {
     width: 90%;
   }
 
+  /* Ajustes de paginación */
   .pagination-wrapper {
     flex-direction: column;
-    gap: 1rem;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .pagination-info {
     text-align: center;
   }
 
@@ -1792,48 +1777,241 @@ textarea:focus {
     justify-content: center;
   }
 
-  .pagination-info {
-    margin-bottom: 1rem;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .modal-stock {
-    width: 95%;
-    padding: 15px;
+  .opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
   }
 
-  .table thead th,
-  .table tbody td {
-    padding: 6px;
-    font-size: 14px;
-  }
-
-  .form-group {
-    margin-bottom: 12px;
-  }
-
-  .form-group input,
-  .form-group input {
+  .action-bar {
+    display: flex;
+    gap: 10px;
     width: 100%;
   }
 
-  .h2-modal-content {
-    font-size: 20px;
+  /* Contenedor para los botones principales */
+  .primary-buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+
+  #btnAdd {
+    flex: 1;
+    margin: 0;
+  }
+
+  .export-button {
+    flex: 1;
+    margin: 0;
+  }
+
+  .button-promocion {
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Contenedor para búsqueda y filtros */
+  .search-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .search-bar {
+    width: 100%;
   }
 
   .busqueda {
-    max-width: 100%;
+    width: 100%;
+    max-width: none;
   }
 
-  .form-form-categoria {
-    padding: 10px;
-    max-height: 200px;
+  .registros {
+    width: 100%;
   }
 
-  .label-categoria {
-    margin-right: 10px;
-    margin-bottom: 8px;
+  .custom-select {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
+/* Móviles */
+@media screen and (max-width: 480px) {
+  .productos-wrapper {
+    padding: 8px;
+  }
+
+  /* Convertir tabla en tarjetas */
+  .table {
+    display: block;
+    min-width: unset;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody {
+    display: block;
+  }
+
+  .table tr {
+    display: block;
+    margin-bottom: 12px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .table td {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    padding: 8px 4px;
+    text-align: left;
+    border: none;
+    font-size: 14px;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #666;
+  }
+
+  /* Ajustes para el modo oscuro en móvil */
+  .dark .table tr {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+
+  .dark .table td::before {
+    color: #aaa;
+  }
+
+  /* Columna de stock con botón editar */
+  .table td:nth-child(4) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .edit-stock {
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    font-size: 14px;
+  }
+
+  /* Columna de acciones */
+  .table td:last-child {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 12px;
+    margin-top: 8px;
+    border-top: 1px solid #eee;
+    grid-column: 1 / -1;
+  }
+
+  .dark .table td:last-child {
+    border-top-color: #404040;
+  }
+
+  /* Ajustes de modales */
+  .modal-producto,
+  .modal-stock,
+  .modal-confirm {
+    width: 95%;
+    margin: 10px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  /* Ajustes de paginación */
+  .pagination-button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .pagination-info {
+    font-size: 13px;
+  }
+
+  .opciones {
+    gap: 8px;
+  }
+
+  .primary-buttons {
+    flex-direction: column;
+  }
+
+  #btnAdd,
+  .export-button,
+  .button-promocion {
+    width: 100%;
+    margin: 0;
+    height: 40px;
+    font-size: 14px;
+  }
+}
+
+/* Móviles pequeños */
+@media screen and (max-width: 360px) {
+  .table td {
+    grid-template-columns: 100%;
+  }
+
+  .table td::before {
+    margin-bottom: 4px;
+  }
+
+  .table td:nth-child(4),
+  .table td:last-child {
+    justify-content: center;
+  }
+
+  #btnEditar,
+  #btnEliminar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+}
+
+/* Landscape mode */
+@media screen and (max-height: 480px) and (orientation: landscape) {
+  .modal-producto {
+    max-height: 100vh;
+    margin: 0;
+  }
+
+  .modal-body {
+    max-height: calc(100vh - 120px);
+  }
+
+  .form-group textarea {
+    min-height: 60px;
   }
 }
 

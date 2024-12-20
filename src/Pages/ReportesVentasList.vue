@@ -1428,6 +1428,7 @@ export default {
   gap: 2rem;
   margin: 2rem 0;
   min-height: 300px;
+  width: 100%;
 }
 
 .filters-section,
@@ -1618,51 +1619,234 @@ tbody td {
   margin-top: 2rem;
 }
 
-/* Media Queries */
-@media screen and (max-width: 768px) {
-  .report-container {
-    padding: 1rem;
-    margin: 0;
-    /* Quitado el margen */
-    width: 100%;
+/* Large Desktop (1440px and up) */
+@media screen and (min-width: 1440px) {
+  .report-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
   }
 
-  .input-field {
-    flex: 1 1 100%;
-  }
-
-  .button-group {
-    justify-content: center;
-  }
-
-  .btn {
-    flex: 1 1 auto;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .report-container {
-    padding: 1rem;
-    margin: 0.5rem auto;
-    width: 98%;
-  }
-
-  .totals div {
-    flex: 1 1 100%;
+  .filters-section,
+  .controls-section {
+    width: 48%;
   }
 
   .table-container {
-    margin: 0 -1rem;
-    padding: 0 1rem;
-    width: calc(100% + 2rem);
+    overflow-x: hidden;
+  }
+}
+
+/* Desktop (1200px and down) */
+@media screen and (max-width: 1200px) {
+  .filters-section,
+  .controls-section {
+    width: 47%;
   }
 
+  .button-group {
+    justify-content: flex-start;
+  }
+
+  .btn {
+    min-width: 100px;
+  }
+}
+
+/* Tablet Landscape (992px y menos) */
+@media screen and (max-width: 992px) {
+  .main-content {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .filters-section,
+  .controls-section {
+    width: 100% !important; /* Forzar ancho completo */
+    max-width: none;
+  }
+
+  .filter-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .date-inputs {
+    width: 100%;
+  }
+
+  .image-drop-area {
+    width: 100%;
+    max-width: none;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .date-group {
+    width: 100%;
+  }
+
+  .button-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .header-footer-btn {
+    width: 100%;
+  }
+}
+
+/* Tablet Portrait (768px y menos) */
+@media screen and (max-width: 768px) {
+  .main-content {
+    padding: 0;
+  }
+
+  .filter-row {
+    flex-direction: column;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .date-inputs {
+    flex-direction: column;
+  }
+
+  .button-group {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .btn {
+    flex: 1 1 calc(33.33% - 0.5rem);
+    margin: 0.25rem;
+  }
+
+  .report-wrapper {
+    padding: 1rem;
+  }
+
+  .filter-row {
+    flex-direction: column;
+  }
+
+  .date-inputs {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .date-field {
+    width: 100%;
+  }
+
+  .filters-section,
+  .controls-section {
+    width: 100%;
+  }
+
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 100%;
+  }
+}
+
+/* Mobile (576px y menos) */
+@media screen and (max-width: 576px) {
   .button-group {
     flex-direction: column;
   }
 
-  .btn {
-    max-width: none;
+  .btn,
+  .header-footer-btn {
+    width: 100%;
+    margin: 0.25rem 0;
+  }
+
+  .filters-section,
+  .controls-section {
+    width: 100%;
+  }
+
+  .header-footer-btn,
+  .hoy-btn {
+    width: 100%;
+  }
+
+  .totals {
+    width: 100%;
+  }
+
+  .totals div {
+    width: 100%;
+  }
+}
+
+/* Extra Small (400px y menos) */
+@media screen and (max-width: 400px) {
+  .report-wrapper {
+    padding: 0.5rem;
+  }
+
+  .filters-section,
+  .controls-section {
+    width: 100%;
+  }
+
+  .report-body {
+    width: 100%;
+  }
+
+  thead th,
+  tbody td {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Print Media Query */
+@media print {
+  .report-wrapper {
+    padding: 0;
+  }
+
+  .filters-section,
+  .controls-section,
+  .button-group,
+  .checkbox-container {
+    display: none;
+  }
+
+  .table-container {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  table {
+    border: 1px solid #000;
+  }
+
+  thead th {
+    background-color: #f5f5f5 !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .totals {
+    margin-top: 1rem;
+    page-break-inside: avoid;
   }
 }
 

@@ -62,14 +62,16 @@
         </thead>
         <tbody>
           <tr v-for="(empleado, index) in paginatedEmpleados" :key="index">
-            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-            <td>{{ empleado.nombre }}</td>
-            <td>{{ empleado.apellido }}</td>
-            <td>{{ empleado.nombre_usuario }}</td>
-            <td>{{ empleado.telefono }}</td>
-            <td>{{ empleado.correo }}</td>
-            <td>{{ getRol(empleado.id_rol) }}</td>
-            <td>
+            <td data-label="#">
+              {{ (currentPage - 1) * pageSize + index + 1 }}
+            </td>
+            <td data-label="Nombre">{{ empleado.nombre }}</td>
+            <td data-label="Apellido">{{ empleado.apellido }}</td>
+            <td data-label="Nombre Usuario">{{ empleado.nombre_usuario }}</td>
+            <td data-label="Teléfono">{{ empleado.telefono }}</td>
+            <td data-label="Email">{{ empleado.correo }}</td>
+            <td data-label="Rol">{{ getRol(empleado.id_rol) }}</td>
+            <td data-label="Acciones">
               <button
                 id="btnEditar"
                 class="btn btn-warning"
@@ -1200,6 +1202,28 @@ textarea:focus {
     justify-content: center;
     flex-wrap: wrap;
   }
+
+  .table-container {
+    margin: 10px 0;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 650px; /* Ancho mínimo para asegurar que el contenido sea legible */
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 8px;
+    font-size: 14px;
+  }
+
+  /* Hacer los botones de acción más compactos */
+  .table td .btn {
+    padding: 6px;
+    margin: 2px;
+  }
 }
 
 @media screen and (max-width: 480px) {
@@ -1221,6 +1245,93 @@ textarea:focus {
   .form-group input,
   .password-wrapper input {
     width: 100%;
+  }
+
+  .table-container {
+    margin: 8px 0;
+    border-radius: 6px;
+  }
+
+  /* Convertir la tabla en tarjetas para móvil */
+  .table {
+    display: block;
+    min-width: unset;
+  }
+
+  .table thead {
+    display: none; /* Ocultar el encabezado en móvil */
+  }
+
+  .table tbody {
+    display: block;
+  }
+
+  .table tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px;
+    background: #fff;
+  }
+
+  .table td {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    padding: 8px;
+    text-align: left;
+    border: none;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    margin-right: 1rem;
+  }
+
+  /* Ajustar botones de acción */
+  .table td:last-child {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 12px;
+  }
+
+  #btnEditar,
+  #btnEliminar {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    font-size: 14px;
+  }
+
+  /* Estilos para modo oscuro */
+  .dark .table tr {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+}
+
+/* Ajustes para móviles pequeños */
+@media screen and (max-width: 360px) {
+  .table td {
+    grid-template-columns: 100%;
+  }
+
+  .table td::before {
+    margin-bottom: 4px;
+  }
+
+  .table td:last-child {
+    justify-content: center;
+  }
+
+  #btnEditar,
+  #btnEliminar {
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    font-size: 12px;
   }
 }
 

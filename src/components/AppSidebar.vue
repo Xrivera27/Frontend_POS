@@ -780,6 +780,10 @@ ul.nav {
   .nav-link i {
     font-size: 2.2vh;
   }
+
+  .nav {
+    margin-top: 0px;
+  }
 }
 
 /* Tablets pequeñas y teléfonos grandes */

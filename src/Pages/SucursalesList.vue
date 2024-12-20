@@ -482,10 +482,11 @@ export default {
 .opciones {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .busqueda {
@@ -495,6 +496,11 @@ export default {
   border-width: 0.5px;
   width: 100%;
   max-width: 300px;
+}
+
+.search-bar {
+  flex: 1;
+  min-width: 200px;
 }
 
 input:focus,
@@ -893,23 +899,169 @@ textarea:focus {
   background: #a38655;
 }
 
-/* Media Queries */
-@media screen and (max-width: 768px) {
+/* Large Desktop (1440px y más) */
+@media screen and (min-width: 1440px) {
+  .table-container {
+    margin: 20px auto;
+  }
+
+  .modal-sucursales {
+    width: 30%;
+    min-width: 500px;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 12px 16px;
+    font-size: 1rem;
+  }
+}
+
+/* Desktop (1200px a 1439px) */
+@media screen and (max-width: 1200px) {
+  .modal-sucursales {
+    width: 40%;
+    min-width: 450px;
+  }
+
+  .table {
+    min-width: 900px;
+  }
+
   .opciones {
-    flex-direction: column;
-    align-items: stretch;
+    gap: 12px;
+  }
+}
+
+/* Tablet Landscape (992px a 1199px) */
+@media screen and (max-width: 992px) {
+  .modal-sucursales {
+    width: 50%;
+    min-width: 400px;
   }
 
-  .busqueda,
-  .registros,
+  .opciones {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
   #btnAdd {
-    width: 100%;
-    margin: 8px 0;
+    width: auto;
+    min-width: 200px;
   }
 
-  .custom-select {
+  .busqueda {
+    width: 250px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 8px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Tablet Portrait (768px a 991px) */
+@media screen and (max-width: 768px) {
+  .sucursales-wrapper {
+    padding: 12px;
+  }
+
+  .modal-sucursales {
+    width: 70%;
+    margin: 10px;
+  }
+
+  .opciones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "add export"
+      "search search";
+    gap: 12px;
+  }
+
+  .search-bar {
+    grid-area: search;
     width: 100%;
-    max-width: none;
+  }
+
+  .busqueda {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  #btnAdd {
+    grid-area: add;
+    width: 100%;
+    white-space: nowrap;
+  }
+
+  .table-container {
+    margin-top: 16px;
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 700px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .phone-input-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .phone-input-container select,
+  .phone-input-container input {
+    width: 100%;
+  }
+
+  .pagination-wrapper {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+  .export-button {
+    grid-area: export;
+    width: 100%;
+  }
+}
+
+/* Mobile (576px a 767px) */
+@media screen and (max-width: 576px) {
+  .sucursales-wrapper {
+    padding: 8px;
+  }
+
+  .modal-sucursales {
+    width: 90%;
+    margin: 8px;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .h2-modal-content {
+    font-size: 1.2rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 8px 12px;
+    font-size: 0.9rem;
   }
 
   #btnEditar,
@@ -917,48 +1069,123 @@ textarea:focus {
     width: 40px;
     height: 35px;
     font-size: 14px;
-    padding: 8px;
   }
 
-  .table-container {
-    margin-top: 24px;
+  .pagination-button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
   }
 
-  #AddSucursalModal,
-  #BtnCerrar {
+  .opciones {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "add"
+      "export"
+      "search";
+    gap: 10px;
+  }
+
+  #btnAdd,
+  .export-button,
+  .search-bar,
+  .busqueda {
     width: 100%;
-    margin: 8px 0;
   }
 }
 
-@media screen and (max-width: 480px) {
-  .modal-content {
-    width: 95%;
-    padding: 15px;
+/* Small Mobile (400px y menos) */
+@media screen and (max-width: 400px) {
+  .sucursales-wrapper {
+    padding: 6px;
   }
 
-  .table thead th,
-  .table tbody td {
-    padding: 6px;
-    font-size: 14px;
+  .modal-sucursales {
+    width: 95%;
+    margin: 6px;
+  }
+
+  .h2-modal-content {
+    font-size: 1.1rem;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 12px;
   }
 
   .form-group {
     margin-bottom: 12px;
   }
 
-  .h2-modal-content {
-    font-size: 20px;
+  .form-group label {
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 6px 10px;
+    font-size: 0.875rem;
+  }
+
+  .pagination-info {
+    font-size: 0.875rem;
+  }
+
+  .pagination-button {
+    padding: 5px 10px;
+    font-size: 0.875rem;
+  }
+
+  #btnEditar,
+  #btnEliminar {
+    width: 35px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .opciones {
+    gap: 8px;
+    margin-bottom: 12px;
   }
 
   #btnAdd {
-    font-size: 14px;
     height: 35px;
+    font-size: 14px;
+  }
+}
+
+/* Modo oscuro para todos los breakpoints */
+@media (prefers-color-scheme: dark) {
+  .modal-sucursales,
+  .modal-confirm {
+    background-color: #2d2d2d;
+    border-color: #404040;
   }
 
-  .rol {
-    text-align: center;
-    margin-top: 8px;
+  .modal-header,
+  .modal-footer {
+    background-color: #1e1e1e;
+    border-color: #404040;
+  }
+
+  .form-group input,
+  .form-group select,
+  .busqueda {
+    background-color: #383838;
+    border-color: #404040;
+    color: #fff;
+  }
+
+  .table-container {
+    background-color: #2d2d2d;
+    border-color: #404040;
+  }
+
+  .pagination-wrapper {
+    border-color: #404040;
+    background-color: #2d2d2d;
   }
 }
 

@@ -83,7 +83,7 @@
         </thead>
         <tbody>
           <tr v-for="(venta, index) in paginatedVentas" :key="index">
-            <td>
+            <td data-label="#">
               {{
                 String((currentPage - 1) * pageSize + index + 1).padStart(
                   3,
@@ -91,14 +91,18 @@
                 )
               }}
             </td>
-            <td>{{ venta.codigo }}</td>
-            <td>{{ venta.nombre }}</td>
-            <td>{{ venta.cliente }}</td>
-            <td>{{ formatCurrency(venta.subtotal) }}</td>
-            <td>{{ formatCurrency(venta.descuento) }}</td>
-            <td>{{ formatCurrency(venta.total_impuesto) }}</td>
-            <td>{{ formatCurrency(venta.total) }}</td>
-            <td>
+            <td data-label="Número Factura">{{ venta.codigo }}</td>
+            <td data-label="Empleado">{{ venta.nombre }}</td>
+            <td data-label="Cliente">{{ venta.cliente }}</td>
+            <td data-label="Subtotal">{{ formatCurrency(venta.subtotal) }}</td>
+            <td data-label="Descuento">
+              {{ formatCurrency(venta.descuento) }}
+            </td>
+            <td data-label="Total Impuesto">
+              {{ formatCurrency(venta.total_impuesto) }}
+            </td>
+            <td data-label="Total">{{ formatCurrency(venta.total) }}</td>
+            <td data-label="Estado">
               <span
                 :class="{
                   'estado-badge': true,
@@ -109,8 +113,10 @@
                 {{ venta.estado || "Pagada" }}
               </span>
             </td>
-            <td>{{ formatDateTime(venta.fechaHora) }}</td>
-            <td class="actions-column">
+            <td data-label="Fecha y Hora">
+              {{ formatDateTime(venta.fechaHora) }}
+            </td>
+            <td class="actions-column" data-label="Acciones">
               <button
                 id="btnFactura"
                 class="btn btn-primary"
@@ -120,7 +126,7 @@
                 <i class="bi bi-file-text-fill"></i>
               </button>
               <button
-                class="btn btn-danger ms-2"
+                class="btn btn-danger"
                 @click="showCancelModal(venta)"
                 :title="
                   venta.estado === 'Cancelada'
@@ -578,8 +584,9 @@ textarea:focus {
 /* Botones de acción */
 .btn {
   font-size: 18px;
-  width: 50px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
+  font-size: 16px;
   border-radius: 10px;
   color: white;
   display: flex;
@@ -620,9 +627,9 @@ textarea:focus {
 
 /* Estado badges */
 .estado-badge {
-  padding: 4px 8px;
+  padding: 3px 6px;
+  font-size: 0.75rem;
   border-radius: 12px;
-  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -659,39 +666,40 @@ textarea:focus {
 
 .bi-file-text-fill,
 .bi-x-circle-fill {
-  font-size: 20px;
+  font-size: 16px;
 }
 
 /* Contenedor de la tabla */
 .table-container {
-  display: flex;
-  flex-direction: column;
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Para mejor scroll en iOS */
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
 }
 
 /* Estilos de la tabla */
 .table {
   width: 100%;
-  min-width: 800px;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-  table-layout: fixed;
+  min-width: auto;
+  margin-bottom: 0;
+  white-space: nowrap;
 }
 
 /* Ajuste específico para la columna # */
 .table th:first-child,
 .table td:first-child {
-  min-width: 60px;
-  width: 60px;
+  width: 40px;
+  min-width: 40px;
   text-align: center;
 }
 
 /* Ajuste para la columna de Número Factura */
 .table th:nth-child(2),
 .table td:nth-child(2) {
-  min-width: 120px;
-  text-align: center;
+  width: 110px;
+  min-width: 110px;
 }
 
 /* Ajuste para columnas numéricas */
@@ -702,7 +710,9 @@ textarea:focus {
 .table th,
 .table td {
   border: 1px solid #dee2e6;
-  padding: 8px;
+  padding: 6px 8px;
+  font-size: 0.875rem;
+  white-space: nowrap;
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -719,19 +729,44 @@ textarea:focus {
 /* Ajuste para la columna de estado */
 .table th:nth-child(9),
 .table td:nth-child(9) {
-  min-width: 100px;
+  width: 90px;
+  min-width: 90px;
 }
 
 /* Ajuste para la columna de fecha */
 .table th:nth-child(10),
 .table td:nth-child(10) {
-  min-width: 140px;
+  width: 120px;
+  min-width: 120px;
+}
+
+/* Columnas de Empleado y Cliente */
+.table th:nth-child(3),
+.table th:nth-child(4),
+.table td:nth-child(3),
+.table td:nth-child(4) {
+  width: 120px;
+  min-width: 120px;
+}
+
+/* Columnas de montos */
+.table th:nth-child(5),
+.table th:nth-child(6),
+.table th:nth-child(7),
+.table th:nth-child(8),
+.table td:nth-child(5),
+.table td:nth-child(6),
+.table td:nth-child(7),
+.table td:nth-child(8) {
+  width: 80px;
+  min-width: 80px;
 }
 
 /* Ajuste para la columna de acciones */
 .table th:last-child,
 .table td:last-child {
-  min-width: 120px;
+  width: 90px;
+  min-width: 90px;
 }
 
 /* Filtro de fechas */
@@ -858,73 +893,246 @@ textarea:focus {
 }
 
 /* Media Queries */
-@media screen and (max-width: 768px) {
-  .opciones {
-    flex-direction: column;
-    align-items: stretch;
+/* Media Queries Mejoradas */
+
+/* Pantallas grandes */
+@media screen and (max-width: 1366px) {
+  .table th,
+  .table td {
+    padding: 4px 6px;
+    font-size: 0.8125rem;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .table-container {
+    overflow-x: auto;
   }
 
-  .busqueda,
-  .export-button,
-  .status-filter,
-  .status-select {
-    width: 100%;
-    margin: 8px 0;
+  .table {
+    min-width: 900px;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .table {
+    min-width: 1000px;
   }
 
   .date-filter {
-    flex-direction: column;
-    align-items: stretch;
-    margin-right: 0;
-    width: 100%;
+    gap: 8px;
+  }
+}
+
+/* Tablets */
+@media screen and (max-width: 768px) {
+  .ventas-wrapper {
+    padding: 12px;
+  }
+
+  /* Layout de opciones */
+  .opciones {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* Filtros de fecha */
+  .date-filter {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: center;
+    gap: 8px;
+  }
+
+  .date-filter label {
+    margin: 0;
   }
 
   .date-filter input {
     width: 100%;
-    margin-right: 0;
-    margin-bottom: 10px;
+    margin: 0;
+    padding: 8px;
   }
 
-  .btn {
-    width: 40px;
-    height: 35px;
+  /* Status y búsqueda */
+  .status-filter,
+  .search-bar {
+    width: 100%;
+  }
+
+  .status-select,
+  .busqueda {
+    width: 100%;
+    max-width: none;
+  }
+
+  /* Botón de exportar */
+  .export-button {
+    width: 100%;
+    padding: 10px;
+    justify-content: center;
+  }
+
+  /* Select de sucursal */
+  .custom-select {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+
+  .table-container {
+    margin: 10px -12px; /* Extender el scroll más allá de los bordes */
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .table {
+    min-width: 700px; /* Reducir más en tablets */
+  }
+
+  /* Ajustar tamaños para tablets */
+  .table th,
+  .table td {
+    padding: 8px 6px;
     font-size: 14px;
+  }
+
+  .actions-column {
+    gap: 4px;
+  }
+
+  /* Badges de estado */
+  .estado-badge {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+}
+
+/* Móviles */
+@media screen and (max-width: 480px) {
+  .ventas-wrapper {
+    padding: 10px;
+  }
+
+  /* Grid a una columna para filtros de fecha */
+  .date-filter {
+    grid-template-columns: 1fr;
+  }
+
+  /* Convertir tabla en tarjetas */
+  .table {
+    min-width: 650px; /* Reducir aún más en móviles */
+  }
+
+  .table-container {
+    margin: 10px -10px;
+  }
+
+  /* Reducir tamaños en móvil */
+  .table th:first-child,
+  .table td:first-child {
+    width: 40px;
+    min-width: 40px;
+  }
+
+  .table th:nth-child(2),
+  .table td:nth-child(2) {
+    width: 100px;
+    min-width: 100px;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody {
+    display: block;
+  }
+
+  .table tr {
+    display: block;
+    margin-bottom: 12px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .table td {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    padding: 8px 4px;
+    text-align: left;
+    border: none;
+    font-size: 14px;
+    white-space: normal;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #666;
+  }
+
+  /* Ajustes específicos para la vista de tarjetas */
+  .actions-column {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 12px;
+    margin-top: 8px;
+    border-top: 1px solid #eee;
+    grid-column: 1 / -1;
+  }
+
+  /* Modo oscuro para tarjetas */
+  .dark .table tr {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+
+  .dark .table td::before {
+    color: #aaa;
+  }
+
+  .dark .actions-column {
+    border-top-color: #404040;
+  }
+
+  /* Botones más compactos */
+  .btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    padding: 0;
   }
 
   .bi-file-text-fill,
   .bi-x-circle-fill {
     font-size: 16px;
   }
+}
 
-  .pagination-wrapper {
-    flex-direction: column;
-    gap: 1rem;
+/* Móviles pequeños */
+@media screen and (max-width: 360px) {
+  .table td {
+    grid-template-columns: 100%;
   }
 
-  .pagination-container {
-    justify-content: center;
-    flex-wrap: wrap;
+  .table td::before {
+    margin-bottom: 4px;
   }
 
   .estado-badge {
-    font-size: 0.75rem;
-    padding: 2px 6px;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .table th,
-  .table td {
-    padding: 6px;
-    font-size: 14px;
+    display: inline-block;
+    margin-top: 4px;
   }
 
-  .busqueda {
-    max-width: 100%;
-  }
-
-  .pagination-button {
-    padding: 6px 12px;
+  .btn {
+    width: 32px;
+    height: 32px;
     font-size: 14px;
   }
 }

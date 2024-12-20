@@ -48,12 +48,14 @@
         </thead>
         <tbody>
           <tr v-for="(proveedor, index) in paginatedProveedores" :key="index">
-            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-            <td>{{ proveedor.nombre }}</td>
-            <td>{{ proveedor.telefono }}</td>
-            <td>{{ proveedor.correo }}</td>
-            <td>{{ proveedor.direccion }}</td>
-            <td v-if="esCeo">
+            <td data-label="#">
+              {{ (currentPage - 1) * pageSize + index + 1 }}
+            </td>
+            <td data-label="Nombre">{{ proveedor.nombre }}</td>
+            <td data-label="Teléfono">{{ proveedor.telefono }}</td>
+            <td data-label="Email">{{ proveedor.correo }}</td>
+            <td data-label="Dirección">{{ proveedor.direccion }}</td>
+            <td v-if="esCeo" data-label="Acciones">
               <button
                 id="btnEditar"
                 class="btn btn-warning"
@@ -921,65 +923,236 @@ select {
   background: #a38655;
 }
 
-/* Media Queries */
-@media screen and (max-width: 768px) {
-  .opciones {
-    flex-direction: column;
-    align-items: stretch;
-  }
+/* Media Queries Mejoradas */
 
-  .modal-body {
-    flex-direction: column;
-  }
-
-  .contenedor {
-    width: 100%;
-    margin-bottom: 20px;
-  }
-
-  .busqueda,
-  .registros,
-  #btnAdd {
-    width: 100%;
-    margin: 8px 0;
-  }
-
-  .custom-select {
-    width: 100%;
-    max-width: none;
-  }
-
-  #btnEditar,
-  #btnEliminar {
-    width: 40px;
-    height: 35px;
-    font-size: 14px;
-    padding: 8px;
+/* Pantallas grandes */
+@media screen and (max-width: 1200px) {
+  .modal-proveedores {
+    width: 70%;
   }
 
   .table-container {
-    margin-top: 24px;
+    margin-top: 14px;
   }
 }
 
-@media screen and (max-width: 480px) {
-  .modal-proveedores {
-    width: 95%;
-    padding: 15px;
+/* Tablets y pantallas medianas */
+@media screen and (max-width: 768px) {
+  .proveedores-wrapper {
+    padding: 12px;
   }
 
-  .table thead th,
-  .table tbody td {
-    padding: 6px;
-    font-size: 14px;
+  /* Layout de opciones */
+  .opciones {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  #btnAdd {
+    width: 100%;
+    margin: 0;
+  }
+
+  .busqueda {
+    max-width: none;
+  }
+
+  /* Tabla responsiva */
+  .table-container {
+    margin-top: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 650px;
+  }
+
+  /* Ajustes modales */
+  .modal-proveedores {
+    width: 90%;
+    margin: 10px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-confirm {
+    width: 80%;
+  }
+
+  /* Formularios */
+  .contenedor {
+    width: 100%;
   }
 
   .form-group {
     margin-bottom: 12px;
   }
 
+  /* Botones de acción */
+  #btnEditar,
+  #btnEliminar {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    padding: 6px;
+  }
+}
+
+/* Móviles */
+@media screen and (max-width: 480px) {
+  .proveedores-wrapper {
+    padding: 10px;
+  }
+
+  /* Convertir tabla en tarjetas */
+  .table {
+    display: block;
+    min-width: unset;
+    border: none;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody {
+    display: block;
+  }
+
+  .table tr {
+    display: block;
+    margin-bottom: 12px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .table td {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    padding: 8px 4px;
+    text-align: left;
+    border: none;
+    font-size: 14px;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #666;
+  }
+
+  /* Modo oscuro para tarjetas */
+  .dark .table tr {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+
+  .dark .table td::before {
+    color: #aaa;
+  }
+
+  /* Columna de acciones */
+  .table td:last-child {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 12px;
+    margin-top: 8px;
+    border-top: 1px solid #eee;
+    grid-column: 1 / -1;
+  }
+
+  .dark .table td:last-child {
+    border-top-color: #404040;
+  }
+
+  /* Input de teléfono responsivo */
+  .phone-input-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .phone-input-container select,
+  .phone-input-container input {
+    width: 100%;
+  }
+
+  /* Ajustes modales */
+  .modal-proveedores {
+    width: 95%;
+    margin: 8px;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-body {
+    padding: 12px;
+  }
+
   .h2-modal-proveedores {
-    font-size: 20px;
+    font-size: 18px;
+  }
+}
+
+/* Móviles pequeños */
+@media screen and (max-width: 360px) {
+  .table td {
+    grid-template-columns: 100%;
+  }
+
+  .table td::before {
+    margin-bottom: 4px;
+  }
+
+  .table td:last-child {
+    justify-content: center;
+  }
+
+  #btnEditar,
+  #btnEliminar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+}
+
+/* Landscape mode */
+@media screen and (max-height: 480px) and (orientation: landscape) {
+  .modal-proveedores {
+    max-height: 100vh;
+    margin: 0;
+  }
+
+  .modal-body {
+    max-height: calc(100vh - 120px);
+  }
+
+  .form-group {
+    margin-bottom: 8px;
+  }
+
+  .phone-input-container {
+    flex-direction: row;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 8px;
   }
 }
 
