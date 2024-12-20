@@ -564,8 +564,8 @@ ul.nav {
 .nav-link {
   display: flex;
   position: relative;
-  overflow: hidden;
-  align-items: center;
+  /* overflow: hidden;
+  align-items: center; */ /** ESTAS DOS LINEAS GENERAN CONFLICTO CON EL TOOLTIP */
   justify-content: flex-start;
   color: #c09d62;
   text-decoration: none;
