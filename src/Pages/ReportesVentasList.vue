@@ -14,11 +14,7 @@
                 <option @click="mostrarReportes" value="ventas_cliente">
                   Ventas por Cliente
                 </option>
-                <option
-                  @click="mostrarReportes"
-                  v-if="esCeo"
-                  value="ventas_sucursal"
-                >
+                <option @click="mostrarReportes" value="ventas_sucursal">
                   Ventas por Sucursal
                 </option>
                 <option @click="mostrarReportes" value="ventas_empleado">
@@ -30,7 +26,9 @@
             <div class="filter-group">
               <label>{{ labelFiltro }}</label>
               <select v-model="valorFiltro" class="select-input">
-                <option value="" @click="mostrarReportes">Todos</option>
+                <option value="" @click="mostrarReportes">
+                  {{ defaultSelectText }}
+                </option>
                 <option
                   v-for="opcion in opcionesFiltro"
                   @click="mostrarReporteDesglose(opcion)"
@@ -267,7 +265,9 @@
 
       <!-- Mensaje cuando no hay datos -->
       <div
-        v-if="!cargando && fechasValidas && !datosReporte.length"
+        v-if="
+          !cargando && intentoGenerar && fechasValidas && !datosReporte.length
+        "
         class="no-data-message"
       >
         <div class="alert-message">
@@ -285,6 +285,8 @@ import { notis } from "../../services/notificaciones.js";
 import HeaderFooterDesigner from "@/components/HeaderFooterDesigner.vue";
 import ModalLoading from "@/components/ModalLoading.vue";
 import solicitudes from "../../services/solicitudes.js";
+import { setPageTitle } from "@/components/pageMetadata";
+
 const {
   clientesReportes,
   sucursalReportes,
@@ -312,9 +314,11 @@ export default {
   data() {
     return {
       titulo: "Reportería",
+      intentoGenerar: false,
       isLoading: false,
       id_usuario: "",
       mostrandoDesglose: false,
+      sucursalAsignada: null,
       cargando: false,
       esCeo: false,
       error: null,
@@ -368,6 +372,17 @@ export default {
   },
 
   computed: {
+    defaultSelectText() {
+      if (
+        this.reporteSeleccionado === "ventas_sucursal" &&
+        !this.esCeo &&
+        this.sucursales.length === 1
+      ) {
+        return "Escoge una opción";
+      }
+      return "Todos";
+    },
+
     canExportReport() {
       return this.datosReporte.length > 0 && !this.cargando;
     },
@@ -439,22 +454,39 @@ export default {
   },
 
   methods: {
+    resetearEstado() {
+      this.intentoGenerar = false;
+      this.datosReporte = [];
+      this.datosAgrupados = [];
+      this.reiniciarTotales();
+    },
+
     async cargarDatos() {
       try {
         this.cargando = true;
-        const [clientes, empleados, productos] = await Promise.all([
-          clientesReportes(this.id_usuario),
-          reportesEmpleados(this.id_usuario, this.esCeo),
-          reportesProductos(this.id_usuario, this.esCeo),
-        ]);
+        const [clientes, empleados, productos, sucursalesResponse] =
+          await Promise.all([
+            clientesReportes(this.id_usuario),
+            reportesEmpleados(this.id_usuario, this.esCeo),
+            reportesProductos(this.id_usuario, this.esCeo),
+            sucursalReportes(this.id_usuario), // Siempre cargar las sucursales
+          ]);
 
         this.clientes = clientes;
-
         this.empleados = empleados;
         this.productos = productos;
 
         if (this.esCeo) {
-          this.sucursales = await sucursalReportes(this.id_usuario);
+          // Si es CEO, mostrar todas las sucursales
+          this.sucursales = sucursalesResponse;
+        } else {
+          // Si es admin, filtrar solo su sucursal asignada
+          // Asumimos que la API devuelve solo la sucursal asignada para el admin
+          this.sucursales =
+            sucursalesResponse.length > 0 ? [sucursalesResponse[0]] : [];
+          if (this.sucursales.length > 0) {
+            this.sucursalAsignada = this.sucursales[0];
+          }
         }
       } catch (error) {
         console.error("Error al cargar datos:", error);
@@ -585,11 +617,56 @@ export default {
             );
             break;
           case "ventas_sucursal":
-            response = await getRegistrosSucursales(
-              this.id_usuario,
-              this.filtros.fechaInicio,
-              this.filtros.fechaFin
-            );
+            if (this.esCeo) {
+              response = await getRegistrosSucursales(
+                this.id_usuario,
+                this.filtros.fechaInicio,
+                this.filtros.fechaFin
+              );
+            } else {
+              // Para admin, obtener solo los datos de su sucursal asignada
+              if (this.sucursalAsignada) {
+                const desgloseSucursal = await getRegistrosSucursalDesglose(
+                  this.sucursalAsignada.id,
+                  this.filtros.fechaInicio,
+                  this.filtros.fechaFin
+                );
+                response = [
+                  {
+                    id: this.sucursalAsignada.id,
+                    nombre: this.sucursalAsignada.nombre,
+                    valor_exento: desgloseSucursal.reduce(
+                      (sum, item) => sum + (item.valor_exento || 0),
+                      0
+                    ),
+                    gravado_15: desgloseSucursal.reduce(
+                      (sum, item) => sum + (item.gravado_15 || 0),
+                      0
+                    ),
+                    gravado_18: desgloseSucursal.reduce(
+                      (sum, item) => sum + (item.gravado_18 || 0),
+                      0
+                    ),
+                    total_isv: desgloseSucursal.reduce(
+                      (sum, item) => sum + (item.total_isv || 0),
+                      0
+                    ),
+                    total: desgloseSucursal.reduce(
+                      (sum, item) => sum + (item.total || 0),
+                      0
+                    ),
+                    total_canceladas: desgloseSucursal.reduce(
+                      (sum, item) =>
+                        sum +
+                        ((item.estado === "Cancelada" ? item.total : 0) || 0),
+                      0
+                    ),
+                  },
+                ];
+              } else {
+                response = [];
+              }
+            }
             break;
         }
 
@@ -614,11 +691,17 @@ export default {
                   );
                   break;
                 case "ventas_sucursal":
-                  desglose = await getRegistrosSucursalDesglose(
-                    item.id,
-                    this.filtros.fechaInicio,
-                    this.filtros.fechaFin
-                  );
+                  if (
+                    this.esCeo ||
+                    (this.sucursalAsignada &&
+                      item.id === this.sucursalAsignada.id)
+                  ) {
+                    desglose = await getRegistrosSucursalDesglose(
+                      item.id,
+                      this.filtros.fechaInicio,
+                      this.filtros.fechaFin
+                    );
+                  }
                   break;
               }
               return {
@@ -658,32 +741,25 @@ export default {
 
     async generarReporte(formato = "preview") {
       if (!this.fechasValidas) {
-        alert("Por favor seleccione un intervalo de fechas válido");
+        notis("error", "Por favor seleccione un intervalo de fechas válido");
         return;
       }
 
       this.cargando = true;
       this.error = null;
       this.isLoading = true;
+      this.intentoGenerar = true; // Establecer que se intentó generar
 
       try {
         if (formato === "preview") {
           if (this.valorFiltro && this.valorFiltro !== "") {
-            // Si hay un cliente específico seleccionado
             const opcionSeleccionada = this.opcionesFiltro.find(
               (opt) => opt.id === this.valorFiltro
             );
             if (opcionSeleccionada) {
-              if (this.especificacion) {
-                // Si especificación está activa, mostrar desglose
-                await this.mostrarReporteDesglose(opcionSeleccionada);
-              } else {
-                // Si especificación está inactiva, mostrar solo el total
-                await this.mostrarReporteTotalCliente(opcionSeleccionada);
-              }
+              await this.mostrarReporteTotalCliente(opcionSeleccionada);
             }
           } else {
-            // Si no hay cliente específico, mostrar todos
             await this.mostrarReportes();
           }
         } else if (formato === "pdf") {
@@ -694,10 +770,8 @@ export default {
         }
       } catch (error) {
         console.error("Error en generarReporte:", error);
-        if (!this.datosAgrupados.length) {
-          notis("error", "Error al generar el reporte");
-          this.error = "Error al generar el reporte";
-        }
+        notis("error", "Error al generar el reporte");
+        this.error = "Error al generar el reporte";
       } finally {
         this.cargando = false;
         this.isLoading = false;
@@ -814,7 +888,6 @@ export default {
         }
       }
     },
-
     formatearFecha(fecha) {
       return new Date(fecha).toLocaleDateString("es-HN");
     },
@@ -1267,10 +1340,22 @@ export default {
         notis("error", "Error al generar el archivo Excel");
       }
     },
+
+    changeFavicon(iconPath) {
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.rel = "icon";
+      link.href = iconPath;
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
   },
 
   async mounted() {
     // Cargar logo guardado si existe
+    setPageTitle("Reportería");
+
     this.isLoading = true;
     try {
       const savedLogo = localStorage.getItem("logoEmpresa");
@@ -1311,25 +1396,21 @@ export default {
 
   watch: {
     reporteSeleccionado() {
-      if (this.valorFiltro !== "") {
-        this.especificacion = true;
-      } else {
-        this.especificacion = false;
-      }
-      if (this.fechasValidas) {
-        this.generarReporte("preview");
-      }
+      this.valorFiltro = "";
+      this.especificacion = false;
+      this.resetearEstado();
     },
 
-    valorFiltro: {
-      handler(newValue) {
-        if (newValue !== "") {
-          this.mostrarReporteTotalCliente({ id: newValue });
-        } else {
-          this.mostrarReportes();
-        }
-      },
-      immediate: true,
+    "filtros.fechaInicio"() {
+      this.resetearEstado();
+    },
+
+    "filtros.fechaFin"() {
+      this.resetearEstado();
+    },
+
+    valorFiltro() {
+      this.resetearEstado();
     },
 
     especificacion: {

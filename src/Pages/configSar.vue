@@ -282,7 +282,7 @@ export default {
   mounted() {
     this.getConfiguracionSAR();
     window.addEventListener("keydown", this.pushEsc);
-    setPageTitle("Configuración");
+    setPageTitle("Configuración SAR");
   },
 
   beforeUnmount() {
